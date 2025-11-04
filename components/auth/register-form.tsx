@@ -87,39 +87,38 @@ export function RegisterForm({ role, roleLabel, roleGradient }: RegisterFormProp
         initial="initial"
         animate="animate"
       >
-        {/* Header compacto con botón volver */}
-        <motion.div variants={fadeInUp} className="mb-4">
+        {/* Header horizontal: Cambiar tipo de cuenta (izq) y Logo (der) */}
+        <motion.div variants={fadeInUp} className="flex items-center justify-between mb-6">
           <Link
             href="/auth/register"
-            className="inline-flex items-center gap-2 text-sm text-gray-600 hover:text-blue-600 transition-colors"
+            className="inline-flex items-center gap-2 text-sm text-gray-600 hover:text-blue-600 transition-colors font-medium"
           >
             <ArrowLeft className="h-4 w-4" />
             Cambiar tipo de cuenta
           </Link>
-        </motion.div>
-
-        {/* Logo, ícono y título fuera del card */}
-        <motion.div variants={fadeInUp} className="text-center mb-4">
-          <Link href={ROUTES.HOME} className="inline-flex items-center justify-center gap-2 mb-3">
+          
+          <Link href={ROUTES.HOME} className="inline-flex items-center gap-2">
             <div className="bg-linear-to-br from-blue-600 to-teal-600 text-white px-3 py-2 rounded-lg font-bold text-xl">
               RS
             </div>
             <span className="font-bold text-xl text-gray-900">{APP_NAME}</span>
           </Link>
-          
-          <div className="mb-3">
-            <div className={`w-14 h-14 rounded-xl bg-linear-to-br ${roleGradient} flex items-center justify-center mx-auto mb-3`}>
-              <Icon className="h-7 w-7 text-white" />
-            </div>
-            <h1 className="text-2xl font-bold text-gray-900 mb-1">
-              Registro de {roleLabel}
-            </h1>
-            <p className="text-sm text-gray-600">
-              Crea tu cuenta en pocos segundos
-            </p>
-          </div>
         </motion.div>
 
+        {/* Centro: Ícono y título */}
+        <motion.div variants={fadeInUp} className="text-center mb-6">
+          <div className={`w-16 h-16 rounded-xl bg-linear-to-br ${roleGradient} flex items-center justify-center mx-auto mb-3`}>
+            <Icon className="h-8 w-8 text-white" />
+          </div>
+          <h1 className="text-2xl font-bold text-gray-900 mb-1">
+            Registro de {roleLabel}
+          </h1>
+          <p className="text-sm text-gray-600">
+            Crea tu cuenta en pocos segundos
+          </p>
+        </motion.div>
+
+        {/* Card limpio solo con formulario */}
         <Card className="border-2 shadow-xl bg-white">
           <CardContent className="px-6 py-6">
             {/* Error Message */}
