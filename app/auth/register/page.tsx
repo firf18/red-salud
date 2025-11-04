@@ -68,46 +68,46 @@ const roles = [
 
 export default function RegisterPage() {
   return (
-    <div className="h-screen flex items-center justify-center px-4 py-6 overflow-hidden">
+    <div className="h-screen flex items-center justify-center px-4 py-6 overflow-hidden bg-linear-to-br from-gray-50 to-blue-50">
       <motion.div
         className="w-full max-w-7xl h-full flex flex-col"
         variants={staggerContainer}
         initial="initial"
         animate="animate"
       >
-        {/* Header compacto */}
-        <motion.div variants={fadeInUp} className="flex items-center justify-between mb-4">
+        {/* Header */}
+        <motion.div variants={fadeInUp} className="flex items-center justify-between mb-6 sm:mb-8">
           <Link
             href={ROUTES.HOME}
-            className="inline-flex items-center gap-1.5 text-sm text-gray-600 hover:text-blue-600 transition-colors"
+            className="inline-flex items-center gap-2 text-sm text-gray-600 hover:text-blue-600 transition-colors"
           >
-            <ArrowLeft className="h-3.5 w-3.5" />
+            <ArrowLeft className="h-4 w-4" />
             Volver
           </Link>
           
           <Link href={ROUTES.HOME} className="inline-flex items-center gap-2">
-            <div className="bg-linear-to-br from-blue-600 to-teal-600 text-white px-2.5 py-1.5 rounded-lg font-bold text-lg">
+            <div className="bg-linear-to-br from-blue-600 to-teal-600 text-white px-3 py-2 rounded-lg font-bold text-xl">
               RS
             </div>
-            <span className="font-bold text-xl text-gray-900 hidden sm:inline">{APP_NAME}</span>
+            <span className="font-bold text-2xl text-gray-900 hidden sm:inline">{APP_NAME}</span>
           </Link>
           
-          <div className="w-16" /> {/* Spacer para centrar */}
+          <div className="w-20" /> {/* Spacer para centrar */}
         </motion.div>
 
-        {/* Título compacto */}
-        <motion.div variants={fadeInUp} className="text-center mb-6">
-          <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900 mb-2">
+        {/* Título */}
+        <motion.div variants={fadeInUp} className="text-center mb-8 sm:mb-10">
+          <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-gray-900 mb-3">
             Únete a Red-Salud
           </h1>
-          <p className="text-sm sm:text-base text-gray-600">
+          <p className="text-base sm:text-lg text-gray-600">
             Selecciona tu tipo de cuenta
           </p>
         </motion.div>
 
-        {/* Grid responsivo - se ajusta al espacio disponible */}
-        <div className="flex-1 overflow-auto">
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-7 gap-3 sm:gap-4 max-h-full pb-4">
+        {/* Grid responsivo - máximo 4 columnas */}
+        <div className="flex-1 overflow-auto px-2">
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6 max-w-6xl mx-auto pb-6">
             {roles.map((role, index) => {
               const Icon = role.icon;
               return (
@@ -120,19 +120,19 @@ export default function RegisterPage() {
                   className="h-full"
                 >
                   <Link href={`/auth/register/${role.id}`} className="block h-full">
-                    <Card className="h-full border-2 hover:border-blue-400 hover:shadow-lg transition-all duration-300 cursor-pointer group">
-                      <CardContent className="p-3 sm:p-4 flex flex-col items-center justify-center h-full text-center">
-                        <div className={`w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-linear-to-br ${role.gradient} flex items-center justify-center mb-2 sm:mb-3 group-hover:scale-110 transition-transform duration-300`}>
-                          <Icon className="h-5 w-5 sm:h-6 sm:w-6 text-white" />
+                    <Card className="h-full border-2 hover:border-blue-400 hover:shadow-xl transition-all duration-300 cursor-pointer group bg-white/80 backdrop-blur-sm">
+                      <CardContent className="p-5 sm:p-6 flex flex-col items-center justify-center h-full text-center gap-3">
+                        <div className={`w-14 h-14 sm:w-16 sm:h-16 rounded-2xl bg-linear-to-br ${role.gradient} flex items-center justify-center group-hover:scale-110 transition-transform duration-300 shadow-lg`}>
+                          <Icon className="h-7 w-7 sm:h-8 sm:w-8 text-white" />
                         </div>
-                        <h3 className="text-sm sm:text-base font-bold text-gray-900 mb-1">
+                        <h3 className="text-base sm:text-lg font-bold text-gray-900">
                           {role.name}
                         </h3>
-                        <p className="text-xs text-gray-600 line-clamp-2 hidden sm:block">
+                        <p className="text-sm text-gray-600 line-clamp-3 hidden sm:block">
                           {role.description}
                         </p>
-                        <div className="mt-2 text-blue-600 text-xs font-medium group-hover:translate-x-1 transition-transform">
-                          →
+                        <div className="mt-auto pt-2 text-blue-600 text-sm font-medium group-hover:translate-x-1 transition-transform">
+                          Continuar →
                         </div>
                       </CardContent>
                     </Card>
@@ -143,12 +143,12 @@ export default function RegisterPage() {
           </div>
         </div>
 
-        {/* Footer compacto */}
-        <motion.p variants={fadeInUp} className="mt-4 text-center text-xs sm:text-sm text-gray-600">
+        {/* Footer */}
+        <motion.p variants={fadeInUp} className="mt-6 text-center text-sm sm:text-base text-gray-600">
           ¿Ya tienes cuenta?{" "}
           <Link
             href="/auth/login"
-            className="font-semibold text-blue-600 hover:text-blue-700"
+            className="font-semibold text-blue-600 hover:text-blue-700 transition-colors"
           >
             Inicia sesión
           </Link>
