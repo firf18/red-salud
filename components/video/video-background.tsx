@@ -30,17 +30,28 @@ export function VideoBackground({
     const video = videoRef.current;
     if (!video) return;
 
-    const handleLoadedData = () => {
+    const handleCanPlay = () => {
       setIsLoaded(true);
-      video.play().catch((err) => {
-        console.warn("Error al reproducir video:", err);
-      });
+      // Intentar reproducir con manejo de errores
+      const playPromise = video.play();
+      
+      if (playPromise !== undefined) {
+        playPromise.catch((err) => {
+          console.warn("Autoplay bloqueado, intentando sin sonido:", err);
+          video.muted = true;
+          video.play().catch((e) => console.error("Error al reproducir video:", e));
+        });
+      }
     };
 
-    video.addEventListener("loadeddata", handleLoadedData);
+    video.addEventListener("canplay", handleCanPlay);
+    // También intentar cargar inmediatamente
+    if (video.readyState >= 3) {
+      handleCanPlay();
+    }
 
     return () => {
-      video.removeEventListener("loadeddata", handleLoadedData);
+      video.removeEventListener("canplay", handleCanPlay);
     };
   }, []);
 

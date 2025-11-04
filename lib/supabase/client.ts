@@ -29,6 +29,16 @@ export interface DashboardMetrics {
 // Función para obtener las métricas del dashboard
 export async function getDashboardMetrics(): Promise<DashboardMetrics | null> {
   try {
+    // Por ahora retornamos valores por defecto hasta que se cree la vista en Supabase
+    // TODO: Crear vista materializada dashboard_metrics en Supabase
+    return {
+      total_patients: 0,
+      total_doctors: 0,
+      total_specialties: 12,
+      satisfaction_percentage: 0,
+    };
+
+    /* Código comentado hasta que se cree la vista en Supabase:
     const { data, error } = await supabase
       .from("dashboard_metrics")
       .select("*")
@@ -40,6 +50,7 @@ export async function getDashboardMetrics(): Promise<DashboardMetrics | null> {
     }
 
     return data;
+    */
   } catch (error) {
     console.error("Error in getDashboardMetrics:", error);
     return null;
