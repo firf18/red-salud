@@ -65,9 +65,9 @@ export function RegisterForm({ role, roleLabel }: RegisterFormProps) {
   };
 
   return (
-    <div className="min-h-screen bg-linear-to-br from-blue-50 via-white to-teal-50">
+    <div className="h-screen bg-linear-to-br from-blue-50/30 via-white to-blue-50/50 overflow-hidden">
       {/* Header horizontal FUERA del contenedor principal */}
-      <motion.div variants={fadeInUp} className="flex items-center justify-between px-4 py-6">
+      <motion.div variants={fadeInUp} className="flex items-center justify-between px-4">
         <Link
           href="/auth/register"
           className="inline-flex items-center gap-2 text-sm text-gray-600 hover:text-blue-600 transition-colors font-medium"
@@ -85,7 +85,7 @@ export function RegisterForm({ role, roleLabel }: RegisterFormProps) {
       </motion.div>
 
       {/* Contenedor principal centrado */}
-      <div className="h-screen flex items-center justify-center px-4 overflow-hidden bg-linear-to-br from-gray-50 to-blue-50">
+      <div className="h-full flex items-center justify-center px-4">
         <motion.div
           className="w-full max-w-md"
           variants={staggerContainer}
