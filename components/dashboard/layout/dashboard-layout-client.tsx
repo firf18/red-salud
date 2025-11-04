@@ -144,7 +144,7 @@ export function DashboardLayoutClient({
                           : "text-gray-700 hover:bg-gray-50"
                       }`}
                     >
-                      {Icon && <Icon className="h-5 w-5 flex-shrink-0" />}
+                      {Icon && <Icon className="h-5 w-5 shrink-0" />}
                       <span className="text-sm font-medium">{item.label}</span>
                     </div>
                   </Link>
@@ -160,7 +160,7 @@ export function DashboardLayoutClient({
                       : "text-gray-700 hover:bg-gray-50"
                   }`}
                 >
-                  <Settings className="h-5 w-5 flex-shrink-0" />
+                  <Settings className="h-5 w-5 shrink-0" />
                   <span className="text-sm font-medium">Configuración</span>
                 </div>
               </Link>
@@ -262,7 +262,7 @@ export function DashboardLayoutClient({
                                 : "text-gray-700 hover:bg-gray-50"
                             }`}
                           >
-                            {Icon && <Icon className="h-5 w-5 flex-shrink-0" />}
+                            {Icon && <Icon className="h-5 w-5 shrink-0" />}
                             <span className="text-sm font-medium">
                               {item.label}
                             </span>
@@ -283,7 +283,7 @@ export function DashboardLayoutClient({
                             : "text-gray-700 hover:bg-gray-50"
                         }`}
                       >
-                        <Settings className="h-5 w-5 flex-shrink-0" />
+                        <Settings className="h-5 w-5 shrink-0" />
                         <span className="text-sm font-medium">
                           Configuración
                         </span>

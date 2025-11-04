@@ -1,69 +1,141 @@
-import { NextResponse } from "next/server";
-import type { NextRequest } from "next/server";
-import { createMiddlewareClient } from "@supabase/auth-helpers-nextjs";
+import { createServerClient, type CookieOptions } from '@supabase/ssr'
+import { NextResponse, type NextRequest } from 'next/server'
 
 /**
- * Middleware de Next.js para protección de rutas
+ * Middleware de autenticación y protección de rutas
  * 
- * Este middleware se ejecutará en rutas que coincidan con el matcher.
- * Verifica autenticación con Supabase y protege rutas del dashboard.
+ * Funcionalidad:
+ * 1. Protege rutas del dashboard
+ * 2. Redirecciona según el rol del usuario
+ * 3. Mantiene sesión actualizada con Supabase
  */
 
 export async function middleware(request: NextRequest) {
-  const res = NextResponse.next();
-  const supabase = createMiddlewareClient({ req: request, res });
+  let supabaseResponse = NextResponse.next({
+    request,
+  })
 
-  // Refresh session si existe
+  const supabase = createServerClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    {
+      cookies: {
+        getAll() {
+          return request.cookies.getAll()
+        },
+        setAll(cookiesToSet: { name: string; value: string; options?: CookieOptions }[]) {
+          cookiesToSet.forEach(({ name, value }) =>
+            request.cookies.set(name, value)
+          )
+          supabaseResponse = NextResponse.next({
+            request,
+          })
+          cookiesToSet.forEach(({ name, value, options }) =>
+            supabaseResponse.cookies.set(name, value, options)
+          )
+        },
+      },
+    }
+  )
+
+  // Obtener usuario autenticado
   const {
-    data: { session },
-  } = await supabase.auth.getSession();
+    data: { user },
+  } = await supabase.auth.getUser()
 
-  const { pathname } = request.nextUrl;
+  const pathname = request.nextUrl.pathname
 
-  // Rutas protegidas que requieren autenticación
-  const protectedRoutes = ["/dashboard"];
+  // ============================================================================
+  // RUTAS PÚBLICAS (no requieren autenticación)
+  // ============================================================================
+  const publicRoutes = [
+    '/',
+    '/nosotros',
+    '/servicios',
+    '/precios',
+    '/blog',
+    '/soporte',
+    '/auth/login',
+    '/auth/register',
+  ]
 
-  // Verificar si la ruta está protegida
-  const isProtectedRoute = protectedRoutes.some((route) =>
-    pathname.startsWith(route)
-  );
+  const isPublicRoute =
+    publicRoutes.some((route) => pathname === route) ||
+    pathname.startsWith('/auth/login/') ||
+    pathname.startsWith('/auth/register/') ||
+    pathname.startsWith('/servicios/') ||
+    pathname.startsWith('/soporte/') ||
+    pathname.startsWith('/blog/')
 
-  // Si es una ruta protegida y no hay sesión, redirigir a login
-  if (isProtectedRoute && !session) {
-    const redirectUrl = new URL("/auth/login", request.url);
-    redirectUrl.searchParams.set("redirect", pathname);
-    return NextResponse.redirect(redirectUrl);
+  // ============================================================================
+  // SI NO HAY USUARIO Y INTENTA ACCEDER A DASHBOARD → LOGIN
+  // ============================================================================
+  if (!user && pathname.startsWith('/dashboard/')) {
+    const loginUrl = new URL('/auth/login', request.url)
+    loginUrl.searchParams.set('redirect', pathname)
+    return NextResponse.redirect(loginUrl)
   }
 
-  // Si hay sesión y el usuario intenta acceder a auth, redirigir a su dashboard
-  if (session && pathname.startsWith("/auth")) {
-    const role = session.user.user_metadata?.role || "paciente";
-    return NextResponse.redirect(new URL(`/dashboard/${role}`, request.url));
+  // ============================================================================
+  // SI HAY USUARIO AUTENTICADO
+  // ============================================================================
+  if (user) {
+    // Obtener perfil del usuario para verificar rol
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('role')
+      .eq('id', user.id)
+      .single()
+
+    // Si intenta acceder a dashboard pero no tiene rol → redirigir a completar perfil
+    if (pathname.startsWith('/dashboard/') && !profile?.role) {
+      return NextResponse.redirect(new URL('/auth/complete-profile', request.url))
+    }
+
+    // ============================================================================
+    // PROTECCIÓN POR ROL: Redirigir al dashboard correcto
+    // ============================================================================
+    if (profile?.role && pathname === '/dashboard') {
+      // Redirigir a dashboard específico del rol
+      return NextResponse.redirect(
+        new URL(`/dashboard/${profile.role}`, request.url)
+      )
+    }
+
+    // Verificar que el usuario accede a su dashboard correcto
+    if (pathname.startsWith('/dashboard/')) {
+      const dashboardRole = pathname.split('/')[2] // /dashboard/[role]/...
+      
+      // Si intenta acceder a dashboard de otro rol → redirigir al suyo
+      if (dashboardRole && dashboardRole !== profile?.role && dashboardRole !== 'shared') {
+        return NextResponse.redirect(
+          new URL(`/dashboard/${profile.role}`, request.url)
+        )
+      }
+    }
+
+    // Si usuario autenticado intenta ir a login/register → redirigir a su dashboard
+    if (pathname.startsWith('/auth/login') || pathname.startsWith('/auth/register')) {
+      if (profile?.role) {
+        return NextResponse.redirect(
+          new URL(`/dashboard/${profile.role}`, request.url)
+        )
+      }
+    }
   }
 
-  // Agregar headers de seguridad
-  res.headers.set("X-Frame-Options", "DENY");
-  res.headers.set("X-Content-Type-Options", "nosniff");
-  res.headers.set("Referrer-Policy", "strict-origin-when-cross-origin");
-  res.headers.set(
-    "Permissions-Policy",
-    "camera=(), microphone=(), geolocation=()"
-  );
-
-  return res;
+  return supabaseResponse
 }
 
-// Configurar qué rutas ejecutarán el middleware
 export const config = {
   matcher: [
     /*
-     * Ejecutar en todas las rutas excepto:
-     * - api (rutas API)
-     * - _next/static (archivos estáticos)
-     * - _next/image (optimización de imágenes)
-     * - favicon.ico
-     * - public folder (archivos públicos)
+     * Match all request paths except:
+     * - _next/static (static files)
+     * - _next/image (image optimization files)
+     * - favicon.ico (favicon file)
+     * - public files (public folder)
      */
-    "/((?!api|_next/static|_next/image|favicon.ico|videos).*)",
+    '/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
   ],
-};
+}

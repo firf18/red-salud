@@ -40,15 +40,10 @@ export function LoginForm({ role, roleLabel }: LoginFormProps) {
     const result = await signIn(data);
 
     if (result.success && result.user) {
-      // Verificar que el rol coincide
-      const userRole = result.user.user_metadata?.role;
-      
-      if (userRole === role) {
-        router.push(`/dashboard/${role}`);
-      } else {
-        setError("El rol de tu cuenta no coincide con el tipo seleccionado");
-        setIsLoading(false);
-      }
+      // El middleware se encargará de redirigir al dashboard correcto
+      // Simplemente refrescamos la página para que el middleware actúe
+      router.push(`/dashboard/${role}`);
+      router.refresh();
     } else {
       setError(result.error || "Error al iniciar sesión");
       setIsLoading(false);
