@@ -42,13 +42,17 @@ export function RegisterForm({ role, roleLabel }: RegisterFormProps) {
     const result = await signUp({ ...data, role });
 
     if (result.success) {
+      // El trigger en Supabase crea el perfil automáticamente
+      // Esperamos un poco para que se propague y luego redirigimos
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      
       // Redirigir al dashboard correspondiente según el rol
       router.push(`/dashboard/${role}`);
+      router.refresh();
     } else {
       setError(result.error || "Error al registrar usuario");
+      setIsLoading(false);
     }
-
-    setIsLoading(false);
   };
 
   const handleGoogleSignIn = async () => {

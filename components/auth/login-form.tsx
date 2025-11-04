@@ -40,8 +40,10 @@ export function LoginForm({ role, roleLabel }: LoginFormProps) {
     const result = await signIn(data);
 
     if (result.success && result.user) {
+      // Esperamos un poco para que se propague la sesión
+      await new Promise(resolve => setTimeout(resolve, 500));
+      
       // El middleware se encargará de redirigir al dashboard correcto
-      // Simplemente refrescamos la página para que el middleware actúe
       router.push(`/dashboard/${role}`);
       router.refresh();
     } else {
