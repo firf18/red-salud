@@ -23,7 +23,7 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { PATIENT_MODULE_CONFIG, PATIENT_MODULES } from "@/lib/constants";
+import { PATIENT_MODULE_CONFIG } from "@/lib/constants";
 
 // Mapa de iconos
 const iconMap: Record<string, React.ComponentType<{ className?: string }>> = {
