@@ -10,7 +10,7 @@ import { ArrowLeft, Mail, Lock, Eye, EyeOff, User, Loader2, Stethoscope, Buildin
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { APP_NAME, ROUTES } from "@/lib/constants";
 import { fadeInUp, staggerContainer } from "@/lib/animations";
 import { registerSchema, type RegisterFormData } from "@/lib/validations/auth";
@@ -98,37 +98,30 @@ export function RegisterForm({ role, roleLabel, roleGradient }: RegisterFormProp
           </Link>
         </motion.div>
 
-        <Card className="border-2 shadow-xl bg-white">
-          <CardHeader className="text-center pb-4 pt-6">
-            {/* Logo y título compactos */}
-            <motion.div variants={fadeInUp}>
-              <Link href={ROUTES.HOME} className="inline-flex items-center justify-center gap-2 mb-4">
-                <div className="bg-linear-to-br from-blue-600 to-teal-600 text-white px-3 py-2 rounded-lg font-bold text-xl">
-                  RS
-                </div>
-                <span className="font-bold text-xl text-gray-900">{APP_NAME}</span>
-              </Link>
-            </motion.div>
-
-            {/* Ícono del rol más pequeño */}
-            <motion.div variants={fadeInUp} className="mb-3">
-              <div className={`w-14 h-14 rounded-xl bg-linear-to-br ${roleGradient} flex items-center justify-center mx-auto`}>
-                <Icon className="h-7 w-7 text-white" />
-              </div>
-            </motion.div>
-
-            <motion.h1
-              variants={fadeInUp}
-              className="text-2xl font-bold text-gray-900 mb-1"
-            >
+        {/* Logo, ícono y título fuera del card */}
+        <motion.div variants={fadeInUp} className="text-center mb-4">
+          <Link href={ROUTES.HOME} className="inline-flex items-center justify-center gap-2 mb-3">
+            <div className="bg-linear-to-br from-blue-600 to-teal-600 text-white px-3 py-2 rounded-lg font-bold text-xl">
+              RS
+            </div>
+            <span className="font-bold text-xl text-gray-900">{APP_NAME}</span>
+          </Link>
+          
+          <div className="mb-3">
+            <div className={`w-14 h-14 rounded-xl bg-linear-to-br ${roleGradient} flex items-center justify-center mx-auto mb-3`}>
+              <Icon className="h-7 w-7 text-white" />
+            </div>
+            <h1 className="text-2xl font-bold text-gray-900 mb-1">
               Registro de {roleLabel}
-            </motion.h1>
-            <motion.p variants={fadeInUp} className="text-sm text-gray-600">
+            </h1>
+            <p className="text-sm text-gray-600">
               Crea tu cuenta en pocos segundos
-            </motion.p>
-          </CardHeader>
+            </p>
+          </div>
+        </motion.div>
 
-          <CardContent className="px-6 pb-6">
+        <Card className="border-2 shadow-xl bg-white">
+          <CardContent className="px-6 py-6">
             {/* Error Message */}
             {error && (
               <motion.div
@@ -140,12 +133,12 @@ export function RegisterForm({ role, roleLabel, roleGradient }: RegisterFormProp
               </motion.div>
             )}
 
-            {/* OAuth Google */}
-            <motion.div variants={fadeInUp} className="mb-4">
+            {/* OAuth Google - más estrecho */}
+            <motion.div variants={fadeInUp} className="mb-4 flex justify-center">
               <Button
                 type="button"
                 variant="outline"
-                className="w-full"
+                className="w-auto px-6"
                 onClick={handleGoogleSignIn}
                 disabled={isLoading}
               >
@@ -182,22 +175,37 @@ export function RegisterForm({ role, roleLabel, roleGradient }: RegisterFormProp
 
             {/* Form compacto */}
             <form onSubmit={handleSubmit(onSubmit)} className="space-y-3">
-              <motion.div variants={fadeInUp}>
-                <Label htmlFor="fullName" className="text-sm">Nombre completo</Label>
-                <div className="relative mt-1">
-                  <User className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
-                  <Input
-                    id="fullName"
-                    type="text"
-                    placeholder="Juan Pérez"
-                    className="pl-9 h-9 text-sm"
-                    {...register("fullName")}
-                    disabled={isLoading}
-                  />
+              {/* Nombre y Apellido en horizontal */}
+              <motion.div variants={fadeInUp} className="grid grid-cols-2 gap-3">
+                <div>
+                  <Label htmlFor="firstName" className="text-sm">Nombre</Label>
+                  <div className="relative mt-1">
+                    <User className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+                    <Input
+                      id="firstName"
+                      type="text"
+                      placeholder="Juan"
+                      className="pl-9 h-9 text-sm"
+                      {...register("fullName")}
+                      disabled={isLoading}
+                    />
+                  </div>
+                  {errors.fullName && (
+                    <p className="text-xs text-red-600 mt-0.5">{errors.fullName.message}</p>
+                  )}
                 </div>
-                {errors.fullName && (
-                  <p className="text-xs text-red-600 mt-0.5">{errors.fullName.message}</p>
-                )}
+                <div>
+                  <Label htmlFor="lastName" className="text-sm">Apellido</Label>
+                  <div className="relative mt-1">
+                    <Input
+                      id="lastName"
+                      type="text"
+                      placeholder="Pérez"
+                      className="h-9 text-sm"
+                      disabled={isLoading}
+                    />
+                  </div>
+                </div>
               </motion.div>
 
               <motion.div variants={fadeInUp}>
@@ -218,48 +226,50 @@ export function RegisterForm({ role, roleLabel, roleGradient }: RegisterFormProp
                 )}
               </motion.div>
 
-              <motion.div variants={fadeInUp}>
-                <Label htmlFor="password" className="text-sm">Contraseña</Label>
-                <div className="relative mt-1">
-                  <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
-                  <Input
-                    id="password"
-                    type={showPassword ? "text" : "password"}
-                    placeholder="••••••••"
-                    className="pl-9 pr-9 h-9 text-sm"
-                    {...register("password")}
-                    disabled={isLoading}
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
-                    disabled={isLoading}
-                  >
-                    {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                  </button>
+              {/* Contraseñas en horizontal */}
+              <motion.div variants={fadeInUp} className="grid grid-cols-2 gap-3">
+                <div>
+                  <Label htmlFor="password" className="text-sm">Contraseña</Label>
+                  <div className="relative mt-1">
+                    <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+                    <Input
+                      id="password"
+                      type={showPassword ? "text" : "password"}
+                      placeholder="••••••••"
+                      className="pl-9 pr-9 h-9 text-sm"
+                      {...register("password")}
+                      disabled={isLoading}
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword(!showPassword)}
+                      className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                      disabled={isLoading}
+                    >
+                      {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                    </button>
+                  </div>
+                  {errors.password && (
+                    <p className="text-xs text-red-600 mt-0.5">{errors.password.message}</p>
+                  )}
                 </div>
-                {errors.password && (
-                  <p className="text-xs text-red-600 mt-0.5">{errors.password.message}</p>
-                )}
-              </motion.div>
-
-              <motion.div variants={fadeInUp}>
-                <Label htmlFor="confirmPassword" className="text-sm">Confirmar contraseña</Label>
-                <div className="relative mt-1">
-                  <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
-                  <Input
-                    id="confirmPassword"
-                    type={showPassword ? "text" : "password"}
-                    placeholder="••••••••"
-                    className="pl-9 h-9 text-sm"
-                    {...register("confirmPassword")}
-                    disabled={isLoading}
-                  />
+                <div>
+                  <Label htmlFor="confirmPassword" className="text-sm">Confirmar contraseña</Label>
+                  <div className="relative mt-1">
+                    <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+                    <Input
+                      id="confirmPassword"
+                      type={showPassword ? "text" : "password"}
+                      placeholder="••••••••"
+                      className="pl-9 h-9 text-sm"
+                      {...register("confirmPassword")}
+                      disabled={isLoading}
+                    />
+                  </div>
+                  {errors.confirmPassword && (
+                    <p className="text-xs text-red-600 mt-0.5">{errors.confirmPassword.message}</p>
+                  )}
                 </div>
-                {errors.confirmPassword && (
-                  <p className="text-xs text-red-600 mt-0.5">{errors.confirmPassword.message}</p>
-                )}
               </motion.div>
 
               <motion.div variants={fadeInUp} className="pt-2">
