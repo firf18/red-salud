@@ -3,6 +3,7 @@ import { Inter, Poppins } from "next/font/google";
 import "./globals.css";
 import { APP_NAME, APP_DESCRIPTION } from "@/lib/constants";
 import { SupabaseAuthProvider } from "@/components/providers/supabase-auth-provider";
+import { SpeedInsights } from "@vercel/speed-insights/next";
 
 const inter = Inter({
   variable: "--font-inter",
@@ -64,6 +65,7 @@ export default function RootLayout({
         <SupabaseAuthProvider>
           {children}
         </SupabaseAuthProvider>
+        <SpeedInsights />
       </body>
     </html>
   );

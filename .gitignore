@@ -45,3 +45,5 @@ next-env.d.ts
 # resultados y reportes temporales
 resultados-*.json
 informe-*.json
+
+.vercel

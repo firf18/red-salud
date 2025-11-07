@@ -42,9 +42,11 @@ interface DashboardStats {
 interface RecentActivity {
   id: string;
   type: string;
+  activity_type: string;
   description: string;
   date: string;
   status: string;
+  created_at: string;
 }
 
 export default function DashboardPacientePage() {

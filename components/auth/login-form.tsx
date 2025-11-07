@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, Suspense } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { motion, AnimatePresence } from "framer-motion";
@@ -21,7 +21,7 @@ interface LoginFormProps {
   roleLabel: string;
 }
 
-export function LoginForm({ role, roleLabel }: LoginFormProps) {
+function LoginFormContent({ role, roleLabel }: LoginFormProps) {
   const router = useRouter();
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -269,5 +269,17 @@ export function LoginForm({ role, roleLabel }: LoginFormProps) {
         </motion.div>
       </div>
     </div>
+  );
+}
+
+export function LoginForm(props: LoginFormProps) {
+  return (
+    <Suspense fallback={
+      <div className="h-screen bg-linear-to-br from-blue-50/30 via-white to-blue-50/50 flex items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
+      </div>
+    }>
+      <LoginFormContent {...props} />
+    </Suspense>
   );
 }

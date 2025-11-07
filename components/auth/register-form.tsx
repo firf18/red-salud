@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { motion, AnimatePresence } from "framer-motion";
@@ -22,7 +22,7 @@ interface RegisterFormProps {
   roleLabel: string;
 }
 
-export function RegisterForm({ role, roleLabel }: RegisterFormProps) {
+function RegisterFormContent({ role, roleLabel }: RegisterFormProps) {
   const router = useRouter();
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -315,5 +315,17 @@ export function RegisterForm({ role, roleLabel }: RegisterFormProps) {
       </motion.div>
     </div>
     </div>
+  );
+}
+
+export function RegisterForm(props: RegisterFormProps) {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-linear-to-br from-blue-50/30 via-white to-blue-50/50 flex items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
+      </div>
+    }>
+      <RegisterFormContent {...props} />
+    </Suspense>
   );
 }
