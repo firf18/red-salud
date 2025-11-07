@@ -16,6 +16,7 @@ interface SignUpData extends RegisterFormData {
 
 /**
  * Registra un nuevo usuario con Supabase Auth
+ * El rol se guarda automáticamente en user.user_metadata
  */
 export async function signUp(data: SignUpData) {
   try {
@@ -44,16 +45,29 @@ export async function signUp(data: SignUpData) {
       };
     }
 
+    // El rol está guardado en authData.user.user_metadata.role
+    // Se sincronizará con el servidor cuando llame a /auth/sync-session
+    console.log(`✅ [SIGNUP] Usuario registrado con rol: ${data.role}`);
+
     return {
       success: true,
       user: authData.user,
       session: authData.session,
     };
-  } catch (error) {
+  } catch (error: any) {
     console.error("Error en signUp:", error);
+    
+    // Detectar errores de red
+    if (error.message?.includes("fetch") || error.message?.includes("network")) {
+      return {
+        success: false,
+        error: "Error de conexión. Verifica tu internet e intenta de nuevo.",
+      };
+    }
+    
     return {
       success: false,
-      error: "Error inesperado al registrar usuario",
+      error: "Error inesperado al registrar usuario. Intenta de nuevo.",
     };
   }
 }
@@ -87,24 +101,47 @@ export async function signIn(data: LoginFormData) {
       user: authData.user,
       session: authData.session,
     };
-  } catch (error) {
+  } catch (error: any) {
     console.error("Error en signIn:", error);
+    
+    // Detectar errores de red
+    if (error.message?.includes("fetch") || error.message?.includes("network")) {
+      return {
+        success: false,
+        error: "Error de conexión. Verifica tu internet e intenta de nuevo.",
+      };
+    }
+    
     return {
       success: false,
-      error: "Error inesperado al iniciar sesión",
+      error: "Error inesperado al iniciar sesión. Intenta de nuevo.",
     };
   }
 }
 
 /**
  * Inicia sesión con OAuth (Google)
+ * @param provider - Proveedor OAuth (google, github, etc.)
+ * @param role - Rol del usuario (solo para registro)
+ * @param action - "login" o "register" para diferenciar el flujo
  */
-export async function signInWithOAuth(provider: "google") {
+export async function signInWithOAuth(
+  provider: "google", 
+  role?: string,
+  action: "login" | "register" = "login"
+) {
   try {
+    // Construir URL de callback con action y rol
+    let callbackUrl = `${window.location.origin}/auth/callback?action=${action}`;
+    
+    if (role && action === "register") {
+      callbackUrl += `&role=${role}`;
+    }
+
     const { data, error } = await supabase.auth.signInWithOAuth({
       provider,
       options: {
-        redirectTo: `${window.location.origin}/auth/callback`,
+        redirectTo: callbackUrl,
       },
     });
 
@@ -196,6 +233,12 @@ function translateAuthError(error: string): string {
     "Invalid email or password": "Correo electrónico o contraseña inválidos",
     "Email rate limit exceeded": "Límite de correos excedido, intenta más tarde",
     "Signups not allowed for this instance": "Los registros no están permitidos",
+    "Password is too weak": "La contraseña es muy débil",
+    "Email link is invalid or has expired": "El enlace de email es inválido o ha expirado",
+    "Token has expired or is invalid": "El token ha expirado o es inválido",
+    "New password should be different from the old password": "La nueva contraseña debe ser diferente a la anterior",
+    "Database error saving new user": "Error de base de datos al guardar el usuario",
+    "Unable to process request": "No se pudo procesar la solicitud",
   };
 
   return errorMap[error] || error;

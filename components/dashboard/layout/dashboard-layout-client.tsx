@@ -20,10 +20,14 @@ import {
   X,
   LogOut,
   Bell,
+  ChevronLeft,
+  ChevronRight,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { PATIENT_MODULE_CONFIG } from "@/lib/constants";
+import { signOut } from "@/lib/supabase/auth";
+import { UserProfileModal } from "../profile";
 
 // Mapa de iconos
 const iconMap: Record<string, React.ComponentType<{ className?: string }>> = {
@@ -44,25 +48,42 @@ interface DashboardLayoutClientProps {
   children: React.ReactNode;
   userName?: string;
   userEmail?: string;
+  userRole?: "paciente" | "medico";
 }
 
 export function DashboardLayoutClient({
   children,
   userName = "Usuario",
   userEmail = "usuario@email.com",
+  userRole = "paciente",
 }: DashboardLayoutClientProps) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const [profileModalOpen, setProfileModalOpen] = useState(false);
   const pathname = usePathname();
 
-  const menuItems = Object.entries(PATIENT_MODULE_CONFIG).map(
-    ([key, config]) => ({
-      key,
-      ...config,
-    })
-  );
+  // Menú según el rol
+  const menuItems = userRole === "medico" 
+    ? [
+        { key: "dashboard", label: "Dashboard", icon: "LayoutDashboard", route: "/dashboard/medico", color: "blue" },
+        { key: "citas", label: "Agenda", icon: "Calendar", route: "/dashboard/medico/citas", color: "green" },
+        { key: "pacientes", label: "Pacientes", icon: "User", route: "/dashboard/medico/pacientes", color: "purple" },
+        { key: "mensajeria", label: "Mensajes", icon: "MessageSquare", route: "/dashboard/medico/mensajeria", color: "cyan" },
+        { key: "telemedicina", label: "Telemedicina", icon: "Video", route: "/dashboard/medico/telemedicina", color: "indigo" },
+        { key: "recetas", label: "Recetas", icon: "Pill", route: "/dashboard/medico/recetas", color: "orange" },
+        { key: "estadisticas", label: "Estadísticas", icon: "Activity", route: "/dashboard/medico/estadisticas", color: "red" },
+        { key: "perfil", label: "Mi Perfil", icon: "User", route: "/dashboard/medico/perfil", color: "gray" },
+      ]
+    : Object.entries(PATIENT_MODULE_CONFIG).map(
+        ([key, config]) => ({
+          key,
+          ...config,
+        })
+      );
 
   const isActive = (route: string) => {
-    if (route === "/dashboard/paciente") {
+    const dashboardRoute = `/dashboard/${userRole}`;
+    if (route === dashboardRoute) {
       return pathname === route;
     }
     return pathname.startsWith(route);
@@ -99,33 +120,33 @@ export function DashboardLayoutClient({
       </header>
 
       {/* Sidebar Desktop */}
-      <aside className="hidden lg:block fixed top-0 left-0 h-screen w-64 bg-white border-r border-gray-200 z-40">
+      <motion.aside
+        animate={{ width: sidebarCollapsed ? 80 : 256 }}
+        transition={{ duration: 0.3, ease: "easeInOut" }}
+        className="hidden lg:block fixed top-0 left-0 h-screen bg-white border-r border-gray-200 z-40"
+      >
         <div className="h-full flex flex-col">
-          {/* Logo */}
-          <div className="h-16 flex items-center px-6 border-b border-gray-200">
-            <Link href="/" className="flex items-center gap-2">
-              <div className="bg-linear-to-br from-blue-600 to-teal-600 text-white px-2 py-1 rounded font-bold">
-                RS
-              </div>
-              <span className="font-bold text-lg">Red-Salud</span>
-            </Link>
-          </div>
 
           {/* User Info */}
           <div className="px-4 py-4 border-b border-gray-200">
-            <div className="flex items-center gap-3">
-              <Avatar>
+            <button
+              onClick={() => setProfileModalOpen(true)}
+              className="w-full flex items-center gap-3 hover:bg-gray-50 rounded-lg p-2 -m-2 transition-colors"
+            >
+              <Avatar className="shrink-0">
                 <AvatarFallback className="bg-blue-100 text-blue-600">
                   {userName.charAt(0).toUpperCase()}
                 </AvatarFallback>
               </Avatar>
-              <div className="flex-1 min-w-0">
-                <p className="text-sm font-semibold text-gray-900 truncate">
-                  {userName}
-                </p>
-                <p className="text-xs text-gray-500 truncate">{userEmail}</p>
-              </div>
-            </div>
+              {!sidebarCollapsed && (
+                <div className="flex-1 min-w-0 text-left">
+                  <p className="text-sm font-semibold text-gray-900 truncate">
+                    {userName}
+                  </p>
+                  <p className="text-xs text-gray-500 truncate">{userEmail}</p>
+                </div>
+              )}
+            </button>
           </div>
 
           {/* Navigation */}
@@ -142,10 +163,13 @@ export function DashboardLayoutClient({
                         active
                           ? "bg-blue-50 text-blue-600"
                           : "text-gray-700 hover:bg-gray-50"
-                      }`}
+                      } ${sidebarCollapsed ? "justify-center" : ""}`}
+                      title={sidebarCollapsed ? item.label : undefined}
                     >
                       {Icon && <Icon className="h-5 w-5 shrink-0" />}
-                      <span className="text-sm font-medium">{item.label}</span>
+                      {!sidebarCollapsed && (
+                        <span className="text-sm font-medium">{item.label}</span>
+                      )}
                     </div>
                   </Link>
                 );
@@ -158,31 +182,53 @@ export function DashboardLayoutClient({
                     pathname === "/dashboard/paciente/configuracion"
                       ? "bg-blue-50 text-blue-600"
                       : "text-gray-700 hover:bg-gray-50"
-                  }`}
+                  } ${sidebarCollapsed ? "justify-center" : ""}`}
+                  title={sidebarCollapsed ? "Configuración" : undefined}
                 >
                   <Settings className="h-5 w-5 shrink-0" />
-                  <span className="text-sm font-medium">Configuración</span>
+                  {!sidebarCollapsed && (
+                    <span className="text-sm font-medium">Configuración</span>
+                  )}
                 </div>
               </Link>
             </div>
           </nav>
 
-          {/* Logout */}
-          <div className="p-4 border-t border-gray-200">
+          {/* Logout and Toggle */}
+          <div className="p-4 border-t border-gray-200 space-y-2">
+            <button
+              onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
+              className={`w-full flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-gray-100 transition-colors text-gray-600 ${
+                sidebarCollapsed ? "justify-center" : "justify-start"
+              }`}
+              title={sidebarCollapsed ? "Expandir sidebar" : "Contraer sidebar"}
+            >
+              {sidebarCollapsed ? (
+                <ChevronRight className="h-5 w-5" />
+              ) : (
+                <>
+                  <ChevronLeft className="h-5 w-5" />
+                  <span className="text-sm font-medium">Contraer</span>
+                </>
+              )}
+            </button>
             <Button
               variant="outline"
-              className="w-full justify-start text-red-600 hover:text-red-700 hover:bg-red-50"
-              onClick={() => {
-                // TODO: Implementar logout
+              className={`w-full text-red-600 hover:text-red-700 hover:bg-red-50 ${
+                sidebarCollapsed ? "px-0 justify-center" : "justify-start"
+              }`}
+              onClick={async () => {
+                await signOut();
                 window.location.href = "/auth/login";
               }}
+              title={sidebarCollapsed ? "Cerrar Sesión" : undefined}
             >
-              <LogOut className="h-5 w-5 mr-2" />
-              Cerrar Sesión
+              <LogOut className={`h-5 w-5 ${sidebarCollapsed ? "" : "mr-2"}`} />
+              {!sidebarCollapsed && "Cerrar Sesión"}
             </Button>
           </div>
         </div>
-      </aside>
+      </motion.aside>
 
       {/* Sidebar Mobile */}
       <AnimatePresence>
@@ -206,14 +252,8 @@ export function DashboardLayoutClient({
               className="lg:hidden fixed top-0 left-0 h-screen w-64 bg-white z-50 shadow-xl"
             >
               <div className="h-full flex flex-col">
-                {/* Logo */}
-                <div className="h-16 flex items-center justify-between px-6 border-b border-gray-200">
-                  <Link href="/" className="flex items-center gap-2">
-                    <div className="bg-linear-to-br from-blue-600 to-teal-600 text-white px-2 py-1 rounded font-bold">
-                      RS
-                    </div>
-                    <span className="font-bold text-lg">Red-Salud</span>
-                  </Link>
+                {/* Header with Close Button */}
+                <div className="h-16 flex items-center justify-end px-4 border-b border-gray-200">
                   <Button
                     variant="ghost"
                     size="icon"
@@ -225,13 +265,19 @@ export function DashboardLayoutClient({
 
                 {/* User Info */}
                 <div className="px-4 py-4 border-b border-gray-200">
-                  <div className="flex items-center gap-3">
+                  <button
+                    onClick={() => {
+                      setProfileModalOpen(true);
+                      setSidebarOpen(false);
+                    }}
+                    className="w-full flex items-center gap-3 hover:bg-gray-50 rounded-lg p-2 -m-2 transition-colors"
+                  >
                     <Avatar>
                       <AvatarFallback className="bg-blue-100 text-blue-600">
                         {userName.charAt(0).toUpperCase()}
                       </AvatarFallback>
                     </Avatar>
-                    <div className="flex-1 min-w-0">
+                    <div className="flex-1 min-w-0 text-left">
                       <p className="text-sm font-semibold text-gray-900 truncate">
                         {userName}
                       </p>
@@ -239,7 +285,7 @@ export function DashboardLayoutClient({
                         {userEmail}
                       </p>
                     </div>
-                  </div>
+                  </button>
                 </div>
 
                 {/* Navigation */}
@@ -297,8 +343,8 @@ export function DashboardLayoutClient({
                   <Button
                     variant="outline"
                     className="w-full justify-start text-red-600 hover:text-red-700 hover:bg-red-50"
-                    onClick={() => {
-                      // TODO: Implementar logout
+                    onClick={async () => {
+                      await signOut();
                       window.location.href = "/auth/login";
                     }}
                   >
@@ -313,9 +359,21 @@ export function DashboardLayoutClient({
       </AnimatePresence>
 
       {/* Main Content */}
-      <main className="lg:ml-64 min-h-screen">
+      <motion.main
+        animate={{ marginLeft: sidebarCollapsed ? 80 : 256 }}
+        transition={{ duration: 0.3, ease: "easeInOut" }}
+        className="min-h-screen lg:ml-64"
+      >
         <div className="pt-16 lg:pt-0">{children}</div>
-      </main>
+      </motion.main>
+
+      {/* User Profile Modal */}
+      <UserProfileModal
+        isOpen={profileModalOpen}
+        onClose={() => setProfileModalOpen(false)}
+        userName={userName}
+        userEmail={userEmail}
+      />
 
       {/* Bottom Navigation (Mobile) */}
       <nav className="lg:hidden fixed bottom-0 left-0 right-0 h-16 bg-white border-t border-gray-200 z-30">

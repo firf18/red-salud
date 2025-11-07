@@ -9,13 +9,13 @@ import { ROUTES, APP_NAME, AUTH_ROUTES } from "@/lib/constants";
 import { cn } from "@/lib/utils";
 
 const servicios = [
-  { name: "Pacientes", href: "/servicios/pacientes", description: "Consultas médicas en línea" },
-  { name: "Médicos", href: "/servicios/medicos", description: "Plataforma para profesionales" },
-  { name: "Clínicas", href: "/servicios/clinicas", description: "Gestión de centros médicos" },
-  { name: "Laboratorios", href: "/servicios/laboratorios", description: "Análisis y resultados" },
-  { name: "Farmacias", href: "/servicios/farmacias", description: "Gestión de medicamentos" },
-  { name: "Ambulancias", href: "/servicios/ambulancias", description: "Servicio de emergencias" },
-  { name: "Seguros", href: "/servicios/seguros", description: "Gestión de pólizas" },
+  { name: "Pacientes", href: "/public/servicios/pacientes", description: "Consultas médicas en línea" },
+  { name: "Médicos", href: "/public/servicios/medicos", description: "Plataforma para profesionales" },
+  { name: "Clínicas", href: "/public/servicios/clinicas", description: "Gestión de centros médicos" },
+  { name: "Laboratorios", href: "/public/servicios/laboratorios", description: "Análisis y resultados" },
+  { name: "Farmacias", href: "/public/servicios/farmacias", description: "Gestión de medicamentos" },
+  { name: "Ambulancias", href: "/public/servicios/ambulancias", description: "Servicio de emergencias" },
+  { name: "Seguros", href: "/public/servicios/seguros", description: "Gestión de pólizas" },
 ];
 
 const navItems = [

@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Inter, Poppins } from "next/font/google";
 import "./globals.css";
 import { APP_NAME, APP_DESCRIPTION } from "@/lib/constants";
+import { SupabaseAuthProvider } from "@/components/providers/supabase-auth-provider";
 
 const inter = Inter({
   variable: "--font-inter",
@@ -60,7 +61,9 @@ export default function RootLayout({
       <body
         className={`${inter.variable} ${poppins.variable} font-sans antialiased`}
       >
-        {children}
+        <SupabaseAuthProvider>
+          {children}
+        </SupabaseAuthProvider>
       </body>
     </html>
   );

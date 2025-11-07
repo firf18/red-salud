@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { motion, AnimatePresence } from "framer-motion";
@@ -14,7 +14,8 @@ import { Card, CardContent } from "@/components/ui/card";
 import { APP_NAME, ROUTES } from "@/lib/constants";
 import { fadeInUp, staggerContainer } from "@/lib/animations";
 import { registerSchema, type RegisterFormData } from "@/lib/validations/auth";
-import { signUp, signInWithOAuth, type UserRole } from "@/lib/supabase/auth";
+import { signUp, signIn, signInWithOAuth, type UserRole } from "@/lib/supabase/auth";
+import { useOAuthErrors } from "@/hooks/auth/use-oauth-errors";
 
 interface RegisterFormProps {
   role: UserRole;
@@ -26,6 +27,8 @@ export function RegisterForm({ role, roleLabel }: RegisterFormProps) {
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  useOAuthErrors(setError);
 
   const {
     register,
@@ -39,30 +42,35 @@ export function RegisterForm({ role, roleLabel }: RegisterFormProps) {
     setIsLoading(true);
     setError(null);
 
-    const result = await signUp({ ...data, role });
+    const signUpResult = await signUp({ ...data, role });
 
-    if (result.success) {
-      // El trigger en Supabase crea el perfil automáticamente
-      // Esperamos un poco para que se propague y luego redirigimos
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      // Redirigir al dashboard correspondiente según el rol
-      router.push(`/dashboard/${role}`);
-      router.refresh();
-    } else {
-      setError(result.error || "Error al registrar usuario");
+    if (!signUpResult.success || !signUpResult.user) {
+      setError(signUpResult.error || "Error al registrar usuario");
       setIsLoading(false);
+      return;
     }
+
+    const signInResult = await signIn({
+      email: data.email,
+      password: data.password,
+    });
+
+    if (!signInResult.success) {
+      router.push(`/auth/login/${role}`);
+      return;
+    }
+
+    router.push(`/dashboard/${role}`);
   };
 
   const handleGoogleSignIn = async () => {
     setIsLoading(true);
     setError(null);
 
-    const result = await signInWithOAuth("google");
+    const result = await signInWithOAuth("google", role, "register");
 
     if (!result.success) {
-      setError(result.error || "Error al iniciar sesión con Google");
+      setError(result.error || "Error al registrarse con Google");
       setIsLoading(false);
     }
     // Si es exitoso, el usuario será redirigido automáticamente

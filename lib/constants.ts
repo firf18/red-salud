@@ -7,16 +7,16 @@ export const APP_DESCRIPTION = "Plataforma integral de servicios de salud";
 export const APP_URL = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
 
 export const ROUTES = {
-  HOME: "/",
-  SERVICIOS: "/servicios",
-  PRECIOS: "/precios",
-  NOSOTROS: "/nosotros",
-  SOPORTE: "/soporte",
-  CONTACTO: "/contacto",
-  BLOG: "/blog",
-  FAQ: "/faq",
-  TERMINOS: "/terminos",
-  PRIVACIDAD: "/privacidad",
+  HOME: "/public",
+  SERVICIOS: "/public/servicios",
+  PRECIOS: "/public/precios",
+  NOSOTROS: "/public/nosotros",
+  SOPORTE: "/public/soporte",
+  CONTACTO: "/public/soporte/contacto",
+  BLOG: "/public/blog",
+  FAQ: "/public/soporte/faq",
+  TERMINOS: "/public/terminos",
+  PRIVACIDAD: "/public/privacidad",
 } as const;
 
 export const SOCIAL_LINKS = {

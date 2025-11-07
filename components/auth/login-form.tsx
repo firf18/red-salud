@@ -13,6 +13,8 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent } from "@/components/ui/card";
 import { loginSchema, type LoginFormData } from "@/lib/validations/auth";
 import { signIn, signInWithOAuth } from "@/lib/supabase/auth";
+import { useRateLimit } from "@/hooks/auth/use-rate-limit";
+import { useOAuthErrors } from "@/hooks/auth/use-oauth-errors";
 
 interface LoginFormProps {
   role: string;
@@ -25,6 +27,10 @@ export function LoginForm({ role, roleLabel }: LoginFormProps) {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  // Hooks personalizados
+  const { checkRateLimit, recordFailedAttempt, resetAttempts } = useRateLimit();
+  useOAuthErrors(setError);
+
   const {
     register,
     handleSubmit,
@@ -34,29 +40,34 @@ export function LoginForm({ role, roleLabel }: LoginFormProps) {
   });
 
   const onSubmit = async (data: LoginFormData) => {
+    const rateLimitCheck = checkRateLimit();
+    if (!rateLimitCheck.allowed) {
+      setError(rateLimitCheck.message!);
+      return;
+    }
+
     setIsLoading(true);
     setError(null);
 
     const result = await signIn(data);
 
-    if (result.success && result.user) {
-      // Esperamos un poco para que se propague la sesión
-      await new Promise(resolve => setTimeout(resolve, 500));
-      
-      // El middleware se encargará de redirigir al dashboard correcto
-      router.push(`/dashboard/${role}`);
-      router.refresh();
-    } else {
+    if (!result.success || !result.user) {
+      recordFailedAttempt();
       setError(result.error || "Error al iniciar sesión");
       setIsLoading(false);
+      return;
     }
+
+    resetAttempts();
+    const userRole = result.user.user_metadata?.role || "paciente";
+    router.push(`/dashboard/${userRole}`);
   };
 
   const handleGoogleSignIn = async () => {
     setIsLoading(true);
     setError(null);
 
-    const result = await signInWithOAuth("google");
+    const result = await signInWithOAuth("google", undefined, "login");
 
     if (!result.success) {
       setError(result.error || "Error al iniciar sesión con Google");
