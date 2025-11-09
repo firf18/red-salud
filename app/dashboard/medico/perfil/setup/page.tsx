@@ -84,7 +84,7 @@ export default function DoctorSetupPage() {
           return;
         }
       } else {
-        router.push("/auth/login/medico");
+        router.push("/login/medico");
       }
     };
     getUser();

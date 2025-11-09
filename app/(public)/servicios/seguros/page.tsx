@@ -83,7 +83,7 @@ export default function SegurosPage() {
                 asChild
                 className="bg-white text-indigo-600 hover:bg-indigo-50 shadow-xl"
               >
-                <Link href="/auth/register/seguro">
+                <Link href="/register/seguro">
                   Solicitar Demo
                   <ArrowRight className="ml-2 h-5 w-5" />
                 </Link>
@@ -185,7 +185,7 @@ export default function SegurosPage() {
             asChild
             className="bg-white text-indigo-600 hover:bg-indigo-50 shadow-xl"
           >
-            <Link href="/auth/register/seguro">
+            <Link href="/register/seguro">
               Agendar Demostración
               <ArrowRight className="ml-2 h-5 w-5" />
             </Link>

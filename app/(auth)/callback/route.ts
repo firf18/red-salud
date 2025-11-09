@@ -78,9 +78,18 @@ export async function GET(request: Request) {
         if (!profile) {
           // Usuario NO existe → Cerrar sesión y mostrar error
           await supabase.auth.signOut();
-          const errorUrl = new URL("/auth/login", requestUrl.origin);
+          const errorUrl = new URL("/login", requestUrl.origin);
           errorUrl.searchParams.set("error", "account_not_found");
           errorUrl.searchParams.set("email", user.email || "");
+          return NextResponse.redirect(errorUrl);
+        }
+        
+        // Validar que el rol del usuario coincida con el rol esperado (si se especificó)
+        if (pendingRole && profile.role !== pendingRole) {
+          await supabase.auth.signOut();
+          const errorUrl = new URL(`/login/${pendingRole}`, requestUrl.origin);
+          errorUrl.searchParams.set("error", "wrong_role");
+          errorUrl.searchParams.set("user_role", profile.role);
           return NextResponse.redirect(errorUrl);
         }
         
@@ -95,7 +104,7 @@ export async function GET(request: Request) {
         // Si el usuario NO fue creado recientemente, es un usuario antiguo intentando registrarse
         if (!isRecentlyCreated && profile) {
           await supabase.auth.signOut();
-          const errorUrl = new URL("/auth/login", requestUrl.origin);
+          const errorUrl = new URL("/login", requestUrl.origin);
           errorUrl.searchParams.set("error", "account_exists");
           errorUrl.searchParams.set("email", user.email || "");
           return NextResponse.redirect(errorUrl);
@@ -104,7 +113,7 @@ export async function GET(request: Request) {
         if (!pendingRole) {
           // No hay rol especificado → Error
           await supabase.auth.signOut();
-          return NextResponse.redirect(new URL("/auth/register?error=missing_role", requestUrl.origin));
+          return NextResponse.redirect(new URL("/register?error=missing_role", requestUrl.origin));
         }
         
         // Si el perfil ya existe (creado por trigger), actualizarlo con el rol correcto
@@ -122,7 +131,7 @@ export async function GET(request: Request) {
           if (updateError) {
             console.error("❌ [CALLBACK] Error al actualizar perfil:", updateError);
             await supabase.auth.signOut();
-            return NextResponse.redirect(new URL("/auth/register?error=profile_update_failed", requestUrl.origin));
+            return NextResponse.redirect(new URL("/register?error=profile_update_failed", requestUrl.origin));
           }
           
           console.log("✅ [CALLBACK] Perfil actualizado con rol:", pendingRole);
@@ -142,7 +151,7 @@ export async function GET(request: Request) {
           if (insertError) {
             console.error("❌ [CALLBACK] Error al crear perfil:", insertError);
             await supabase.auth.signOut();
-            return NextResponse.redirect(new URL("/auth/register?error=profile_creation_failed", requestUrl.origin));
+            return NextResponse.redirect(new URL("/register?error=profile_creation_failed", requestUrl.origin));
           }
           
           console.log("✅ [CALLBACK] Perfil creado con rol:", pendingRole);
@@ -176,7 +185,7 @@ export async function GET(request: Request) {
         console.log("❌ [CALLBACK] Usuario sin perfil, cerrando sesión");
         await supabase.auth.signOut();
         
-        const loginUrl = new URL("/auth/login", requestUrl.origin);
+        const loginUrl = new URL("/login", requestUrl.origin);
         loginUrl.searchParams.set("error", "no_role");
         loginUrl.searchParams.set("message", "Debes registrarte con un rol específico");
         
@@ -187,6 +196,6 @@ export async function GET(request: Request) {
 
   // Si algo sale mal, redirigir al login
   console.log("❌ [CALLBACK] No se pudo procesar el callback");
-  return NextResponse.redirect(new URL("/auth/login", requestUrl.origin));
+  return NextResponse.redirect(new URL("/login", requestUrl.origin));
 }
 

@@ -42,6 +42,61 @@ export interface FormData {
   contactoEmergencia: string;
   telefonoEmergencia: string;
   relacionEmergencia: string;
+  // Campos CNE
+  cneEstado?: string;
+  cneMunicipio?: string;
+  cneParroquia?: string;
+  cneCentroElectoral?: string;
+  rif?: string;
+  nacionalidad?: string;
+  primerNombre?: string;
+  segundoNombre?: string;
+  primerApellido?: string;
+  segundoApellido?: string;
+  // Verificación
+  cedulaVerificada?: boolean;
+  photoVerified?: boolean;
+  diditRequestId?: string;
+  photoUploadDeadline?: string | null;
+  cedulaVerifiedAt?: string | null;
+  cedulaPhotoVerifiedAt?: string | null;
+  // Campos médicos expandidos
+  sexoBiologico?: string;
+  peso?: string;
+  altura?: string;
+  perimetroCintura?: string;
+  presionSistolica?: string;
+  presionDiastolica?: string;
+  frecuenciaCardiaca?: string;
+  // Campos específicos para mujeres
+  embarazada?: boolean;
+  lactancia?: boolean;
+  fechaUltimaMenstruacion?: string;
+  usaAnticonceptivos?: boolean;
+  tipoAnticonceptivo?: string;
+  embarazosPrevios?: string;
+  // Alergias expandidas
+  alergiasAlimentarias?: string;
+  otrasAlergias?: string;
+  // Condiciones
+  condicionesMentales?: string;
+  discapacidades?: string;
+  // Medicamentos y tratamientos
+  suplementos?: string;
+  tratamientosActuales?: string;
+  // Hábitos
+  fuma?: string;
+  cigarrillosPorDia?: string;
+  exFumadorDesde?: string;
+  consumeAlcohol?: string;
+  frecuenciaAlcohol?: string;
+  actividadFisica?: string;
+  horasEjercicioSemanal?: string;
+  horasSuenoPromedio?: string;
+  // Otros
+  dispositivosMedicos?: string;
+  donanteOrganos?: string;
+  observacionesAdicionales?: string;
 }
 
 export interface TabComponentProps {
@@ -50,6 +105,7 @@ export interface TabComponentProps {
   isEditing: boolean;
   setIsEditing: (editing: boolean) => void;
   handleSave: () => Promise<void>;
+  isLoading?: boolean;
 }
 
 export interface DocumentStatus {

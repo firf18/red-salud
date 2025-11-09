@@ -14,7 +14,7 @@ export function TabNavigation({
 }: TabNavigationProps) {
   return (
     <nav
-      className="px-8 mt-6 border-b border-gray-200 shrink-0"
+      className="px-8 border-b border-gray-200 shrink-0"
       aria-label="Navegación de perfil"
     >
       <div className="flex gap-4 overflow-x-auto">
@@ -24,7 +24,7 @@ export function TabNavigation({
             <button
               key={tab.id}
               onClick={() => onTabChange(tab.id)}
-              className={`pb-3 px-2 font-medium text-sm transition-colors relative flex items-center gap-2 whitespace-nowrap ${
+              className={`pb-3 px-3 font-medium text-sm transition-colors relative flex items-center gap-2 whitespace-nowrap ${
                 activeTab === tab.id
                   ? "text-blue-600"
                   : "text-gray-600 hover:text-gray-900"

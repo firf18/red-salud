@@ -111,7 +111,7 @@ export default function RegisterPage() {
                   whileTap={{ scale: 0.95 }}
                   className="h-full"
                 >
-                  <Link href={`/auth/register/${role.id}`} className="block h-full">
+                  <Link href={`/register/${role.id}`} className="block h-full">
                     <Card className="h-full border-2 hover:border-blue-400 hover:shadow-xl transition-all duration-300 cursor-pointer group bg-white/80 backdrop-blur-sm">
                       <CardContent className="p-4 sm:p-5 flex flex-col items-center justify-center h-full text-center gap-2 sm:gap-3">
                         <div className={`w-12 h-12 sm:w-14 sm:h-14 rounded-2xl bg-linear-to-br ${role.gradient} flex items-center justify-center group-hover:scale-110 transition-transform duration-300 shadow-lg`}>
@@ -139,7 +139,7 @@ export default function RegisterPage() {
         <motion.p variants={fadeInUp} className="mt-6 text-center text-sm sm:text-base text-gray-600">
           ¿Ya tienes cuenta?{" "}
           <Link
-            href="/auth/login"
+            href="/login"
             className="font-semibold text-blue-600 hover:text-blue-700 transition-colors"
           >
             Inicia sesión

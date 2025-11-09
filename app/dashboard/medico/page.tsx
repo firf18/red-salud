@@ -35,7 +35,7 @@ export default function DoctorDashboardPage() {
       if (user) {
         setUserId(user.id);
       } else {
-        router.push("/auth/login/medico");
+        router.push("/login/medico");
       }
       setAuthLoading(false);
     };

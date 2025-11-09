@@ -12,9 +12,11 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent } from "@/components/ui/card";
 import { loginSchema, type LoginFormData } from "@/lib/validations/auth";
-import { signIn, signInWithOAuth } from "@/lib/supabase/auth";
+import { signIn, signInWithOAuth, signOut } from "@/lib/supabase/auth";
 import { useRateLimit } from "@/hooks/auth/use-rate-limit";
 import { useOAuthErrors } from "@/hooks/auth/use-oauth-errors";
+import { RememberMeCheckbox } from "@/components/auth/remember-me-checkbox";
+import { sessionManager } from "@/lib/security/session-manager";
 
 interface LoginFormProps {
   role: string;
@@ -26,6 +28,7 @@ function LoginFormContent({ role, roleLabel }: LoginFormProps) {
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [rememberMe, setRememberMe] = useState(false);
 
   // Hooks personalizados
   const { checkRateLimit, recordFailedAttempt, resetAttempts } = useRateLimit();
@@ -60,14 +63,54 @@ function LoginFormContent({ role, roleLabel }: LoginFormProps) {
 
     resetAttempts();
     const userRole = result.user.user_metadata?.role || "paciente";
+    
+    // Validar que el rol del usuario coincida con el rol de la página
+    if (userRole !== role) {
+      // Obtener el nombre del rol en español
+      const roleLabels: Record<string, string> = {
+        paciente: "Paciente",
+        medico: "Médico",
+        clinica: "Clínica",
+        farmacia: "Farmacia",
+        laboratorio: "Laboratorio",
+        ambulancia: "Ambulancia",
+        seguro: "Seguro"
+      };
+      
+      const userRoleLabel = roleLabels[userRole] || userRole;
+      setError(`Esta cuenta está registrada como ${userRoleLabel}. Por favor, inicia sesión en la página correcta.`);
+      setIsLoading(false);
+      // Cerrar sesión automáticamente
+      await signOut();
+      return;
+    }
+    
+    // Configurar sesión con preferencias de seguridad
+    await sessionManager.setupSession({
+      rememberMe,
+      role: userRole,
+      deviceFingerprint: await getDeviceFingerprint(),
+    });
+    
     router.push(`/dashboard/${userRole}`);
+  };
+
+  const getDeviceFingerprint = async (): Promise<string> => {
+    const data = [
+      navigator.userAgent,
+      navigator.language,
+      screen.width,
+      screen.height,
+      new Date().getTimezoneOffset(),
+    ].join("|");
+    return btoa(data);
   };
 
   const handleGoogleSignIn = async () => {
     setIsLoading(true);
     setError(null);
 
-    const result = await signInWithOAuth("google", undefined, "login");
+    const result = await signInWithOAuth("google", role, "login");
 
     if (!result.success) {
       setError(result.error || "Error al iniciar sesión con Google");
@@ -76,36 +119,36 @@ function LoginFormContent({ role, roleLabel }: LoginFormProps) {
   };
 
   return (
-    <div className="h-screen bg-linear-to-br from-blue-50/30 via-white to-blue-50/50 overflow-hidden">
-      {/* Header */}
-      <motion.div
-        initial={{ opacity: 0, y: -20 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="flex items-center justify-between px-4"
+    <div className="min-h-screen bg-linear-to-br from-blue-50/30 via-white to-blue-50/50 relative">
+      {/* Botón de regresar - Posición absoluta */}
+      <Link
+        href="/login"
+        className="absolute top-6 left-6 flex items-center gap-2 text-gray-600 hover:text-blue-600 transition-colors group"
       >
-        <Link
-          href="/auth/login"
-          className="inline-flex items-center gap-2 text-gray-600 hover:text-blue-600 transition-colors py-4"
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="20"
+          height="20"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          className="group-hover:-translate-x-1 transition-transform"
         >
-          ← Cambiar tipo de cuenta
-        </Link>
-        <Link
-          href="/"
-          className="inline-flex items-center gap-2 font-bold text-xl text-gray-900"
-        >
-          <div className="bg-linear-to-br from-blue-600 to-teal-600 text-white px-2 py-1 rounded">
-            RS
-          </div>
-          Red-Salud
-        </Link>
-      </motion.div>
+          <path d="m12 19-7-7 7-7" />
+          <path d="M19 12H5" />
+        </svg>
+        <span className="text-sm font-medium">Cambiar tipo de cuenta</span>
+      </Link>
 
       {/* Contenedor centrado */}
-      <div className="h-full flex items-center justify-center px-4">
+      <div className="min-h-screen flex items-center justify-center px-4">
+        <div className="w-full max-w-md py-12">
         <motion.div
           initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
-          className="w-full max-w-md"
         >
           {/* Título */}
           <div className="text-center mb-6">
@@ -202,7 +245,7 @@ function LoginFormContent({ role, roleLabel }: LoginFormProps) {
                   <div className="flex items-center justify-between mb-2">
                     <Label htmlFor="password">Contraseña</Label>
                     <Link
-                      href="/auth/forgot-password"
+                      href="/forgot-password"
                       className="text-xs text-blue-600 hover:text-blue-700"
                     >
                       ¿Olvidaste tu contraseña?
@@ -238,6 +281,12 @@ function LoginFormContent({ role, roleLabel }: LoginFormProps) {
                   )}
                 </div>
 
+                <RememberMeCheckbox
+                  checked={rememberMe}
+                  onCheckedChange={setRememberMe}
+                  role={role}
+                />
+
                 <Button
                   type="submit"
                   size="lg"
@@ -258,7 +307,7 @@ function LoginFormContent({ role, roleLabel }: LoginFormProps) {
               <p className="mt-6 text-center text-sm text-gray-600">
                 ¿No tienes cuenta?{" "}
                 <Link
-                  href={`/auth/register/${role}`}
+                  href={`/register/${role}`}
                   className="font-semibold text-blue-600 hover:text-blue-700"
                 >
                   Regístrate aquí
@@ -267,6 +316,7 @@ function LoginFormContent({ role, roleLabel }: LoginFormProps) {
             </CardContent>
           </Card>
         </motion.div>
+        </div>
       </div>
     </div>
   );

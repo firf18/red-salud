@@ -83,7 +83,7 @@ export default function MedicosPage() {
                 asChild
                 className="bg-white text-blue-600 hover:bg-blue-50 shadow-xl"
               >
-                <Link href="/auth/register/medico">
+                <Link href="/register/medico">
                   Unirme como Médico
                   <ArrowRight className="ml-2 h-5 w-5" />
                 </Link>
@@ -185,7 +185,7 @@ export default function MedicosPage() {
             asChild
             className="bg-white text-blue-600 hover:bg-blue-50 shadow-xl"
           >
-            <Link href="/auth/register/medico">
+            <Link href="/register/medico">
               Registrarme Ahora
               <ArrowRight className="ml-2 h-5 w-5" />
             </Link>

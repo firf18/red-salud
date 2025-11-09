@@ -74,7 +74,7 @@ export default function PacientesPage() {
                 asChild
                 className="bg-white text-blue-600 hover:bg-blue-50 shadow-xl"
               >
-                <Link href="/auth/register/paciente">
+                <Link href="/register/paciente">
                   Registrarse Gratis
                   <ArrowRight className="ml-2 h-5 w-5" />
                 </Link>
@@ -172,7 +172,7 @@ export default function PacientesPage() {
             asChild
             className="bg-white text-blue-600 hover:bg-blue-50 shadow-xl"
           >
-            <Link href="/auth/register/paciente">
+            <Link href="/register/paciente">
               Crear Cuenta Gratis
               <ArrowRight className="ml-2 h-5 w-5" />
             </Link>

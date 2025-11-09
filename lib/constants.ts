@@ -7,16 +7,16 @@ export const APP_DESCRIPTION = "Plataforma integral de servicios de salud";
 export const APP_URL = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
 
 export const ROUTES = {
-  HOME: "/public",
-  SERVICIOS: "/public/servicios",
-  PRECIOS: "/public/precios",
-  NOSOTROS: "/public/nosotros",
-  SOPORTE: "/public/soporte",
-  CONTACTO: "/public/soporte/contacto",
-  BLOG: "/public/blog",
-  FAQ: "/public/soporte/faq",
-  TERMINOS: "/public/terminos",
-  PRIVACIDAD: "/public/privacidad",
+  HOME: "/",
+  SERVICIOS: "/servicios",
+  PRECIOS: "/precios",
+  NOSOTROS: "/nosotros",
+  SOPORTE: "/soporte",
+  CONTACTO: "/soporte/contacto",
+  BLOG: "/blog",
+  FAQ: "/soporte/faq",
+  TERMINOS: "/terminos",
+  PRIVACIDAD: "/privacidad",
 } as const;
 
 export const SOCIAL_LINKS = {
@@ -34,10 +34,11 @@ export const CONTACT_INFO = {
 
 // Rutas de autenticación
 export const AUTH_ROUTES = {
-  LOGIN: "/auth/login",
-  REGISTER: "/auth/register",
-  FORGOT_PASSWORD: "/auth/forgot-password",
-  RESET_PASSWORD: "/auth/reset-password",
+  LOGIN: "/login",
+  REGISTER: "/register",
+  FORGOT_PASSWORD: "/forgot-password",
+  RESET_PASSWORD: "/reset-password",
+  CALLBACK: "/callback",
 } as const;
 
 // Tipos de usuario (roles)
@@ -97,7 +98,7 @@ export const ROLE_CONFIG: Record<
     label: "Aseguradora",
     description: "Gestiona pólizas y autorizaciones médicas",
     icon: "Shield",
-    dashboardPath: "/dashboard/aseguradora",
+    dashboardPath: "/dashboard/seguro",
   },
   [USER_ROLES.AMBULANCIA]: {
     label: "Ambulancia",

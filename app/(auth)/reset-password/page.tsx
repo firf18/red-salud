@@ -71,7 +71,7 @@ export default function ResetPasswordPage() {
       
       // Redirigir al login después de 3 segundos
       setTimeout(() => {
-        router.push("/auth/login");
+        router.push("/login");
       }, 3000);
     } catch (err) {
       setError("Error al restablecer la contraseña");
@@ -101,7 +101,7 @@ export default function ResetPasswordPage() {
                 {error}
               </p>
 
-              <Link href="/auth/forgot-password">
+              <Link href="/forgot-password">
                 <Button className="w-full">
                   Solicitar Nuevo Enlace
                 </Button>
@@ -139,7 +139,7 @@ export default function ResetPasswordPage() {
                 Tu contraseña ha sido restablecida exitosamente. Serás redirigido al login...
               </p>
 
-              <Link href="/auth/login">
+              <Link href="/login">
                 <Button className="w-full">
                   Ir al Login
                 </Button>

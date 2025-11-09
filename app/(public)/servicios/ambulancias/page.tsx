@@ -83,7 +83,7 @@ export default function AmbulanciasPage() {
                 asChild
                 className="bg-white text-red-600 hover:bg-red-50 shadow-xl"
               >
-                <Link href="/auth/register/ambulancia">
+                <Link href="/register/ambulancia">
                   Solicitar Demo
                   <ArrowRight className="ml-2 h-5 w-5" />
                 </Link>
@@ -185,7 +185,7 @@ export default function AmbulanciasPage() {
             asChild
             className="bg-white text-red-600 hover:bg-red-50 shadow-xl"
           >
-            <Link href="/auth/register/ambulancia">
+            <Link href="/register/ambulancia">
               Agendar Demostración
               <ArrowRight className="ml-2 h-5 w-5" />
             </Link>

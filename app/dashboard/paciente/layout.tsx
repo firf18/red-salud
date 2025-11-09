@@ -40,7 +40,7 @@ export default async function PacienteLayout({
   } = await supabase.auth.getUser();
 
   if (!user) {
-    redirect("/auth/login");
+    redirect("/login");
   }
 
   // Obtener perfil del usuario
@@ -60,6 +60,7 @@ export default async function PacienteLayout({
       <DashboardLayoutClient
         userName={profile?.nombre_completo || user.email?.split("@")[0]}
         userEmail={user.email}
+        userId={user.id}
       >
         {children}
       </DashboardLayoutClient>

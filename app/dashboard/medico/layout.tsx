@@ -40,7 +40,7 @@ export default async function MedicoLayout({
   } = await supabase.auth.getUser();
 
   if (!user) {
-    redirect("/auth/login/medico");
+    redirect("/login/medico");
   }
 
   // Obtener perfil del usuario

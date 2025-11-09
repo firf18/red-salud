@@ -17,7 +17,7 @@ export default function PerfilMedicoPage() {
       } = await supabase.auth.getUser();
 
       if (!user) {
-        router.push("/auth/login");
+        router.push("/login");
         return;
       }
 

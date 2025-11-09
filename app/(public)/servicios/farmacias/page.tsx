@@ -83,7 +83,7 @@ export default function FarmaciasPage() {
                 asChild
                 className="bg-white text-rose-600 hover:bg-rose-50 shadow-xl"
               >
-                <Link href="/auth/register/farmacia">
+                <Link href="/register/farmacia">
                   Empezar Gratis
                   <ArrowRight className="ml-2 h-5 w-5" />
                 </Link>
@@ -185,7 +185,7 @@ export default function FarmaciasPage() {
             asChild
             className="bg-white text-rose-600 hover:bg-rose-50 shadow-xl"
           >
-            <Link href="/auth/register/farmacia">
+            <Link href="/register/farmacia">
               Registrar Farmacia
               <ArrowRight className="ml-2 h-5 w-5" />
             </Link>

@@ -1,6 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { fetchProfile, setProfile } from "@/lib/redux/profileSlice";
+import type { RootState, AppDispatch } from "@/lib/redux/store";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   User,
@@ -15,7 +18,7 @@ import {
 import { ModalHeader } from "./components/modal-header";
 import { TabNavigation } from "./components/tab-navigation";
 import { ProfileTab } from "./tabs/profile-tab";
-import { MedicalTab } from "./tabs/medical-tab";
+import { MedicalTabNew as MedicalTab } from "./tabs/medical-tab-new";
 import { DocumentsTab } from "./tabs/documents-tab";
 import { SecurityTab } from "./tabs/security-tab";
 import { PreferencesTab } from "./tabs/preferences-tab";
@@ -24,6 +27,8 @@ import { ActivityTab } from "./tabs/activity-tab";
 import { BillingTab } from "./tabs/billing-tab";
 import { useProfileForm } from "./hooks/use-profile-form";
 import { useAvatarUpload } from "./hooks/use-avatar-upload";
+import { useThemeColor } from "@/hooks/use-theme-color";
+import { Toast, type ToastType } from "@/components/ui/toast";
 import type { UserProfileModalProps, TabType, TabConfig } from "./types";
 
 const TABS: TabConfig[] = [
@@ -44,20 +49,31 @@ export function UserProfileModal({
   userEmail,
   userId,
 }: UserProfileModalProps) {
-  const [activeTab, setActiveTab] = useState<TabType>("profile");
+    const [activeTab, setActiveTab] = useState<TabType>("profile");
+    const dispatch = useDispatch<AppDispatch>();
+    const profileState = useSelector((state: RootState) => state.profile);
+  const { themeColor, setThemeColor } = useThemeColor();
+  
+  // Toast state
+  const [toastMessage, setToastMessage] = useState("");
+  const [toastType, setToastType] = useState<ToastType>("info");
+  const [showToast, setShowToast] = useState(false);
 
-  const {
-    formData,
-    setFormData,
-    isEditing,
-    setIsEditing,
-    isSaving,
-    setIsSaving,
-    resetForm,
-  } = useProfileForm({
-    nombre: userName,
-    email: userEmail,
-  });
+  const [isEditing, setIsEditing] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
+
+  const showNotification = (message: string, type: ToastType = "info") => {
+    setToastMessage(message);
+    setToastType(type);
+    setShowToast(true);
+  };
+
+  // Cargar datos del perfil cuando se abre el modal
+  useEffect(() => {
+    if (isOpen && userId && profileState.status === "idle") {
+      dispatch(fetchProfile(userId));
+    }
+  }, [isOpen, userId, dispatch, profileState.status]);
 
   const {
     avatarHover,
@@ -66,18 +82,75 @@ export function UserProfileModal({
     handleAvatarClick,
     handleFileChange,
   } = useAvatarUpload(async (file) => {
-    // TODO: Implementar subida con Supabase Storage
-    console.log("Uploading file:", file);
+    if (!userId) {
+      showNotification("Error: Usuario no identificado", "error");
+      return;
+    }
+    
+    try {
+      showNotification("Subiendo imagen...", "info");
+      // TODO: Implementar subida con Supabase Storage
+      console.log("Uploading file:", file, "for user:", userId);
+      
+      // Simulación temporal - remover cuando se implemente Supabase Storage
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      showNotification("Imagen subida correctamente (pendiente implementación)", "warning");
+    } catch (error) {
+      showNotification("Error al subir la imagen", "error");
+    }
   });
 
   const handleSave = async () => {
+    if (!userId) {
+      showNotification("Error: Usuario no identificado", "error");
+      return;
+    }
+
+    if (!profileState.data) {
+      showNotification("Error: No hay datos para guardar", "error");
+      return;
+    }
+
     setIsSaving(true);
     try {
-      // TODO: Implementar guardado con Supabase MCP
-      await new Promise((resolve) => setTimeout(resolve, 1000));
+      console.log("📤 Enviando datos al backend:", {
+        userId,
+        ...profileState.data,
+      });
+      
+      const response = await fetch("/api/profile/update", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          userId,
+          ...profileState.data,
+        }),
+      });
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        const errorMessage = result.message || "Error al guardar el perfil";
+        showNotification(errorMessage, "error");
+        return;
+      }
+
       setIsEditing(false);
+      showNotification("Perfil actualizado correctamente", "success");
+      
+      // Esperar un momento antes de recargar para asegurar consistencia en la BD
+      await new Promise(resolve => setTimeout(resolve, 300));
+      
+      // Recargar datos del perfil desde el servidor
+      if (userId) {
+        dispatch(fetchProfile(userId));
+      }
     } catch (error) {
       console.error("Error saving:", error);
+      const errorMessage = error instanceof Error ? error.message : "Error al conectar con el servidor";
+      showNotification(errorMessage, "error");
     } finally {
       setIsSaving(false);
     }
@@ -89,26 +162,35 @@ export function UserProfileModal({
   };
 
   return (
-    <AnimatePresence>
-      {isOpen && (
-        <>
-          {/* Overlay */}
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            onClick={onClose}
-            className="fixed inset-0 bg-black/50 z-[100]"
-            aria-hidden="true"
-          />
+    <>
+      {/* Toast Notification */}
+      <Toast
+        message={toastMessage}
+        type={toastType}
+        isVisible={showToast}
+        onClose={() => setShowToast(false)}
+      />
 
-          {/* Modal */}
-          <motion.dialog
+      <AnimatePresence>
+        {isOpen && (
+          <>
+            {/* Overlay */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={onClose}
+              className="fixed inset-0 bg-black/50 z-100"
+              aria-hidden="true"
+            />
+
+            {/* Modal */}
+            <motion.dialog
             initial={{ opacity: 0, scale: 0.95, y: 20 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.95, y: 20 }}
             open={isOpen}
-            className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-6xl h-[90vh] bg-white rounded-xl shadow-2xl z-[101] overflow-hidden flex flex-col"
+            className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-7xl h-[95vh] bg-white rounded-xl shadow-2xl z-101 overflow-hidden flex flex-col"
             aria-labelledby="profile-modal-title"
             aria-modal="true"
           >
@@ -121,6 +203,8 @@ export function UserProfileModal({
               onAvatarClick={handleAvatarClick}
               fileInputRef={fileInputRef}
               onFileChange={handleFileChange}
+              themeColor={themeColor}
+              onThemeColorChange={setThemeColor}
             />
 
             <TabNavigation
@@ -132,39 +216,62 @@ export function UserProfileModal({
             {/* Content Area - Scrollable */}
             <main className="flex-1 overflow-y-auto">
               <div className="p-8">
-                <AnimatePresence mode="wait">
-                  {activeTab === "profile" && (
-                    <ProfileTab
-                      formData={formData}
-                      setFormData={setFormData}
-                      isEditing={isEditing}
-                      setIsEditing={setIsEditing}
-                      handleSave={handleSave}
-                    />
-                  )}
-                  {activeTab === "medical" && (
-                    <MedicalTab
-                      formData={formData}
-                      setFormData={setFormData}
-                      isEditing={isEditing}
-                      setIsEditing={setIsEditing}
-                      handleSave={handleSave}
-                    />
-                  )}
-                  {activeTab === "documents" && <DocumentsTab userId={userId} />}
-                  {activeTab === "security" && (
-                    <SecurityTab userEmail={userEmail} />
-                  )}
-                  {activeTab === "preferences" && <PreferencesTab />}
-                  {activeTab === "privacy" && <PrivacyTab userId={userId} />}
-                  {activeTab === "activity" && <ActivityTab userId={userId} />}
-                  {activeTab === "billing" && <BillingTab userId={userId} />}
-                </AnimatePresence>
+                {profileState.status === "loading" && (
+                  <div className="flex items-center justify-center h-64">
+                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+                  </div>
+                )}
+                
+                {profileState.status === "failed" && (
+                  <div className="flex items-center justify-center h-64">
+                    <div className="text-center">
+                      <p className="text-red-600 mb-4">{profileState.error || "Error al cargar el perfil"}</p>
+                      <button
+                        onClick={() => userId && dispatch(fetchProfile(userId))}
+                        className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
+                      >
+                        Reintentar
+                      </button>
+                    </div>
+                  </div>
+                )}
+
+                {profileState.status === "succeeded" && profileState.data && (
+                  <AnimatePresence mode="wait">
+                    {activeTab === "profile" && (
+                      <ProfileTab
+                        formData={profileState.data}
+                        setFormData={(data) => dispatch(setProfile(data))}
+                        isEditing={isEditing}
+                        setIsEditing={setIsEditing}
+                        handleSave={handleSave}
+                      />
+                    )}
+                    {activeTab === "medical" && (
+                      <MedicalTab
+                        formData={profileState.data}
+                        setFormData={(data) => dispatch(setProfile(data))}
+                        isEditing={isEditing}
+                        setIsEditing={setIsEditing}
+                        handleSave={handleSave}
+                      />
+                    )}
+                    {activeTab === "documents" && <DocumentsTab userId={userId} />}
+                    {activeTab === "security" && (
+                      <SecurityTab userEmail={userEmail} />
+                    )}
+                    {activeTab === "preferences" && <PreferencesTab />}
+                    {activeTab === "privacy" && <PrivacyTab userId={userId} />}
+                    {activeTab === "activity" && <ActivityTab userId={userId} />}
+                    {activeTab === "billing" && <BillingTab userId={userId} />}
+                  </AnimatePresence>
+                )}
               </div>
             </main>
           </motion.dialog>
         </>
       )}
     </AnimatePresence>
+    </>
   );
 }

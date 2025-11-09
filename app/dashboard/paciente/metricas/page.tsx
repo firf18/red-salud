@@ -39,7 +39,7 @@ export default function MetricasSaludPage() {
       } = await supabase.auth.getUser();
 
       if (!user) {
-        router.push("/auth/login");
+        router.push("/login");
         return;
       }
 

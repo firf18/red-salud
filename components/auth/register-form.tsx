@@ -56,7 +56,7 @@ function RegisterFormContent({ role, roleLabel }: RegisterFormProps) {
     });
 
     if (!signInResult.success) {
-      router.push(`/auth/login/${role}`);
+      router.push(`/login/${role}`);
       return;
     }
 
@@ -81,7 +81,7 @@ function RegisterFormContent({ role, roleLabel }: RegisterFormProps) {
       {/* Header horizontal FUERA del contenedor principal */}
       <motion.div variants={fadeInUp} className="flex items-center justify-between px-4">
         <Link
-          href="/auth/register"
+          href="/register"
           className="inline-flex items-center gap-2 text-sm text-gray-600 hover:text-blue-600 transition-colors font-medium"
         >
           <ArrowLeft className="h-4 w-4" />
@@ -304,7 +304,7 @@ function RegisterFormContent({ role, roleLabel }: RegisterFormProps) {
             <motion.p variants={fadeInUp} className="mt-3 text-center text-sm text-gray-600">
               ¿Ya tienes cuenta?{" "}
               <Link
-                href="/auth/login"
+                href="/login"
                 className="font-semibold text-blue-600 hover:text-blue-700"
               >
                 Inicia sesión

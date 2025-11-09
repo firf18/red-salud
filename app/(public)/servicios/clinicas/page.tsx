@@ -83,7 +83,7 @@ export default function ClinicasPage() {
                 asChild
                 className="bg-white text-blue-600 hover:bg-blue-50 shadow-xl"
               >
-                <Link href="/auth/register/clinica">
+                <Link href="/register/clinica">
                   Solicitar Demo
                   <ArrowRight className="ml-2 h-5 w-5" />
                 </Link>
@@ -185,7 +185,7 @@ export default function ClinicasPage() {
             asChild
             className="bg-white text-purple-600 hover:bg-purple-50 shadow-xl"
           >
-            <Link href="/auth/register/clinica">
+            <Link href="/register/clinica">
               Solicitar Demo Gratuita
               <ArrowRight className="ml-2 h-5 w-5" />
             </Link>

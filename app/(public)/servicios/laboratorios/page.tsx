@@ -83,7 +83,7 @@ export default function LaboratoriosPage() {
                 asChild
                 className="bg-white text-emerald-600 hover:bg-emerald-50 shadow-xl"
               >
-                <Link href="/auth/register/laboratorio">
+                <Link href="/register/laboratorio">
                   Comenzar Ahora
                   <ArrowRight className="ml-2 h-5 w-5" />
                 </Link>
@@ -185,7 +185,7 @@ export default function LaboratoriosPage() {
             asChild
             className="bg-white text-emerald-600 hover:bg-emerald-50 shadow-xl"
           >
-            <Link href="/auth/register/laboratorio">
+            <Link href="/register/laboratorio">
               Registrar Laboratorio
               <ArrowRight className="ml-2 h-5 w-5" />
             </Link>

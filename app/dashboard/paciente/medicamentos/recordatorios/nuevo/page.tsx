@@ -43,7 +43,7 @@ export default function NuevoRecordatorioPage() {
       } = await supabase.auth.getUser();
 
       if (!user) {
-        router.push("/auth/login");
+        router.push("/login");
         return;
       }
 

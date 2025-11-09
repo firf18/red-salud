@@ -132,7 +132,7 @@ export async function signInWithOAuth(
 ) {
   try {
     // Construir URL de callback con action y rol
-    let callbackUrl = `${window.location.origin}/auth/callback?action=${action}`;
+    let callbackUrl = `${window.location.origin}/callback?action=${action}`;
     
     if (role && action === "register") {
       callbackUrl += `&role=${role}`;

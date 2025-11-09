@@ -2,6 +2,9 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import { useSelector, useDispatch } from "react-redux";
+import type { RootState, AppDispatch } from "@/lib/redux/store";
+import { fetchProfile } from "@/lib/redux/profileSlice";
 import { supabase } from "@/lib/supabase/client";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -51,9 +54,10 @@ interface RecentActivity {
 
 export default function DashboardPacientePage() {
   const router = useRouter();
+  const dispatch = useDispatch<AppDispatch>();
+  const profileState = useSelector((state: RootState) => state.profile);
   const [loading, setLoading] = useState(true);
   const [userId, setUserId] = useState<string | undefined>();
-  const [userName, setUserName] = useState<string>("");
   const [stats, setStats] = useState<DashboardStats>({
     upcomingAppointments: 0,
     totalConsultations: 0,
@@ -77,21 +81,15 @@ export default function DashboardPacientePage() {
       const { data: { user } } = await supabase.auth.getUser();
       
       if (!user) {
-        router.push("/auth/login");
+        router.push("/login");
         return;
       }
 
       setUserId(user.id);
 
-      // Obtener nombre del usuario
-      const { data: profile } = await supabase
-        .from("profiles")
-        .select("nombre_completo")
-        .eq("id", user.id)
-        .single();
-
-      if (profile) {
-        setUserName(profile.nombre_completo);
+      // Cargar perfil desde Redux si no está cargado
+      if (profileState.status === "idle") {
+        dispatch(fetchProfile(user.id));
       }
 
       // Cargar estadísticas en paralelo
@@ -286,7 +284,7 @@ export default function DashboardPacientePage() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold text-gray-900">
-            ¡Hola, {userName.split(" ")[0] || "Paciente"}! 👋
+            ¡Hola, {profileState.data?.nombre?.split(" ")[0] || "Paciente"}! 👋
           </h1>
           <p className="text-gray-600 mt-1">
             {new Date().toLocaleDateString("es-ES", {

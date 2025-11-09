@@ -31,10 +31,35 @@ export default function LoginPage() {
   const roles = Object.values(USER_ROLES);
 
   return (
-    <div className="min-h-screen bg-linear-to-br from-blue-50/30 via-white to-blue-50/50 flex items-center justify-center px-4">
-      <div className="w-full max-w-6xl py-12">
-        {/* Header */}
-        <div className="text-center mb-12">
+    <div className="min-h-screen bg-linear-to-br from-blue-50/30 via-white to-blue-50/50 relative">
+      {/* Botón de regresar - Posición absoluta */}
+      <Link
+        href="/"
+        className="absolute top-6 left-6 flex items-center gap-2 text-gray-600 hover:text-blue-600 transition-colors group"
+      >
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="20"
+          height="20"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          className="group-hover:-translate-x-1 transition-transform"
+        >
+          <path d="m12 19-7-7 7-7" />
+          <path d="M19 12H5" />
+        </svg>
+        <span className="text-sm font-medium">Inicio</span>
+      </Link>
+
+      {/* Contenido centrado */}
+      <div className="min-h-screen flex items-center justify-center px-4">
+        <div className="w-full max-w-6xl py-12">
+          {/* Header */}
+          <div className="text-center mb-12">
           <h1 className="text-4xl font-bold text-gray-900 mb-3">
             Iniciar Sesión
           </h1>
@@ -50,7 +75,7 @@ export default function LoginPage() {
             const Icon = iconMap[config.icon];
 
             return (
-              <Link key={role} href={`/auth/login/${role}`}>
+              <Link key={role} href={`/login/${role}`}>
                 <Card className="p-4 sm:p-5 hover:shadow-lg hover:scale-105 transition-all duration-200 cursor-pointer border-2 hover:border-blue-500 bg-white group">
                   <div className="flex flex-col items-center text-center space-y-3">
                     {/* Icono */}
@@ -81,12 +106,13 @@ export default function LoginPage() {
           <p className="text-gray-600">
             ¿No tienes cuenta?{" "}
             <Link
-              href="/auth/register"
+              href="/register"
               className="text-blue-600 hover:text-blue-700 font-semibold"
             >
               Regístrate aquí
             </Link>
           </p>
+        </div>
         </div>
       </div>
     </div>

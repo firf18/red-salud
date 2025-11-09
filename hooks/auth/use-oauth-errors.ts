@@ -8,6 +8,7 @@ export function useOAuthErrors(setError: (error: string | null) => void) {
     const errorParam = searchParams.get("error");
     const emailParam = searchParams.get("email");
     const messageParam = searchParams.get("message");
+    const userRoleParam = searchParams.get("user_role");
 
     if (errorParam === "account_not_found") {
       setError(
@@ -16,6 +17,20 @@ export function useOAuthErrors(setError: (error: string | null) => void) {
     } else if (errorParam === "account_exists") {
       setError(
         `Ya existe una cuenta con el email ${emailParam || "proporcionado"}. Usa el login en lugar de registro.`
+      );
+    } else if (errorParam === "wrong_role") {
+      const roleLabels: Record<string, string> = {
+        paciente: "Paciente",
+        medico: "Médico",
+        clinica: "Clínica",
+        farmacia: "Farmacia",
+        laboratorio: "Laboratorio",
+        ambulancia: "Ambulancia",
+        seguro: "Seguro"
+      };
+      const userRoleLabel = userRoleParam ? roleLabels[userRoleParam] || userRoleParam : "otro rol";
+      setError(
+        `Esta cuenta está registrada como ${userRoleLabel}. Por favor, inicia sesión en la página correcta.`
       );
     } else if (errorParam === "no_role") {
       setError(
