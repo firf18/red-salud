@@ -1,10 +1,10 @@
 package com.example.red_salud_paciente.data.repositories
 
 import com.example.red_salud_paciente.data.local.DataStoreManager
-import io.github.jan.supabase.gotrue.GoTrueClient
+import io.github.jan.supabase.gotrue.Auth
+import io.github.jan.supabase.gotrue.providers.builtin.Email
 import io.github.jan.supabase.gotrue.user.UserInfo
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.flow
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -13,7 +13,7 @@ import javax.inject.Singleton
  */
 @Singleton
 class AuthRepository @Inject constructor(
-    private val authClient: GoTrueClient,
+    private val authClient: Auth,
     private val dataStoreManager: DataStoreManager
 ) {
     
@@ -22,18 +22,21 @@ class AuthRepository @Inject constructor(
      */
     suspend fun signInWithEmail(email: String, password: String): Result<Unit> {
         return try {
-            val result = authClient.signInWith(io.github.jan.supabase.gotrue.providers.builtin.Email) {
+            authClient.signInWith(Email) {
                 this.email = email
                 this.password = password
             }
             
+            val user = authClient.currentUserOrNull()
+            val session = authClient.currentSessionOrNull()
+            
             // Guardar datos de la sesión
             dataStoreManager.saveSession(
-                userId = result.user?.id ?: "",
-                email = result.user?.email ?: "",
-                name = result.user?.userMetadata?.get("full_name")?.toString() ?: "",
-                accessToken = result.session?.accessToken ?: "",
-                refreshToken = result.session?.refreshToken ?: ""
+                userId = user?.id ?: "",
+                email = user?.email ?: "",
+                name = user?.userMetadata?.get("full_name")?.toString() ?: "",
+                accessToken = session?.accessToken ?: "",
+                refreshToken = session?.refreshToken ?: ""
             )
             
             Result.success(Unit)
@@ -47,19 +50,16 @@ class AuthRepository @Inject constructor(
      */
     suspend fun signUpWithEmail(email: String, password: String, fullName: String): Result<Unit> {
         return try {
-            val result = authClient.signUpWith(io.github.jan.supabase.gotrue.providers.builtin.Email) {
+            authClient.signUpWith(Email) {
                 this.email = email
                 this.password = password
-                data["full_name"] = fullName
+                data = buildMap {
+                    put("full_name", fullName)
+                }
             }
             
-            // Si el correo electrónico necesita confirmación, no iniciamos sesión automáticamente
-            if (result == null || result.user?.confirmedAt != null) {
-                // Iniciar sesión automáticamente después del registro exitoso
-                signInWithEmail(email, password)
-            } else {
-                Result.success(Unit)
-            }
+            // Iniciar sesión automáticamente después del registro exitoso
+            signInWithEmail(email, password)
         } catch (e: Exception) {
             Result.failure(e)
         }
@@ -99,7 +99,7 @@ class AuthRepository @Inject constructor(
      */
     suspend fun getAccessToken(): String? {
         return try {
-            authClient.currentAccessToken
+            authClient.currentSessionOrNull()?.accessToken
         } catch (e: Exception) {
             null
         }

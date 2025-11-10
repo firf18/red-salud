@@ -18,7 +18,7 @@ interface EmergencyContactModalProps {
     contactoEmergencia: string;
     telefonoEmergencia: string;
     relacionEmergencia: string;
-  }) => void;
+  }) => Promise<void>;
 }
 
 export function EmergencyContactModal({
@@ -45,18 +45,32 @@ export function EmergencyContactModal({
     }
   }, [isOpen, contactoEmergencia, telefonoEmergencia, relacionEmergencia]);
 
-  const handleSave = () => {
+  const [isSaving, setIsSaving] = useState(false);
+  const [error, setError] = useState<string>("");
+
+  const handleSave = async () => {
+    // Limpiar errores previos
+    setError("");
+    
     // Validar campos requeridos
     if (
       !formData.contactoEmergencia.trim() ||
       !formData.telefonoEmergencia.trim() ||
       !formData.relacionEmergencia
     ) {
-      alert("Por favor completa todos los campos");
+      setError("Por favor completa todos los campos");
       return;
     }
 
-    onSave(formData);
+    setIsSaving(true);
+    try {
+      await onSave(formData);
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : "Error al guardar";
+      setError(errorMessage);
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   if (!isOpen) return null;
@@ -159,14 +173,32 @@ export function EmergencyContactModal({
           </div>
         </div>
 
+        {/* Error Message */}
+        {error && (
+          <div className="px-6 pb-4">
+            <div className="bg-red-50 border border-red-200 rounded-lg p-3">
+              <p className="text-sm text-red-700">{error}</p>
+            </div>
+          </div>
+        )}
+
         {/* Footer */}
         <div className="flex items-center justify-end gap-3 p-6 border-t bg-gray-50">
-          <Button onClick={onClose} variant="outline">
+          <Button onClick={onClose} variant="outline" disabled={isSaving}>
             Cancelar
           </Button>
-          <Button onClick={handleSave}>
-            <Save className="h-4 w-4 mr-2" />
-            Guardar
+          <Button onClick={handleSave} disabled={isSaving}>
+            {isSaving ? (
+              <>
+                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                Guardando...
+              </>
+            ) : (
+              <>
+                <Save className="h-4 w-4 mr-2" />
+                Guardar
+              </>
+            )}
           </Button>
         </div>
       </div>

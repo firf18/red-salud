@@ -1,306 +1,331 @@
-# 🚀 Despliegue del Servicio Backend SACS
+# 🚀 Despliegue del Servicio SACS Backend
 
-El servicio backend con Puppeteer debe desplegarse en un servidor externo (Railway, Render, etc.) porque Supabase Edge Functions no soportan Puppeteer.
-
----
+El servicio de verificación SACS requiere Puppeteer (navegador headless) para hacer scraping del sistema oficial SACS de Venezuela. Este servicio debe desplegarse en un servidor separado.
 
 ## 📋 Requisitos
 
-- Cuenta en Railway o Render (recomendado)
 - Node.js 18+
-- El código del servicio está en: `sacs-verification-service/`
+- Servidor con soporte para Puppeteer (Railway, Render, Heroku, VPS)
+- 512MB RAM mínimo (recomendado 1GB)
 
----
+## 🎯 Opciones de Despliegue
 
-## 🎯 Opción 1: Desplegar en Railway (Recomendado)
+### Opción 1: Railway (Recomendado) ⭐
 
-### Paso 1: Preparar el Proyecto
+Railway detecta automáticamente Node.js y tiene buen soporte para Puppeteer.
 
-1. Asegúrate de tener un `package.json` en `sacs-verification-service/`:
+#### Pasos:
 
-```json
-{
-  "name": "sacs-verification-service",
-  "version": "2.0.0",
-  "description": "Servicio de verificación SACS con Puppeteer",
-  "main": "index.js",
-  "scripts": {
-    "start": "node index.js",
-    "dev": "nodemon index.js"
-  },
-  "dependencies": {
-    "express": "^4.18.2",
-    "puppeteer": "^21.6.0",
-    "cors": "^2.8.5"
-  },
-  "engines": {
-    "node": ">=18.0.0"
-  }
-}
-```
+1. **Crear cuenta en Railway**
+   - Ve a [railway.app](https://railway.app)
+   - Regístrate con GitHub
 
-### Paso 2: Crear Proyecto en Railway
+2. **Crear nuevo proyecto**
+   ```bash
+   # Desde la carpeta raíz del proyecto
+   cd sacs-verification-service
+   
+   # Inicializar git si no está inicializado
+   git init
+   git add .
+   git commit -m "Initial commit"
+   ```
 
-1. Ve a [railway.app](https://railway.app)
-2. Click en "New Project"
-3. Selecciona "Deploy from GitHub repo"
-4. Conecta tu repositorio
-5. Selecciona la carpeta `sacs-verification-service`
+3. **Desplegar**
+   - En Railway: "New Project" → "Deploy from GitHub repo"
+   - Selecciona el repositorio
+   - Railway detectará automáticamente el `package.json`
+   - Root Directory: `sacs-verification-service`
 
-### Paso 3: Configurar Variables de Entorno
+4. **Configurar Variables de Entorno** (opcional)
+   ```
+   PORT=3001
+   NODE_ENV=production
+   ```
 
-En Railway, agrega estas variables:
+5. **Obtener URL del servicio**
+   - Railway te dará una URL como: `https://tu-servicio.up.railway.app`
+   - Copia esta URL
 
-```bash
-PORT=3001
-NODE_ENV=production
-```
+6. **Configurar en Supabase Edge Function**
+   - Ve a Supabase Dashboard → Edge Functions → Settings
+   - Agrega variable de entorno:
+     ```
+     SACS_BACKEND_URL=https://tu-servicio.up.railway.app
+     ```
 
-### Paso 4: Configurar Build
+### Opción 2: Render
 
-Railway detectará automáticamente el `package.json` y ejecutará:
-- Build: `npm install`
-- Start: `npm start`
+1. **Crear cuenta en Render**
+   - Ve a [render.com](https://render.com)
 
-### Paso 5: Obtener la URL
+2. **Crear Web Service**
+   - New → Web Service
+   - Conecta tu repositorio
+   - Configuración:
+     ```
+     Name: sacs-verification-service
+     Root Directory: sacs-verification-service
+     Environment: Node
+     Build Command: npm install
+     Start Command: npm start
+     ```
 
-Una vez desplegado, Railway te dará una URL como:
-```
-https://sacs-verification-service-production.up.railway.app
-```
+3. **Plan**: Free tier funciona, pero puede ser lento en cold starts
 
----
+4. **Variables de entorno**:
+   ```
+   PORT=3001
+   NODE_ENV=production
+   ```
 
-## 🎯 Opción 2: Desplegar en Render
+5. **Obtener URL**: `https://tu-servicio.onrender.com`
 
-### Paso 1: Crear Web Service
+### Opción 3: VPS (DigitalOcean, Linode, etc.)
 
-1. Ve a [render.com](https://render.com)
-2. Click en "New +" → "Web Service"
-3. Conecta tu repositorio de GitHub
-4. Configura:
-   - **Name**: `sacs-verification-service`
-   - **Root Directory**: `sacs-verification-service`
-   - **Environment**: `Node`
-   - **Build Command**: `npm install`
-   - **Start Command**: `npm start`
-
-### Paso 2: Variables de Entorno
-
-```bash
-PORT=3001
-NODE_ENV=production
-```
-
-### Paso 3: Plan
-
-- Free tier funciona bien para desarrollo
-- Para producción, considera el plan Starter ($7/mes)
-
-### Paso 4: Obtener la URL
-
-Render te dará una URL como:
-```
-https://sacs-verification-service.onrender.com
-```
-
----
-
-## ⚙️ Configurar Supabase Edge Function
-
-Una vez desplegado el backend, configura la variable de entorno en Supabase:
-
-### Opción A: Via Dashboard
-
-1. Ve a tu proyecto en Supabase
-2. Settings → Edge Functions
-3. Agrega la variable:
-   - **Name**: `SACS_BACKEND_URL`
-   - **Value**: `https://tu-servicio.railway.app` (o Render)
-
-### Opción B: Via CLI
+Si prefieres más control:
 
 ```bash
-supabase secrets set SACS_BACKEND_URL=https://tu-servicio.railway.app
-```
+# Conectar al servidor
+ssh user@tu-servidor.com
 
----
+# Instalar Node.js 18+
+curl -fsSL https://deb.nodesource.com/setup_18.x | sudo -E bash -
+sudo apt-get install -y nodejs
+
+# Instalar dependencias de Chromium
+sudo apt-get install -y \
+  chromium-browser \
+  fonts-liberation \
+  libasound2 \
+  libatk-bridge2.0-0 \
+  libatk1.0-0 \
+  libcups2 \
+  libdbus-1-3 \
+  libdrm2 \
+  libgbm1 \
+  libgtk-3-0 \
+  libnspr4 \
+  libnss3 \
+  libxcomposite1 \
+  libxdamage1 \
+  libxrandr2 \
+  xdg-utils
+
+# Clonar repositorio
+git clone https://github.com/tu-usuario/red-salud.git
+cd red-salud/sacs-verification-service
+
+# Instalar dependencias
+npm install
+
+# Configurar PM2 para mantener el servicio corriendo
+sudo npm install -g pm2
+pm2 start index.js --name sacs-service
+pm2 save
+pm2 startup
+
+# Configurar Nginx como reverse proxy (opcional)
+sudo apt-get install nginx
+# Configurar proxy en /etc/nginx/sites-available/default
+```
 
 ## 🧪 Probar el Servicio
 
-### 1. Probar el Backend Directamente
+### Localmente
 
 ```bash
+cd sacs-verification-service
+npm install
+npm start
+
+# En otra terminal
+curl http://localhost:3001/health
+
+# Probar verificación
+curl -X POST http://localhost:3001/verify \
+  -H "Content-Type: application/json" \
+  -d '{"cedula": "12345678", "tipo_documento": "V"}'
+```
+
+### En Producción
+
+```bash
+# Health check
+curl https://tu-servicio.railway.app/health
+
+# Verificación
 curl -X POST https://tu-servicio.railway.app/verify \
   -H "Content-Type: application/json" \
-  -d '{"cedula": "30218596", "tipo_documento": "V"}'
+  -d '{"cedula": "12345678", "tipo_documento": "V"}'
 ```
 
-### 2. Probar via Edge Function
+## 🔧 Configurar Edge Function de Supabase
 
-```bash
-curl -X POST https://hwckkfiirldgundbcjsp.supabase.co/functions/v1/verify-doctor-sacs \
-  -H "Content-Type: application/json" \
-  -H "Authorization: Bearer YOUR_ANON_KEY" \
-  -d '{"cedula": "30218596", "tipo_documento": "V"}'
-```
+Una vez desplegado el servicio backend:
 
-### 3. Probar desde el Dashboard
+1. **Ir a Supabase Dashboard**
+   - Project → Edge Functions → Settings
 
-Simplemente usa el formulario en `/dashboard/medico/perfil/setup`
+2. **Agregar variable de entorno**
+   ```
+   SACS_BACKEND_URL=https://tu-servicio.railway.app
+   ```
 
----
+3. **Desplegar Edge Function**
+   ```bash
+   # Instalar Supabase CLI
+   npm install -g supabase
+
+   # Login
+   supabase login
+
+   # Desplegar función
+   supabase functions deploy verify-doctor-sacs
+   ```
+
+4. **Probar desde el frontend**
+   - La función de setup del médico ahora debería funcionar
+   - Ve a `/dashboard/medico/perfil/setup`
 
 ## 📊 Monitoreo
 
 ### Railway
-
-- Ve a tu proyecto → Deployments
-- Click en "View Logs" para ver logs en tiempo real
-- Métricas de CPU y memoria disponibles
+- Dashboard → Metrics
+- Ver logs en tiempo real
+- Alertas automáticas
 
 ### Render
+- Dashboard → Logs
+- Métricas de uso
 
-- Ve a tu servicio → Logs
-- Logs en tiempo real disponibles
-- Métricas en el dashboard
+### VPS
+```bash
+# Ver logs con PM2
+pm2 logs sacs-service
 
----
+# Monitorear recursos
+pm2 monit
+```
 
-## 🔧 Troubleshooting
-
-### Error: "Backend service error: 500"
-
-**Causa**: El servicio backend no está respondiendo
-
-**Solución**:
-1. Verifica que el servicio esté corriendo en Railway/Render
-2. Revisa los logs del backend
-3. Verifica que la URL en `SACS_BACKEND_URL` sea correcta
-
-### Error: "Timeout"
-
-**Causa**: El scraping del SACS está tardando mucho
-
-**Solución**:
-1. El SACS puede ser lento, esto es normal
-2. Considera aumentar el timeout en Puppeteer
-3. En Railway/Render, asegúrate de tener suficientes recursos
+## 🐛 Troubleshooting
 
 ### Error: "Puppeteer failed to launch"
 
-**Causa**: Falta configuración de Chromium
+**Solución**: Instalar dependencias de Chromium
 
-**Solución**:
-En Railway/Render, asegúrate de que Puppeteer tenga las dependencias necesarias.
-
-Para Render, agrega un `render.yaml`:
-
-```yaml
-services:
-  - type: web
-    name: sacs-verification-service
-    env: node
-    buildCommand: npm install
-    startCommand: npm start
-    envVars:
-      - key: NODE_ENV
-        value: production
-      - key: PUPPETEER_SKIP_CHROMIUM_DOWNLOAD
-        value: false
+```bash
+# Ubuntu/Debian
+sudo apt-get install -y chromium-browser fonts-liberation libasound2 libatk-bridge2.0-0 libatk1.0-0 libcups2 libdbus-1-3 libdrm2 libgbm1 libgtk-3-0 libnspr4 libnss3 libxcomposite1 libxdamage1 libxrandr2 xdg-utils
 ```
 
----
+### Error: "Timeout"
+
+**Solución**: El SACS puede estar lento. Aumentar timeout:
+
+```javascript
+// En index.js
+page.setDefaultTimeout(60000); // 60 segundos
+```
+
+### Error: "Memory limit exceeded"
+
+**Solución**: Aumentar memoria del servicio
+- Railway: Settings → Resources → Increase memory
+- Render: Upgrade plan
+
+### Cold Starts Lentos (Render Free Tier)
+
+**Solución**: 
+- Upgrade a plan pago
+- O usar Railway (no tiene cold starts)
+- O implementar keep-alive ping
 
 ## 💰 Costos Estimados
 
 ### Railway
-- **Free Tier**: $5 de crédito mensual (suficiente para desarrollo)
-- **Hobby**: $5/mes por servicio
-- **Pro**: $20/mes (más recursos)
+- Free tier: $5 crédito mensual
+- Hobby: $5/mes (suficiente para este servicio)
+- Pro: $20/mes (si necesitas más recursos)
 
 ### Render
-- **Free**: Gratis (con limitaciones, se duerme después de inactividad)
-- **Starter**: $7/mes (siempre activo)
-- **Standard**: $25/mes (más recursos)
+- Free: $0 (con cold starts)
+- Starter: $7/mes (sin cold starts)
 
----
+### VPS
+- DigitalOcean Droplet: $6/mes (1GB RAM)
+- Linode: $5/mes (1GB RAM)
 
 ## 🔐 Seguridad
 
 ### Recomendaciones:
 
-1. **API Key**: Agrega autenticación al servicio backend
-2. **Rate Limiting**: Limita las peticiones por IP
-3. **CORS**: Configura CORS solo para tu dominio en producción
-4. **Logs**: No logees información sensible
+1. **No exponer públicamente**: Solo la Edge Function debe acceder
+2. **Agregar API Key** (opcional):
+   ```javascript
+   // En index.js
+   app.use((req, res, next) => {
+     const apiKey = req.headers['x-api-key'];
+     if (apiKey !== process.env.API_KEY) {
+       return res.status(401).json({ error: 'Unauthorized' });
+     }
+     next();
+   });
+   ```
 
-### Ejemplo con API Key:
+3. **Rate Limiting**:
+   ```bash
+   npm install express-rate-limit
+   ```
+   ```javascript
+   const rateLimit = require('express-rate-limit');
+   const limiter = rateLimit({
+     windowMs: 15 * 60 * 1000, // 15 minutos
+     max: 100 // límite de requests
+   });
+   app.use(limiter);
+   ```
 
-```javascript
-// En index.js del backend
-const API_KEY = process.env.API_KEY || 'tu-api-key-secreta';
+4. **CORS**: Ya configurado para aceptar solo desde tu dominio
 
-app.post('/verify', async (req, res) => {
-  const apiKey = req.headers['x-api-key'];
-  
-  if (apiKey !== API_KEY) {
-    return res.status(401).json({
-      success: false,
-      error: 'API key inválida'
-    });
-  }
-  
-  // ... resto del código
-});
-```
+5. **HTTPS**: Railway y Render lo proveen automáticamente
 
-Y en la Edge Function:
+## ✅ Checklist de Despliegue
 
-```typescript
-const backendResponse = await fetch(`${BACKEND_SERVICE_URL}/verify`, {
-  method: 'POST',
-  headers: {
-    'Content-Type': 'application/json',
-    'X-API-Key': Deno.env.get('SACS_API_KEY')!,
-  },
-  body: JSON.stringify({ cedula, tipo_documento }),
-});
-```
-
----
-
-## 📝 Checklist de Despliegue
-
-- [ ] Servicio backend desplegado en Railway/Render
+- [ ] Servicio desplegado en Railway/Render/VPS
+- [ ] Health check funcionando (`/health`)
+- [ ] Endpoint de verificación funcionando (`/verify`)
 - [ ] Variable `SACS_BACKEND_URL` configurada en Supabase
-- [ ] Edge Function desplegada (versión 3+)
-- [ ] Tabla `verificaciones_sacs` creada
-- [ ] Campos SACS agregados a `profiles`
-- [ ] Prueba con cédula real exitosa
-- [ ] Logs del backend funcionando
+- [ ] Edge Function desplegada
+- [ ] Prueba end-to-end desde el frontend
 - [ ] Monitoreo configurado
-
----
-
-## 🚀 Próximos Pasos
-
-Una vez desplegado:
-
-1. Prueba con cédulas reales de médicos
-2. Monitorea los logs para detectar errores
-3. Ajusta timeouts si es necesario
-4. Considera agregar caché para cédulas ya verificadas
-5. Implementa rate limiting si hay muchas peticiones
-
----
+- [ ] Logs accesibles
 
 ## 📞 Soporte
 
 Si tienes problemas:
 
-1. Revisa los logs del backend (Railway/Render)
-2. Revisa los logs de la Edge Function (Supabase)
-3. Verifica que la URL del backend sea correcta
-4. Prueba el backend directamente con curl
-5. Verifica que el SACS esté disponible: https://sistemas.sacs.gob.ve/consultas/prfsnal_salud
+1. Revisa los logs del servicio
+2. Verifica que el SACS esté disponible: https://sistemas.sacs.gob.ve
+3. Prueba el endpoint directamente con curl
+4. Revisa la configuración de variables de entorno
+
+## 🔄 Actualizar el Servicio
+
+```bash
+# Railway: Push a GitHub, auto-deploy
+git push origin main
+
+# Render: Push a GitHub, auto-deploy
+git push origin main
+
+# VPS:
+ssh user@servidor
+cd red-salud/sacs-verification-service
+git pull
+pm2 restart sacs-service
+```
+
+---
+
+**Nota**: El servicio SACS de Venezuela puede estar caído o lento ocasionalmente. Esto es normal y está fuera de nuestro control.

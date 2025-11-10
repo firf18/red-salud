@@ -165,10 +165,19 @@ export function ProfileTab({
 
     setIsSaving(true);
     try {
-      console.log("📋 Datos locales antes de guardar:", localData);
-      // Actualizar formData con los datos locales antes de guardar
-      setFormData(localData);
-      await handleSave();
+      console.log("📋 [ProfileTab] Datos locales antes de guardar:", localData);
+      
+      // Guardar en el servidor PRIMERO con los datos actualizados
+      const result = await handleSave(localData);
+      
+      if (result.success) {
+        // Solo actualizar estado local si el guardado fue exitoso
+        setFormData(localData);
+        console.log("✅ [ProfileTab] Guardado exitoso");
+      } else {
+        console.error("❌ [ProfileTab] Error al guardar:", result.error);
+        throw new Error(result.error || "Error al guardar");
+      }
     } finally {
       setIsSaving(false);
     }
@@ -522,7 +531,9 @@ export function ProfileTab({
               telefonoEmergencia={localData.telefonoEmergencia}
               relacionEmergencia={localData.relacionEmergencia}
               onUpdate={async (data) => {
-                // Actualizar estado local primero
+                console.log("🔄 [EmergencyContact] Iniciando actualización:", data);
+                
+                // Crear objeto con todos los datos actualizados
                 const updatedData = {
                   ...localData,
                   contactoEmergencia: data.contactoEmergencia,
@@ -530,12 +541,25 @@ export function ProfileTab({
                   relacionEmergencia: data.relacionEmergencia,
                 };
                 
-                // Actualizar estados locales inmediatamente
-                setLocalData(updatedData);
-                setFormData(updatedData);
+                console.log("📦 [EmergencyContact] Datos completos a guardar:", {
+                  contactoEmergencia: updatedData.contactoEmergencia,
+                  telefonoEmergencia: updatedData.telefonoEmergencia,
+                  relacionEmergencia: updatedData.relacionEmergencia,
+                });
                 
-                // Guardar en el servidor
-                await handleSave();
+                // Guardar en el servidor PRIMERO con los datos actualizados
+                // Esto evita race conditions con Redux
+                const result = await handleSave(updatedData);
+                
+                if (result.success) {
+                  // Solo actualizar estados locales si el guardado fue exitoso
+                  setLocalData(updatedData);
+                  setFormData(updatedData);
+                  console.log("✅ [EmergencyContact] Actualización completada exitosamente");
+                } else {
+                  console.error("❌ [EmergencyContact] Error en actualización:", result.error);
+                  throw new Error(result.error || "Error al guardar");
+                }
               }}
             />
           </div>

@@ -18,9 +18,9 @@ import {
 import { ModalHeader } from "./components/modal-header";
 import { TabNavigation } from "./components/tab-navigation";
 import { ProfileTab } from "./tabs/profile-tab";
-import { MedicalTabNew as MedicalTab } from "./tabs/medical-tab-new";
-import { DocumentsTab } from "./tabs/documents-tab";
-import { SecurityTab } from "./tabs/security-tab";
+import { MedicalTabImproved as MedicalTab } from "./tabs/medical-tab-improved";
+import { DocumentsTabDidit as DocumentsTab } from "./tabs/documents-tab-didit";
+import { SecurityTabNew as SecurityTab } from "./tabs/security-tab-new";
 import { PreferencesTab } from "./tabs/preferences-tab";
 import { PrivacyTab } from "./tabs/privacy-tab";
 import { ActivityTab } from "./tabs/activity-tab";
@@ -100,22 +100,25 @@ export function UserProfileModal({
     }
   });
 
-  const handleSave = async () => {
+  const handleSave = async (dataOverride?: any) => {
     if (!userId) {
       showNotification("Error: Usuario no identificado", "error");
-      return;
+      return { success: false, error: "Usuario no identificado" };
     }
 
-    if (!profileState.data) {
+    // Usar datos proporcionados o los del estado de Redux
+    const dataToSave = dataOverride || profileState.data;
+
+    if (!dataToSave) {
       showNotification("Error: No hay datos para guardar", "error");
-      return;
+      return { success: false, error: "No hay datos para guardar" };
     }
 
     setIsSaving(true);
     try {
       console.log("📤 Enviando datos al backend:", {
         userId,
-        ...profileState.data,
+        ...dataToSave,
       });
       
       const response = await fetch("/api/profile/update", {
@@ -125,7 +128,7 @@ export function UserProfileModal({
         },
         body: JSON.stringify({
           userId,
-          ...profileState.data,
+          ...dataToSave,
         }),
       });
 
@@ -134,7 +137,7 @@ export function UserProfileModal({
       if (!response.ok) {
         const errorMessage = result.message || "Error al guardar el perfil";
         showNotification(errorMessage, "error");
-        return;
+        return { success: false, error: errorMessage };
       }
 
       setIsEditing(false);
@@ -145,12 +148,15 @@ export function UserProfileModal({
       
       // Recargar datos del perfil desde el servidor
       if (userId) {
-        dispatch(fetchProfile(userId));
+        await dispatch(fetchProfile(userId));
       }
+      
+      return { success: true };
     } catch (error) {
       console.error("Error saving:", error);
       const errorMessage = error instanceof Error ? error.message : "Error al conectar con el servidor";
       showNotification(errorMessage, "error");
+      return { success: false, error: errorMessage };
     } finally {
       setIsSaving(false);
     }
@@ -186,11 +192,12 @@ export function UserProfileModal({
 
             {/* Modal */}
             <motion.dialog
-            initial={{ opacity: 0, scale: 0.95, y: 20 }}
-            animate={{ opacity: 1, scale: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.95, y: 20 }}
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.95 }}
             open={isOpen}
             className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-7xl h-[95vh] bg-white rounded-xl shadow-2xl z-101 overflow-hidden flex flex-col"
+            style={{ translateX: '-50%', translateY: '-50%' }}
             aria-labelledby="profile-modal-title"
             aria-modal="true"
           >
@@ -256,9 +263,14 @@ export function UserProfileModal({
                         handleSave={handleSave}
                       />
                     )}
-                    {activeTab === "documents" && <DocumentsTab userId={userId} />}
+                    {activeTab === "documents" && (
+                      <DocumentsTab
+                        formData={profileState.data}
+                        isLoading={false}
+                      />
+                    )}
                     {activeTab === "security" && (
-                      <SecurityTab userEmail={userEmail} />
+                      <SecurityTab userEmail={userEmail} userId={userId} />
                     )}
                     {activeTab === "preferences" && <PreferencesTab />}
                     {activeTab === "privacy" && <PrivacyTab userId={userId} />}

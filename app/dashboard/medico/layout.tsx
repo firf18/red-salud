@@ -61,6 +61,7 @@ export default async function MedicoLayout({
         userName={profile?.nombre_completo || user.email?.split("@")[0]}
         userEmail={user.email}
         userRole="medico"
+        userId={user.id}
       >
         {children}
       </DashboardLayoutClient>

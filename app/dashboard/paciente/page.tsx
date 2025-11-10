@@ -6,6 +6,7 @@ import { useSelector, useDispatch } from "react-redux";
 import type { RootState, AppDispatch } from "@/lib/redux/store";
 import { fetchProfile } from "@/lib/redux/profileSlice";
 import { supabase } from "@/lib/supabase/client";
+import { useI18n } from "@/lib/hooks/use-i18n";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -56,6 +57,7 @@ export default function DashboardPacientePage() {
   const router = useRouter();
   const dispatch = useDispatch<AppDispatch>();
   const profileState = useSelector((state: RootState) => state.profile);
+  const { t } = useI18n();
   const [loading, setLoading] = useState(true);
   const [userId, setUserId] = useState<string | undefined>();
   const [stats, setStats] = useState<DashboardStats>({
@@ -272,7 +274,7 @@ export default function DashboardPacientePage() {
       <div className="flex items-center justify-center min-h-screen">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-          <p className="text-gray-600">Cargando dashboard...</p>
+          <p className="text-gray-600">{t("common.loading")}</p>
         </div>
       </div>
     );
@@ -283,8 +285,8 @@ export default function DashboardPacientePage() {
       {/* Header con Bienvenida */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">
-            ¡Hola, {profileState.data?.nombre?.split(" ")[0] || "Paciente"}! 👋
+          <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100">
+            {t("dashboard.greeting").replace("{name}", profileState.data?.nombre?.split(" ")[0] || "Paciente")} 👋
           </h1>
           <p className="text-gray-600 mt-1">
             {new Date().toLocaleDateString("es-ES", {
@@ -297,7 +299,7 @@ export default function DashboardPacientePage() {
         </div>
         <Button onClick={() => router.push("/dashboard/paciente/citas/nueva")}>
           <Plus className="h-4 w-4 mr-2" />
-          Nueva Cita
+          {t("dashboard.scheduleAppointment")}
         </Button>
       </div>
 
@@ -339,9 +341,11 @@ export default function DashboardPacientePage() {
                 {stats.upcomingAppointments}
               </span>
             </div>
-            <h3 className="text-sm font-medium text-gray-600">Próximas Citas</h3>
-            <p className="text-xs text-gray-500 mt-1">
-              {stats.totalConsultations} consultas totales
+            <h3 className="text-sm font-medium text-gray-600 dark:text-gray-400">
+              {t("dashboard.upcomingAppointments")}
+            </h3>
+            <p className="text-xs text-gray-500 dark:text-gray-500 mt-1">
+              {stats.totalConsultations} {t("dashboard.totalAppointments")}
             </p>
           </CardContent>
         </Card>
@@ -357,10 +361,12 @@ export default function DashboardPacientePage() {
                 {stats.activeMedications}
               </span>
             </div>
-            <h3 className="text-sm font-medium text-gray-600">
-              Medicamentos Activos
+            <h3 className="text-sm font-medium text-gray-600 dark:text-gray-400">
+              {t("dashboard.activeMedications")}
             </h3>
-            <p className="text-xs text-gray-500 mt-1">Recordatorios configurados</p>
+            <p className="text-xs text-gray-500 dark:text-gray-500 mt-1">
+              {t("dashboard.remindersConfigured")}
+            </p>
           </CardContent>
         </Card>
 
@@ -375,10 +381,12 @@ export default function DashboardPacientePage() {
                 {stats.pendingLabResults}
               </span>
             </div>
-            <h3 className="text-sm font-medium text-gray-600">
-              Resultados Pendientes
+            <h3 className="text-sm font-medium text-gray-600 dark:text-gray-400">
+              {t("dashboard.pendingResults")}
             </h3>
-            <p className="text-xs text-gray-500 mt-1">Órdenes de laboratorio</p>
+            <p className="text-xs text-gray-500 dark:text-gray-500 mt-1">
+              {t("dashboard.documentsToUpload")}
+            </p>
           </CardContent>
         </Card>
 
@@ -393,10 +401,12 @@ export default function DashboardPacientePage() {
                 {stats.unreadMessages}
               </span>
             </div>
-            <h3 className="text-sm font-medium text-gray-600">
-              Mensajes Sin Leer
+            <h3 className="text-sm font-medium text-gray-600 dark:text-gray-400">
+              {t("dashboard.unreadMessages")}
             </h3>
-            <p className="text-xs text-gray-500 mt-1">Conversaciones activas</p>
+            <p className="text-xs text-gray-500 dark:text-gray-500 mt-1">
+              {t("dashboard.activeConversations")}
+            </p>
           </CardContent>
         </Card>
       </div>
@@ -409,18 +419,18 @@ export default function DashboardPacientePage() {
           <Card>
             <CardHeader>
               <div className="flex items-center justify-between">
-                <CardTitle>Próximas Citas</CardTitle>
+                <CardTitle>{t("dashboard.upcomingAppointments")}</CardTitle>
                 <Button
                   variant="ghost"
                   size="sm"
                   onClick={() => router.push("/dashboard/paciente/citas")}
                 >
-                  Ver todas
+                  {t("dashboard.viewAll")}
                   <ArrowRight className="h-4 w-4 ml-2" />
                 </Button>
               </div>
               <CardDescription>
-                Tus próximas consultas médicas programadas
+                {t("dashboard.upcomingAppointments")}
               </CardDescription>
             </CardHeader>
             <CardContent>
@@ -465,12 +475,12 @@ export default function DashboardPacientePage() {
               ) : (
                 <div className="text-center py-12">
                   <Calendar className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                  <p className="text-gray-600 mb-4">No tienes citas programadas</p>
+                  <p className="text-gray-600 mb-4">{t("dashboard.noAppointments")}</p>
                   <Button
                     onClick={() => router.push("/dashboard/paciente/citas/nueva")}
                   >
                     <Plus className="h-4 w-4 mr-2" />
-                    Agendar Cita
+                    {t("dashboard.scheduleAppointment")}
                   </Button>
                 </div>
               )}
@@ -480,9 +490,9 @@ export default function DashboardPacientePage() {
           {/* Actividad Reciente */}
           <Card>
             <CardHeader>
-              <CardTitle>Actividad Reciente</CardTitle>
+              <CardTitle>{t("dashboard.recentActivity")}</CardTitle>
               <CardDescription>
-                Últimas acciones en tu cuenta
+                {t("dashboard.recentActivity")}
               </CardDescription>
             </CardHeader>
             <CardContent>
@@ -518,7 +528,7 @@ export default function DashboardPacientePage() {
                 </div>
               ) : (
                 <p className="text-center text-gray-500 py-8">
-                  No hay actividad reciente
+                  {t("dashboard.noActivity")}
                 </p>
               )}
             </CardContent>
@@ -531,16 +541,16 @@ export default function DashboardPacientePage() {
           <Card>
             <CardHeader>
               <div className="flex items-center justify-between">
-                <CardTitle>Métricas de Salud</CardTitle>
+                <CardTitle>{t("dashboard.healthMetrics")}</CardTitle>
                 <Button
                   variant="ghost"
                   size="sm"
                   onClick={() => router.push("/dashboard/paciente/metricas")}
                 >
-                  Ver más
+                  {t("dashboard.viewAll")}
                 </Button>
               </div>
-              <CardDescription>Últimas mediciones registradas</CardDescription>
+              <CardDescription>{t("dashboard.lastMeasurements")}</CardDescription>
             </CardHeader>
             <CardContent>
               {latestMetrics.length > 0 ? (
@@ -571,7 +581,7 @@ export default function DashboardPacientePage() {
                 <div className="text-center py-8">
                   <Activity className="h-10 w-10 text-gray-400 mx-auto mb-3" />
                   <p className="text-sm text-gray-600 mb-3">
-                    No hay métricas registradas
+                    {t("dashboard.noMetrics")}
                   </p>
                   <Button
                     size="sm"
@@ -579,7 +589,7 @@ export default function DashboardPacientePage() {
                     onClick={() => router.push("/dashboard/paciente/metricas/registrar")}
                   >
                     <Plus className="h-4 w-4 mr-2" />
-                    Registrar Métrica
+                    {t("dashboard.registerMetric")}
                   </Button>
                 </div>
               )}
@@ -590,16 +600,16 @@ export default function DashboardPacientePage() {
           <Card>
             <CardHeader>
               <div className="flex items-center justify-between">
-                <CardTitle>Medicamentos</CardTitle>
+                <CardTitle>{t("dashboard.medications")}</CardTitle>
                 <Button
                   variant="ghost"
                   size="sm"
                   onClick={() => router.push("/dashboard/paciente/medicamentos")}
                 >
-                  Ver más
+                  {t("dashboard.viewAll")}
                 </Button>
               </div>
-              <CardDescription>Recordatorios activos</CardDescription>
+              <CardDescription>{t("dashboard.remindersConfigured")}</CardDescription>
             </CardHeader>
             <CardContent>
               {activeMedications.length > 0 ? (
@@ -632,7 +642,7 @@ export default function DashboardPacientePage() {
                 <div className="text-center py-8">
                   <Pill className="h-10 w-10 text-gray-400 mx-auto mb-3" />
                   <p className="text-sm text-gray-600 mb-3">
-                    No hay medicamentos activos
+                    {t("dashboard.noMedications")}
                   </p>
                   <Button
                     size="sm"
@@ -642,7 +652,7 @@ export default function DashboardPacientePage() {
                     }
                   >
                     <Plus className="h-4 w-4 mr-2" />
-                    Agregar Recordatorio
+                    {t("dashboard.addReminder")}
                   </Button>
                 </div>
               )}
@@ -652,8 +662,8 @@ export default function DashboardPacientePage() {
           {/* Accesos Rápidos */}
           <Card>
             <CardHeader>
-              <CardTitle>Accesos Rápidos</CardTitle>
-              <CardDescription>Servicios disponibles</CardDescription>
+              <CardTitle>{t("dashboard.quickAccess")}</CardTitle>
+              <CardDescription>{t("dashboard.servicesAvailable")}</CardDescription>
             </CardHeader>
             <CardContent>
               <div className="grid grid-cols-2 gap-3">
@@ -663,7 +673,7 @@ export default function DashboardPacientePage() {
                   onClick={() => router.push("/dashboard/paciente/telemedicina")}
                 >
                   <Video className="h-6 w-6 text-blue-600" />
-                  <span className="text-xs">Telemedicina</span>
+                  <span className="text-xs">{t("dashboard.telemedicine")}</span>
                 </Button>
 
                 <Button
@@ -672,7 +682,7 @@ export default function DashboardPacientePage() {
                   onClick={() => router.push("/dashboard/paciente/laboratorio")}
                 >
                   <Beaker className="h-6 w-6 text-purple-600" />
-                  <span className="text-xs">Laboratorio</span>
+                  <span className="text-xs">{t("dashboard.laboratory")}</span>
                 </Button>
 
                 <Button
@@ -681,7 +691,7 @@ export default function DashboardPacientePage() {
                   onClick={() => router.push("/dashboard/paciente/historial")}
                 >
                   <FileText className="h-6 w-6 text-green-600" />
-                  <span className="text-xs">Historial</span>
+                  <span className="text-xs">{t("dashboard.medicalHistory")}</span>
                 </Button>
 
                 <Button
@@ -690,7 +700,7 @@ export default function DashboardPacientePage() {
                   onClick={() => router.push("/dashboard/paciente/mensajeria")}
                 >
                   <MessageSquare className="h-6 w-6 text-orange-600" />
-                  <span className="text-xs">Mensajes</span>
+                  <span className="text-xs">{t("dashboard.messages")}</span>
                 </Button>
               </div>
 
@@ -700,7 +710,7 @@ export default function DashboardPacientePage() {
                 onClick={() => router.push("/dashboard/paciente/configuracion")}
               >
                 <User className="h-4 w-4 mr-2" />
-                Configuración
+                {t("dashboard.settings")}
               </Button>
             </CardContent>
           </Card>

@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { PATIENT_MODULE_CONFIG } from "@/lib/constants";
 import { signOut } from "@/lib/supabase/auth";
 import { UserProfileModal } from "../profile";
+import { UserProfileModalDoctor } from "../profile/doctor";
 import { DiditSidebar } from "./didit-sidebar";
 import { DiditMobileSidebar } from "./didit-mobile-sidebar";
 
@@ -155,13 +156,23 @@ export function DashboardLayoutClient({
       </div>
 
       {/* User Profile Modal */}
-      <UserProfileModal
-        isOpen={profileModalOpen}
-        onClose={() => setProfileModalOpen(false)}
-        userName={userName}
-        userEmail={userEmail}
-        userId={userId}
-      />
+      {userRole === "medico" ? (
+        <UserProfileModalDoctor
+          isOpen={profileModalOpen}
+          onClose={() => setProfileModalOpen(false)}
+          userName={userName}
+          userEmail={userEmail}
+          userId={userId}
+        />
+      ) : (
+        <UserProfileModal
+          isOpen={profileModalOpen}
+          onClose={() => setProfileModalOpen(false)}
+          userName={userName}
+          userEmail={userEmail}
+          userId={userId}
+        />
+      )}
     </div>
   );
 }

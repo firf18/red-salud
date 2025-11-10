@@ -8,9 +8,7 @@ plugins {
 
 android {
     namespace = "com.example.red_salud_paciente"
-    compileSdk {
-        version = release(36)
-    }
+    compileSdk = 36
 
     defaultConfig {
         applicationId = "com.example.red_salud_paciente"
@@ -86,7 +84,11 @@ dependencies {
     implementation(libs.androidx.security.crypto)
 
     // Supabase
-    implementation(libs.supabaseKt)
+    implementation(libs.supabase.postgrest)
+    implementation(libs.supabase.gotrue)
+    implementation(libs.supabase.storage)
+    implementation(libs.supabase.realtime)
+    implementation(libs.ktor.client.android)
 
     // Testing
     testImplementation(libs.junit)

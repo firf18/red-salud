@@ -76,8 +76,12 @@ export function MedicalTabNew({
   const handleLocalSave = async () => {
     setIsSaving(true);
     try {
-      setFormData(localData);
-      await handleSave();
+      const result = await handleSave(localData);
+      if (result.success) {
+        setFormData(localData);
+      } else {
+        throw new Error(result.error || "Error al guardar");
+      }
     } finally {
       setIsSaving(false);
     }

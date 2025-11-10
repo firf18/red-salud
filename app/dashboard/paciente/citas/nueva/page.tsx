@@ -6,6 +6,7 @@ import { supabase } from "@/lib/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import {
   Select,
@@ -21,7 +22,8 @@ import {
   useCreateAppointment,
 } from "@/hooks/use-appointments";
 import { Calendar } from "@/components/ui/calendar";
-import { ArrowLeft, Video, MapPin, Phone, Check } from "lucide-react";
+import { ArrowLeft, Video, MapPin, Phone, Check, Search, User } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
 import Link from "next/link";
 import { es } from "date-fns/locale";
 
@@ -45,6 +47,10 @@ export default function NuevaCitaPage() {
     selectedDate?.toISOString().split("T")[0]
   );
   const { create, loading: creating } = useCreateAppointment();
+  
+  // Estado para búsqueda de especialidades
+  const [searchQuery, setSearchQuery] = useState("");
+  const [filteredSpecialties, setFilteredSpecialties] = useState(specialties);
 
   useEffect(() => {
     const checkUser = async () => {
@@ -62,6 +68,21 @@ export default function NuevaCitaPage() {
 
     checkUser();
   }, [router]);
+
+  // Filtrar especialidades cuando cambia la búsqueda
+  useEffect(() => {
+    if (!searchQuery.trim()) {
+      setFilteredSpecialties(specialties);
+      return;
+    }
+
+    const query = searchQuery.toLowerCase();
+    const filtered = specialties.filter((specialty) =>
+      specialty.name.toLowerCase().includes(query) ||
+      specialty.description?.toLowerCase().includes(query)
+    );
+    setFilteredSpecialties(filtered);
+  }, [searchQuery, specialties]);
 
   const handleSubmit = async () => {
     if (!userId || !selectedDoctor || !selectedDate || !selectedTime) return;
@@ -128,29 +149,75 @@ export default function NuevaCitaPage() {
             <CardDescription>Elige el tipo de consulta que necesitas</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-              {specialties.map((specialty) => (
-                <button
-                  key={specialty.id}
-                  onClick={() => {
-                    setSelectedSpecialty(specialty.id);
-                    setSelectedDoctor("");
-                  }}
-                  className={`p-4 border rounded-lg text-left transition-colors ${
-                    selectedSpecialty === specialty.id
-                      ? "border-primary bg-primary/5"
-                      : "hover:border-primary/50"
-                  }`}
-                >
-                  <h3 className="font-semibold">{specialty.name}</h3>
-                  {specialty.description && (
-                    <p className="text-sm text-muted-foreground mt-1">
-                      {specialty.description}
-                    </p>
-                  )}
-                </button>
-              ))}
+            {/* Buscador */}
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+              <Input
+                placeholder="Buscar especialidad (ej: Cardiología, Pediatría, Dermatología...)"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="pl-10"
+              />
             </div>
+
+            {/* Contador de resultados */}
+            <div className="flex items-center justify-between text-sm text-muted-foreground">
+              <span>
+                {filteredSpecialties.length} especialidad{filteredSpecialties.length !== 1 ? "es" : ""} disponible{filteredSpecialties.length !== 1 ? "s" : ""}
+              </span>
+              {searchQuery && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setSearchQuery("")}
+                  className="h-auto p-0 text-primary hover:text-primary/80"
+                >
+                  Limpiar búsqueda
+                </Button>
+              )}
+            </div>
+
+            {/* Grid de especialidades - 4 columnas x 3 filas */}
+            {filteredSpecialties.length > 0 ? (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
+                {filteredSpecialties.slice(0, 12).map((specialty) => (
+                  <button
+                    key={specialty.id}
+                    onClick={() => {
+                      setSelectedSpecialty(specialty.id);
+                      setSelectedDoctor("");
+                    }}
+                    className={`p-4 border rounded-lg text-left transition-colors ${
+                      selectedSpecialty === specialty.id
+                        ? "border-primary bg-primary/5"
+                        : "hover:border-primary/50"
+                    }`}
+                  >
+                    <h3 className="font-semibold text-sm">{specialty.name}</h3>
+                    {specialty.description && (
+                      <p className="text-xs text-muted-foreground mt-1 line-clamp-2">
+                        {specialty.description}
+                      </p>
+                    )}
+                  </button>
+                ))}
+              </div>
+            ) : (
+              <div className="text-center py-12">
+                <Search className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+                <p className="text-muted-foreground">
+                  No se encontraron especialidades que coincidan con "{searchQuery}"
+                </p>
+                <Button
+                  variant="outline"
+                  onClick={() => setSearchQuery("")}
+                  className="mt-4"
+                >
+                  Ver todas las especialidades
+                </Button>
+              </div>
+            )}
+
             <Button
               onClick={() => setStep(2)}
               disabled={!selectedSpecialty}
@@ -167,66 +234,103 @@ export default function NuevaCitaPage() {
         <Card>
           <CardHeader>
             <CardTitle>Selecciona un Doctor</CardTitle>
-            <CardDescription>Elige el profesional de tu preferencia</CardDescription>
+            <CardDescription>
+              {doctors.length} doctor{doctors.length !== 1 ? "es" : ""} disponible{doctors.length !== 1 ? "s" : ""} en {specialties.find(s => s.id === selectedSpecialty)?.name}
+            </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
-            <div className="space-y-3">
-              {doctors.map((doctor) => (
-                <button
-                  key={doctor.id}
-                  onClick={() => setSelectedDoctor(doctor.id)}
-                  className={`w-full p-4 border rounded-lg text-left transition-colors ${
-                    selectedDoctor === doctor.id
-                      ? "border-primary bg-primary/5"
-                      : "hover:border-primary/50"
-                  }`}
-                >
-                  <div className="flex items-start gap-3">
-                    <div className="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
-                      {doctor.avatar_url ? (
-                        <img
-                          src={doctor.avatar_url}
-                          alt={doctor.nombre_completo || "Doctor"}
-                          className="h-12 w-12 rounded-full object-cover"
-                        />
-                      ) : (
-                        <span className="text-lg font-semibold text-primary">
-                          {doctor.nombre_completo?.charAt(0) || "D"}
-                        </span>
-                      )}
-                    </div>
-                    <div className="flex-1">
-                      <h3 className="font-semibold">{doctor.nombre_completo}</h3>
-                      <p className="text-sm text-muted-foreground">
-                        {doctor.specialty?.name}
-                      </p>
-                      {doctor.years_experience && (
-                        <p className="text-sm text-muted-foreground">
-                          {doctor.years_experience} años de experiencia
-                        </p>
-                      )}
-                      {doctor.consultation_price && (
-                        <p className="text-sm font-medium mt-1">
-                          ${doctor.consultation_price.toFixed(2)}
-                        </p>
-                      )}
-                    </div>
-                  </div>
-                </button>
-              ))}
-            </div>
-            <div className="flex gap-2">
-              <Button variant="outline" onClick={() => setStep(1)} className="flex-1">
-                Atrás
-              </Button>
-              <Button
-                onClick={() => setStep(3)}
-                disabled={!selectedDoctor}
-                className="flex-1"
-              >
-                Continuar
-              </Button>
-            </div>
+            {doctors.length > 0 ? (
+              <>
+                <div className="space-y-3">
+                  {doctors.map((doctor) => (
+                    <button
+                      key={doctor.id}
+                      onClick={() => setSelectedDoctor(doctor.id)}
+                      className={`w-full p-4 border-2 rounded-lg text-left transition-all ${
+                        selectedDoctor === doctor.id
+                          ? "border-primary bg-primary/5 shadow-md"
+                          : "hover:border-primary/50 hover:shadow"
+                      }`}
+                    >
+                      <div className="flex items-start gap-4">
+                        <div className="h-16 w-16 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0 overflow-hidden">
+                          {doctor.profile?.avatar_url ? (
+                            <img
+                              src={doctor.profile.avatar_url}
+                              alt={doctor.profile?.nombre_completo || "Doctor"}
+                              className="h-16 w-16 rounded-full object-cover"
+                            />
+                          ) : (
+                            <span className="text-2xl font-semibold text-primary">
+                              {doctor.profile?.nombre_completo?.charAt(0) || "D"}
+                            </span>
+                          )}
+                        </div>
+                        <div className="flex-1">
+                          <div className="flex items-start justify-between">
+                            <div>
+                              <h3 className="font-semibold text-lg">
+                                Dr. {doctor.profile?.nombre_completo || "Médico"}
+                              </h3>
+                              <p className="text-sm text-muted-foreground">
+                                {doctor.specialty?.name}
+                              </p>
+                            </div>
+                            {doctor.verified && (
+                              <Badge className="bg-green-100 text-green-800">
+                                Verificado
+                              </Badge>
+                            )}
+                          </div>
+                          <div className="mt-2 space-y-1">
+                            {doctor.anos_experiencia && (
+                              <p className="text-sm text-gray-600">
+                                ⭐ {doctor.anos_experiencia} años de experiencia
+                              </p>
+                            )}
+                            {doctor.tarifa_consulta && (
+                              <p className="text-sm font-medium text-green-600">
+                                💵 ${doctor.tarifa_consulta} por consulta
+                              </p>
+                            )}
+                            {doctor.biografia && (
+                              <p className="text-sm text-gray-600 line-clamp-2 mt-2">
+                                {doctor.biografia}
+                              </p>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    </button>
+                  ))}
+                </div>
+                <div className="flex gap-2">
+                  <Button variant="outline" onClick={() => setStep(1)} className="flex-1">
+                    Atrás
+                  </Button>
+                  <Button
+                    onClick={() => setStep(3)}
+                    disabled={!selectedDoctor}
+                    className="flex-1"
+                  >
+                    Continuar
+                  </Button>
+                </div>
+              </>
+            ) : (
+              <div className="text-center py-12">
+                <User className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                  No hay médicos disponibles
+                </h3>
+                <p className="text-gray-600 mb-4">
+                  Aún no hay médicos verificados en esta especialidad
+                </p>
+                <Button variant="outline" onClick={() => setStep(1)}>
+                  Elegir Otra Especialidad
+                </Button>
+              </div>
+            )}
           </CardContent>
         </Card>
       )}

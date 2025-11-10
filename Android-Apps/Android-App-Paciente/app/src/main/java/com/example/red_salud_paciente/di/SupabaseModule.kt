@@ -6,6 +6,9 @@ import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
 import io.github.jan.supabase.SupabaseClient
+import io.github.jan.supabase.gotrue.Auth
+import io.github.jan.supabase.postgrest.Postgrest
+import io.github.jan.supabase.storage.Storage
 import javax.inject.Singleton
 
 /**
@@ -23,13 +26,19 @@ object SupabaseModule {
     
     @Provides
     @Singleton
-    fun provideSupabaseAuthClient(supabaseClient: SupabaseClient) = supabaseClient.auth
+    fun provideSupabaseAuthClient(supabaseClient: SupabaseClient): Auth {
+        return supabaseClient.auth
+    }
     
     @Provides
     @Singleton
-    fun provideSupabaseDatabaseClient(supabaseClient: SupabaseClient) = supabaseClient.db
+    fun provideSupabaseDatabaseClient(supabaseClient: SupabaseClient): Postgrest {
+        return supabaseClient.postgrest
+    }
     
     @Provides
     @Singleton
-    fun provideSupabaseStorageClient(supabaseClient: SupabaseClient) = supabaseClient.storage
+    fun provideSupabaseStorageClient(supabaseClient: SupabaseClient): Storage {
+        return supabaseClient.storage
+    }
 }

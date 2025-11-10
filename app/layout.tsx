@@ -3,6 +3,7 @@ import { Inter, Poppins } from "next/font/google";
 import "./globals.css";
 import { APP_NAME, APP_DESCRIPTION } from "@/lib/constants";
 import { SupabaseAuthProvider } from "@/components/providers/supabase-auth-provider";
+import { AppProviders } from "@/components/providers/app-providers";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 
 const inter = Inter({
@@ -58,13 +59,15 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="es" className="scroll-smooth">
+    <html lang="es" className="scroll-smooth" suppressHydrationWarning>
       <body
         className={`${inter.variable} ${poppins.variable} font-sans antialiased`}
       >
-        <SupabaseAuthProvider>
-          {children}
-        </SupabaseAuthProvider>
+        <AppProviders>
+          <SupabaseAuthProvider>
+            {children}
+          </SupabaseAuthProvider>
+        </AppProviders>
         <SpeedInsights />
       </body>
     </html>

@@ -96,6 +96,7 @@ export interface FormData {
   // Otros
   dispositivosMedicos?: string;
   donanteOrganos?: string;
+  donanteSangre?: string;
   observacionesAdicionales?: string;
 }
 
@@ -104,7 +105,7 @@ export interface TabComponentProps {
   setFormData: (data: FormData) => void;
   isEditing: boolean;
   setIsEditing: (editing: boolean) => void;
-  handleSave: () => Promise<void>;
+  handleSave: (dataOverride?: FormData) => Promise<{ success: boolean; error?: string }>;
   isLoading?: boolean;
 }
 
@@ -143,4 +144,20 @@ export interface Transaction {
   date: string;
   status: "paid" | "pending";
   invoice: string;
+}
+
+// Tipos específicos para médicos
+export interface DoctorProfileData {
+  nombre_completo: string;
+  email: string;
+  telefono: string;
+  cedula: string;
+  mpps: string;
+  especialidad: string;
+  universidad?: string;
+  anos_experiencia?: number;
+  bio?: string;
+  subespecialidades?: string;
+  certificaciones?: string;
+  idiomas?: string;
 }

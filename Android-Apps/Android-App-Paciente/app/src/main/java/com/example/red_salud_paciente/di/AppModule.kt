@@ -11,9 +11,9 @@ import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
-import io.github.jan.supabase.gotrue.GoTrueClient
-import io.github.jan.supabase.postgrest.PostgrestClient
-import io.github.jan.supabase.storage.StorageClient
+import io.github.jan.supabase.gotrue.Auth
+import io.github.jan.supabase.postgrest.Postgrest
+import io.github.jan.supabase.storage.Storage
 import javax.inject.Singleton
 
 // Para DataStore
@@ -32,7 +32,7 @@ object AppModule {
     @Provides
     @Singleton
     fun provideAuthRepository(
-        authClient: GoTrueClient,
+        authClient: Auth,
         dataStoreManager: DataStoreManager
     ): AuthRepository {
         return AuthRepository(authClient, dataStoreManager)
@@ -41,8 +41,8 @@ object AppModule {
     @Provides
     @Singleton
     fun provideAppointmentRepository(
-        dbClient: PostgrestClient,
-        authClient: GoTrueClient
+        dbClient: Postgrest,
+        authClient: Auth
     ): AppointmentRepository {
         return AppointmentRepository(dbClient, authClient)
     }
@@ -50,8 +50,8 @@ object AppModule {
     @Provides
     @Singleton
     fun provideMedicationRepository(
-        dbClient: PostgrestClient,
-        authClient: GoTrueClient
+        dbClient: Postgrest,
+        authClient: Auth
     ): MedicationRepository {
         return MedicationRepository(dbClient, authClient)
     }
@@ -59,9 +59,9 @@ object AppModule {
     @Provides
     @Singleton
     fun provideLabRepository(
-        dbClient: PostgrestClient,
-        storageClient: StorageClient,
-        authClient: GoTrueClient
+        dbClient: Postgrest,
+        storageClient: Storage,
+        authClient: Auth
     ): LabRepository {
         return LabRepository(dbClient, storageClient, authClient)
     }
@@ -69,8 +69,8 @@ object AppModule {
     @Provides
     @Singleton
     fun provideHealthMetricRepository(
-        dbClient: PostgrestClient,
-        authClient: GoTrueClient
+        dbClient: Postgrest,
+        authClient: Auth
     ): HealthMetricRepository {
         return HealthMetricRepository(dbClient, authClient)
     }
@@ -78,8 +78,8 @@ object AppModule {
     @Provides
     @Singleton
     fun provideMedicalRecordRepository(
-        dbClient: PostgrestClient,
-        authClient: GoTrueClient
+        dbClient: Postgrest,
+        authClient: Auth
     ): MedicalRecordRepository {
         return MedicalRecordRepository(dbClient, authClient)
     }
@@ -87,8 +87,8 @@ object AppModule {
     @Provides
     @Singleton
     fun provideMessageRepository(
-        dbClient: PostgrestClient,
-        authClient: GoTrueClient
+        dbClient: Postgrest,
+        authClient: Auth
     ): MessageRepository {
         return MessageRepository(dbClient, authClient)
     }
@@ -96,8 +96,8 @@ object AppModule {
     @Provides
     @Singleton
     fun provideTelemedRepository(
-        dbClient: PostgrestClient,
-        authClient: GoTrueClient
+        dbClient: Postgrest,
+        authClient: Auth
     ): TelemedRepository {
         return TelemedRepository(dbClient, authClient)
     }

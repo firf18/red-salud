@@ -1,12 +1,25 @@
 import { motion } from "framer-motion";
 import { Label } from "@/components/ui/label";
-import { useTheme } from "@/lib/contexts/theme-context";
-import { useLanguage } from "@/lib/contexts/language-context";
+import { usePreferences } from "@/lib/contexts/preferences-context";
+import { useI18n } from "@/lib/hooks/use-i18n";
 import { Moon, Sun } from "lucide-react";
 
 export function PreferencesTab() {
-  const { theme, toggleTheme } = useTheme();
-  const { language, setLanguage } = useLanguage();
+  const { preferences, updatePreference } = usePreferences();
+  const { t } = useI18n();
+  
+  const theme = preferences.theme === "system" 
+    ? (window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light")
+    : preferences.theme;
+  
+  const toggleTheme = () => {
+    const newTheme = theme === "dark" ? "light" : "dark";
+    updatePreference("theme", newTheme);
+  };
+  
+  const setLanguage = (lang: "es" | "en" | "pt" | "fr" | "it") => {
+    updatePreference("language", lang);
+  };
   return (
     <motion.article
       key="preferences"
@@ -15,48 +28,57 @@ export function PreferencesTab() {
       exit={{ opacity: 0, x: 20 }}
     >
       <header className="mb-6">
-        <h2 className="text-xl font-semibold text-gray-900">
-          Preferencias de la Aplicación
+        <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100">
+          {t("preferences.title")}
         </h2>
-        <p className="text-sm text-gray-500 mt-1">
-          Personaliza tu experiencia en Red-Salud
+        <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+          {t("preferences.subtitle")}
         </p>
       </header>
 
       <div className="grid grid-cols-2 gap-6">
         <section className="space-y-4">
-          <h3 className="font-semibold text-gray-900 mb-3">General</h3>
+          <h3 className="font-semibold text-gray-900 dark:text-gray-100 mb-3">
+            {t("preferences.regional.title")}
+          </h3>
 
           <div className="p-4 rounded-lg border border-gray-200 dark:border-gray-700 dark:bg-gray-800">
             <Label htmlFor="idioma" className="mb-2 block dark:text-gray-100">
-              Idioma de la Interfaz
+              {t("preferences.regional.language")}
             </Label>
             <select
               id="idioma"
-              value={language}
-              onChange={(e) => setLanguage(e.target.value as "es" | "en" | "pt")}
+              value={preferences.language}
+              onChange={(e) => setLanguage(e.target.value as "es" | "en" | "pt" | "fr" | "it")}
               className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-gray-100"
               aria-label="Seleccionar idioma"
             >
               <option value="es">Español</option>
               <option value="en">English</option>
               <option value="pt">Português</option>
+              <option value="fr">Français</option>
+              <option value="it">Italiano</option>
             </select>
           </div>
 
-          <div className="p-4 rounded-lg border border-gray-200">
-            <Label htmlFor="zona" className="mb-2 block">
-              Zona Horaria
+          <div className="p-4 rounded-lg border border-gray-200 dark:border-gray-700 dark:bg-gray-800">
+            <Label htmlFor="zona" className="mb-2 block dark:text-gray-100">
+              {t("preferences.regional.timezone")}
             </Label>
             <select
               id="zona"
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              value={preferences.timezone}
+              onChange={(e) => updatePreference("timezone", e.target.value)}
+              className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-gray-100"
               aria-label="Seleccionar zona horaria"
             >
               <option value="America/Caracas">Venezuela (GMT-4)</option>
               <option value="America/Bogota">Colombia (GMT-5)</option>
               <option value="America/Lima">Perú (GMT-5)</option>
               <option value="America/Mexico_City">México (GMT-6)</option>
+              <option value="America/Buenos_Aires">Argentina (GMT-3)</option>
+              <option value="America/Santiago">Chile (GMT-3)</option>
+              <option value="America/Sao_Paulo">Brasil (GMT-3)</option>
             </select>
           </div>
 
@@ -69,10 +91,10 @@ export function PreferencesTab() {
               )}
               <div>
                 <p className="text-sm font-medium text-gray-900 dark:text-gray-100">
-                  Modo Oscuro
+                  {t("preferences.appearance.theme")}
                 </p>
                 <p className="text-xs text-gray-500 dark:text-gray-400">
-                  Tema oscuro para la interfaz
+                  {theme === "dark" ? t("preferences.appearance.themeDark") : t("preferences.appearance.themeLight")}
                 </p>
               </div>
             </div>
@@ -88,105 +110,138 @@ export function PreferencesTab() {
             </label>
           </div>
 
-          {[
-            {
-              label: "Notificaciones de Escritorio",
-              description: "Recibe alertas en tu navegador",
-              checked: true,
-            },
-            {
-              label: "Sonidos de Notificación",
-              description: "Reproducir sonido al recibir notificaciones",
-              checked: true,
-            },
-          ].map((item, index) => (
-            <div
-              key={index}
-              className="flex items-center justify-between p-4 rounded-lg border border-gray-200"
-            >
-              <div>
-                <p className="text-sm font-medium text-gray-900">
-                  {item.label}
-                </p>
-                <p className="text-xs text-gray-500">{item.description}</p>
-              </div>
-              <label className="relative inline-flex items-center cursor-pointer">
-                <input
-                  type="checkbox"
-                  className="sr-only peer"
-                  defaultChecked={item.checked}
-                  aria-label={`Activar ${item.label}`}
-                />
-                <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
-              </label>
+          <div className="flex items-center justify-between p-4 rounded-lg border border-gray-200 dark:border-gray-700 dark:bg-gray-800">
+            <div>
+              <p className="text-sm font-medium text-gray-900 dark:text-gray-100">
+                {t("preferences.notifications.desktop")}
+              </p>
+              <p className="text-xs text-gray-500 dark:text-gray-400">
+                {t("preferences.notifications.desktopDesc")}
+              </p>
             </div>
-          ))}
+            <label className="relative inline-flex items-center cursor-pointer">
+              <input
+                type="checkbox"
+                className="sr-only peer"
+                checked={preferences.desktopNotifications}
+                onChange={(e) => updatePreference("desktopNotifications", e.target.checked)}
+                aria-label="Activar Notificaciones de Escritorio"
+              />
+              <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"></div>
+            </label>
+          </div>
+
+          <div className="flex items-center justify-between p-4 rounded-lg border border-gray-200 dark:border-gray-700 dark:bg-gray-800">
+            <div>
+              <p className="text-sm font-medium text-gray-900 dark:text-gray-100">
+                {t("preferences.notifications.sound")}
+              </p>
+              <p className="text-xs text-gray-500 dark:text-gray-400">
+                {t("preferences.notifications.soundDesc")}
+              </p>
+            </div>
+            <label className="relative inline-flex items-center cursor-pointer">
+              <input
+                type="checkbox"
+                className="sr-only peer"
+                checked={preferences.soundNotifications}
+                onChange={(e) => updatePreference("soundNotifications", e.target.checked)}
+                aria-label="Activar Sonidos de Notificación"
+              />
+              <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"></div>
+            </label>
+          </div>
         </section>
 
         <section className="space-y-4">
-          <h3 className="font-semibold text-gray-900 mb-3">
-            Preferencias de Comunicación
+          <h3 className="font-semibold text-gray-900 dark:text-gray-100 mb-3">
+            {t("preferences.communication.title")}
           </h3>
 
-          <div className="p-4 rounded-lg border border-gray-200">
-            <Label htmlFor="metodoContacto" className="mb-2 block">
-              Método de Contacto Preferido
+          <div className="p-4 rounded-lg border border-gray-200 dark:border-gray-700 dark:bg-gray-800">
+            <Label htmlFor="metodoContacto" className="mb-2 block dark:text-gray-100">
+              {t("preferences.communication.preferredMethod")}
             </Label>
             <select
               id="metodoContacto"
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              value={preferences.preferredContactMethod}
+              onChange={(e) => updatePreference("preferredContactMethod", e.target.value as any)}
+              className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-gray-100"
               aria-label="Seleccionar método de contacto"
             >
-              <option value="email">Correo Electrónico</option>
-              <option value="sms">SMS</option>
-              <option value="whatsapp">WhatsApp</option>
-              <option value="llamada">Llamada Telefónica</option>
+              <option value="email">{t("preferences.communication.email")}</option>
+              <option value="sms">{t("preferences.communication.sms")}</option>
+              <option value="whatsapp">{t("preferences.communication.whatsapp")}</option>
+              <option value="phone">{t("preferences.communication.phone")}</option>
             </select>
           </div>
 
-          {[
-            {
-              label: "Boletín Informativo",
-              description: "Recibe noticias y consejos de salud",
-              checked: false,
-            },
-            {
-              label: "Ofertas y Promociones",
-              description: "Descuentos en servicios médicos",
-              checked: true,
-            },
-            {
-              label: "Encuestas de Satisfacción",
-              description: "Ayúdanos a mejorar el servicio",
-              checked: true,
-            },
-          ].map((item, index) => (
-            <div
-              key={index}
-              className="flex items-center justify-between p-4 rounded-lg border border-gray-200"
-            >
-              <div>
-                <p className="text-sm font-medium text-gray-900">
-                  {item.label}
-                </p>
-                <p className="text-xs text-gray-500">{item.description}</p>
-              </div>
-              <label className="relative inline-flex items-center cursor-pointer">
-                <input
-                  type="checkbox"
-                  className="sr-only peer"
-                  defaultChecked={item.checked}
-                  aria-label={`Activar ${item.label}`}
-                />
-                <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
-              </label>
+          <div className="flex items-center justify-between p-4 rounded-lg border border-gray-200 dark:border-gray-700 dark:bg-gray-800">
+            <div>
+              <p className="text-sm font-medium text-gray-900 dark:text-gray-100">
+                {t("preferences.subscriptions.newsletter")}
+              </p>
+              <p className="text-xs text-gray-500 dark:text-gray-400">
+                {t("preferences.subscriptions.newsletterDesc")}
+              </p>
             </div>
-          ))}
+            <label className="relative inline-flex items-center cursor-pointer">
+              <input
+                type="checkbox"
+                className="sr-only peer"
+                checked={preferences.newsletterSubscribed}
+                onChange={(e) => updatePreference("newsletterSubscribed", e.target.checked)}
+                aria-label="Activar Boletín Informativo"
+              />
+              <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"></div>
+            </label>
+          </div>
 
-          <aside className="bg-blue-50 border border-blue-200 rounded-lg p-4 mt-4">
-            <p className="text-sm text-blue-800">
-              <strong>Tip:</strong> Mantén activadas las notificaciones de citas
-              para no perder ninguna consulta médica.
+          <div className="flex items-center justify-between p-4 rounded-lg border border-gray-200 dark:border-gray-700 dark:bg-gray-800">
+            <div>
+              <p className="text-sm font-medium text-gray-900 dark:text-gray-100">
+                {t("preferences.subscriptions.promotions")}
+              </p>
+              <p className="text-xs text-gray-500 dark:text-gray-400">
+                {t("preferences.subscriptions.promotionsDesc")}
+              </p>
+            </div>
+            <label className="relative inline-flex items-center cursor-pointer">
+              <input
+                type="checkbox"
+                className="sr-only peer"
+                checked={preferences.promotionsSubscribed}
+                onChange={(e) => updatePreference("promotionsSubscribed", e.target.checked)}
+                aria-label="Activar Ofertas y Promociones"
+              />
+              <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"></div>
+            </label>
+          </div>
+
+          <div className="flex items-center justify-between p-4 rounded-lg border border-gray-200 dark:border-gray-700 dark:bg-gray-800">
+            <div>
+              <p className="text-sm font-medium text-gray-900 dark:text-gray-100">
+                {t("preferences.subscriptions.surveys")}
+              </p>
+              <p className="text-xs text-gray-500 dark:text-gray-400">
+                {t("preferences.subscriptions.surveysDesc")}
+              </p>
+            </div>
+            <label className="relative inline-flex items-center cursor-pointer">
+              <input
+                type="checkbox"
+                className="sr-only peer"
+                checked={preferences.surveysSubscribed}
+                onChange={(e) => updatePreference("surveysSubscribed", e.target.checked)}
+                aria-label="Activar Encuestas de Satisfacción"
+              />
+              <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"></div>
+            </label>
+          </div>
+
+          <aside className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4 mt-4">
+            <p className="text-sm text-blue-800 dark:text-blue-300">
+              <strong>Tip:</strong> {t("preferences.notifications.appointmentRemindersDesc")}
             </p>
           </aside>
         </section>

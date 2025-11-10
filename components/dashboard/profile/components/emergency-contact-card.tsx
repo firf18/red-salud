@@ -15,7 +15,7 @@ interface EmergencyContactCardProps {
   contactoEmergencia: string;
   telefonoEmergencia: string;
   relacionEmergencia: string;
-  onUpdate: (data: EmergencyContactData) => void;
+  onUpdate: (data: EmergencyContactData) => Promise<void>;
 }
 
 export function EmergencyContactCard({
@@ -120,9 +120,15 @@ export function EmergencyContactCard({
         contactoEmergencia={contactoEmergencia}
         telefonoEmergencia={telefonoEmergencia}
         relacionEmergencia={relacionEmergencia}
-        onSave={(data: EmergencyContactData) => {
-          onUpdate(data);
-          setIsModalOpen(false);
+        onSave={async (data: EmergencyContactData) => {
+          try {
+            await onUpdate(data);
+            // Solo cerrar el modal si el guardado fue exitoso
+            setIsModalOpen(false);
+          } catch (error) {
+            // El error ya se maneja en el modal, solo lo propagamos
+            throw error;
+          }
         }}
       />
     </>
