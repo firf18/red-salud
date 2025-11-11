@@ -47,3 +47,10 @@ resultados-*.json
 informe-*.json
 
 .vercel
+
+# mobile (Expo React Native)
+/mobile/node_modules
+**/node_modules
+/mobile/.expo
+/mobile/.expo/*
+/mobile/.turbo
