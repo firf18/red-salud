@@ -12,7 +12,7 @@ import {
   CreditCard,
   Loader2,
 } from "lucide-react";
-import { VerificationGuard } from "@/components/dashboard/medico/verification-guard";
+import { VerificationGuard } from "@/components/dashboard/medico/features/verification-guard";
 import { PreferencesTab } from "@/components/dashboard/profile/tabs/preferences-tab";
 import { SecurityTabNew as SecurityTab } from "@/components/dashboard/profile/tabs/security-tab-new";
 import { PrivacyTab } from "@/components/dashboard/profile/tabs/privacy-tab";

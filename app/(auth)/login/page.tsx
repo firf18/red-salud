@@ -1,5 +1,5 @@
 import { Card } from "@/components/ui/card";
-import { ROLE_CONFIG, USER_ROLES, type UserRole } from "@/lib/constants";
+import { ROLE_CONFIG, USER_ROLES, type UserRole, APP_NAME, ROUTES } from "@/lib/constants";
 import Link from "next/link";
 import {
   UserCircle,
@@ -31,52 +31,33 @@ export default function LoginPage() {
   const roles = Object.values(USER_ROLES);
 
   return (
-    <div className="min-h-screen bg-linear-to-br from-blue-50/30 via-white to-blue-50/50 relative">
-      {/* Botón de regresar - Posición absoluta */}
-      <Link
-        href="/"
-        className="absolute top-6 left-6 flex items-center gap-2 text-gray-600 hover:text-blue-600 transition-colors group"
-      >
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          width="20"
-          height="20"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="2"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          className="group-hover:-translate-x-1 transition-transform"
-        >
-          <path d="m12 19-7-7 7-7" />
-          <path d="M19 12H5" />
-        </svg>
-        <span className="text-sm font-medium">Inicio</span>
+    <div className="h-screen overflow-hidden bg-linear-to-br from-blue-50/30 via-white to-blue-50/50 relative">
+      <Link href={ROUTES.HOME} className="absolute top-6 left-6 flex items-center gap-3 group">
+        <div className="bg-linear-to-br from-blue-600 to-teal-600 text-white px-3 py-2 rounded-lg font-bold text-xl">RS</div>
+        <span className="text-sm font-semibold text-gray-800 group-hover:text-blue-700 transition-colors">{APP_NAME}</span>
       </Link>
 
-      {/* Contenido centrado */}
-      <div className="min-h-screen flex items-center justify-center px-4">
-        <div className="w-full max-w-6xl py-12">
+      <div className="h-screen flex items-center justify-center px-4">
+        <div className="w-full max-w-6xl py-10 md:py-12">
           {/* Header */}
-          <div className="text-center mb-12">
-          <h1 className="text-4xl font-bold text-gray-900 mb-3">
+          <div className="text-center mb-8">
+          <h1 className="text-3xl md:text-4xl font-bold text-gray-900 mb-2">
             Iniciar Sesión
           </h1>
-          <p className="text-lg text-gray-600">
+          <p className="text-base md:text-lg text-gray-600">
             Selecciona tu tipo de cuenta para continuar
           </p>
         </div>
 
         {/* Grid de roles */}
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4 lg:gap-5 mb-8">
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-5 mb-6">
           {roles.map((role) => {
             const config = ROLE_CONFIG[role as UserRole];
             const Icon = iconMap[config.icon];
 
             return (
               <Link key={role} href={`/login/${role}`}>
-                <Card className="p-4 sm:p-5 hover:shadow-lg hover:scale-105 transition-all duration-200 cursor-pointer border-2 hover:border-blue-500 bg-white group">
+                <Card className="p-4 sm:p-5 hover:shadow-lg hover:scale-105 transition-all duration-200 cursor-pointer border-2 hover:border-blue-500 bg-white group rounded-xl">
                   <div className="flex flex-col items-center text-center space-y-3">
                     {/* Icono */}
                     <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-full bg-blue-50 flex items-center justify-center group-hover:bg-blue-100 transition-colors">

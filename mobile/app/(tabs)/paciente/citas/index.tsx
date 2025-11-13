@@ -1,33 +1,91 @@
-import React from 'react';
-import { View, Text, FlatList } from 'react-native';
-import { useQuery } from '@tanstack/react-query';
+import React, { useState, useMemo } from 'react';
+import { View } from 'react-native';
+import { useRouter } from 'expo-router';
 import { useAuth } from '@mobile/providers/AuthProvider';
-import { getCitasPaciente, Cita } from '@mobile/services/paciente/citas';
+import { useAppointments } from '@mobile/hooks';
+import { AppointmentFilters, AppointmentList } from '@mobile/components/citas';
+import type { Appointment } from '@mobile/types';
+
+type FilterType = 'todas' | 'proximas' | 'pasadas' | 'canceladas';
 
 export default function CitasPaciente() {
   const { user } = useAuth();
-  const { data, isLoading, error } = useQuery<Cita[]>({
-    queryKey: ['citas', user?.id],
-    queryFn: () => getCitasPaciente(user!.id),
-    enabled: !!user?.id,
-  });
+  const router = useRouter();
+  const [activeFilter, setActiveFilter] = useState<FilterType>('proximas');
 
-  if (isLoading) return <Text>Cargando...</Text>;
-  if (error) return <Text>Error al cargar citas</Text>;
+  const { appointments, isLoading } = useAppointments(user?.id!);
+
+  // Filtrar citas según el filtro activo
+  const filteredAppointments = useMemo(() => {
+    if (!appointments) return [];
+
+    const now = new Date();
+
+    switch (activeFilter) {
+      case 'proximas':
+        return appointments.filter(
+          (apt) => new Date(apt.fecha_hora) >= now && apt.status !== 'cancelada'
+        );
+      case 'pasadas':
+        return appointments.filter(
+          (apt) => new Date(apt.fecha_hora) < now && apt.status !== 'cancelada'
+        );
+      case 'canceladas':
+        return appointments.filter((apt) => apt.status === 'cancelada');
+      case 'todas':
+      default:
+        return appointments;
+    }
+  }, [all, activeFilter]);
+
+  // Contar citas por categoría
+  const counts = useMemo(() => {
+    if (!appointments) return { todas: 0, proximas: 0, pasadas: 0, canceladas: 0 };
+
+    const now = new Date();
+    return {
+      todas: appointments.length,
+      proximas: appointments.filter(
+        (apt) => new Date(apt.fecha_hora) >= now && apt.status !== 'cancelada'
+      ).length,
+      pasadas: appointments.filter(
+        (apt) => new Date(apt.fecha_hora) < now && apt.status !== 'cancelada'
+      ).length,
+      canceladas: appointments.filter((apt) => apt.status === 'cancelada').length,
+    };
+  }, [all]);
+
+  const handleAppointmentPress = (appointment: Appointment) => {
+    router.push(`/(tabs)/paciente/citas/${appointment.id}`);
+  };
+
+  const getEmptyMessage = () => {
+    switch (activeFilter) {
+      case 'proximas':
+        return 'No tienes citas próximas';
+      case 'pasadas':
+        return 'No tienes citas pasadas';
+      case 'canceladas':
+        return 'No tienes citas canceladas';
+      default:
+        return 'No tienes citas registradas';
+    }
+  };
 
   return (
-    <FlatList<Cita>
-      className="flex-1 bg-white"
-      contentContainerClassName="p-4"
-      data={data}
-      keyExtractor={(item: Cita) => item.id}
-      renderItem={({ item }: { item: Cita }) => (
-        <View className="mb-3 border border-gray-200 rounded p-3">
-          <Text className="font-semibold">{item.tipo}</Text>
-          <Text className="text-gray-600 text-sm">{new Date(item.fecha).toLocaleString()}</Text>
-        </View>
-      )}
-      ListEmptyComponent={<Text>No hay citas</Text>}
-    />
+    <View className="flex-1 bg-gray-50">
+      <AppointmentFilters
+        activeFilter={activeFilter}
+        onFilterChange={setActiveFilter}
+        counts={counts}
+      />
+
+      <AppointmentList
+        appointments={filteredAppointments}
+        isLoading={isLoading}
+        onAppointmentPress={handleAppointmentPress}
+        emptyMessage={getEmptyMessage()}
+      />
+    </View>
   );
 }

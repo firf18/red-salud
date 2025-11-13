@@ -25,7 +25,7 @@ export function HeroSection() {
   };
 
   return (
-    <section className="relative h-screen flex items-center justify-center overflow-hidden">
+    <section className="relative min-h-[calc(100svh-64px)] sm:min-h-[calc(100svh-80px)] xl:min-h-[calc(100svh-80px)] flex items-center justify-center overflow-hidden pt-[env(safe-area-inset-top)]">
       {/* Video Background */}
       <VideoBackground
         src="/videos/doctors-bg.mp4"
@@ -34,7 +34,7 @@ export function HeroSection() {
       />
 
       {/* Content */}
-      <div className="relative z-10 container mx-auto px-4 sm:px-6 lg:px-8 py-32">
+      <div className="relative z-10 container mx-auto px-4 sm:px-6 lg:px-8 py-20 sm:py-28">
         <motion.div
           className="max-w-4xl mx-auto text-center"
           variants={staggerContainer}
@@ -55,21 +55,22 @@ export function HeroSection() {
           {/* Title */}
           <motion.h1
             variants={fadeInUp}
-            className="font-bold text-5xl sm:text-6xl lg:text-7xl text-white mb-6 leading-tight font-(family-name:--font-poppins)"
+            className="font-bold text-4xl sm:text-6xl lg:text-7xl text-white mb-6 leading-tight font-(family-name:--font-poppins)"
           >
-            Tu Salud,{" "}
+            <span className="sm:hidden">Tu salud al instante</span>
+            <span className="hidden sm:inline">Salud digital, atención humana</span>{" "}
             <span className="bg-linear-to-r from-teal-400 to-blue-500 bg-clip-text text-transparent">
-              Nuestra Prioridad
+              conectada y segura
             </span>
           </motion.h1>
 
           {/* Description */}
           <motion.p
             variants={fadeInUp}
-            className="text-xl sm:text-2xl text-gray-200 mb-8 max-w-3xl mx-auto leading-relaxed"
+            className="text-base sm:text-xl lg:text-2xl text-gray-200 mb-8 max-w-3xl mx-auto leading-relaxed"
           >
-            Conectamos pacientes con profesionales de la salud de manera rápida,
-            segura y eficiente. La mejor atención médica al alcance de tus manos.
+            Plataforma integral para conectar pacientes y profesionales, con tecnología
+            que prioriza privacidad, calidad y disponibilidad 24/7.
           </motion.p>
 
           {/* Features List */}
@@ -90,34 +91,7 @@ export function HeroSection() {
             ))}
           </motion.div>
 
-          {/* CTAs */}
-          <motion.div
-            variants={fadeInUp}
-            className="flex flex-col sm:flex-row items-center justify-center gap-4"
-          >
-            <Button
-              asChild
-              size="lg"
-              className="bg-linear-to-r from-teal-500 to-blue-600 hover:from-teal-600 hover:to-blue-700 text-white shadow-2xl hover:shadow-teal-500/50 transition-all duration-300 text-lg px-8 py-6 group min-w-[200px]"
-            >
-              <Link href={AUTH_ROUTES.REGISTER}>
-                <UserPlus className="mr-2 h-5 w-5" />
-                Registrarse
-                <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform" />
-              </Link>
-            </Button>
-            <Button
-              asChild
-              size="lg"
-              variant="outline"
-              className="border-2 border-white/30 text-white hover:bg-white/10 backdrop-blur-sm text-lg px-8 py-6 min-w-[200px]"
-            >
-              <Link href={AUTH_ROUTES.LOGIN}>
-                <LogIn className="mr-2 h-5 w-5" />
-                Iniciar Sesión
-              </Link>
-            </Button>
-          </motion.div>
+          
 
           {/* Stats - Ahora dinámicos desde Supabase */}
           <motion.div variants={fadeInUp}>

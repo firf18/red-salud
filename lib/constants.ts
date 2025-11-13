@@ -48,7 +48,7 @@ export const USER_ROLES = {
   FARMACIA: "farmacia",
   LABORATORIO: "laboratorio",
   CLINICA: "clinica",
-  ASEGURADORA: "aseguradora",
+  ASEGURADORA: "seguro",
   AMBULANCIA: "ambulancia",
 } as const;
 

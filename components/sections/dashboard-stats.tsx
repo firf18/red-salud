@@ -31,13 +31,18 @@ export function DashboardStats() {
     return () => clearInterval(interval);
   }, []);
 
+  const formatNumber = (n: number) => {
+    if (n >= 1000) return `${(n / 1000).toFixed(1)}K+`;
+    return `${n}`;
+  };
+
   const stats = [
     {
-      value: loading ? "..." : metrics.total_patients > 0 ? `${(metrics.total_patients / 1000).toFixed(1)}K+` : "0",
+      value: loading ? "..." : formatNumber(metrics.total_patients),
       label: "Pacientes Atendidos",
     },
     {
-      value: loading ? "..." : metrics.total_doctors > 0 ? `${metrics.total_doctors}+` : "0",
+      value: loading ? "..." : formatNumber(metrics.total_doctors),
       label: "Profesionales",
     },
     {

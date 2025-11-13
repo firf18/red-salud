@@ -1,21 +1,14 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { ArrowLeft, UserPlus, AlertCircle, CheckCircle, Loader2, Save, Printer, Sparkles, Calendar } from "lucide-react";
+import { ArrowLeft, UserPlus, AlertCircle, CheckCircle, Loader2, Sparkles, Calendar } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { VerificationGuard } from "@/components/dashboard/medico/verification-guard";
+import { VerificationGuard } from "@/components/dashboard/medico/features/verification-guard";
 import { validateCedulaWithCNE, isValidVenezuelanCedula, calculateAge } from "@/lib/services/cedula-validation";
 import { Badge } from "@/components/ui/badge";
 import { MedicalWorkspace } from "@/components/dashboard/medico/medical-workspace";
@@ -186,9 +179,9 @@ export default function NuevoPacientePage() {
     }
   };
 
-  if (currentStep === 1) {
-    return (
-      <VerificationGuard>
+  return (
+    <VerificationGuard>
+      {currentStep === 1 ? (
         <div className="min-h-screen w-full bg-gradient-to-br from-blue-50 via-white to-purple-50">
           {/* Header */}
           <div className="bg-white/80 backdrop-blur-sm border-b sticky top-0 z-10">
@@ -484,33 +477,29 @@ export default function NuevoPacientePage() {
             </div>
           </div>
         </div>
-      </VerificationGuard>
-    );
-  }
-
-  return (
-    <VerificationGuard>
-      <MedicalWorkspace
-        paciente={{
-          cedula: formData.cedula,
-          nombre_completo: formData.nombre_completo,
-          edad: edad,
-          genero: formData.genero,
-        }}
-        alergias={alergias}
-        setAlergias={setAlergias}
-        condicionesCronicas={condicionesCronicas}
-        setCondicionesCronicas={setCondicionesCronicas}
-        medicamentosActuales={medicamentosActuales}
-        setMedicamentosActuales={setMedicamentosActuales}
-        notasMedicas={notasMedicas}
-        setNotasMedicas={setNotasMedicas}
-        diagnosticos={diagnosticos}
-        setDiagnosticos={setDiagnosticos}
-        onSave={handleSubmit}
-        onBack={() => setCurrentStep(1)}
-        loading={loading}
-      />
+      ) : (
+        <MedicalWorkspace
+          paciente={{
+            cedula: formData.cedula,
+            nombre_completo: formData.nombre_completo,
+            edad: edad,
+            genero: formData.genero,
+          }}
+          alergias={alergias}
+          setAlergias={setAlergias}
+          condicionesCronicas={condicionesCronicas}
+          setCondicionesCronicas={setCondicionesCronicas}
+          medicamentosActuales={medicamentosActuales}
+          setMedicamentosActuales={setMedicamentosActuales}
+          notasMedicas={notasMedicas}
+          setNotasMedicas={setNotasMedicas}
+          diagnosticos={diagnosticos}
+          setDiagnosticos={setDiagnosticos}
+          onSave={handleSubmit}
+          onBack={() => setCurrentStep(1)}
+          loading={loading}
+        />
+      )}
     </VerificationGuard>
   );
 }

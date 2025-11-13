@@ -9,7 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import { Calendar as CalendarIcon, Clock, User, Video, MapPin, Phone, Plus } from "lucide-react";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
-import { VerificationGuard } from "@/components/dashboard/medico/verification-guard";
+import { VerificationGuard } from "@/components/dashboard/medico/features/verification-guard";
 
 interface Appointment {
   id: string;
