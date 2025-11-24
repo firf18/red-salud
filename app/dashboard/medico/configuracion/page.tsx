@@ -1,146 +1,152 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { motion, AnimatePresence } from "framer-motion";
-import { useAuth } from "@/hooks/use-auth";
+import { useState } from "react";
+import { motion } from "framer-motion";
 import {
   User,
-  Settings,
+  Clock,
+  Users,
+  Bell,
   Shield,
-  Eye,
-  Activity,
-  CreditCard,
-  Loader2,
+  Settings,
 } from "lucide-react";
 import { VerificationGuard } from "@/components/dashboard/medico/features/verification-guard";
-import { PreferencesTab } from "@/components/dashboard/profile/tabs/preferences-tab";
-import { SecurityTabNew as SecurityTab } from "@/components/dashboard/profile/tabs/security-tab-new";
-import { PrivacyTab } from "@/components/dashboard/profile/tabs/privacy-tab";
-import { ActivityTab } from "@/components/dashboard/profile/tabs/activity-tab";
-import { BillingTab } from "@/components/dashboard/profile/tabs/billing-tab";
+import { ProfileSection } from "@/components/dashboard/medico/configuracion/profile-section";
+import { ScheduleSection } from "@/components/dashboard/medico/configuracion/schedule-section";
+import { SecretariesSection } from "@/components/dashboard/medico/configuracion/secretaries-section";
+import { NotificationsSection } from "@/components/dashboard/medico/configuracion/notifications-section";
+import { SecuritySection } from "@/components/dashboard/medico/configuracion/security-section";
 
-type TabType = "perfil" | "preferencias" | "seguridad" | "privacidad" | "actividad" | "facturacion";
+type TabType = "perfil" | "horarios" | "secretarias" | "notificaciones" | "seguridad";
 
 interface TabConfig {
   id: TabType;
   label: string;
   icon: any;
+  description: string;
 }
 
 const TABS: TabConfig[] = [
-  { id: "perfil", label: "Mi Perfil", icon: User },
-  { id: "preferencias", label: "Preferencias", icon: Settings },
-  { id: "seguridad", label: "Seguridad", icon: Shield },
-  { id: "privacidad", label: "Privacidad", icon: Eye },
-  { id: "actividad", label: "Actividad", icon: Activity },
-  { id: "facturacion", label: "Facturación", icon: CreditCard },
+  { 
+    id: "perfil", 
+    label: "Perfil Profesional", 
+    icon: User,
+    description: "Información personal y profesional"
+  },
+  { 
+    id: "horarios", 
+    label: "Horarios", 
+    icon: Clock,
+    description: "Días y horarios de atención"
+  },
+  { 
+    id: "secretarias", 
+    label: "Secretarias", 
+    icon: Users,
+    description: "Gestión de equipo de trabajo"
+  },
+  { 
+    id: "notificaciones", 
+    label: "Notificaciones", 
+    icon: Bell,
+    description: "Preferencias de notificaciones"
+  },
+  { 
+    id: "seguridad", 
+    label: "Seguridad", 
+    icon: Shield,
+    description: "Contraseña y privacidad"
+  },
 ];
 
 export default function ConfiguracionMedicoPage() {
   const [activeTab, setActiveTab] = useState<TabType>("perfil");
-  const { user } = useAuth();
-  const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    // Simular carga inicial
-    const timer = setTimeout(() => setLoading(false), 500);
-    return () => clearTimeout(timer);
-  }, []);
-
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center h-[calc(100vh-200px)]">
-        <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
-      </div>
-    );
-  }
+  const renderTabContent = () => {
+    switch (activeTab) {
+      case "perfil":
+        return <ProfileSection />;
+      case "horarios":
+        return <ScheduleSection />;
+      case "secretarias":
+        return <SecretariesSection />;
+      case "notificaciones":
+        return <NotificationsSection />;
+      case "seguridad":
+        return <SecuritySection />;
+      default:
+        return null;
+    }
+  };
 
   return (
     <VerificationGuard>
-      <div className="space-y-6">
-        <div>
-          <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100">
-            Configuración
-          </h1>
-          <p className="text-gray-500 dark:text-gray-400 mt-2">
-            Administra tu perfil profesional y preferencias
+      <div className="container mx-auto px-4 py-8 max-w-7xl">
+        {/* Header */}
+        <div className="mb-8">
+          <div className="flex items-center gap-3 mb-2">
+            <div className="p-2 bg-blue-100 rounded-lg">
+              <Settings className="h-6 w-6 text-blue-600" />
+            </div>
+            <h1 className="text-3xl font-bold text-gray-900">
+              Configuración
+            </h1>
+          </div>
+          <p className="text-gray-600 ml-14">
+            Administra tu perfil profesional, horarios y preferencias del sistema
           </p>
         </div>
 
-      {/* Tab Navigation */}
-      <nav className="border-b border-gray-200 dark:border-gray-700">
-        <div className="flex gap-1 overflow-x-auto">
-          {TABS.map((tab) => {
-            const Icon = tab.icon;
-            return (
-              <button
-                key={tab.id}
-                onClick={() => setActiveTab(tab.id)}
-                className={`
-                  flex items-center gap-2 px-4 py-3 border-b-2 transition-colors whitespace-nowrap
-                  ${
-                    activeTab === tab.id
-                      ? "border-blue-600 text-blue-600 dark:border-blue-500 dark:text-blue-500"
-                      : "border-transparent text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200 hover:border-gray-300 dark:hover:border-gray-600"
-                  }
-                `}
-              >
-                <Icon className="h-4 w-4" />
-                <span className="font-medium">{tab.label}</span>
-              </button>
-            );
-          })}
-        </div>
-      </nav>
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+          {/* Sidebar Navigation */}
+          <div className="lg:col-span-1">
+            <nav className="space-y-1 bg-white rounded-lg border p-2 sticky top-4">
+              {TABS.map((tab) => {
+                const Icon = tab.icon;
+                const isActive = activeTab === tab.id;
+                
+                return (
+                  <button
+                    key={tab.id}
+                    onClick={() => setActiveTab(tab.id)}
+                    className={`
+                      w-full flex items-start gap-3 px-4 py-3 rounded-lg transition-all
+                      ${
+                        isActive
+                          ? "bg-blue-50 text-blue-700 shadow-sm"
+                          : "text-gray-700 hover:bg-gray-50"
+                      }
+                    `}
+                  >
+                    <Icon className={`h-5 w-5 flex-shrink-0 mt-0.5 ${isActive ? "text-blue-600" : "text-gray-400"}`} />
+                    <div className="text-left">
+                      <div className={`font-medium ${isActive ? "text-blue-700" : "text-gray-900"}`}>
+                        {tab.label}
+                      </div>
+                      <div className="text-xs text-gray-500 mt-0.5">
+                        {tab.description}
+                      </div>
+                    </div>
+                  </button>
+                );
+              })}
+            </nav>
+          </div>
 
-      {/* Tab Content */}
-      <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-6">
-        <AnimatePresence mode="wait">
-          {activeTab === "perfil" && (
+          {/* Content Area */}
+          <div className="lg:col-span-3">
             <motion.div
-              key="perfil"
-              initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: 20 }}
+              key={activeTab}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.2 }}
+              className="bg-white rounded-lg border p-6 min-h-[600px]"
             >
-              <div className="text-center py-12">
-                <User className="h-16 w-16 mx-auto mb-4 text-gray-400" />
-                <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-2">
-                  Perfil Profesional
-                </h3>
-                <p className="text-gray-500 dark:text-gray-400 mb-4">
-                  Esta sección está en desarrollo
-                </p>
-                <p className="text-sm text-gray-400 dark:text-gray-500">
-                  Pronto podrás editar tu información profesional, especialidades y credenciales
-                </p>
-              </div>
+              {renderTabContent()}
             </motion.div>
-          )}
-
-          {activeTab === "preferencias" && <PreferencesTab />}
-          
-          {activeTab === "seguridad" && user && (
-            <SecurityTab 
-              userEmail={user.email || ""} 
-              userId={user.id} 
-            />
-          )}
-          
-          {activeTab === "privacidad" && user && (
-            <PrivacyTab userId={user.id} />
-          )}
-          
-          {activeTab === "actividad" && user && (
-            <ActivityTab userId={user.id} />
-          )}
-          
-          {activeTab === "facturacion" && user && (
-            <BillingTab userId={user.id} />
-          )}
-        </AnimatePresence>
+          </div>
+        </div>
       </div>
-    </div>
     </VerificationGuard>
   );
 }

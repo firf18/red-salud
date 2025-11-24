@@ -50,6 +50,7 @@ export const USER_ROLES = {
   CLINICA: "clinica",
   ASEGURADORA: "seguro",
   AMBULANCIA: "ambulancia",
+  SECRETARIA: "secretaria",
 } as const;
 
 export type UserRole = typeof USER_ROLES[keyof typeof USER_ROLES];
@@ -105,6 +106,12 @@ export const ROLE_CONFIG: Record<
     description: "Coordina traslados y emergencias médicas",
     icon: "Ambulance",
     dashboardPath: "/dashboard/ambulancia",
+  },
+  [USER_ROLES.SECRETARIA]: {
+    label: "Secretaria Médica",
+    description: "Gestiona agenda y pacientes del médico",
+    icon: "UserCog",
+    dashboardPath: "/dashboard/secretaria",
   },
 };
 

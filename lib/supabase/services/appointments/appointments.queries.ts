@@ -7,110 +7,104 @@ import type {
   Appointment,
 } from "./appointments.types";
 
+interface AvailabilityRow {
+  id: string;
+  doctor_id: string;
+  dia_semana: number;
+  hora_inicio: string | number;
+  hora_fin: string | number;
+  activo: boolean;
+  created_at: string;
+}
+
+interface AppointmentIntervalRow {
+  id: string;
+  fecha_hora: string;
+  duracion_minutos?: number;
+}
+
+interface TimeBlockRow {
+  fecha_inicio: string;
+  fecha_fin: string;
+}
+
+interface DoctorAppointmentRow {
+  id: string;
+  paciente_id: string;
+  medico_id: string;
+  fecha_hora: string;
+  duracion_minutos: number;
+  status: string;
+  motivo?: string;
+  notas?: string;
+  created_at: string;
+  updated_at: string;
+  patient?: {
+    id: string;
+    nombre_completo?: string;
+    email?: string;
+    avatar_url?: string;
+  } | null;
+}
+
+interface PublicApiResponse<T> {
+  success: boolean;
+  data: T;
+  error?: string;
+}
+
+function getApiBaseUrl() {
+  if (typeof window !== "undefined") {
+    return "";
+  }
+
+  if (process.env.NEXT_PUBLIC_SITE_URL) {
+    return process.env.NEXT_PUBLIC_SITE_URL.replace(/\/$/, "");
+  }
+
+  if (process.env.VERCEL_URL) {
+    return `https://${process.env.VERCEL_URL}`;
+  }
+
+  return "http://localhost:3000";
+}
+
+async function fetchPublicData<T>(
+  path: string,
+  params?: Record<string, string | undefined>,
+  options: { includeCredentials?: boolean } = {}
+): Promise<T> {
+  const baseUrl = getApiBaseUrl();
+  const queryString = params
+    ? Object.entries(params)
+        .filter(([, value]) => value !== undefined && value !== null && value !== "")
+        .map(([key, value]) => `${encodeURIComponent(key)}=${encodeURIComponent(String(value))}`)
+        .join("&")
+    : "";
+
+  const url = `${baseUrl}${path}${queryString ? `?${queryString}` : ""}`;
+
+  const response = await fetch(url, {
+    cache: "no-store",
+    credentials: options.includeCredentials ? "include" : "same-origin",
+  });
+  const payload = (await response.json()) as PublicApiResponse<T>;
+
+  if (!response.ok || !payload.success) {
+    throw new Error(payload.error || `Request to ${path} failed`);
+  }
+
+  return payload.data;
+}
+
 // Obtener todas las especialidades (con opción de filtrar solo las que tienen médicos)
 export async function getMedicalSpecialties(onlyWithDoctors: boolean = false) {
-  console.log('🚀 getMedicalSpecialties called with onlyWithDoctors:', onlyWithDoctors);
-  
   try {
-    if (onlyWithDoctors) {
-      console.log('📡 Fetching doctors from Supabase...');
-      
-      // Obtener médicos verificados en SACS
-      const { data: profiles, error: profilesError } = await supabase
-        .from("profiles")
-        .select(`
-          id,
-          sacs_especialidad,
-          doctor_details:doctor_details!doctor_details_profile_id_fkey(
-            especialidad_id,
-            specialty:specialties!doctor_details_especialidad_id_fkey(
-              id,
-              name,
-              description,
-              icon,
-              created_at
-            )
-          )
-        `)
-        .eq("role", "medico")
-        .eq("sacs_verificado", true);
+    const data = await fetchPublicData<MedicalSpecialty[]>("/api/public/doctor-specialties", {
+      onlyWithDoctors: onlyWithDoctors ? "true" : undefined,
+    });
 
-      console.log('📊 Supabase response:', { 
-        profiles: profiles?.length, 
-        error: profilesError,
-        data: profiles 
-      });
-
-      if (profilesError) {
-        console.error('❌ Supabase error:', profilesError);
-        throw profilesError;
-      }
-
-      if (!profiles || profiles.length === 0) {
-        console.warn('⚠️ No profiles found');
-        return { success: true, data: [] };
-      }
-
-      // Recopilar especialidades únicas de médicos verificados
-      const specialtyMap = new Map<string, MedicalSpecialty>();
-
-      console.log('👥 Processing', profiles.length, 'profiles');
-
-      profiles.forEach((profile: any) => {
-        const doctorDetail = profile.doctor_details?.[0];
-        
-        console.log('🔍 Profile:', {
-          id: profile.id,
-          sacs_especialidad: profile.sacs_especialidad,
-          has_doctor_details: !!doctorDetail,
-          specialty: doctorDetail?.specialty
-        });
-        
-        if (doctorDetail?.specialty) {
-          const spec = doctorDetail.specialty;
-          if (!specialtyMap.has(spec.id)) {
-            console.log('➕ Adding specialty from doctor_details:', spec.name);
-            specialtyMap.set(spec.id, {
-              id: spec.id,
-              name: spec.name,
-              description: spec.description || '',
-              icon: spec.icon || 'stethoscope',
-              created_at: spec.created_at,
-            });
-          }
-        } else if (profile.sacs_especialidad) {
-          const tempId = `sacs-${profile.sacs_especialidad.toLowerCase().replace(/\s+/g, '-')}`;
-          if (!specialtyMap.has(tempId)) {
-            console.log('➕ Adding specialty from SACS:', profile.sacs_especialidad);
-            specialtyMap.set(tempId, {
-              id: tempId,
-              name: profile.sacs_especialidad,
-              description: 'Especialidad verificada en SACS',
-              icon: 'stethoscope',
-              created_at: new Date().toISOString(),
-            });
-          }
-        }
-      });
-
-      const specialtiesWithDoctors = Array.from(specialtyMap.values()).sort((a, b) => 
-        a.name.localeCompare(b.name)
-      );
-
-      console.log('✅ Final specialties:', specialtiesWithDoctors.length, specialtiesWithDoctors);
-
-      return { success: true, data: specialtiesWithDoctors };
-    } else {
-      // Obtener todas las especialidades activas
-      const { data, error } = await supabase
-        .from("specialties")
-        .select("*")
-        .eq("active", true)
-        .order("name");
-
-      if (error) throw error;
-      return { success: true, data: data as MedicalSpecialty[] };
-    }
+    return { success: true, data };
   } catch (error) {
     console.error("❌ Error fetching specialties:", error);
     return { success: false, error, data: [] };
@@ -120,109 +114,11 @@ export async function getMedicalSpecialties(onlyWithDoctors: boolean = false) {
 // Obtener doctores disponibles (con filtros opcionales)
 export async function getAvailableDoctors(specialtyId?: string) {
   try {
-    console.log('🔍 getAvailableDoctors called with specialtyId:', specialtyId);
-    
-    let query = supabase
-      .from("profiles")
-      .select(`
-        id,
-        nombre_completo,
-        email,
-        avatar_url,
-        telefono,
-        direccion,
-        ciudad,
-        estado,
-        sacs_verificado,
-        sacs_especialidad,
-        sacs_matricula,
-        doctor_details:doctor_details!doctor_details_profile_id_fkey(
-          id,
-          especialidad_id,
-          licencia_medica,
-          anos_experiencia,
-          biografia,
-          tarifa_consulta,
-          horario_atencion,
-          direccion_consultorio,
-          telefono_consultorio,
-          acepta_seguro,
-          verified,
-          sacs_verified,
-          is_active,
-          professional_phone,
-          professional_email,
-          clinic_address,
-          consultation_duration,
-          consultation_price,
-          schedule,
-          created_at,
-          updated_at,
-          specialty:specialties!doctor_details_especialidad_id_fkey(id, name, description, icon)
-        )
-      `)
-      .eq("role", "medico")
-      .eq("sacs_verificado", true);
+    const doctors = await fetchPublicData<DoctorProfile[]>("/api/public/doctors", {
+      specialtyId,
+    });
 
-    const { data, error } = await query.order("created_at");
-
-    console.log('📊 Query result:', { data, error, count: data?.length });
-
-    if (error) throw error;
-
-    let doctors = data?.map((profile: any) => {
-      const doctorDetail = profile.doctor_details?.[0];
-      
-      return {
-        id: profile.id,
-        specialty_id: doctorDetail?.especialidad_id || null,
-        license_number: profile.sacs_matricula || doctorDetail?.licencia_medica,
-        anos_experiencia: doctorDetail?.anos_experiencia || 0,
-        biografia: doctorDetail?.biografia || null,
-        tarifa_consulta: doctorDetail?.tarifa_consulta 
-          ? parseFloat(doctorDetail.tarifa_consulta) 
-          : (doctorDetail?.consultation_price ? parseFloat(doctorDetail.consultation_price) : undefined),
-        consultation_duration: doctorDetail?.consultation_duration || 30,
-        verified: true,
-        is_active: doctorDetail?.is_active !== false,
-        telefono: profile.telefono || doctorDetail?.professional_phone,
-        direccion: profile.direccion || doctorDetail?.clinic_address,
-        ciudad: profile.ciudad,
-        estado: profile.estado,
-        horario: doctorDetail?.schedule || doctorDetail?.horario_atencion,
-        acepta_seguro: doctorDetail?.acepta_seguro || doctorDetail?.accepts_insurance || false,
-        created_at: doctorDetail?.created_at || profile.created_at || new Date().toISOString(),
-        updated_at: doctorDetail?.updated_at || profile.updated_at || new Date().toISOString(),
-        profile: {
-          id: profile.id,
-          nombre_completo: profile.nombre_completo,
-          email: profile.email,
-          avatar_url: profile.avatar_url,
-        },
-        specialty: doctorDetail?.specialty || {
-          id: '',
-          name: profile.sacs_especialidad || 'Medicina General',
-          description: '',
-          icon: 'stethoscope',
-          created_at: new Date().toISOString(),
-        },
-      };
-    }) || [];
-
-    if (specialtyId) {
-      console.log('🔍 Filtering by specialty:', specialtyId);
-      doctors = doctors.filter(doc => {
-        if (doc.specialty_id) {
-          return doc.specialty_id === specialtyId;
-        }
-        const tempId = `sacs-${doc.specialty.name.toLowerCase().replace(/\s+/g, '-')}`;
-        return tempId === specialtyId;
-      });
-    }
-
-    console.log('✅ Transformed doctors:', doctors.length, doctors);
-
-    return { success: true, data: doctors as DoctorProfile[] };
+    return { success: true, data: doctors };
   } catch (error) {
     console.error("Error fetching doctors:", error);
     return { success: false, error, data: [] };
@@ -233,26 +129,26 @@ export async function getAvailableDoctors(specialtyId?: string) {
 export async function getDoctorProfile(doctorId: string) {
   try {
     const { data, error } = await supabase
-      .from("doctor_details")
+      .from("doctor_profiles")
       .select(`
         *,
-        specialty:specialties!doctor_details_especialidad_id_fkey(id, name, description, icon),
-        profile:profiles!doctor_details_profile_id_fkey(id, nombre_completo, email, avatar_url)
+        specialty:medical_specialties(id, name, description, icon),
+        profile:profiles!inner(id, nombre_completo, email, avatar_url)
       `)
-      .eq("profile_id", doctorId)
+      .eq("id", doctorId)
       .single();
 
     if (error) throw error;
 
     const doctor = {
-      id: data.profile_id,
-      specialty_id: data.especialidad_id,
-      license_number: data.licencia_medica,
-      anos_experiencia: data.anos_experiencia,
-      biografia: data.biografia,
-      tarifa_consulta: data.tarifa_consulta ? parseFloat(data.tarifa_consulta) : undefined,
-      consultation_duration: 30,
-      verified: data.verified && data.sacs_verified,
+      id: data.id,
+      specialty_id: data.specialty_id,
+      license_number: data.license_number,
+      anos_experiencia: data.years_experience,
+      biografia: data.bio,
+      tarifa_consulta: data.consultation_price ? parseFloat(data.consultation_price) : undefined,
+      consultation_duration: data.consultation_duration || 30,
+      verified: data.is_verified,
       created_at: data.created_at,
       updated_at: data.updated_at,
       profile: {
@@ -274,44 +170,32 @@ export async function getDoctorProfile(doctorId: string) {
 // Obtener horarios de un doctor
 export async function getDoctorSchedules(doctorId: string) {
   try {
-    const { data, error} = await supabase
-      .from("doctor_details")
-      .select("horario_atencion")
-      .eq("profile_id", doctorId)
-      .single();
+    const { data, error } = await supabase
+      .from("doctor_availability")
+      .select("id, dia_semana, hora_inicio, hora_fin, activo, doctor_id, created_at")
+      .eq("doctor_id", doctorId)
+      .eq("activo", true)
+      .order("dia_semana", { ascending: true });
 
     if (error) throw error;
-    
-    const schedules: DoctorSchedule[] = [];
-    const horario = data?.horario_atencion as any;
-    
-    if (horario) {
-      const dayMap: Record<string, number> = {
-        'domingo': 0,
-        'lunes': 1,
-        'martes': 2,
-        'miercoles': 3,
-        'jueves': 4,
-        'viernes': 5,
-        'sabado': 6
-      };
-      
-      Object.entries(horario).forEach(([day, time]) => {
-        if (typeof time === 'string' && time.includes('-')) {
-          const [start, end] = time.split('-');
-          schedules.push({
-            id: `${doctorId}-${day}`,
-            doctor_id: doctorId,
-            day_of_week: dayMap[day.toLowerCase()] || 0,
-            start_time: start + ':00',
-            end_time: end + ':00',
-            is_active: true,
-            created_at: new Date().toISOString()
-          });
-        }
-      });
-    }
-    
+
+    const availabilityRows = (data || []) as AvailabilityRow[];
+    const schedules: DoctorSchedule[] = availabilityRows.map((slot) => ({
+      id: slot.id,
+      doctor_id: slot.doctor_id,
+      day_of_week: slot.dia_semana,
+      start_time:
+        typeof slot.hora_inicio === "string"
+          ? slot.hora_inicio
+          : `${slot.hora_inicio}:00`,
+      end_time:
+        typeof slot.hora_fin === "string"
+          ? slot.hora_fin
+          : `${slot.hora_fin}:00`,
+      is_active: slot.activo,
+      created_at: slot.created_at,
+    }));
+
     return { success: true, data: schedules };
   } catch (error) {
     console.error("Error fetching doctor schedules:", error);
@@ -323,58 +207,122 @@ export async function getDoctorSchedules(doctorId: string) {
 export async function getAvailableTimeSlots(
   doctorId: string,
   date: string
-): Promise<{ success: boolean; data: TimeSlot[]; error?: any }> {
+): Promise<{ success: boolean; data: TimeSlot[]; error?: unknown }> {
   try {
     const dayOfWeek = new Date(date).getDay();
+    const startOfDay = new Date(`${date}T00:00:00`);
+    const endOfDay = new Date(`${date}T23:59:59.999`);
 
-    const { data: schedules, error: scheduleError } = await supabase
-      .from("doctor_schedules")
-      .select("*")
-      .eq("doctor_id", doctorId)
-      .eq("day_of_week", dayOfWeek)
-      .eq("is_active", true);
+    const [availabilityResult, profileResult] = await Promise.all([
+      supabase
+        .from("doctor_availability")
+        .select("hora_inicio, hora_fin")
+        .eq("doctor_id", doctorId)
+        .eq("dia_semana", dayOfWeek)
+        .eq("activo", true),
+      supabase
+        .from("doctor_profiles")
+        .select("consultation_duration")
+        .eq("id", doctorId)
+        .single(),
+    ]);
 
-    if (scheduleError) throw scheduleError;
+    if (availabilityResult.error) throw availabilityResult.error;
+    if (profileResult.error) throw profileResult.error;
 
-    if (!schedules || schedules.length === 0) {
+    const availability = availabilityResult.data || [];
+    if (availability.length === 0) {
       return { success: true, data: [] };
     }
 
+    const slotDuration = profileResult.data?.consultation_duration || 30;
+
     const { data: appointments, error: appointmentsError } = await supabase
       .from("appointments")
-      .select("appointment_time, duration, id")
-      .eq("doctor_id", doctorId)
-      .eq("appointment_date", date)
-      .in("status", ["pending", "confirmed"]);
+      .select("id, fecha_hora, duracion_minutos, status")
+      .eq("medico_id", doctorId)
+      .gte("fecha_hora", startOfDay.toISOString())
+      .lte("fecha_hora", endOfDay.toISOString())
+      .not("status", "in", '("cancelada","rechazada")');
 
     if (appointmentsError) throw appointmentsError;
 
+    const { data: timeBlocks, error: blocksError } = await supabase
+      .from("doctor_time_blocks")
+      .select("fecha_inicio, fecha_fin")
+      .eq("doctor_id", doctorId)
+      .lte("fecha_inicio", endOfDay.toISOString())
+      .gte("fecha_fin", startOfDay.toISOString());
+
+    if (blocksError) throw blocksError;
+
+    const toMinutes = (value: string) => {
+      const [hours, minutes] = value.split(":").map((part) => Number(part));
+      return hours * 60 + minutes;
+    };
+
+    const toTimeString = (minutes: number) => {
+      const hours = Math.floor(minutes / 60);
+      const mins = minutes % 60;
+      return `${hours.toString().padStart(2, '0')}:${mins.toString().padStart(2, '0')}:00`;
+    };
+
+    const appointmentRows = (appointments || []) as AppointmentIntervalRow[];
+    const appointmentIntervals = appointmentRows.map((apt) => {
+      const startDate = new Date(apt.fecha_hora);
+      const start = startDate.getHours() * 60 + startDate.getMinutes();
+      const duration = apt.duracion_minutos || slotDuration;
+      return {
+        id: apt.id,
+        start,
+        end: start + duration,
+      };
+    });
+
+    const blockRows = (timeBlocks || []) as TimeBlockRow[];
+    const blockIntervals = blockRows.map((block) => {
+      const startDate = new Date(block.fecha_inicio);
+      const endDate = new Date(block.fecha_fin);
+      return {
+        start: Math.max(0, startDate.getHours() * 60 + startDate.getMinutes()),
+        end: Math.min(24 * 60, endDate.getHours() * 60 + endDate.getMinutes()),
+      };
+    });
+
+    const hasConflict = (start: number, end: number) => {
+      const appointmentConflict = appointmentIntervals.find(
+        (interval) => interval.start < end && interval.end > start
+      );
+
+      if (appointmentConflict) {
+        return { conflicted: true, appointmentId: appointmentConflict.id };
+      }
+
+      const blockConflict = blockIntervals.some(
+        (interval) => interval.start < end && interval.end > start
+      );
+
+      return { conflicted: blockConflict, appointmentId: undefined };
+    };
+
     const timeSlots: TimeSlot[] = [];
-    const bookedTimes = new Set(
-      appointments?.map((apt) => apt.appointment_time) || []
-    );
 
-    schedules.forEach((schedule) => {
-      const startTime = schedule.start_time;
-      const endTime = schedule.end_time;
-      const duration = 30;
+    availability.forEach((slot) => {
+      const startMinutes = toMinutes(slot.hora_inicio);
+      const endMinutes = toMinutes(slot.hora_fin);
 
-      let currentTime = startTime;
-      while (currentTime < endTime) {
-        const isBooked = bookedTimes.has(currentTime);
+      let cursor = startMinutes;
+      while (cursor + slotDuration <= endMinutes) {
+        const slotEnd = cursor + slotDuration;
+        const conflict = hasConflict(cursor, slotEnd);
+
         timeSlots.push({
-          time: currentTime,
-          available: !isBooked,
-          appointment_id: isBooked
-            ? appointments?.find((apt) => apt.appointment_time === currentTime)?.id
-            : undefined,
+          time: toTimeString(cursor),
+          available: !conflict.conflicted,
+          appointment_id: conflict.appointmentId,
         });
 
-        const [hours, minutes] = currentTime.split(":").map(Number);
-        const totalMinutes = hours * 60 + minutes + duration;
-        const newHours = Math.floor(totalMinutes / 60);
-        const newMinutes = totalMinutes % 60;
-        currentTime = `${String(newHours).padStart(2, "0")}:${String(newMinutes).padStart(2, "0")}:00`;
+        cursor += slotDuration;
       }
     });
 
@@ -388,56 +336,13 @@ export async function getAvailableTimeSlots(
 // Obtener citas de un paciente
 export async function getPatientAppointments(patientId: string) {
   try {
-    const { data, error } = await supabase
-      .from("appointments")
-      .select(`
-        *,
-        doctor:profiles!appointments_medico_id_fkey(
-          id,
-          nombre_completo,
-          avatar_url
-        )
-      `)
-      .eq("paciente_id", patientId)
-      .order("fecha_hora", { ascending: false });
+    const data = await fetchPublicData<Appointment[]>(
+      "/api/patient/appointments",
+      { patientId },
+      { includeCredentials: true }
+    );
 
-    if (error) throw error;
-
-    const appointments = data?.map((apt: any) => {
-      const fechaHora = new Date(apt.fecha_hora);
-      return {
-        id: apt.id,
-        patient_id: apt.paciente_id,
-        doctor_id: apt.medico_id,
-        appointment_date: fechaHora.toISOString().split('T')[0],
-        appointment_time: fechaHora.toTimeString().split(' ')[0],
-        duration: apt.duracion_minutos,
-        status: apt.status === 'pendiente' ? 'pending' : apt.status === 'confirmada' ? 'confirmed' : apt.status === 'completada' ? 'completed' : 'cancelled',
-        consultation_type: 'video' as const,
-        reason: apt.motivo,
-        notes: apt.notas,
-        created_at: apt.created_at,
-        updated_at: apt.updated_at,
-        doctor: {
-          id: apt.doctor?.id,
-          verified: true,
-          created_at: apt.created_at,
-          updated_at: apt.updated_at,
-          profile: {
-            id: apt.doctor?.id,
-            nombre_completo: apt.doctor?.nombre_completo,
-            avatar_url: apt.doctor?.avatar_url,
-          },
-          specialty: { 
-            id: '',
-            name: 'Medicina General',
-            created_at: apt.created_at,
-          },
-        },
-      };
-    }) || [];
-
-    return { success: true, data: appointments as Appointment[] };
+    return { success: true, data };
   } catch (error) {
     console.error("Error fetching patient appointments:", error);
     return { success: false, error, data: [] };
@@ -463,7 +368,8 @@ export async function getDoctorAppointments(doctorId: string) {
 
     if (error) throw error;
     
-    const appointments = data?.map((apt: any) => {
+    const appointmentRows = (data || []) as DoctorAppointmentRow[];
+    const appointments = appointmentRows.map((apt) => {
       const fechaHora = new Date(apt.fecha_hora);
       return {
         id: apt.id,
@@ -478,9 +384,9 @@ export async function getDoctorAppointments(doctorId: string) {
         notes: apt.notas,
         created_at: apt.created_at,
         updated_at: apt.updated_at,
-        patient: apt.patient,
+        patient: apt.patient || undefined,
       };
-    }) || [];
+    });
     
     return { success: true, data: appointments as Appointment[] };
   } catch (error) {

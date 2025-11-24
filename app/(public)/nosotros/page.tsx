@@ -18,7 +18,7 @@ export default function NosotrosPage() {
         </div>
       </section>
 
-      <section className="py-24 bg-white">
+      <section className="py-24 bg-white dark:bg-background">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8 max-w-4xl">
           <motion.div className="text-center mb-16" initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}>
             <h2 className="text-3xl font-bold mb-6 font-(family-name:--font-poppins)">Nuestra Historia</h2>
@@ -43,7 +43,7 @@ export default function NosotrosPage() {
                       <Icon className="h-8 w-8 text-blue-600" />
                     </div>
                     <h3 className="text-xl font-bold mb-3 font-(family-name:--font-poppins)">{item.title}</h3>
-                    <p className="text-gray-600">{item.desc}</p>
+                    <p className="text-gray-600 dark:text-gray-300">{item.desc}</p>
                   </Card>
                 </motion.div>
               );
@@ -54,3 +54,4 @@ export default function NosotrosPage() {
     </div>
   );
 }
+

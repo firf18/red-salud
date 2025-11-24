@@ -9,6 +9,7 @@ import {
   Hospital,
   Shield,
   Ambulance,
+  UserCog,
 } from "lucide-react";
 
 /**
@@ -25,6 +26,7 @@ const iconMap: Record<string, React.ComponentType<{ className?: string }>> = {
   Hospital,
   Shield,
   Ambulance,
+  UserCog,
 };
 
 export default function LoginPage() {

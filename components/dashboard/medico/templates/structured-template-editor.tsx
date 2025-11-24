@@ -5,7 +5,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { AlertCircle, CheckCircle, AlertTriangle } from "lucide-react";
-import { StructuredTemplate, STRUCTURED_TEMPLATES } from "@/lib/templates/structured-templates";
+import { StructuredTemplate } from "@/lib/templates/structured-templates";
+import { getAllTemplates } from "@/lib/templates/extended-templates";
 import { MedicationInput } from "../inputs/medication-input";
 
 interface VitalSign {
@@ -34,9 +35,19 @@ export function StructuredTemplateEditor({
   onMedicationsChange,
 }: StructuredTemplateEditorProps) {
   // Usar template por defecto si no hay uno seleccionado
-  const activeTemplate = template || STRUCTURED_TEMPLATES[0];
+  const allTemplates = getAllTemplates();
+  const activeTemplate = template || allTemplates[0];
   
   const [fields, setFields] = useState<Record<string, string>>({});
+
+  // Si no hay template disponible, mostrar mensaje
+  if (!activeTemplate) {
+    return (
+      <div className="p-6 text-center">
+        <p className="text-gray-500">No hay templates disponibles. Por favor, selecciona un template.</p>
+      </div>
+    );
+  }
 
   const [vitalSigns, setVitalSigns] = useState<Record<string, VitalSign>>({
     pa: {

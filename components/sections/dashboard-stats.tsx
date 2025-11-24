@@ -55,6 +55,13 @@ export function DashboardStats() {
     },
   ];
 
+  // Evitar mostrar números vacíos cuando aún no hay datos reales
+  const hasMeaningfulData =
+    metrics.total_patients > 0 || metrics.total_doctors > 0 || metrics.satisfaction_percentage > 0;
+  if (!loading && !hasMeaningfulData) {
+    return null;
+  }
+
   return (
     <div className="grid grid-cols-2 md:grid-cols-4 gap-8 mt-20 max-w-3xl mx-auto">
       {stats.map((stat, index) => (

@@ -1,7 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { Heart, Shield, Clock, Users, Smartphone, Award } from "lucide-react";
+import { Heart, Banknote, MapPin, UserCheck, Clock, Star } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { fadeInUp, staggerContainer } from "@/lib/animations";
 
@@ -9,45 +9,50 @@ const features = [
   {
     icon: Heart,
     title: "Atención Personalizada",
-    description: "Cada paciente recibe un plan de atención diseñado específicamente para sus necesidades.",
+    description: "Cada paciente recibe un plan de atención diseñado específicamente para sus necesidades únicas.",
     gradient: "from-rose-500 to-pink-600",
   },
   {
-    icon: Shield,
-    title: "Seguridad y Privacidad",
-    description: "Tus datos médicos están protegidos con encriptación de nivel bancario y cumplimiento HIPAA.",
+    icon: Banknote,
+    title: "Precios Transparentes",
+    description: "Conoce el costo de cada consulta antes de agendar, sin sorpresas ni cargos ocultos.",
+    gradient: "from-emerald-500 to-green-600",
+  },
+  {
+    icon: MapPin,
+    title: "Cobertura Nacional",
+    description: "Accede a servicios de salud en todo Venezuela, desde cualquier estado del país.",
     gradient: "from-blue-500 to-cyan-600",
   },
   {
-    icon: Clock,
-    title: "Disponibilidad 24/7",
-    description: "Accede a consultas médicas en cualquier momento, desde cualquier lugar del mundo.",
-    gradient: "from-purple-500 to-indigo-600",
-  },
-  {
-    icon: Users,
-    title: "Profesionales Expertos",
-    description: "Red de más de 500 médicos especializados y certificados internacionalmente.",
+    icon: UserCheck,
+    title: "Profesionales Verificados",
+    description: "Todos nuestros médicos y especialistas están certificados y verificados rigurosamente.",
     gradient: "from-teal-500 to-green-600",
   },
   {
-    icon: Smartphone,
-    title: "Tecnología Avanzada",
-    description: "Plataforma intuitiva con IA para diagnósticos precisos y seguimiento en tiempo real.",
-    gradient: "from-orange-500 to-amber-600",
+    icon: Clock,
+    title: "Disponibilidad Inmediata",
+    description: "Agenda citas en minutos y recibe atención médica cuando realmente la necesites.",
+    gradient: "from-purple-500 to-indigo-600",
   },
   {
-    icon: Award,
-    title: "Calidad Certificada",
-    description: "Reconocidos internacionalmente por nuestros estándares de excelencia en atención médica.",
-    gradient: "from-violet-500 to-purple-600",
+    icon: Star,
+    title: "Calidad Garantizada",
+    description: "Sistema de reseñas y calificaciones que asegura la excelencia en cada atención.",
+    gradient: "from-amber-500 to-orange-600",
   },
 ];
 
 export function FeaturesSection() {
   return (
-    <section className="py-24 lg:py-32 bg-linear-to-b from-white via-gray-50 to-white">
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+    <section className="py-24 lg:py-32 bg-secondary/30 dark:bg-background relative overflow-hidden">
+      {/* Fondo decorativo */}
+      <div className="absolute inset-0 opacity-5 dark:opacity-10">
+        <div className="absolute top-0 left-1/2 w-96 h-96 bg-blue-500 rounded-full mix-blend-multiply filter blur-3xl animate-blob" />
+      </div>
+
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         <motion.div
           className="text-center max-w-3xl mx-auto mb-16"
           variants={staggerContainer}
@@ -57,30 +62,30 @@ export function FeaturesSection() {
         >
           <motion.div
             variants={fadeInUp}
-            className="inline-block px-4 py-2 rounded-full bg-blue-100 text-blue-700 text-sm font-semibold mb-4"
+            className="inline-block px-4 py-2 rounded-full bg-gradient-to-r from-blue-100 to-teal-100 dark:from-blue-900/30 dark:to-teal-900/30 text-blue-700 dark:text-blue-300 text-sm font-semibold mb-4 border border-blue-200 dark:border-blue-800"
           >
             ¿Por qué elegirnos?
           </motion.div>
           <motion.h2
             variants={fadeInUp}
-            className="text-4xl sm:text-5xl lg:text-6xl font-bold text-gray-900 mb-6 font-(family-name:--font-poppins)"
+            className="text-4xl sm:text-5xl lg:text-6xl font-bold text-foreground mb-6"
           >
-            Innovación que{" "}
-            <span className="bg-linear-to-r from-blue-600 to-teal-600 bg-clip-text text-transparent">
-              Transforma Vidas
+            Beneficios que{" "}
+            <span className="bg-gradient-to-r from-blue-600 to-teal-600 bg-clip-text text-transparent">
+              marcan la diferencia
             </span>
           </motion.h2>
           <motion.p
             variants={fadeInUp}
-            className="text-xl text-gray-600 leading-relaxed"
+            className="text-xl text-muted-foreground leading-relaxed"
           >
-            Combinamos tecnología de vanguardia con atención humana para ofrecer
-            la mejor experiencia en servicios de salud.
+            Nos enfocamos en brindarte la mejor experiencia de salud digital,
+            poniendo siempre tus necesidades primero.
           </motion.p>
         </motion.div>
 
         <motion.div
-          className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"
+          className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-6xl mx-auto"
           variants={staggerContainer}
           initial="initial"
           whileInView="animate"
@@ -95,30 +100,30 @@ export function FeaturesSection() {
                 whileHover={{ y: -8 }}
                 transition={{ duration: 0.3 }}
               >
-                <Card className="h-full border-2 border-transparent hover:border-blue-200 transition-all duration-300 hover:shadow-xl group overflow-hidden relative">
+                <Card className="h-full border-2 border-transparent hover:border-blue-400/50 dark:hover:border-blue-600/50 transition-all duration-300 hover:shadow-xl group overflow-hidden relative">
                   {/* Gradient background on hover */}
-                  <div className="absolute inset-0 bg-linear-to-br from-blue-50 to-teal-50 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                  <div className="absolute inset-0 bg-gradient-to-br from-blue-50/50 to-teal-50/50 dark:from-blue-950/20 dark:to-teal-950/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                   
                   <CardContent className="p-8 relative z-10">
                     {/* Icon */}
                     <div className="mb-6">
                       <div
-                        className={`inline-flex p-4 rounded-2xl bg-linear-to-br ${feature.gradient} shadow-lg group-hover:scale-110 transition-transform duration-300`}
+                        className={`inline-flex p-4 rounded-2xl bg-gradient-to-br ${feature.gradient} shadow-lg group-hover:scale-110 transition-transform duration-300`}
                       >
                         <Icon className="h-8 w-8 text-white" />
                       </div>
                     </div>
 
                     {/* Content */}
-                    <h3 className="text-2xl font-bold text-gray-900 mb-4 font-(family-name:--font-poppins)">
+                    <h3 className="text-2xl font-bold text-foreground mb-4">
                       {feature.title}
                     </h3>
-                    <p className="text-gray-600 leading-relaxed">
+                    <p className="text-muted-foreground leading-relaxed">
                       {feature.description}
                     </p>
 
                     {/* Decorative element */}
-                    <div className="absolute top-0 right-0 w-32 h-32 bg-linear-to-br from-blue-100 to-transparent rounded-bl-full opacity-0 group-hover:opacity-20 transition-opacity duration-300" />
+                    <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-blue-100/20 to-transparent dark:from-blue-900/10 rounded-bl-full opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                   </CardContent>
                 </Card>
               </motion.div>

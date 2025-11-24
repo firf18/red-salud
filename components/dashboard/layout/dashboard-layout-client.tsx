@@ -15,7 +15,8 @@ interface DashboardLayoutClientProps {
   userName?: string;
   userEmail?: string;
   userId?: string;
-  userRole?: "paciente" | "medico";
+  userRole?: "paciente" | "medico" | "secretaria";
+  secretaryPermissions?: any;
 }
 
 export function DashboardLayoutClient({
@@ -24,12 +25,42 @@ export function DashboardLayoutClient({
   userEmail = "usuario@email.com",
   userId,
   userRole = "paciente",
+  secretaryPermissions,
 }: DashboardLayoutClientProps) {
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
   const [profileModalOpen, setProfileModalOpen] = useState(false);
 
   // Configurar menú según el rol
-  const menuGroups = userRole === "medico" 
+  const menuGroups = userRole === "secretaria"
+    ? [
+        {
+          label: "Principal",
+          items: [
+            { key: "dashboard", label: "Dashboard", icon: "LayoutDashboard", route: "/dashboard/secretaria" },
+            ...(secretaryPermissions?.can_view_agenda ? [
+              { key: "agenda", label: "Agenda", icon: "Calendar", route: "/dashboard/secretaria/agenda" }
+            ] : []),
+            ...(secretaryPermissions?.can_view_patients ? [
+              { key: "pacientes", label: "Pacientes", icon: "User", route: "/dashboard/secretaria/pacientes" }
+            ] : []),
+          ],
+        },
+        {
+          label: "Comunicación",
+          items: [
+            ...(secretaryPermissions?.can_send_messages ? [
+              { key: "mensajes", label: "Mensajes", icon: "MessageSquare", route: "/dashboard/secretaria/mensajes" }
+            ] : []),
+          ],
+        },
+        {
+          label: "Configuración",
+          items: [
+            { key: "perfil", label: "Mi Perfil", icon: "User", route: "/dashboard/secretaria/perfil" },
+          ],
+        },
+      ].filter(group => group.items.length > 0)
+    : userRole === "medico" 
     ? [
         {
           label: "Principal",

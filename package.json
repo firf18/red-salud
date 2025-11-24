@@ -9,7 +9,11 @@
     "lint": "eslint",
     "scrape-sacs": "tsx scripts/scrape-sacs.ts",
     "scrape-sacs-simple": "tsx scripts/scrape-sacs-simple.ts",
-    "verify-workspace": "tsx scripts/verify-workspace-setup.ts"
+    "verify-workspace": "tsx scripts/verify-workspace-setup.ts",
+    "test-email": "tsx scripts/test-email-validation.ts",
+    "test-phone": "tsx scripts/test-phone-prefix.ts",
+    "test-consulta": "tsx scripts/test-consulta-build.ts",
+    "test-hero": "tsx scripts/test-hero-usability.ts"
   },
   "dependencies": {
     "@google/generative-ai": "^0.24.1",
@@ -37,6 +41,7 @@
     "@supabase/auth-helpers-nextjs": "^0.10.0",
     "@supabase/ssr": "^0.7.0",
     "@supabase/supabase-js": "^2.78.0",
+    "@tanstack/react-query": "^5.90.10",
     "@vercel/speed-insights": "^1.2.0",
     "bcryptjs": "^3.0.3",
     "class-variance-authority": "^0.7.1",

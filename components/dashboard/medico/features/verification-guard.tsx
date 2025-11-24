@@ -17,6 +17,8 @@ export function VerificationGuard({ children }: VerificationGuardProps) {
   const router = useRouter();
   const [userId, setUserId] = useState<string | null>(null);
   const [authLoading, setAuthLoading] = useState(true);
+  const [isVerified, setIsVerified] = useState(false);
+  const [checkingVerification, setCheckingVerification] = useState(true);
   const { profile, loading } = useDoctorProfile(userId || undefined);
 
   useEffect(() => {
@@ -32,8 +34,69 @@ export function VerificationGuard({ children }: VerificationGuardProps) {
     getUser();
   }, [router]);
 
+  // Verificar si el médico está verificado en profiles
+  useEffect(() => {
+    const checkVerification = async () => {
+      if (!userId) return;
+
+      try {
+        // Verificar en profiles si está verificado
+        const { data: profileData } = await supabase
+          .from("profiles")
+          .select("role, sacs_verificado, cedula_verificada")
+          .eq("id", userId)
+          .single();
+
+        if (profileData) {
+          // El médico está verificado si tiene role medico Y está verificado por SACS o cédula
+          const verified = 
+            profileData.role === "medico" && 
+            (profileData.sacs_verificado === true || profileData.cedula_verificada === true);
+          
+          setIsVerified(verified);
+
+          // Si está verificado pero no tiene doctor_details, crearlo automáticamente
+          if (verified && !profile && !loading) {
+            await createDoctorDetails(userId);
+          }
+        }
+      } catch (error) {
+        console.error("Error checking verification:", error);
+      } finally {
+        setCheckingVerification(false);
+      }
+    };
+
+    if (userId && !loading) {
+      checkVerification();
+    }
+  }, [userId, profile, loading]);
+
+  // Función para crear doctor_details automáticamente
+  const createDoctorDetails = async (doctorId: string) => {
+    try {
+      const { error } = await supabase
+        .from("doctor_details")
+        .insert({
+          profile_id: doctorId,
+          verified: true,
+          sacs_verified: true,
+        });
+
+      if (error) {
+        console.error("Error creating doctor_details:", error);
+      } else {
+        console.log("Doctor details created successfully");
+        // Recargar la página para que el hook recargue el perfil
+        window.location.reload();
+      }
+    } catch (error) {
+      console.error("Error creating doctor_details:", error);
+    }
+  };
+
   // Mostrar loading mientras se verifica
-  if (authLoading || loading) {
+  if (authLoading || loading || checkingVerification) {
     return (
       <div className="flex items-center justify-center min-h-[60vh]">
         <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
@@ -41,8 +104,13 @@ export function VerificationGuard({ children }: VerificationGuardProps) {
     );
   }
 
-  // Si no tiene perfil, mostrar overlay de verificación
-  if (!profile) {
+  // Si está verificado en profiles, permitir acceso aunque no tenga doctor_details aún
+  if (isVerified) {
+    return <>{children}</>;
+  }
+
+  // Si no está verificado, mostrar overlay de verificación
+  if (!profile && !isVerified) {
     return (
       <div className="relative">
         {/* Contenido con blur */}

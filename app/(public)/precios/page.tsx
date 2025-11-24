@@ -136,7 +136,7 @@ export default function PreciosPage() {
       </section>
 
       {/* Pricing Cards */}
-      <section className="py-24 lg:py-32 bg-gray-50">
+      <section className="py-24 lg:py-32 bg-gray-50 dark:bg-gray-900">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <motion.div
             className="grid grid-cols-1 lg:grid-cols-3 gap-8 max-w-7xl mx-auto"
@@ -171,21 +171,21 @@ export default function PreciosPage() {
                   <div className={`h-2 bg-linear-to-r ${plan.gradient}`} />
 
                   <CardHeader className="text-center pb-8 pt-12">
-                    <h3 className="text-2xl font-bold text-gray-900 mb-2 font-(family-name:--font-poppins)">
+                    <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-2 font-(family-name:--font-poppins)">
                       {plan.name}
                     </h3>
-                    <p className="text-gray-600 mb-6">{plan.description}</p>
+                    <p className="text-gray-600 dark:text-gray-300 mb-6">{plan.description}</p>
 
                     <div className="mb-2">
-                      <span className="text-5xl font-bold text-gray-900">
+                      <span className="text-5xl font-bold text-gray-900 dark:text-white">
                         ${isAnnual ? plan.annualPrice : plan.monthlyPrice}
                       </span>
-                      <span className="text-gray-600 ml-2">
+                      <span className="text-gray-600 dark:text-gray-400 ml-2">
                         /{isAnnual ? "año" : "mes"}
                       </span>
                     </div>
                     {isAnnual && (
-                      <p className="text-sm text-teal-600 font-semibold">
+                      <p className="text-sm text-teal-600 dark:text-teal-400 font-semibold">
                         Ahorra ${(plan.monthlyPrice * 12 - plan.annualPrice)} al año
                       </p>
                     )}
@@ -207,8 +207,8 @@ export default function PreciosPage() {
                             className={cn(
                               "text-sm",
                               feature.included
-                                ? "text-gray-700"
-                                : "text-gray-400 line-through"
+                                ? "text-gray-700 dark:text-gray-300"
+                                : "text-gray-400 dark:text-gray-500 line-through"
                             )}
                           >
                             {feature.text}
@@ -240,7 +240,7 @@ export default function PreciosPage() {
       </section>
 
       {/* FAQ Section */}
-      <section className="py-24 bg-white">
+      <section className="py-24 bg-white dark:bg-background">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8 max-w-4xl">
           <motion.div
             className="text-center mb-16"
@@ -248,7 +248,7 @@ export default function PreciosPage() {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
           >
-            <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-4 font-(family-name:--font-poppins)">
+            <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 dark:text-white mb-4 font-(family-name:--font-poppins)">
               Preguntas Frecuentes
             </h2>
           </motion.div>
@@ -274,10 +274,10 @@ export default function PreciosPage() {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ delay: index * 0.1 }}
-                className="bg-gray-50 rounded-lg p-6"
+                className="bg-gray-50 dark:bg-gray-800 rounded-lg p-6"
               >
-                <h3 className="font-semibold text-gray-900 mb-2">{faq.q}</h3>
-                <p className="text-gray-600">{faq.a}</p>
+                <h3 className="font-semibold text-gray-900 dark:text-white mb-2">{faq.q}</h3>
+                <p className="text-gray-600 dark:text-gray-300">{faq.a}</p>
               </motion.div>
             ))}
           </div>
@@ -286,3 +286,4 @@ export default function PreciosPage() {
     </div>
   );
 }
+

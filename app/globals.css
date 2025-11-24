@@ -37,7 +37,41 @@
   --sidebar-ring: 0 0% 63.9%;
 }
 
-/* Modo oscuro deshabilitado - solo modo claro disponible */
+/* Paleta base y soporte a modo oscuro */
+
+.dark {
+  --background: 222 47% 5%;
+  --foreground: 0 0% 98%;
+  --card: 222 47% 7%;
+  --card-foreground: 0 0% 98%;
+  --popover: 222 47% 7%;
+  --popover-foreground: 0 0% 98%;
+  --primary: 221 83% 66%; /* azul accesible para dark */
+  --primary-foreground: 222 47% 7%;
+  --secondary: 215 28% 17%;
+  --secondary-foreground: 0 0% 98%;
+  --muted: 215 16% 20%;
+  --muted-foreground: 214 15% 75%;
+  --accent: 190 80% 35%;
+  --accent-foreground: 0 0% 98%;
+  --destructive: 0 63% 55%;
+  --border: 215 19% 27%;
+  --input: 215 19% 27%;
+  --ring: 221 83% 66%;
+  --chart-1: 199 89% 48%;
+  --chart-2: 173 58% 52%;
+  --chart-3: 197 37% 40%;
+  --chart-4: 43 74% 56%;
+  --chart-5: 27 87% 55%;
+  --sidebar: 222 47% 7%;
+  --sidebar-foreground: 0 0% 98%;
+  --sidebar-primary: 221 83% 66%;
+  --sidebar-primary-foreground: 222 47% 7%;
+  --sidebar-accent: 215 28% 17%;
+  --sidebar-accent-foreground: 0 0% 98%;
+  --sidebar-border: 215 19% 27%;
+  --sidebar-ring: 221 83% 66%;
+}
 
 @layer base {
   * {
@@ -67,6 +101,34 @@
   @supports not (text-wrap: balance) {
     .text-balance {
       text-wrap: pretty;
+    }
+  }
+
+  /* Animaciones de blob para fondos dinámicos */
+  .animate-blob {
+    animation: blob 7s infinite;
+  }
+  
+  .animation-delay-2000 {
+    animation-delay: 2s;
+  }
+  
+  .animation-delay-4000 {
+    animation-delay: 4s;
+  }
+  
+  @keyframes blob {
+    0% {
+      transform: translate(0px, 0px) scale(1);
+    }
+    33% {
+      transform: translate(30px, -50px) scale(1.1);
+    }
+    66% {
+      transform: translate(-20px, 20px) scale(0.9);
+    }
+    100% {
+      transform: translate(0px, 0px) scale(1);
     }
   }
 }

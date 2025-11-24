@@ -2,7 +2,7 @@
 
 import { motion } from "framer-motion";
 import Link from "next/link";
-import { ArrowLeft, User, Stethoscope, Building2, Pill, Microscope, Ambulance, Shield } from "lucide-react";
+import { ArrowLeft, User, Stethoscope, Building2, Pill, Microscope, Ambulance, Shield, UserCog } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { APP_NAME, ROUTES } from "@/lib/constants";
 import { fadeInUp, staggerContainer } from "@/lib/animations";
@@ -63,6 +63,14 @@ const roles = [
     icon: Shield,
     gradient: "from-indigo-500 to-indigo-600",
     bgGradient: "from-indigo-50 to-indigo-100",
+  },
+  {
+    id: "secretaria",
+    name: "Secretaria Médica",
+    description: "Gestiona agenda y pacientes del médico",
+    icon: UserCog,
+    gradient: "from-pink-500 to-pink-600",
+    bgGradient: "from-pink-50 to-pink-100",
   },
 ];
 

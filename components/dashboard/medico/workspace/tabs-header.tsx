@@ -12,7 +12,6 @@ interface TabsHeaderProps {
   notasMedicas: string;
   isAnalyzing: boolean;
   onShowStructuredMarketplace: () => void;
-  onShowMarketplace: () => void;
   onAnalyzeWithAI: () => void;
 }
 
@@ -22,7 +21,6 @@ export function TabsHeader({
   notasMedicas,
   isAnalyzing,
   onShowStructuredMarketplace,
-  onShowMarketplace,
   onAnalyzeWithAI,
 }: TabsHeaderProps) {
   return (
@@ -43,7 +41,7 @@ export function TabsHeader({
           </TabsTrigger>
         </TabsList>
 
-        {activeTab === "estructurado" ? (
+        {activeTab === "estructurado" && (
           <Button
             variant="outline"
             size="sm"
@@ -51,24 +49,10 @@ export function TabsHeader({
             className="gap-2"
           >
             <FileText className="h-4 w-4" />
-            Templates Estructurados
-            <Badge variant="secondary" className="text-xs h-5">
-              <Sparkles className="h-3 w-3 mr-1" />
-              {selectedStructuredTemplate ? selectedStructuredTemplate.fields.length : "4"} campos
-            </Badge>
-          </Button>
-        ) : (
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={onShowMarketplace}
-            className="gap-2"
-          >
-            <FileText className="h-4 w-4" />
             Templates
             <Badge variant="secondary" className="text-xs h-5">
               <Sparkles className="h-3 w-3 mr-1" />
-              IA
+              {selectedStructuredTemplate ? selectedStructuredTemplate.fields.length : "4"} campos
             </Badge>
           </Button>
         )}

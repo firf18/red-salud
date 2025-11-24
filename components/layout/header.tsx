@@ -15,6 +15,7 @@ const servicios = [
   { name: "Clínicas", href: "/servicios/clinicas", description: "Gestión de centros médicos" },
   { name: "Laboratorios", href: "/servicios/laboratorios", description: "Análisis y resultados" },
   { name: "Farmacias", href: "/servicios/farmacias", description: "Gestión de medicamentos" },
+    { name: "Secretarias", href: "/servicios/secretarias", description: "Organiza agendas médicas" },
   { name: "Ambulancias", href: "/servicios/ambulancias", description: "Servicio de emergencias" },
   { name: "Seguros", href: "/servicios/seguros", description: "Gestión de pólizas" },
 ];
@@ -47,7 +48,7 @@ export function Header() {
       className={cn(
         "fixed top-0 left-0 right-0 z-50 transition-all duration-300",
         isScrolled
-          ? "bg-white/95 dark:bg-gray-900/80 backdrop-blur-md shadow-lg"
+          ? "bg-white/98 dark:bg-gray-900/95 backdrop-blur-md shadow-lg"
           : "bg-transparent"
       )}
       initial={{ y: -100 }}
@@ -98,7 +99,7 @@ export function Header() {
                     className={cn(
                       "px-3 md:px-4 py-2 rounded-lg text-sm font-medium transition-all duration-300 hover:scale-105 flex items-center gap-1",
                       isScrolled
-                        ? "text-gray-700 hover:bg-blue-50 hover:text-blue-600 dark:text-gray-200 dark:hover:bg-gray-800 dark:hover:text-white"
+                        ? "text-gray-900 hover:bg-blue-50 hover:text-blue-600 dark:text-gray-200 dark:hover:bg-gray-800 dark:hover:text-white"
                         : "text-white/90 hover:bg-white/10 hover:text-white"
                     )}
                     >
@@ -114,19 +115,19 @@ export function Header() {
                           animate={{ opacity: 1, y: 0 }}
                           exit={{ opacity: 0, y: -10 }}
                           transition={{ duration: 0.2 }}
-                          className="absolute top-full left-0 mt-2 w-72 bg-white rounded-xl shadow-2xl border border-gray-100 overflow-hidden z-50"
+                          className="absolute top-full left-0 mt-2 w-72 bg-white dark:bg-gray-800 rounded-xl shadow-2xl border border-gray-100 dark:border-gray-700 overflow-hidden z-50"
                         >
                           <div className="p-2">
                             {servicios.map((servicio) => (
                               <Link
                                 key={servicio.name}
                                 href={servicio.href}
-                                className="block px-4 py-3 rounded-lg hover:bg-blue-50 transition-colors duration-200 group"
+                                className="block px-4 py-3 rounded-lg hover:bg-blue-50 dark:hover:bg-gray-700 transition-colors duration-200 group"
                               >
-                                <div className="font-medium text-gray-900 group-hover:text-blue-600 transition-colors">
+                                <div className="font-medium text-gray-900 dark:text-gray-100 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
                                   {servicio.name}
                                 </div>
-                                <div className="text-xs text-gray-500 mt-0.5">
+                                <div className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
                                   {servicio.description}
                                 </div>
                               </Link>
@@ -142,7 +143,7 @@ export function Header() {
                     className={cn(
                       "px-3 md:px-4 py-2 rounded-lg text-sm font-medium transition-all duration-300 hover:scale-105",
                       isScrolled
-                        ? "text-gray-700 hover:bg-blue-50 hover:text-blue-600 dark:text-gray-200 dark:hover:bg-gray-800 dark:hover:text-white"
+                        ? "text-gray-900 hover:bg-blue-50 hover:text-blue-600 dark:text-gray-200 dark:hover:bg-gray-800 dark:hover:text-white"
                         : "text-white/90 hover:bg-white/10 hover:text-white"
                     )}
                   >
@@ -292,8 +293,8 @@ function ThemeToggle({ isScrolled }: { isScrolled: boolean }) {
   const { theme, toggleTheme } = useTheme();
   const isDark = theme === "dark";
   const classes = isScrolled
-    ? "inline-flex items-center justify-center w-9 h-9 rounded-md border border-gray-200 bg-white text-blue-600 hover:bg-blue-50 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-200 dark:hover:bg-gray-700"
-    : "inline-flex items-center justify-center w-9 h-9 rounded-md border border-white/30 bg-black/40 text-white backdrop-blur-md hover:bg-black/50";
+    ? "inline-flex items-center justify-center w-9 h-9 rounded-md border-2 border-gray-300 bg-white text-gray-700 hover:bg-gray-50 hover:border-blue-500 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-200 dark:hover:bg-gray-700 dark:hover:border-blue-400 transition-all duration-300"
+    : "inline-flex items-center justify-center w-9 h-9 rounded-md border-2 border-white/40 bg-white/10 text-white backdrop-blur-md hover:bg-white/20 hover:border-white transition-all duration-300";
   return (
     <button onClick={toggleTheme} aria-label="Toggle theme" className={classes}>
       {isDark ? <SunIcon /> : <MoonIcon />}

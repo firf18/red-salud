@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
@@ -23,8 +23,24 @@ import {
   Eye,
   Sparkles,
   CheckCircle,
+  Zap,
+  Baby,
+  User,
+  Scan,
+  Ear,
+  Bone,
+  Brain,
+  Wind,
+  Droplet,
+  Bug,
+  Scissors,
+  ClipboardCheck,
+  UserPlus,
+  AlertTriangle,
 } from "lucide-react";
-import { STRUCTURED_TEMPLATES, StructuredTemplate } from "@/lib/templates/structured-templates";
+import { StructuredTemplate } from "@/lib/templates/structured-templates";
+import { getAllTemplates } from "@/lib/templates/extended-templates";
+import { CustomTemplateCreator } from "./custom-template-creator";
 
 interface StructuredTemplateMarketplaceProps {
   open: boolean;
@@ -38,6 +54,21 @@ const iconMap: Record<string, any> = {
   Activity,
   AlertCircle,
   Heart,
+  Zap,
+  Baby,
+  User,
+  Scan,
+  Eye,
+  Ear,
+  Bone,
+  Brain,
+  Wind,
+  Droplet,
+  Bug,
+  Scissors,
+  ClipboardCheck,
+  UserPlus,
+  AlertTriangle,
 };
 
 export function StructuredTemplateMarketplace({
@@ -48,12 +79,38 @@ export function StructuredTemplateMarketplace({
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState<string>("all");
   const [previewTemplate, setPreviewTemplate] = useState<StructuredTemplate | null>(null);
+  const [showCustomCreator, setShowCustomCreator] = useState(false);
+  const [customTemplates, setCustomTemplates] = useState<StructuredTemplate[]>([]);
+  const [allTemplates, setAllTemplates] = useState<StructuredTemplate[]>([]);
 
-  const filteredTemplates = STRUCTURED_TEMPLATES.filter((template) => {
+  useEffect(() => {
+    // Cargar templates del sistema y personalizados
+    const systemTemplates = getAllTemplates();
+    const savedCustomTemplates = loadCustomTemplates();
+    setCustomTemplates(savedCustomTemplates);
+    setAllTemplates([...systemTemplates, ...savedCustomTemplates]);
+  }, []);
+
+  const loadCustomTemplates = (): StructuredTemplate[] => {
+    if (typeof window === 'undefined') return [];
+    const saved = localStorage.getItem('customTemplates');
+    return saved ? JSON.parse(saved) : [];
+  };
+
+  const saveCustomTemplate = (template: StructuredTemplate) => {
+    const updated = [...customTemplates, template];
+    setCustomTemplates(updated);
+    setAllTemplates([...getAllTemplates(), ...updated]);
+    localStorage.setItem('customTemplates', JSON.stringify(updated));
+  };
+
+  const filteredTemplates = allTemplates.filter((template) => {
     const matchesSearch =
+      searchQuery === "" ||
       template.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
       template.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      template.tags.some((tag) => tag.toLowerCase().includes(searchQuery.toLowerCase()));
+      template.tags.some((tag) => tag.toLowerCase().includes(searchQuery.toLowerCase())) ||
+      (template.specialty && template.specialty.toLowerCase().includes(searchQuery.toLowerCase()));
 
     const matchesCategory =
       selectedCategory === "all" || template.category === selectedCategory;
@@ -71,10 +128,22 @@ export function StructuredTemplateMarketplace({
     return Icon;
   };
 
+  const categories = [
+    { value: 'all', label: 'Todos' },
+    { value: 'general', label: 'General' },
+    { value: 'especialidad', label: 'Especialidad' },
+    { value: 'emergencia', label: 'Emergencia' },
+    { value: 'control', label: 'Control' },
+    { value: 'pediatria', label: 'Pediatría' },
+    { value: 'ginecologia', label: 'Ginecología' },
+    { value: 'quirurgico', label: 'Quirúrgico' },
+    { value: 'custom', label: 'Personalizados' },
+  ];
+
   return (
     <>
       <Dialog open={open} onOpenChange={onClose}>
-        <DialogContent className="max-w-5xl h-[85vh] p-0 gap-0">
+        <DialogContent className="w-[98vw] max-w-[98vw] h-[95vh] p-0 gap-0">
           <DialogHeader className="px-6 py-4 border-b">
             <DialogTitle className="text-xl flex items-center gap-2">
               <div className="h-10 w-10 rounded-lg bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center">
@@ -100,48 +169,23 @@ export function StructuredTemplateMarketplace({
                 />
               </div>
 
-              <div className="flex gap-2">
-                <Button
-                  variant={selectedCategory === "all" ? "default" : "outline"}
-                  size="sm"
-                  onClick={() => setSelectedCategory("all")}
-                >
-                  Todos
-                </Button>
-                <Button
-                  variant={selectedCategory === "general" ? "default" : "outline"}
-                  size="sm"
-                  onClick={() => setSelectedCategory("general")}
-                >
-                  General
-                </Button>
-                <Button
-                  variant={selectedCategory === "especialidad" ? "default" : "outline"}
-                  size="sm"
-                  onClick={() => setSelectedCategory("especialidad")}
-                >
-                  Especialidad
-                </Button>
-                <Button
-                  variant={selectedCategory === "emergencia" ? "default" : "outline"}
-                  size="sm"
-                  onClick={() => setSelectedCategory("emergencia")}
-                >
-                  Emergencia
-                </Button>
-                <Button
-                  variant={selectedCategory === "control" ? "default" : "outline"}
-                  size="sm"
-                  onClick={() => setSelectedCategory("control")}
-                >
-                  Control
-                </Button>
+              <div className="flex gap-2 flex-wrap">
+                {categories.map((cat) => (
+                  <Button
+                    key={cat.value}
+                    variant={selectedCategory === cat.value ? "default" : "outline"}
+                    size="sm"
+                    onClick={() => setSelectedCategory(cat.value)}
+                  >
+                    {cat.label}
+                  </Button>
+                ))}
               </div>
             </div>
 
             {/* Templates Grid */}
             <ScrollArea className="flex-1 px-6 py-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pb-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 pb-4">
                 {filteredTemplates.map((template) => {
                   const Icon = IconComponent(template.icon);
                   
@@ -162,9 +206,15 @@ export function StructuredTemplateMarketplace({
                             </h3>
                             <p className="text-xs text-gray-500">
                               {template.fields.length} campos
+                              {template.specialty && ` • ${template.specialty}`}
                             </p>
                           </div>
                         </div>
+                        {template.isCustom && (
+                          <Badge variant="secondary" className="text-xs">
+                            Personalizado
+                          </Badge>
+                        )}
                       </div>
 
                       {/* Description */}
@@ -244,9 +294,20 @@ export function StructuredTemplateMarketplace({
                 <FileText className="h-4 w-4" />
                 <span>{filteredTemplates.length} templates disponibles</span>
               </div>
-              <Button variant="outline" size="sm" onClick={onClose}>
-                Cerrar
-              </Button>
+              <div className="flex gap-2">
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  onClick={() => setShowCustomCreator(true)}
+                  className="bg-gradient-to-r from-green-50 to-emerald-50 border-green-200 hover:from-green-100 hover:to-emerald-100"
+                >
+                  <Plus className="h-4 w-4 mr-2" />
+                  Crear Template
+                </Button>
+                <Button variant="outline" size="sm" onClick={onClose}>
+                  Cerrar
+                </Button>
+              </div>
             </div>
           </div>
         </DialogContent>
@@ -254,7 +315,7 @@ export function StructuredTemplateMarketplace({
 
       {/* Preview Dialog */}
       <Dialog open={!!previewTemplate} onOpenChange={() => setPreviewTemplate(null)}>
-        <DialogContent className="max-w-3xl h-[80vh] flex flex-col">
+        <DialogContent className="w-[90vw] max-w-[90vw] h-[85vh] flex flex-col">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-3">
               {previewTemplate && (
@@ -278,35 +339,139 @@ export function StructuredTemplateMarketplace({
 
           {previewTemplate && (
             <div className="flex-1 flex flex-col overflow-hidden">
-              <ScrollArea className="flex-1 border rounded-lg bg-gray-50 p-4">
-                <div className="space-y-4">
-                  {previewTemplate.fields.map((field) => (
-                    <div key={field.id} className="space-y-1">
-                      <div className="flex items-center gap-2">
-                        <p className="text-sm font-semibold text-gray-700">
-                          {field.label}
-                        </p>
-                        {field.required && (
-                          <Badge variant="destructive" className="text-xs h-5">
-                            Requerido
-                          </Badge>
+              {/* Template Info */}
+              <div className="grid grid-cols-3 gap-4 mb-4 p-4 bg-gradient-to-r from-blue-50 to-purple-50 rounded-lg border border-blue-200">
+                <div className="text-center">
+                  <p className="text-2xl font-bold text-blue-600">{previewTemplate.fields.length}</p>
+                  <p className="text-xs text-gray-600">Campos Totales</p>
+                </div>
+                <div className="text-center">
+                  <p className="text-2xl font-bold text-purple-600">
+                    {previewTemplate.fields.filter(f => f.required).length}
+                  </p>
+                  <p className="text-xs text-gray-600">Campos Requeridos</p>
+                </div>
+                <div className="text-center">
+                  <p className="text-2xl font-bold text-green-600">
+                    {previewTemplate.fields.filter(f => f.type === 'vitals' || f.type === 'medications').length}
+                  </p>
+                  <p className="text-xs text-gray-600">Campos Especiales</p>
+                </div>
+              </div>
+
+              {/* Tags */}
+              <div className="flex flex-wrap gap-2 mb-4">
+                {previewTemplate.tags.map((tag) => (
+                  <Badge key={tag} variant="secondary">
+                    {tag}
+                  </Badge>
+                ))}
+                {previewTemplate.specialty && (
+                  <Badge variant="outline" className="border-blue-300 text-blue-700">
+                    {previewTemplate.specialty}
+                  </Badge>
+                )}
+              </div>
+
+              {/* Fields Preview */}
+              <ScrollArea className="flex-1 border rounded-lg bg-white">
+                <div className="p-6 space-y-6">
+                  {previewTemplate.fields.map((field, index) => (
+                    <div key={field.id} className="space-y-2 pb-4 border-b last:border-b-0">
+                      <div className="flex items-start justify-between">
+                        <div className="flex-1">
+                          <div className="flex items-center gap-2 mb-1">
+                            <span className="flex items-center justify-center h-6 w-6 rounded-full bg-blue-100 text-blue-600 text-xs font-semibold">
+                              {index + 1}
+                            </span>
+                            <p className="text-sm font-semibold text-gray-900">
+                              {field.label}
+                            </p>
+                            {field.required && (
+                              <Badge variant="destructive" className="text-xs h-5">
+                                Requerido
+                              </Badge>
+                            )}
+                          </div>
+                          {field.placeholder && (
+                            <p className="text-xs text-gray-500 italic ml-8">
+                              Ejemplo: {field.placeholder}
+                            </p>
+                          )}
+                        </div>
+                        <div className="flex flex-col gap-1">
+                          {field.type === 'vitals' && (
+                            <Badge variant="outline" className="text-xs border-green-300 text-green-700">
+                              <Activity className="h-3 w-3 mr-1" />
+                              Signos Vitales
+                            </Badge>
+                          )}
+                          {field.type === 'medications' && (
+                            <Badge variant="outline" className="text-xs border-purple-300 text-purple-700">
+                              <Sparkles className="h-3 w-3 mr-1" />
+                              Autocompletado
+                            </Badge>
+                          )}
+                          {field.type === 'textarea' && (
+                            <Badge variant="outline" className="text-xs border-gray-300 text-gray-700">
+                              Texto Largo
+                            </Badge>
+                          )}
+                          {field.type === 'input' && (
+                            <Badge variant="outline" className="text-xs border-gray-300 text-gray-700">
+                              Texto Corto
+                            </Badge>
+                          )}
+                        </div>
+                      </div>
+                      
+                      {/* Visual representation */}
+                      <div className="ml-8 mt-2">
+                        {field.type === 'textarea' && (
+                          <div className="border rounded-md p-3 bg-gray-50 min-h-[80px] text-xs text-gray-400">
+                            {field.placeholder || 'Área de texto...'}
+                          </div>
+                        )}
+                        {field.type === 'input' && (
+                          <div className="border rounded-md p-2 bg-gray-50 text-xs text-gray-400">
+                            {field.placeholder || 'Campo de texto...'}
+                          </div>
+                        )}
+                        {field.type === 'select' && (
+                          <div className="border rounded-md p-2 bg-gray-50 text-xs text-gray-400">
+                            Selector de opciones
+                          </div>
+                        )}
+                        {field.type === 'checkbox' && (
+                          <div className="border rounded-md p-2 bg-gray-50 text-xs text-gray-400">
+                            Casilla de verificación
+                          </div>
                         )}
                         {field.type === 'vitals' && (
-                          <Badge variant="outline" className="text-xs h-5">
-                            Con validación
-                          </Badge>
+                          <div className="grid grid-cols-3 gap-2">
+                            <div className="border rounded-md p-2 bg-green-50 text-xs">
+                              <p className="font-semibold text-green-700">PA</p>
+                              <p className="text-gray-500">120/80 mmHg</p>
+                            </div>
+                            <div className="border rounded-md p-2 bg-green-50 text-xs">
+                              <p className="font-semibold text-green-700">FC</p>
+                              <p className="text-gray-500">72 lpm</p>
+                            </div>
+                            <div className="border rounded-md p-2 bg-green-50 text-xs">
+                              <p className="font-semibold text-green-700">Temp</p>
+                              <p className="text-gray-500">36.5°C</p>
+                            </div>
+                          </div>
                         )}
                         {field.type === 'medications' && (
-                          <Badge variant="outline" className="text-xs h-5">
-                            Autocompletado
-                          </Badge>
+                          <div className="border rounded-md p-2 bg-purple-50 text-xs">
+                            <div className="flex items-center gap-2 text-purple-700">
+                              <Sparkles className="h-3 w-3" />
+                              <span>Búsqueda inteligente de medicamentos</span>
+                            </div>
+                          </div>
                         )}
                       </div>
-                      {field.placeholder && (
-                        <p className="text-xs text-gray-500 italic">
-                          {field.placeholder}
-                        </p>
-                      )}
                     </div>
                   ))}
                 </div>
@@ -335,6 +500,13 @@ export function StructuredTemplateMarketplace({
           )}
         </DialogContent>
       </Dialog>
+
+      {/* Custom Template Creator */}
+      <CustomTemplateCreator
+        open={showCustomCreator}
+        onClose={() => setShowCustomCreator(false)}
+        onSave={saveCustomTemplate}
+      />
     </>
   );
 }

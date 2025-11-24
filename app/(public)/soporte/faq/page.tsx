@@ -28,13 +28,13 @@ export default function FAQPage() {
         </div>
       </section>
 
-      <section className="py-24 bg-white">
+      <section className="py-24 bg-white dark:bg-background">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8 max-w-4xl">
           <Accordion type="single" collapsible className="space-y-4">
             {faqs.map((faq, i) => (
               <AccordionItem key={i} value={`item-${i}`} className="border rounded-lg px-6">
                 <AccordionTrigger className="text-left font-semibold hover:text-blue-600">{faq.q}</AccordionTrigger>
-                <AccordionContent className="text-gray-600">{faq.a}</AccordionContent>
+                <AccordionContent className="text-gray-600 dark:text-gray-300">{faq.a}</AccordionContent>
               </AccordionItem>
             ))}
           </Accordion>
@@ -43,3 +43,4 @@ export default function FAQPage() {
     </div>
   );
 }
+

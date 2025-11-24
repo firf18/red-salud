@@ -1,32 +1,20 @@
-"use client";
 
+"use client";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase/client";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Calendar as CalendarIcon, Clock, User, Video, MapPin, Phone, Plus } from "lucide-react";
-import { format } from "date-fns";
-import { es } from "date-fns/locale";
 import { VerificationGuard } from "@/components/dashboard/medico/features/verification-guard";
-
-interface Appointment {
-  id: string;
-  fecha_hora: string;
-  motivo: string;
-  status: string;
-  paciente: {
-    nombre_completo: string;
-    avatar_url: string | null;
-  };
-}
+import { CalendarMain } from "@/components/dashboard/medico/calendar/calendar-main";
+import { PatientSummaryModal } from "@/components/dashboard/medico/calendar/patient-summary-modal";
+import type { CalendarAppointment } from "@/components/dashboard/medico/calendar/types";
+import { startOfMonth, endOfMonth, addMonths } from "date-fns";
 
 export default function DoctorCitasPage() {
   const router = useRouter();
   const [loading, setLoading] = useState(true);
-  const [appointments, setAppointments] = useState<Appointment[]>([]);
-  const [userId, setUserId] = useState<string | null>(null);
+  const [appointments, setAppointments] = useState<CalendarAppointment[]>([]);
+  const [selectedAppointment, setSelectedAppointment] = useState<CalendarAppointment | null>(null);
+  const [modalOpen, setModalOpen] = useState(false);
 
   useEffect(() => {
     loadData();
@@ -39,7 +27,6 @@ export default function DoctorCitasPage() {
         router.push("/login/medico");
         return;
       }
-      setUserId(user.id);
       await loadAppointments(user.id);
     } catch (error) {
       console.error("Error loading data:", error);
@@ -49,123 +36,155 @@ export default function DoctorCitasPage() {
   };
 
   const loadAppointments = async (doctorId: string) => {
+    // Cargar citas del mes actual y siguiente
+    const startDate = startOfMonth(new Date());
+    const endDate = endOfMonth(addMonths(new Date(), 1));
+
     const { data, error } = await supabase
       .from("appointments")
       .select(`
-        *,
+        id,
+        paciente_id,
+        offline_patient_id,
+        fecha_hora,
+        duracion_minutos,
+        motivo,
+        status,
+        tipo_cita,
+        color,
+        notas_internas,
         paciente:profiles!appointments_paciente_id_fkey(
           nombre_completo,
+          telefono,
+          email,
           avatar_url
+        ),
+        offline_patient:offline_patients!appointments_offline_patient_id_fkey(
+          nombre_completo,
+          telefono,
+          email
         )
       `)
       .eq("medico_id", doctorId)
+      .gte("fecha_hora", startDate.toISOString())
+      .lte("fecha_hora", endDate.toISOString())
       .order("fecha_hora", { ascending: true });
 
-    if (!error && data) {
-      setAppointments(data as any);
+    if (error) {
+      console.error("Error loading appointments:", error);
+      return;
+    }
+
+    if (data) {
+      const formattedAppointments: CalendarAppointment[] = data.map((apt: any) => {
+        // Determinar si es paciente registrado u offline
+        const isOfflinePatient = !apt.paciente_id && apt.offline_patient_id;
+        const patientData = isOfflinePatient ? apt.offline_patient : apt.paciente;
+
+        return {
+          id: apt.id,
+          paciente_id: apt.paciente_id,
+          offline_patient_id: apt.offline_patient_id,
+          paciente_nombre: patientData?.nombre_completo || "Paciente",
+          paciente_telefono: patientData?.telefono || null,
+          paciente_email: patientData?.email || null,
+          paciente_avatar: isOfflinePatient ? null : (patientData?.avatar_url || null),
+          fecha_hora: apt.fecha_hora,
+          fecha_hora_fin: new Date(
+            new Date(apt.fecha_hora).getTime() + (apt.duracion_minutos || 30) * 60000
+          ).toISOString(),
+          duracion_minutos: apt.duracion_minutos || 30,
+          motivo: apt.motivo || "Sin motivo",
+          status: apt.status || "pendiente",
+          tipo_cita: apt.tipo_cita || "presencial",
+          color: apt.color || "#3B82F6",
+          notas_internas: apt.notas_internas || null,
+        };
+      });
+      
+      console.log(`Loaded ${formattedAppointments.length} appointments (${data.filter((a: any) => a.offline_patient_id).length} offline patients)`);
+      setAppointments(formattedAppointments);
     }
   };
 
-  const getStatusBadge = (status: string) => {
-    const variants: Record<string, { label: string; className: string }> = {
-      pendiente: { label: "Pendiente", className: "bg-yellow-100 text-yellow-800" },
-      confirmada: { label: "Confirmada", className: "bg-blue-100 text-blue-800" },
-      completada: { label: "Completada", className: "bg-green-100 text-green-800" },
-      cancelada: { label: "Cancelada", className: "bg-red-100 text-red-800" },
-    };
-    const variant = variants[status] || variants.pendiente;
-    return <Badge className={variant.className}>{variant.label}</Badge>;
+  const handleNewAppointment = () => {
+    router.push("/dashboard/medico/citas/nueva");
   };
 
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600" />
-      </div>
-    );
-  }
+  const handleAppointmentClick = (appointment: CalendarAppointment) => {
+    setSelectedAppointment(appointment);
+    setModalOpen(true);
+  };
+
+  const handleCloseModal = () => {
+    setModalOpen(false);
+    setSelectedAppointment(null);
+  };
+
+  const handleTimeSlotClick = (date: Date, hour?: number) => {
+    // Validar que no sea fecha/hora pasada
+    const now = new Date();
+    const selectedDateTime = new Date(date);
+    
+    if (hour !== undefined) {
+      selectedDateTime.setHours(hour, 0, 0, 0);
+    }
+    
+    // Si es fecha/hora pasada, no permitir
+    if (selectedDateTime < now) {
+      alert("No puedes agendar citas en fechas u horas pasadas");
+      return;
+    }
+    
+    const dateParam = date.toISOString();
+    const hourParam = hour !== undefined ? `&hour=${hour}` : "";
+    router.push(`/dashboard/medico/citas/nueva?date=${dateParam}${hourParam}`);
+  };
+
+  const handleMessage = (appointment: CalendarAppointment) => {
+    if (!appointment.paciente_id) {
+      alert("No se puede enviar mensajes a pacientes sin cuenta en el sistema");
+      return;
+    }
+    router.push(`/dashboard/medico/mensajeria?patient=${appointment.paciente_id}`);
+  };
+
+  const handleStartVideo = (appointment: CalendarAppointment) => {
+    if (!appointment.paciente_id) {
+      alert("No se puede iniciar videollamada con pacientes sin cuenta en el sistema");
+      return;
+    }
+    router.push(`/dashboard/medico/telemedicina/${appointment.id}`);
+  };
 
   return (
     <VerificationGuard>
-      <div className="container mx-auto px-4 py-8 space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold text-gray-900">Agenda de Citas</h1>
+      <div className="container mx-auto px-4 py-8">
+        <div className="mb-6">
+          <h1 className="text-3xl font-bold text-gray-900">Agenda</h1>
           <p className="text-gray-600 mt-1">
-            {appointments.length} cita{appointments.length !== 1 ? "s" : ""} programada{appointments.length !== 1 ? "s" : ""}
+            Gestiona tus citas y disponibilidad
           </p>
         </div>
-        <Button onClick={() => router.push("/dashboard/medico/citas/nueva")}>
-          <Plus className="h-4 w-4 mr-2" />
-          Nueva Cita
-        </Button>
-      </div>
 
-      {appointments.length > 0 ? (
-        <div className="grid grid-cols-1 gap-4">
-          {appointments.map((apt) => {
-            const fechaHora = new Date(apt.fecha_hora);
-            return (
-              <Card key={apt.id} className="hover:shadow-lg transition-shadow">
-                <CardContent className="p-6">
-                  <div className="flex items-start justify-between">
-                    <div className="flex items-start gap-4 flex-1">
-                      <div className="h-12 w-12 bg-blue-100 rounded-full flex items-center justify-center">
-                        <User className="h-6 w-6 text-blue-600" />
-                      </div>
-                      <div className="flex-1">
-                        <div className="flex items-center gap-2 mb-2">
-                          <h3 className="font-semibold text-lg">
-                            {apt.paciente?.nombre_completo || "Paciente"}
-                          </h3>
-                          {getStatusBadge(apt.status)}
-                        </div>
-                        <p className="text-gray-600 mb-3">{apt.motivo}</p>
-                        <div className="flex items-center gap-4 text-sm text-gray-500">
-                          <div className="flex items-center gap-1">
-                            <CalendarIcon className="h-4 w-4" />
-                            {format(fechaHora, "EEEE, d 'de' MMMM", { locale: es })}
-                          </div>
-                          <div className="flex items-center gap-1">
-                            <Clock className="h-4 w-4" />
-                            {format(fechaHora, "HH:mm")}
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                    <div className="flex gap-2">
-                      <Button variant="outline" size="sm">
-                        Ver Detalles
-                      </Button>
-                      {apt.status === "confirmada" && (
-                        <Button size="sm">
-                          <Video className="h-4 w-4 mr-1" />
-                          Iniciar
-                        </Button>
-                      )}
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            );
-          })}
-        </div>
-      ) : (
-        <Card>
-          <CardContent className="py-12">
-            <div className="text-center">
-              <CalendarIcon className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-              <h3 className="text-lg font-semibold text-gray-900 mb-2">
-                No tienes citas programadas
-              </h3>
-              <p className="text-gray-600 mb-4">
-                Las citas que agendes o que tus pacientes agenden aparecerán aquí
-              </p>
-            </div>
-          </CardContent>
-        </Card>
-      )}
-    </div>
+        <CalendarMain
+          appointments={appointments}
+          onNewAppointment={handleNewAppointment}
+          onAppointmentClick={handleAppointmentClick}
+          onTimeSlotClick={handleTimeSlotClick}
+          onMessage={handleMessage}
+          onStartVideo={handleStartVideo}
+          loading={loading}
+        />
+
+        <PatientSummaryModal
+          appointment={selectedAppointment}
+          open={modalOpen}
+          onClose={handleCloseModal}
+          onMessage={handleMessage}
+          onStartVideo={handleStartVideo}
+        />
+      </div>
     </VerificationGuard>
   );
 }
