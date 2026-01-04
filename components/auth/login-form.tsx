@@ -118,15 +118,20 @@ function LoginFormContent({ role, roleLabel }: LoginFormProps) {
         <div className="absolute -bottom-[20%] left-[20%] w-[40%] h-[40%] rounded-full bg-accent/10 blur-[100px] animate-blob animation-delay-4000" />
       </div>
 
-      {/* Botón de regresar */}
-      <div className="relative z-10 px-4 pt-4 pb-2 shrink-0">
+      {/* Header bar with Back button and Logo */}
+      <div className="relative z-10 px-4 pt-4 pb-2 shrink-0 flex items-center justify-between">
         <Link
           href="/login"
-          className="inline-flex items-center gap-2 text-muted-foreground hover:text-primary transition-colors group px-3 py-1.5 rounded-full hover:bg-muted/50"
+          className="inline-flex items-center gap-2 text-muted-foreground hover:text-primary transition-colors group px-3 py-1.5 rounded-full hover:bg-muted/50 relative z-20"
         >
           <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
           <span className="text-xs sm:text-sm font-medium">Cambiar tipo de cuenta</span>
         </Link>
+
+        {/* Centered Logo */}
+        <div className="absolute inset-0 flex items-center justify-center pointer-events-none pt-2">
+          <Logo size="md" showIcon className="pointer-events-auto" />
+        </div>
       </div>
 
       {/* Contenedor centrado */}
@@ -137,11 +142,8 @@ function LoginFormContent({ role, roleLabel }: LoginFormProps) {
             animate={{ opacity: 1, scale: 1 }}
             transition={{ duration: 0.3 }}
           >
-            {/* Logo y Título */}
+            {/* Título */}
             <div className="text-center mb-6 space-y-1">
-              <div className="flex justify-center mb-4">
-                <Logo size="lg" showIcon className="scale-100" />
-              </div>
               <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-foreground">
                 Bienvenido de vuelta
               </h1>

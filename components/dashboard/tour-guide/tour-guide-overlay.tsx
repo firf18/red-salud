@@ -95,6 +95,11 @@ export function TourGuideOverlay({
 
   return (
     <>
+      {/* Global Backdrop - solo si NO hay target (si hay target, Spotlight maneja el backdrop) */}
+      {!step.target && (
+        <div className="fixed inset-0 z-[9998] bg-gray-900/40 backdrop-blur-[2px] transition-all duration-500" onClick={(e) => e.stopPropagation()} />
+      )}
+
       {/* Spotlight - solo si hay target */}
       {step.target && (
         <Spotlight

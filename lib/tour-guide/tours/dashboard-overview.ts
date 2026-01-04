@@ -1,6 +1,9 @@
 /**
- * Dashboard Overview Tour
- * Tour introductorio del dashboard para nuevos médicos
+ * @file dashboard-overview.ts
+ * @description Tour introductorio completo del dashboard para nuevos médicos.
+ * Incluye explicación de modos, widgets arrastrables y todas las funcionalidades.
+ * 
+ * @module Tour/Dashboard
  */
 
 import type { TourDefinition } from '@/lib/tour-guide/types';
@@ -8,100 +11,127 @@ import type { TourDefinition } from '@/lib/tour-guide/types';
 export const dashboardOverviewTour: TourDefinition = {
   id: 'dashboard-overview',
   name: 'Introducción al Dashboard',
-  description: 'Conoce las funcionalidades principales de tu dashboard médico',
+  description: 'Conoce todas las funcionalidades de tu dashboard médico',
   category: 'onboarding',
-  autoStart: true, // Se inicia automáticamente para nuevos usuarios
-  route: '/dashboard/medico', // Ruta donde está disponible este tour
-  
+  autoStart: true, // Se inicia automáticamente la primera vez
+  route: '/dashboard/medico',
+
   steps: [
+    // =========================================================================
+    // BIENVENIDA
+    // =========================================================================
     {
       id: 'welcome',
-      title: '¡Bienvenido a Red Salud! 👋',
-      description: 'Te guiaremos por las funcionalidades principales del dashboard. Este tour tomará aproximadamente 2 minutos. Puedes saltarlo en cualquier momento presionando ESC.',
+      title: '¡Bienvenido a Red-Salud! 👋',
+      description: 'Este es tu centro de control médico personalizable. Aquí gestionarás citas, pacientes, tareas y mucho más. Te guiaremos por todas las funcionalidades.',
       placement: 'center',
     },
-    
-    {
-      id: 'calendar-intro',
-      target: '[data-tour="calendar-section"]',
-      title: 'Calendario de Citas',
-      description: 'Tu calendario principal con vistas Día, Semana y Mes. Aquí gestionas todas tus citas de forma eficiente.',
-      placement: 'top',
-      condition: () => {
-        // Solo mostrar si ya estamos en la página de citas
-        return window.location.pathname.includes('/citas');
-      }
-    },
-    
-    {
-      id: 'calendar-views',
-      target: '[data-tour="calendar-view-buttons"]',
-      title: 'Vistas del Calendario',
-      description: 'Cambia entre vista Día, Semana, Mes y Lista según tu preferencia. También puedes usar atajos de teclado: D, W, M, L.',
-      placement: 'bottom',
-    },
-    
-    {
-      id: 'new-appointment',
-      target: '[data-tour="new-appointment-btn"]',
-      title: 'Crear Nueva Cita',
-      description: 'Haz clic aquí para agendar una nueva cita. También puedes presionar la tecla "N" desde cualquier lugar del calendario.',
-      placement: 'bottom',
-      highlight: 'bounce',
-    },
-    
-    {
-      id: 'drag-drop',
-      target: '[data-tour="calendar-grid"]',
-      title: 'Reprogramar con Drag & Drop',
-      description: 'Puedes arrastrar y soltar citas para reprogramarlas rápidamente. El sistema validará automáticamente conflictos.',
-      placement: 'top',
-    },
-    
-    {
-      id: 'realtime-updates',
-      target: '[data-tour="realtime-indicator"]',
-      title: 'Actualizaciones en Tiempo Real',
-      description: 'Las citas se sincronizan automáticamente. Si un paciente agenda desde la app, verás el cambio instantáneamente sin recargar.',
-      placement: 'bottom',
-    },
-    
-    {
-      id: 'keyboard-shortcuts',
-      title: 'Atajos de Teclado ⌨️',
-      description: `Usa estos atajos para trabajar más rápido:
 
-• N - Nueva cita
-• T - Ir a hoy
-• ← → - Navegar semanas
-• D / W / M / L - Cambiar vistas
-• ESC - Cerrar modales
-
-Presiona ? en cualquier momento para ver todos los atajos.`,
-      placement: 'center',
+    // =========================================================================
+    // HEADER
+    // =========================================================================
+    {
+      id: 'header-info',
+      target: '[data-tour="dashboard-header"]',
+      title: 'Tu Panel de Información',
+      description: 'Aquí verás tu nombre, especialidad, fecha actual y tu estado de verificación SACS. Todo actualizado en tiempo real.',
+      placement: 'bottom',
     },
-    
+
+    // =========================================================================
+    // MODOS
+    // =========================================================================
+    {
+      id: 'mode-indicator',
+      target: '[data-tour="mode-indicator"]',
+      title: 'Modo Simple vs Profesional',
+      description: '**Haz clic aquí para cambiar de modo:**\n\n• **Simple**: Vista rápida con lo esencial\n• **Pro**: Más widgets y análisis detallados\n\n¡Pruébalo ahora!',
+      placement: 'left',
+    },
+
+    // =========================================================================
+    // WIDGETS PERSONALIZABLES
+    // =========================================================================
+    {
+      id: 'widgets-button',
+      target: '[data-tour="dashboard-actions"]',
+      title: 'Personaliza tu Dashboard',
+      description: 'Desde aquí puedes:\n\n• **Activar/desactivar** widgets\n• **Restablecer** el diseño original\n\nTus preferencias se guardan automáticamente en la nube.',
+      placement: 'left',
+    },
+
+    {
+      id: 'dashboard-grid',
+      target: '[data-tour="dashboard-grid"]',
+      title: '¡Widgets Arrastrables! 🖱️',
+      description: 'Cada tarjeta es **un widget interactivo**. Puedes:\n\n• **Arrastrar y soltar** para reorganizar\n• **Click** para ver más detalles\n\nPrueba arrastrar las tarjetas para personalizar tu vista.',
+      placement: 'top',
+      highlight: 'pulse',
+    },
+
+    // =========================================================================
+    // WIDGETS INDIVIDUALES
+    // =========================================================================
+    {
+      id: 'stats-widget',
+      target: '[data-widget="stats-overview"]',
+      title: 'Widget de Estadísticas',
+      description: 'Métricas clave de tu práctica:\n\n• Citas del día\n• Total de pacientes\n• Consultas del mes\n• Tu calificación promedio',
+      placement: 'bottom',
+    },
+
+    {
+      id: 'appointments-widget',
+      target: '[data-widget="today-timeline"]',
+      title: 'Timeline de Citas',
+      description: 'Tu agenda del día en tiempo real:\n\n• Próximas citas\n• Estado de cada consulta\n• Acceso rápido al paciente',
+      placement: 'right',
+    },
+
+    {
+      id: 'tasks-widget',
+      target: '[data-widget="tasks"]',
+      title: 'Gestor de Tareas',
+      description: 'Tu lista de pendientes:\n\n• Crear tareas con prioridad\n• Fechas límite\n• Marcar como completadas\n\nPuedes vincular tareas a pacientes específicos.',
+      placement: 'left',
+    },
+
+    {
+      id: 'quick-actions-widget',
+      target: '[data-widget="quick-actions"]',
+      title: 'Acciones Rápidas',
+      description: 'Accesos directos a las funciones más usadas:\n\n• Nueva cita\n• Buscar paciente\n• Crear receta\n• Iniciar videollamada',
+      placement: 'top',
+    },
+
+    // =========================================================================
+    // CIERRE
+    // =========================================================================
+    {
+      id: 'help-button',
+      target: '[data-tour="help-button"]',
+      title: 'Ayuda Siempre Disponible',
+      description: 'Si necesitas volver a ver este tour, haz clic en el ícono de ayuda (?). También puedes acceder al chat de soporte.',
+      placement: 'bottom',
+    },
+
     {
       id: 'complete',
-      title: '¡Tour Completado! 🎉',
-      description: 'Ya conoces lo básico del calendario. Explora libremente y practica arrastrando citas para reprogramarlas. ¡Disfruta de tu dashboard!',
+      title: '¡Estás Listo! 🚀',
+      description: 'Ya conoces tu dashboard médico. Explora los widgets, personaliza tu vista y comienza a gestionar tu práctica.\n\n**Consejos finales:**\n• Arrastra widgets para organizarlos\n• El modo Pro tiene más funciones\n• Tus preferencias se guardan automáticamente',
       placement: 'center',
     }
   ],
-  
+
   onStart: () => {
-    console.log('Dashboard overview tour started');
-    // Analytics: track tour start
+    console.log('[Tour] Dashboard overview started');
   },
-  
+
   onComplete: () => {
-    console.log('Dashboard overview tour completed');
-    // Analytics: track completion
-    // Mostrar mensaje de felicitación
+    console.log('[Tour] Dashboard overview completed');
   },
-  
+
   onSkip: () => {
-    console.log('Dashboard overview tour skipped');
-    // Analytics: track skip
+    console.log('[Tour] Dashboard overview skipped');
   },
 };

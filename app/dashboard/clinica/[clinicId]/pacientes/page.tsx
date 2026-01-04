@@ -8,7 +8,8 @@ import { useParams } from 'next/navigation';
 import { useInternationalPatients } from '@/hooks/use-clinic-international';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Skeleton } from '@/components/ui/skeleton';
+
+
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Globe, FileText, Calendar } from 'lucide-react';
 
@@ -26,8 +27,9 @@ export default function InternationalPatientsPage() {
   } = useInternationalPatients(clinicId);
 
   if (isLoading) {
-    return <Skeleton className="h-96 w-full" />;
+    return null;
   }
+
 
   return (
     <div className="space-y-6">

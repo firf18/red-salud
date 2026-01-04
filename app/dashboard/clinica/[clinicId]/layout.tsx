@@ -8,7 +8,8 @@ import { useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { ClinicScopeProvider, useClinicScope } from '@/components/dashboard/clinica/clinic-scope-provider';
 import { useClinicOverview } from '@/hooks/use-clinic-overview';
-import { Skeleton } from '@/components/ui/skeleton';
+
+
 
 function ClinicLayoutContent({ children }: { children: React.ReactNode }) {
   const params = useParams();
@@ -41,13 +42,9 @@ function ClinicLayoutContent({ children }: { children: React.ReactNode }) {
   }, [locations, setCurrentLocations]);
 
   if (isLoading) {
-    return (
-      <div className="flex-1 space-y-4 p-8 pt-6">
-        <Skeleton className="h-10 w-64" />
-        <Skeleton className="h-96 w-full" />
-      </div>
-    );
+    return null;
   }
+
 
   if (!currentClinic) {
     return (

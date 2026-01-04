@@ -19,6 +19,7 @@ import {
   Bell,
   ExternalLink,
   Calendar,
+  type LucideIcon,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -32,7 +33,7 @@ interface Service {
   id: string;
   name: string;
   description: string;
-  icon: React.ElementType;
+  icon: LucideIcon;
   status: ServiceStatus;
   uptime: number;
   responseTime: number;
@@ -188,7 +189,7 @@ const statusConfig: Record<ServiceStatus, { label: string; color: string; icon: 
 function ServiceCard({ service }: { service: Service }) {
   const status = statusConfig[service.status];
   const Icon = service.icon;
-  const StatusIcon = status.icon;
+  const StatusIcon = status.icon as LucideIcon;
 
   return (
     <motion.div
@@ -247,7 +248,7 @@ function UptimeBar() {
 
 function IncidentCard({ incident }: { incident: Incident }) {
   const [isExpanded, setIsExpanded] = useState(false);
-  
+
   const severityColors = {
     minor: "bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400",
     major: "bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400",
@@ -270,9 +271,9 @@ function IncidentCard({ incident }: { incident: Incident }) {
               {incident.severity === "minor" ? "Menor" : incident.severity === "major" ? "Mayor" : "Crítico"}
             </Badge>
             <Badge variant="outline" className={statusColors[incident.status]}>
-              {incident.status === "resolved" ? "Resuelto" : 
-               incident.status === "investigating" ? "Investigando" :
-               incident.status === "identified" ? "Identificado" : "Monitoreando"}
+              {incident.status === "resolved" ? "Resuelto" :
+                incident.status === "investigating" ? "Investigando" :
+                  incident.status === "identified" ? "Identificado" : "Monitoreando"}
             </Badge>
           </div>
           <h3 className="font-semibold text-zinc-900 dark:text-white">
@@ -331,13 +332,13 @@ export default function EstadoPage() {
       {/* Hero */}
       <section className="relative pt-32 pb-16 px-4 sm:px-6 lg:px-8 overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-br from-green-50 via-white to-teal-50 dark:from-zinc-900 dark:via-zinc-950 dark:to-zinc-900" />
-        
+
         <div className="max-w-4xl mx-auto relative z-10 text-center">
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
             <div className={cn(
               "inline-flex items-center gap-3 px-6 py-3 rounded-full mb-8",
-              allOperational 
-                ? "bg-green-100 dark:bg-green-900/30" 
+              allOperational
+                ? "bg-green-100 dark:bg-green-900/30"
                 : "bg-yellow-100 dark:bg-yellow-900/30"
             )}>
               {allOperational ? (
@@ -347,8 +348,8 @@ export default function EstadoPage() {
               )}
               <span className={cn(
                 "text-lg font-semibold",
-                allOperational 
-                  ? "text-green-700 dark:text-green-400" 
+                allOperational
+                  ? "text-green-700 dark:text-green-400"
                   : "text-yellow-700 dark:text-yellow-400"
               )}>
                 {allOperational ? "Todos los sistemas operativos" : "Algunos sistemas con problemas"}

@@ -10,7 +10,8 @@ import { useClinicRCM } from '@/hooks/use-clinic-rcm';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
-import { Skeleton } from '@/components/ui/skeleton';
+
+
 
 export default function ClinicRCMPage() {
   const params = useParams();
@@ -27,8 +28,9 @@ export default function ClinicRCMPage() {
   } = useClinicRCM(clinicId, selectedLocationIds);
 
   if (isLoading) {
-    return <Skeleton className="h-96 w-full" />;
+    return null;
   }
+
 
   const latestKPI = financialKPIs?.[0];
 

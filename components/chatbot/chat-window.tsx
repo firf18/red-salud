@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useRef, useEffect, useCallback } from "react";
+import { usePathname } from "next/navigation";
 import { Send, X, Bot, User, Loader2, ThumbsUp, ThumbsDown, Sparkles, MessageCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -8,7 +9,9 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { cn } from "@/lib/utils";
 import { motion, AnimatePresence } from "framer-motion";
 import ReactMarkdown from "react-markdown";
-import { suggestedQuestions } from "@/lib/data/knowledge-base";
+import { suggestedQuestions, pageSuggestions } from "@/lib/data/knowledge-base";
+import { useTranslation } from "@/lib/hooks/use-translation";
+import { TranslationKey } from "@/lib/i18n/translations";
 
 interface Message {
     id: string;
@@ -87,17 +90,24 @@ function saveHistory(messages: Message[]): void {
     }
 }
 
-function getWelcomeMessage(persona: ChatPersona, context?: ChatContext): string {
+function getWelcomeMessage(persona: ChatPersona, context: ChatContext | undefined, t: (key: TranslationKey) => string): string {
     if (persona === "doctor") {
-        const location = context?.page ? ` (${context.page})` : "";
-        return "Hola, soy tu asistente clínico. Puedo ayudarte a gestionar la agenda, resumir pacientes y guiarte en el dashboard" +
-            `${location}. Dime qué necesitas y te sugiero el mejor flujo.`;
+        return t("welcome_doctor");
     }
 
-    return "¡Hola! 👋 Soy el asistente virtual de **Red Salud**. Puedo ayudarte con información sobre:\n\n- 💰 Planes y precios\n- 🏥 Especialidades médicas\n- 📅 Cómo agendar citas\n- 💻 Telemedicina\n- ❓ Y mucho más\n\n¿En qué puedo ayudarte hoy?";
+    // Contextual welcome message
+    if (context?.page?.includes("/precios")) {
+        return t("welcome_pricing");
+    }
+    if (context?.page?.includes("/servicios")) {
+        return t("welcome_services");
+    }
+
+    return t("welcome_default");
 }
 
 export function ChatWindow({ isOpen, onClose, persona = "default", context, suggestedQuestionsOverride }: ChatWindowProps) {
+    const { t } = useTranslation();
     const [messages, setMessages] = useState<Message[]>([]);
     const [input, setInput] = useState("");
     const [isLoading, setIsLoading] = useState(false);
@@ -105,15 +115,37 @@ export function ChatWindow({ isOpen, onClose, persona = "default", context, sugg
     const scrollRef = useRef<HTMLDivElement>(null);
     const inputRef = useRef<HTMLInputElement>(null);
 
-    const effectivePage = context?.page || (typeof window !== "undefined" ? window.location.pathname : undefined);
+    const pathname = usePathname();
+    const effectivePage = context?.page || pathname;
+
+    // Determine dynamic suggestions based on page
+    const getDynamicSuggestions = () => {
+        if (suggestedQuestionsOverride) return suggestedQuestionsOverride;
+        if (persona === "doctor") return doctorSuggestedQuestions;
+
+        // Find matching page suggestions (longest match wins)
+        if (effectivePage) {
+            const keys = Object.keys(pageSuggestions);
+            const matchingKey = keys
+                .filter(key => effectivePage.startsWith(key))
+                .sort((a, b) => b.length - a.length)[0]; // Sort by length desc
+
+            if (matchingKey) return pageSuggestions[matchingKey];
+        }
+
+        return suggestedQuestions;
+    };
+
+    const effectiveSuggestions = getDynamicSuggestions();
+
     const effectiveContext: ChatContext = {
         ...context,
         page: effectivePage,
         role: context?.role || (persona === "doctor" ? "medico" : context?.role),
     };
-    const welcomeMessage = getWelcomeMessage(persona, effectiveContext);
-    const effectiveSuggestions = suggestedQuestionsOverride || (persona === "doctor" ? doctorSuggestedQuestions : suggestedQuestions);
-
+    
+    // Welcome message is now derived inside effect to use 't'
+    
     // Load history on mount
     useEffect(() => {
         const history = loadHistory();
@@ -122,6 +154,7 @@ export function ChatWindow({ isOpen, onClose, persona = "default", context, sugg
             setShowSuggestions(false);
         } else {
             // Initial welcome message
+            const welcomeMessage = getWelcomeMessage(persona, effectiveContext, t);
             setMessages([
                 {
                     id: generateId(),
@@ -168,7 +201,7 @@ export function ChatWindow({ isOpen, onClose, persona = "default", context, sugg
                     responseContent: message.content,
                     isPositive,
                     sessionId: getSessionId(),
-                    pageUrl: typeof window !== "undefined" ? window.location.pathname : null,
+                    pageUrl: pathname,
                 }),
             });
         } catch (error) {
@@ -253,7 +286,7 @@ export function ChatWindow({ isOpen, onClose, persona = "default", context, sugg
                 {
                     id: generateId(),
                     role: "model",
-                    content: "Lo siento, tuve un problema al procesar tu mensaje. Por favor intenta de nuevo o [contacta a soporte](/soporte) si el problema persiste.",
+                    content: t("error_message"),
                 },
             ]);
         } finally {
@@ -267,7 +300,7 @@ export function ChatWindow({ isOpen, onClose, persona = "default", context, sugg
             {
                 id: generateId(),
                 role: "model",
-                content: welcomeMessage,
+                content: getWelcomeMessage(persona, effectiveContext, t),
             },
         ]);
         setShowSuggestions(true);
@@ -293,9 +326,9 @@ export function ChatWindow({ isOpen, onClose, persona = "default", context, sugg
                                 <div className="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-green-400 rounded-full border-2 border-primary" />
                             </div>
                             <div>
-                                <h3 className="font-semibold text-sm">Asistente Red Salud</h3>
+                                <h3 className="font-semibold text-sm">{t("header_title")}</h3>
                                 <p className="text-xs text-primary-foreground/80 flex items-center gap-1">
-                                    <Sparkles className="h-3 w-3" /> Disponible 24/7
+                                    <Sparkles className="h-3 w-3" /> {t("header_subtitle")}
                                 </p>
                             </div>
                         </div>
@@ -306,13 +339,14 @@ export function ChatWindow({ isOpen, onClose, persona = "default", context, sugg
                                 onClick={clearHistory}
                                 className="text-primary-foreground/80 hover:text-primary-foreground hover:bg-primary-foreground/10 text-xs h-7 px-2"
                             >
-                                Limpiar
+                                {t("clear_history")}
                             </Button>
                             <Button
                                 variant="ghost"
                                 size="icon"
                                 onClick={onClose}
                                 className="text-primary-foreground hover:bg-primary-foreground/10 h-8 w-8"
+                                aria-label={t("close_chat")}
                             >
                                 <X className="h-4 w-4" />
                             </Button>
@@ -357,11 +391,11 @@ export function ChatWindow({ isOpen, onClose, persona = "default", context, sugg
                                             )}
                                         >
                                             {message.role === "model" && message.content === "" ? (
-                                                <span className="flex items-center gap-2 text-muted-foreground">
-                                                    <Loader2 className="h-4 w-4 animate-spin" />
-                                                    Escribiendo...
-                                                </span>
-                                            ) : message.role === "model" ? (
+                                        <span className="flex items-center gap-2 text-muted-foreground">
+                                            <Loader2 className="h-4 w-4 animate-spin" />
+                                            {t("searching")}
+                                        </span>
+                                    ) : message.role === "model" ? (
                                                 <div className="prose prose-sm dark:prose-invert max-w-none [&_p]:my-1 [&_ul]:my-1 [&_li]:my-0.5">
                                                     <ReactMarkdown
                                                         components={{
@@ -394,7 +428,7 @@ export function ChatWindow({ isOpen, onClose, persona = "default", context, sugg
                                                                 ? "text-muted-foreground/30 cursor-not-allowed"
                                                                 : "text-muted-foreground hover:text-green-600 hover:bg-green-100 dark:hover:bg-green-900/30"
                                                     )}
-                                                    title="Respuesta útil"
+                                                    title={t("feedback_positive")}
                                                 >
                                                     <ThumbsUp className="h-3.5 w-3.5" />
                                                 </button>
@@ -409,7 +443,7 @@ export function ChatWindow({ isOpen, onClose, persona = "default", context, sugg
                                                                 ? "text-muted-foreground/30 cursor-not-allowed"
                                                                 : "text-muted-foreground hover:text-red-600 hover:bg-red-100 dark:hover:bg-red-900/30"
                                                     )}
-                                                    title="Respuesta no útil"
+                                                    title={t("feedback_negative")}
                                                 >
                                                     <ThumbsDown className="h-3.5 w-3.5" />
                                                 </button>
@@ -428,7 +462,7 @@ export function ChatWindow({ isOpen, onClose, persona = "default", context, sugg
                                 animate={{ opacity: 1, y: 0 }}
                                 className="mt-4 space-y-2"
                             >
-                                <p className="text-xs text-muted-foreground font-medium">Preguntas sugeridas:</p>
+                                <p className="text-xs text-muted-foreground font-medium">{t("suggestions_label")}</p>
                                 <div className="flex flex-wrap gap-2">
                                     {effectiveSuggestions.slice(0, 4).map((question, i) => (
                                         <button
@@ -451,15 +485,17 @@ export function ChatWindow({ isOpen, onClose, persona = "default", context, sugg
                                 ref={inputRef}
                                 value={input}
                                 onChange={(e) => setInput(e.target.value)}
-                                placeholder="Escribe tu pregunta..."
+                                placeholder={t("input_placeholder")}
                                 className="flex-1 focus-visible:ring-1 rounded-full px-4"
                                 disabled={isLoading}
+                                aria-label={t("input_placeholder")}
                             />
                             <Button
                                 type="submit"
                                 size="icon"
                                 disabled={isLoading || !input.trim()}
                                 className="rounded-full shrink-0"
+                                aria-label={t("send_message")}
                             >
                                 {isLoading ? (
                                     <Loader2 className="h-4 w-4 animate-spin" />
@@ -469,7 +505,7 @@ export function ChatWindow({ isOpen, onClose, persona = "default", context, sugg
                             </Button>
                         </form>
                         <p className="text-[10px] text-muted-foreground text-center mt-2">
-                            Respuestas generadas por IA. Verifica información importante.
+                            {t("disclaimer")}
                         </p>
                     </div>
                 </motion.div>

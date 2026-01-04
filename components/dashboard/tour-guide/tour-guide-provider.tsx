@@ -5,9 +5,10 @@
 
 'use client';
 
-import { createContext, useEffect, useState, useCallback } from 'react';
+import { createContext, useContext, useEffect, useState, useCallback } from 'react';
+import { usePathname } from 'next/navigation';
 import { TourGuideOverlay } from './tour-guide-overlay';
-import { TOURS, TOUR_STORAGE_KEYS, DEFAULT_TOUR_SETTINGS, getTourById } from '@/lib/tour-guide/tours';
+import { TOURS, TOUR_STORAGE_KEYS, DEFAULT_TOUR_SETTINGS, getTourById, getTourForRoute } from '@/lib/tour-guide/tours';
 import type { TourDefinition, TourGuideContextValue } from '@/lib/tour-guide/types';
 
 export const TourGuideContext = createContext<TourGuideContextValue | null>(null);
@@ -31,7 +32,7 @@ export function TourGuideProvider({ children }: TourGuideProviderProps) {
     }
     return null;
   });
-  
+
   const [currentStep, setCurrentStep] = useState(() => {
     if (typeof window === 'undefined') return 0;
     try {
@@ -45,7 +46,7 @@ export function TourGuideProvider({ children }: TourGuideProviderProps) {
     }
     return 0;
   });
-  
+
   // Inicializar completedTours desde localStorage
   const [completedTours, setCompletedTours] = useState<string[]>(() => {
     if (typeof window === 'undefined') return [];
@@ -56,7 +57,7 @@ export function TourGuideProvider({ children }: TourGuideProviderProps) {
       return [];
     }
   });
-  
+
   // Inicializar settings desde localStorage
   const [settings] = useState(() => {
     if (typeof window === 'undefined') return DEFAULT_TOUR_SETTINGS;
@@ -67,6 +68,8 @@ export function TourGuideProvider({ children }: TourGuideProviderProps) {
       return DEFAULT_TOUR_SETTINGS;
     }
   });
+
+  const pathname = usePathname();
 
   // Funciones del tour (declaradas antes de los useEffects que las usan)
   const closeTour = useCallback(() => {
@@ -150,7 +153,7 @@ export function TourGuideProvider({ children }: TourGuideProviderProps) {
     if (!settings.autoStartTours) return;
 
     const isFirstVisit = !localStorage.getItem(TOUR_STORAGE_KEYS.VISITED);
-    
+
     if (isFirstVisit) {
       // Marcar como visitado
       localStorage.setItem(TOUR_STORAGE_KEYS.VISITED, 'true');
@@ -168,6 +171,20 @@ export function TourGuideProvider({ children }: TourGuideProviderProps) {
       }
     }
   }, [settings.autoStartTours, completedTours, startTour]);
+
+  // Listen for custom start-tour events
+  useEffect(() => {
+    const handleStartTour = () => {
+      // Try to find a tour for the current route
+      const tour = getTourForRoute(pathname);
+      if (tour) {
+        startTour(tour.id);
+      }
+    };
+
+    document.addEventListener('start-tour', handleStartTour);
+    return () => document.removeEventListener('start-tour', handleStartTour);
+  }, [pathname, startTour]);
 
   // Guardar progreso cuando cambia
   useEffect(() => {
@@ -195,15 +212,15 @@ export function TourGuideProvider({ children }: TourGuideProviderProps) {
     isTourActive: currentTour !== null,
     canGoNext: currentTour ? currentStep < currentTour.steps.length - 1 : false,
     canGoPrev: currentStep > 0,
-    progress: currentTour 
-      ? ((currentStep + 1) / currentTour.steps.length) * 100 
+    progress: currentTour
+      ? ((currentStep + 1) / currentTour.steps.length) * 100
       : 0,
   };
 
   return (
     <TourGuideContext.Provider value={value}>
       {children}
-      
+
       {/* Renderizar overlay si hay tour activo */}
       {currentTour && (
         <TourGuideOverlay
@@ -217,4 +234,17 @@ export function TourGuideProvider({ children }: TourGuideProviderProps) {
       )}
     </TourGuideContext.Provider>
   );
+}
+
+/**
+ * Hook para acceder al contexto del Tour Guide
+ * @returns El contexto del Tour Guide con todas las funciones y estado
+ * @throws Error si se usa fuera del TourGuideProvider
+ */
+export function useTourGuide() {
+  const context = useContext(TourGuideContext);
+  if (!context) {
+    throw new Error('useTourGuide must be used within a TourGuideProvider');
+  }
+  return context;
 }

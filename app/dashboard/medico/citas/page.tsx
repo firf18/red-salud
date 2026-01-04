@@ -1,17 +1,23 @@
 
 "use client";
 import { useEffect, useState, useRef } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { supabase } from "@/lib/supabase/client";
 import { VerificationGuard } from "@/components/dashboard/medico/features/verification-guard";
 import { CalendarMain } from "@/components/dashboard/medico/calendar/calendar-main";
 import { PatientSummaryModal } from "@/components/dashboard/medico/calendar/patient-summary-modal";
 import type { CalendarAppointment } from "@/components/dashboard/medico/calendar/types";
-import { startOfMonth, endOfMonth, addMonths, addWeeks, subWeeks } from "date-fns";
+import { startOfMonth, endOfMonth, addMonths, addWeeks, subWeeks, isSameDay, format, addDays, subDays, subMonths } from "date-fns";
+import { es } from "date-fns/locale";
 import { Toast, type ToastType } from "@/components/ui/toast";
 import type { RealtimeChannel } from "@supabase/supabase-js";
 import { useDragAndDrop } from "@/hooks/use-drag-drop";
-import { useKeyboardShortcuts, CALENDAR_SHORTCUTS } from "@/hooks/use-keyboard-shortcuts";
+import { useKeyboardShortcuts, DEFAULT_SHORTCUTS } from "@/hooks/use-keyboard-shortcuts";
+import { Button } from "@/components/ui/button";
+import { ChevronLeft, ChevronRight, Plus, Calendar as CalendarIcon, MessageCircle, HelpCircle } from "lucide-react";
+import { CalendarViewSelector, type CalendarView } from "@/components/dashboard/medico/calendar/calendar-view-selector";
+import { SessionTimer } from "@/components/auth";
+
 
 export default function DoctorCitasPage() {
   const router = useRouter();
@@ -28,6 +34,11 @@ export default function DoctorCitasPage() {
   });
   const channelRef = useRef<RealtimeChannel | null>(null);
   const doctorIdRef = useRef<string | null>(null);
+
+  // Leer parámetros de URL para navegación desde widget
+  const searchParams = useSearchParams();
+  const urlDate = searchParams.get('date');
+  const urlView = searchParams.get('view');
 
   const showToast = (message: string, type: ToastType = "info") => {
     setToast({ message, type, isVisible: true });
@@ -48,21 +59,51 @@ export default function DoctorCitasPage() {
     setSelectedAppointment(null);
   };
 
+  const handleViewChange = (newView: CalendarView) => {
+    setView(newView);
+  };
+
   const handleTimeSlotClick = (date: Date, hour?: number) => {
     // Validar que no sea fecha/hora pasada
     const now = new Date();
     const selectedDateTime = new Date(date);
-    
+
     if (hour !== undefined) {
       selectedDateTime.setHours(hour, 0, 0, 0);
     }
-    
+
+    // Check for double booking
+    if (selectedDateTime < now) {
+      showToast("No puedes agendar citas en fechas u horas pasadas", "warning");
+      return;
+    }
+
+    // Check if slot is taken (basic check)
+    const isSlotTaken = appointments.some(apt => {
+      const aptDate = new Date(apt.fecha_hora);
+      const aptEndDate = new Date(apt.fecha_hora_fin);
+      const selectedEndTime = new Date(selectedDateTime.getTime() + (apt.duracion_minutos || 30) * 60000); // Assuming default 30 min for new slot check
+
+      // Check for overlap:
+      // (StartA < EndB) && (EndA > StartB)
+      return (
+        isSameDay(aptDate, selectedDateTime) &&
+        selectedDateTime.getTime() < aptEndDate.getTime() &&
+        selectedEndTime.getTime() > aptDate.getTime()
+      );
+    });
+
+    if (isSlotTaken) {
+      showToast("Ya existe una cita en este horario o se superpone con otra. Por favor selecciona otro.", "warning");
+      return;
+    }
+
     // Si es fecha/hora pasada, no permitir
     if (selectedDateTime < now) {
       showToast("No puedes agendar citas en fechas u horas pasadas", "warning");
       return;
     }
-    
+
     const dateParam = date.toISOString();
     const hourParam = hour !== undefined ? `&hour=${hour}` : "";
     router.push(`/dashboard/medico/citas/nueva?date=${dateParam}${hourParam}`);
@@ -87,7 +128,7 @@ export default function DoctorCitasPage() {
   // Drag & Drop
   const { dragState, handleDragStart, handleDragOver, handleDragEnd, handleDragCancel } = useDragAndDrop(
     (updatedAppointment) => {
-      setAppointments(prev => 
+      setAppointments(prev =>
         prev.map(apt => apt.id === updatedAppointment.id ? updatedAppointment : apt)
       );
       showToast('Cita reprogramada exitosamente', 'success');
@@ -98,50 +139,73 @@ export default function DoctorCitasPage() {
   // Keyboard Shortcuts
   useKeyboardShortcuts([
     {
-      key: CALENDAR_SHORTCUTS.NEW_APPOINTMENT.key,
+      key: DEFAULT_SHORTCUTS.NEW_APPOINTMENT.key,
       handler: handleNewAppointment,
-      description: CALENDAR_SHORTCUTS.NEW_APPOINTMENT.description,
+      description: DEFAULT_SHORTCUTS.NEW_APPOINTMENT.description,
     },
     {
-      key: CALENDAR_SHORTCUTS.TODAY.key,
+      key: DEFAULT_SHORTCUTS.TODAY.key,
       handler: () => setCurrentDate(new Date()),
-      description: CALENDAR_SHORTCUTS.TODAY.description,
+      description: DEFAULT_SHORTCUTS.TODAY.description,
     },
     {
-      key: CALENDAR_SHORTCUTS.NEXT_WEEK.key,
+      key: DEFAULT_SHORTCUTS.NEXT_WEEK.key,
       handler: () => setCurrentDate(prev => addWeeks(prev, 1)),
-      description: CALENDAR_SHORTCUTS.NEXT_WEEK.description,
+      description: DEFAULT_SHORTCUTS.NEXT_WEEK.description,
     },
     {
-      key: CALENDAR_SHORTCUTS.PREV_WEEK.key,
+      key: DEFAULT_SHORTCUTS.PREV_WEEK.key,
       handler: () => setCurrentDate(prev => subWeeks(prev, 1)),
-      description: CALENDAR_SHORTCUTS.PREV_WEEK.description,
+      description: DEFAULT_SHORTCUTS.PREV_WEEK.description,
     },
     {
-      key: CALENDAR_SHORTCUTS.DAY_VIEW.key,
+      key: DEFAULT_SHORTCUTS.DAY_VIEW.key,
       handler: () => setView('day'),
-      description: CALENDAR_SHORTCUTS.DAY_VIEW.description,
+      description: DEFAULT_SHORTCUTS.DAY_VIEW.description,
     },
     {
-      key: CALENDAR_SHORTCUTS.WEEK_VIEW.key,
+      key: DEFAULT_SHORTCUTS.WEEK_VIEW.key,
       handler: () => setView('week'),
-      description: CALENDAR_SHORTCUTS.WEEK_VIEW.description,
+      description: DEFAULT_SHORTCUTS.WEEK_VIEW.description,
     },
     {
-      key: CALENDAR_SHORTCUTS.MONTH_VIEW.key,
+      key: DEFAULT_SHORTCUTS.MONTH_VIEW.key,
       handler: () => setView('month'),
-      description: CALENDAR_SHORTCUTS.MONTH_VIEW.description,
+      description: DEFAULT_SHORTCUTS.MONTH_VIEW.description,
     },
     {
-      key: CALENDAR_SHORTCUTS.LIST_VIEW.key,
+      key: DEFAULT_SHORTCUTS.LIST_VIEW.key,
       handler: () => setView('list'),
-      description: CALENDAR_SHORTCUTS.LIST_VIEW.description,
+      description: DEFAULT_SHORTCUTS.LIST_VIEW.description,
     },
   ]);
 
+  // Efecto para establecer fecha y vista desde URL
+  useEffect(() => {
+    // Si hay fecha en la URL, establecerla
+    if (urlDate) {
+      // IMPORTANTE: Parsear la fecha manualmente para evitar problemas de timezone
+      // new Date("YYYY-MM-DD") interpreta como UTC, causando desfase de 1 día
+      const dateParts = urlDate.split('-');
+      if (dateParts.length === 3) {
+        const year = parseInt(dateParts[0], 10);
+        const month = parseInt(dateParts[1], 10) - 1; // Los meses son 0-indexed
+        const day = parseInt(dateParts[2], 10);
+        const parsedDate = new Date(year, month, day);
+        if (!isNaN(parsedDate.getTime())) {
+          setCurrentDate(parsedDate);
+        }
+      }
+    }
+    // Si hay vista en la URL, establecerla
+    if (urlView && ['day', 'week', 'month', 'list'].includes(urlView)) {
+      setView(urlView as 'day' | 'week' | 'month' | 'list');
+    }
+  }, [urlDate, urlView]);
+
   useEffect(() => {
     loadData();
-    
+
     // Cleanup al desmontar
     return () => {
       if (channelRef.current) {
@@ -234,7 +298,7 @@ export default function DoctorCitasPage() {
           notas_internas: (apt.notas_internas as string) || null,
         };
       });
-      
+
       console.log(`Loaded ${formattedAppointments.length} appointments (${data.filter((a: Record<string, unknown>) => a.offline_patient_id).length} offline patients)`);
       setAppointments(formattedAppointments);
     }
@@ -292,7 +356,7 @@ export default function DoctorCitasPage() {
     try {
       // Determinar si es paciente registrado u offline
       const isOfflinePatient = !aptData.paciente_id && aptData.offline_patient_id;
-      
+
       let patientData = null;
       if (isOfflinePatient) {
         const { data } = await supabase
@@ -337,13 +401,13 @@ export default function DoctorCitasPage() {
     <VerificationGuard>
       <div className="flex flex-col h-screen overflow-hidden" data-tour="calendar-section">
         {/* Header - Fixed */}
-        <div className="flex-shrink-0 px-4 py-6 sm:px-6 border-b bg-white">
+        <div className="flex-shrink-0 px-4 py-6 sm:px-6 border-b border-gray-200/60 bg-white shadow-sm">
           <div className="flex items-center justify-between">
             <div>
               <div className="flex items-center gap-3">
                 <h1 className="text-3xl font-bold text-gray-900">Agenda</h1>
                 {!loading && (
-                  <span 
+                  <span
                     className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-green-100 text-green-700 text-xs font-medium"
                     data-tour="realtime-indicator"
                   >
@@ -355,6 +419,33 @@ export default function DoctorCitasPage() {
               <p className="text-gray-600 mt-1">
                 Gestiona tus citas y disponibilidad • Actualizaciones en tiempo real
               </p>
+            </div>
+            <div className="flex items-center gap-4">
+              {/* Integrated Tools - Timer, Chat & Tour */}
+              <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2 border-l border-gray-200/60 pl-3">
+                  <SessionTimer showWarning={true} />
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="text-gray-500 hover:text-blue-600"
+                    data-tour="chatbot-button"
+                    onClick={() => document.dispatchEvent(new Event('toggle-chat'))}
+                    title="Abrir Chatbot"
+                  >
+                    <MessageCircle className="h-5 w-5" />
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="text-gray-500 hover:text-purple-600"
+                    onClick={() => document.dispatchEvent(new Event('start-tour'))}
+                    title="Iniciar Tour"
+                  >
+                    <HelpCircle className="h-5 w-5" />
+                  </Button>
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -388,14 +479,14 @@ export default function DoctorCitasPage() {
           onMessage={handleMessage}
           onStartVideo={handleStartVideo}
         />
-        
+
         <Toast
           message={toast.message}
           type={toast.type}
           isVisible={toast.isVisible}
           onClose={() => setToast((prev) => ({ ...prev, isVisible: false }))}
         />
-      </div>
-    </VerificationGuard>
+      </div >
+    </VerificationGuard >
   );
 }

@@ -84,41 +84,37 @@ export function WeekView({
       <div className="flex-shrink-0 bg-gradient-to-r from-blue-50 to-indigo-50 border-b-2 border-blue-200 sticky top-0 z-30 shadow-md">
         <div className="flex">
           {/* Time column header */}
-          <div className="w-16 flex-shrink-0 border-r border-blue-200 bg-white/90 backdrop-blur-sm flex items-center justify-center">
+          <div className="w-16 flex-shrink-0 border-r border-gray-100 bg-white flex items-center justify-center">
             <Clock className="h-4 w-4 text-gray-500" />
           </div>
-          
+
           {/* Day headers - Grid fixed, NO scroll */}
           <div className="flex-1 grid grid-cols-7 gap-0">
             {weekDays.map((day) => {
               const isCurrentDay = checkIsToday(day);
               const dayAppointments = getDayAppointments(day);
-              
+
               return (
                 <div
                   key={day.toISOString()}
-                  className={`flex flex-col items-center justify-center p-3 border-r last:border-r-0 transition-all ${
-                    isCurrentDay 
-                      ? "bg-gradient-to-b from-blue-500 to-blue-600 text-white shadow-lg" 
-                      : "bg-white/80 backdrop-blur-sm hover:bg-blue-50/50"
-                  }`}
+                  className={`flex flex-col items-center justify-center p-3 border-r last:border-r-0 transition-all ${isCurrentDay
+                    ? "bg-gradient-to-b from-blue-500 to-blue-600 text-white shadow-lg"
+                    : "bg-white/80 backdrop-blur-sm hover:bg-blue-50/50"
+                    }`}
                 >
-                  <div className={`text-[10px] font-semibold uppercase tracking-wider mb-0.5 ${
-                    isCurrentDay ? "text-blue-100" : "text-gray-600"
-                  }`}>
+                  <div className={`text-[10px] font-semibold uppercase tracking-wider mb-0.5 ${isCurrentDay ? "text-blue-100" : "text-gray-600"
+                    }`}>
                     {format(day, "EEE", { locale: es })}
                   </div>
-                  <div className={`text-2xl font-bold ${
-                    isCurrentDay ? "text-white" : "text-gray-900"
-                  }`}>
+                  <div className={`text-2xl font-bold ${isCurrentDay ? "text-white" : "text-gray-900"
+                    }`}>
                     {format(day, "d")}
                   </div>
                   {dayAppointments.length > 0 && (
-                    <div className={`text-[9px] font-bold mt-1 px-1.5 py-0.5 rounded-full ${
-                      isCurrentDay 
-                        ? "bg-white/20 text-white" 
-                        : "bg-blue-100 text-blue-700"
-                    }`}>
+                    <div className={`text-[9px] font-bold mt-1 px-1.5 py-0.5 rounded-full ${isCurrentDay
+                      ? "bg-white/20 text-white"
+                      : "bg-blue-100 text-blue-700"
+                      }`}>
                       {dayAppointments.length}
                     </div>
                   )}
@@ -133,7 +129,7 @@ export function WeekView({
       <div className="flex-1 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100 relative">
         {/* Current time line (absolute positioned) */}
         {currentTimePosition !== null && checkIsToday(date) && (
-          <div 
+          <div
             className="absolute left-0 right-0 z-20 pointer-events-none"
             style={{ top: `${currentTimePosition}px` }}
           >
@@ -148,16 +144,15 @@ export function WeekView({
 
         <div className="flex">
           {/* Time column - Sticky left */}
-          <div className="w-16 flex-shrink-0 bg-gray-50/90 border-r border-gray-200 sticky left-0 z-10">
+          <div className="w-16 flex-shrink-0 bg-white border-r border-gray-100 sticky left-0 z-10">
             {hours.map((hour) => {
               const isCurrentHour = hour === currentHour && checkIsToday(date);
-              
+
               return (
                 <div
                   key={hour}
-                  className={`h-24 flex items-start justify-center pt-1 border-b border-gray-200 text-[10px] font-semibold transition-colors ${
-                    isCurrentHour ? "bg-yellow-50 text-yellow-800" : "text-gray-600"
-                  }`}
+                  className={`h-24 flex items-start justify-center pt-1 border-b border-gray-200 text-[10px] font-semibold transition-colors ${isCurrentHour ? "bg-yellow-50 text-yellow-800" : "text-gray-600"
+                    }`}
                 >
                   {format(new Date().setHours(hour, 0, 0, 0), "HH:mm")}
                 </div>
@@ -184,15 +179,13 @@ export function WeekView({
                     return (
                       <div
                         key={`${day.toISOString()}-${hour}`}
-                        className={`h-24 p-1 border-b border-gray-200 transition-all duration-100 ${
-                          isCurrentHour ? "bg-yellow-50/30" : ""
-                        } ${
-                          isDropTarget ? "bg-green-100 ring-2 ring-green-400" : ""
-                        } ${
-                          isPast || isPastDay
+                        data-tour="time-slot"
+                        className={`h-24 p-1 border-b border-gray-200 transition-all duration-100 ${isCurrentHour ? "bg-yellow-50/30" : ""
+                          } ${isDropTarget ? "bg-green-100 ring-2 ring-green-400" : ""
+                          } ${isPast || isPastDay
                             ? "bg-gray-50/50 cursor-not-allowed opacity-50"
                             : "cursor-pointer hover:bg-blue-50 active:bg-blue-100"
-                        }`}
+                          }`}
                         onClick={() => {
                           if (!isPast && !isPastDay) {
                             onTimeSlotClick?.(day, hour);
@@ -216,10 +209,12 @@ export function WeekView({
                           <div className="space-y-0.5 h-full overflow-y-auto scrollbar-none">
                             {hourAppointments.map((apt) => {
                               const isDragging = dragState?.draggedAppointment?.id === apt.id;
-                              
+
                               return (
                                 <div
                                   key={apt.id}
+                                  data-tour="appointment-card"
+                                  data-type={apt.tipo_cita}
                                   draggable={!isPast && !isPastDay}
                                   onDragStart={(e) => {
                                     e.stopPropagation();
@@ -233,17 +228,15 @@ export function WeekView({
                                       onDragCancel?.();
                                     }
                                   }}
-                                  className={`text-[9px] p-1 rounded border-l-2 transition-all hover:shadow-lg ${
-                                    isDragging ? "opacity-50 scale-95 cursor-grabbing" : "cursor-grab"
-                                  } ${
-                                    apt.status === "pendiente"
+                                  className={`text-[9px] p-1 rounded border-l-2 transition-all hover:shadow-lg ${isDragging ? "opacity-50 scale-95 cursor-grabbing" : "cursor-grab"
+                                    } ${apt.status === "pendiente"
                                       ? "bg-yellow-50 border-yellow-400 hover:bg-yellow-100"
                                       : apt.status === "confirmada"
-                                      ? "bg-blue-50 border-blue-400 hover:bg-blue-100"
-                                      : apt.status === "completada"
-                                      ? "bg-green-50 border-green-400 hover:bg-green-100"
-                                      : "bg-gray-50 border-gray-400 hover:bg-gray-100"
-                                  }`}
+                                        ? "bg-blue-50 border-blue-400 hover:bg-blue-100"
+                                        : apt.status === "completada"
+                                          ? "bg-green-50 border-green-400 hover:bg-green-100"
+                                          : "bg-gray-50 border-gray-400 hover:bg-gray-100"
+                                    }`}
                                   onClick={(e) => {
                                     e.stopPropagation();
                                     if (!isDragging) {

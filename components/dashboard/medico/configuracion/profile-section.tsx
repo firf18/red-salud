@@ -1,123 +1,255 @@
+/**
+ * @file profile-section.tsx
+ * @description Sección de Perfil Básico en la configuración del médico.
+ * Permite editar datos personales, foto, teléfono y especialidades.
+ * Nombre y cédula son de solo lectura tras verificación SACS.
+ * @module Dashboard/Medico/Configuracion
+ */
+
 "use client";
 
-import { useState, useEffect } from "react";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import { useState, useEffect, useCallback } from "react";
 import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Camera, Save, Loader2, Plus, X } from "lucide-react";
+import {
+  Save,
+  Loader2,
+  Lock,
+  X,
+  Sparkles,
+  CheckCircle,
+  AlertCircle,
+  Info
+} from "lucide-react";
+import { PhoneInput } from "@/components/ui/phone-input";
+import { SpecialtyCombobox } from "@/components/ui/specialty-combobox";
+import { SpecialtyMultiSelect } from "@/components/ui/specialty-multi-select";
+import { AvatarUpload } from "@/components/ui/avatar-upload";
 import { supabase } from "@/lib/supabase/client";
+import { cn } from "@/lib/utils";
 
+/**
+ * Datos del perfil del médico
+ */
 interface ProfileData {
+  /** Nombre completo (solo lectura tras verificación) */
   nombre_completo: string;
+  /** Correo electrónico (solo lectura) */
   email: string;
+  /** Teléfono con formato +58 XXX XXX XXXX */
   telefono: string;
+  /** Cédula (solo lectura, ID del médico) */
+  cedula: string;
+  /** Especialidad principal verificada */
   especialidad: string;
-  cedula_profesional: string;
-  biografia: string;
-  avatar_url: string | null;
+  /** Especialidades adicionales del SACS */
   especialidades_adicionales: string[];
+  /** Biografía profesional */
+  biografia: string;
+  /** URL del avatar */
+  avatar_url: string | null;
+  /** Si el perfil está verificado en SACS */
+  is_verified: boolean;
+  /** Especialidades permitidas desde SACS */
+  especialidades_permitidas: string[];
 }
 
-export function ProfileSection() {
+/**
+ * Props del componente ProfileSection
+ */
+interface ProfileSectionProps {
+  /** Clase CSS adicional */
+  className?: string;
+}
+
+/**
+ * Sección de Perfil Básico para la configuración del médico
+ */
+export function ProfileSection({ className }: ProfileSectionProps) {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [improvingBio, setImprovingBio] = useState(false);
   const [profile, setProfile] = useState<ProfileData>({
     nombre_completo: "",
     email: "",
-    telefono: "",
+    telefono: "+58 ",
+    cedula: "",
     especialidad: "",
-    cedula_profesional: "",
+    especialidades_adicionales: [],
     biografia: "",
     avatar_url: null,
-    especialidades_adicionales: [],
+    is_verified: false,
+    especialidades_permitidas: [],
   });
-  const [newEspecialidad, setNewEspecialidad] = useState("");
+  const [saveMessage, setSaveMessage] = useState<{ type: "success" | "error", text: string } | null>(null);
 
-  useEffect(() => {
-    loadProfile();
-  }, []);
-
-  const loadProfile = async () => {
+  /**
+   * Carga el perfil del médico desde Supabase
+   */
+  const loadProfile = useCallback(async () => {
     try {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return;
 
-      const { data, error } = await supabase
+      // Cargar perfil básico
+      const { data: profileData, error: profileError } = await supabase
         .from("profiles")
         .select("*")
         .eq("id", user.id)
         .single();
 
-      if (error) throw error;
+      if (profileError) throw profileError;
 
-      if (data) {
-        setProfile({
-          nombre_completo: data.nombre_completo || "",
-          email: user.email || "",
-          telefono: data.telefono || "",
-          especialidad: data.especialidad || "",
-          cedula_profesional: data.cedula_profesional || "",
-          biografia: data.biografia || "",
-          avatar_url: data.avatar_url || null,
-          especialidades_adicionales: data.especialidades_adicionales || [],
-        });
+      // Cargar detalles del médico
+      const { data: doctorData } = await supabase
+        .from("doctor_details")
+        .select(`
+          *,
+          especialidad:specialties(id, name)
+        `)
+        .eq("profile_id", user.id)
+        .single();
+
+      // Obtener especialidades permitidas (del SACS o todas si no hay restricción)
+      let especialidadesPermitidas: string[] = [];
+
+      // Intentar obtener del sacs_data si existe
+      if (doctorData?.sacs_data?.especialidades) {
+        especialidadesPermitidas = doctorData.sacs_data.especialidades;
+      } else {
+        // Si no hay datos SACS, cargar todas las especialidades disponibles
+        const { data: allSpecialties } = await supabase
+          .from("specialties")
+          .select("name")
+          .order("name");
+
+        especialidadesPermitidas = allSpecialties?.map(s => s.name) || [];
       }
+
+      setProfile({
+        nombre_completo: profileData?.nombre_completo || "",
+        email: user.email || "",
+        telefono: profileData?.telefono || "+58 ",
+        cedula: profileData?.cedula || "",
+        especialidad: doctorData?.especialidad?.name || "",
+        especialidades_adicionales: doctorData?.subespecialidades || [],
+        biografia: doctorData?.biografia || "",
+        avatar_url: profileData?.avatar_url || null,
+        is_verified: doctorData?.verified || false,
+        especialidades_permitidas: especialidadesPermitidas,
+      });
     } catch (error) {
-      console.error("Error loading profile:", error);
-      alert("Error al cargar el perfil");
+      console.error("[ProfileSection] Error loading profile:", error);
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
+  useEffect(() => {
+    loadProfile();
+  }, [loadProfile]);
+
+  /**
+   * Guarda los cambios del perfil
+   */
   const handleSave = async () => {
     setSaving(true);
+    setSaveMessage(null);
+
     try {
       const { data: { user } } = await supabase.auth.getUser();
-      if (!user) return;
+      if (!user) throw new Error("No hay usuario autenticado");
 
-      const { error } = await supabase
+      // Actualizar perfil básico (sin nombre ni cédula si está verificado)
+      const profileUpdate: Record<string, any> = {
+        telefono: profile.telefono,
+      };
+
+      // Solo actualizar nombre si NO está verificado
+      if (!profile.is_verified) {
+        profileUpdate.nombre_completo = profile.nombre_completo;
+      }
+
+      const { error: profileError } = await supabase
         .from("profiles")
-        .update({
-          nombre_completo: profile.nombre_completo,
-          telefono: profile.telefono,
-          especialidad: profile.especialidad,
-          cedula_profesional: profile.cedula_profesional,
-          biografia: profile.biografia,
-          especialidades_adicionales: profile.especialidades_adicionales,
-        })
+        .update(profileUpdate)
         .eq("id", user.id);
 
-      if (error) throw error;
+      if (profileError) throw profileError;
 
-      alert("Perfil actualizado correctamente");
-    } catch (error) {
-      console.error("Error saving profile:", error);
-      alert("Error al guardar el perfil");
+      // Actualizar detalles del médico
+      const { error: doctorError } = await supabase
+        .from("doctor_details")
+        .update({
+          biografia: profile.biografia,
+          subespecialidades: profile.especialidades_adicionales,
+        })
+        .eq("profile_id", user.id);
+
+      if (doctorError) throw doctorError;
+
+      setSaveMessage({ type: "success", text: "Perfil guardado correctamente" });
+
+      // Limpiar mensaje después de 3 segundos
+      setTimeout(() => setSaveMessage(null), 3000);
+    } catch (error: any) {
+      console.error("[ProfileSection] Error saving profile:", error);
+      setSaveMessage({ type: "error", text: error.message || "Error al guardar" });
     } finally {
       setSaving(false);
     }
   };
 
-  const addEspecialidad = () => {
-    if (newEspecialidad.trim() && !profile.especialidades_adicionales.includes(newEspecialidad.trim())) {
-      setProfile({
-        ...profile,
-        especialidades_adicionales: [...profile.especialidades_adicionales, newEspecialidad.trim()],
+  /**
+   * Mejora la biografía usando IA
+   */
+  const handleImproveBio = async () => {
+    if (!profile.biografia.trim() || profile.biografia.length < 20) {
+      setSaveMessage({ type: "error", text: "Escribe al menos 20 caracteres para mejorar" });
+      return;
+    }
+
+    setImprovingBio(true);
+    setSaveMessage(null);
+
+    try {
+      const response = await fetch("/api/ai/improve-bio", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          biografia: profile.biografia,
+          nombre: profile.nombre_completo,
+          especialidad: profile.especialidad,
+        }),
       });
-      setNewEspecialidad("");
+
+      if (!response.ok) throw new Error("Error al mejorar la biografía");
+
+      const data = await response.json();
+
+      if (data.improved_bio) {
+        setProfile({ ...profile, biografia: data.improved_bio });
+        setSaveMessage({ type: "success", text: "Biografía mejorada. No olvides guardar los cambios." });
+      }
+    } catch (error) {
+      console.error("[ProfileSection] Error improving bio:", error);
+      setSaveMessage({ type: "error", text: "Error al mejorar la biografía" });
+    } finally {
+      setImprovingBio(false);
     }
   };
 
-  const removeEspecialidad = (especialidad: string) => {
-    setProfile({
-      ...profile,
-      especialidades_adicionales: profile.especialidades_adicionales.filter(e => e !== especialidad),
-    });
+  /**
+   * Actualiza la URL del avatar
+   */
+  const handleAvatarUpload = (url: string) => {
+    setProfile({ ...profile, avatar_url: url });
   };
+
+
 
   if (loading) {
     return (
@@ -128,77 +260,119 @@ export function ProfileSection() {
   }
 
   return (
-    <div className="space-y-6">
-      {/* Avatar Section */}
-      <div className="flex items-center gap-6 pb-6 border-b">
-        <div className="relative">
-          <Avatar className="h-24 w-24">
-            <AvatarImage src={profile.avatar_url || undefined} />
-            <AvatarFallback className="text-2xl">
-              {profile.nombre_completo.split(" ").map(n => n[0]).join("").toUpperCase().slice(0, 2)}
-            </AvatarFallback>
-          </Avatar>
-          <button className="absolute bottom-0 right-0 p-2 bg-blue-600 text-white rounded-full hover:bg-blue-700 transition-colors">
-            <Camera className="h-4 w-4" />
-          </button>
-        </div>
-        <div>
-          <h3 className="text-xl font-semibold text-gray-900">{profile.nombre_completo}</h3>
-          <p className="text-gray-600">{profile.especialidad}</p>
-          <p className="text-sm text-gray-500 mt-1">Cédula: {profile.cedula_profesional}</p>
+    <div className={cn("space-y-8", className)}>
+      {/* Header con Avatar */}
+      <div className="flex flex-col sm:flex-row items-start sm:items-center gap-6 pb-6 border-b dark:border-gray-700">
+        <AvatarUpload
+          currentUrl={profile.avatar_url}
+          onUpload={handleAvatarUpload}
+          userName={profile.nombre_completo}
+          size="xl"
+        />
+
+        <div className="flex-1">
+          <div className="flex items-center gap-2 mb-1">
+            <h3 className="text-xl font-semibold text-gray-900 dark:text-gray-100">
+              {profile.nombre_completo || "Completa tu perfil"}
+            </h3>
+            {profile.is_verified && (
+              <Badge className="bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400">
+                <CheckCircle className="h-3 w-3 mr-1" />
+                Verificado
+              </Badge>
+            )}
+          </div>
+          <p className="text-gray-600 dark:text-gray-400">{profile.especialidad}</p>
+          <p className="text-sm text-gray-500 dark:text-gray-500 mt-1">
+            Cédula: {profile.cedula || "No registrada"}
+          </p>
         </div>
       </div>
 
-      {/* Form Fields */}
+      {/* Aviso de campos bloqueados */}
+      {profile.is_verified && (
+        <div className="flex items-start gap-3 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
+          <Info className="h-5 w-5 text-blue-600 dark:text-blue-400 flex-shrink-0 mt-0.5" />
+          <div className="text-sm">
+            <p className="font-medium text-blue-800 dark:text-blue-300">
+              Perfil verificado por SACS
+            </p>
+            <p className="text-blue-600 dark:text-blue-400 mt-0.5">
+              El nombre y la cédula están vinculados a tu verificación profesional y no pueden modificarse.
+            </p>
+          </div>
+        </div>
+      )}
+
+      {/* Formulario */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        {/* Nombre Completo */}
         <div className="space-y-2">
-          <Label htmlFor="nombre">Nombre Completo</Label>
+          <Label htmlFor="nombre" className="flex items-center gap-2">
+            Nombre Completo
+            {profile.is_verified && <Lock className="h-3 w-3 text-gray-400" />}
+          </Label>
           <Input
             id="nombre"
             value={profile.nombre_completo}
             onChange={(e) => setProfile({ ...profile, nombre_completo: e.target.value })}
             placeholder="Dr. Juan Pérez"
+            disabled={profile.is_verified}
+            className={cn(profile.is_verified && "bg-gray-50 dark:bg-gray-800 cursor-not-allowed")}
           />
         </div>
 
+        {/* Correo Electrónico */}
         <div className="space-y-2">
-          <Label htmlFor="email">Correo Electrónico</Label>
+          <Label htmlFor="email" className="flex items-center gap-2">
+            Correo Electrónico
+            <Lock className="h-3 w-3 text-gray-400" />
+          </Label>
           <Input
             id="email"
             type="email"
             value={profile.email}
             disabled
-            className="bg-gray-50"
+            className="bg-gray-50 dark:bg-gray-800 cursor-not-allowed"
           />
         </div>
 
+        {/* Teléfono */}
         <div className="space-y-2">
           <Label htmlFor="telefono">Teléfono</Label>
-          <Input
-            id="telefono"
+          <PhoneInput
             value={profile.telefono}
-            onChange={(e) => setProfile({ ...profile, telefono: e.target.value })}
-            placeholder="+52 123 456 7890"
+            onChange={(value) => setProfile({ ...profile, telefono: value })}
           />
         </div>
 
+        {/* Cédula */}
         <div className="space-y-2">
-          <Label htmlFor="cedula">Cédula Profesional</Label>
+          <Label htmlFor="cedula" className="flex items-center gap-2">
+            Cédula (ID)
+            <Lock className="h-3 w-3 text-gray-400" />
+          </Label>
           <Input
             id="cedula"
-            value={profile.cedula_profesional}
-            onChange={(e) => setProfile({ ...profile, cedula_profesional: e.target.value })}
-            placeholder="1234567"
+            value={profile.cedula}
+            disabled
+            className="bg-gray-50 dark:bg-gray-800 cursor-not-allowed font-mono"
           />
         </div>
 
+        {/* Especialidad Principal */}
         <div className="space-y-2">
-          <Label htmlFor="especialidad">Especialidad Principal</Label>
-          <Input
+          <Label htmlFor="especialidad" className="flex items-center gap-2">
+            Especialidad Principal
+            {profile.is_verified && <Lock className="h-3 w-3 text-gray-400" />}
+          </Label>
+          <SpecialtyCombobox
             id="especialidad"
             value={profile.especialidad}
-            onChange={(e) => setProfile({ ...profile, especialidad: e.target.value })}
-            placeholder="Cardiología"
+            onChange={(value) => setProfile({ ...profile, especialidad: value })}
+            allowedSpecialties={profile.especialidades_permitidas}
+            readOnly={profile.is_verified}
+            placeholder="Seleccionar especialidad"
           />
         </div>
       </div>
@@ -206,50 +380,75 @@ export function ProfileSection() {
       {/* Especialidades Adicionales */}
       <div className="space-y-3">
         <Label>Especialidades Adicionales</Label>
-        <div className="flex gap-2">
-          <Input
-            value={newEspecialidad}
-            onChange={(e) => setNewEspecialidad(e.target.value)}
-            onKeyPress={(e) => e.key === "Enter" && addEspecialidad()}
-            placeholder="Agregar especialidad"
-          />
-          <Button onClick={addEspecialidad} variant="outline">
-            <Plus className="h-4 w-4" />
-          </Button>
-        </div>
-        <div className="flex flex-wrap gap-2">
-          {profile.especialidades_adicionales.map((esp) => (
-            <Badge key={esp} variant="secondary" className="px-3 py-1">
-              {esp}
-              <button
-                onClick={() => removeEspecialidad(esp)}
-                className="ml-2 hover:text-red-600"
-              >
-                <X className="h-3 w-3" />
-              </button>
-            </Badge>
-          ))}
-        </div>
+        <SpecialtyMultiSelect
+          selected={profile.especialidades_adicionales}
+          onChange={(newValues) => setProfile({ ...profile, especialidades_adicionales: newValues })}
+          exclude={[profile.especialidad]}
+          placeholder="Buscar especialidades adicionales"
+        />
+        <p className="text-xs text-muted-foreground">
+          Agrega otras especialidades o subespecialidades que practiques.
+        </p>
       </div>
 
-      {/* Biografía */}
-      <div className="space-y-2">
-        <Label htmlFor="biografia">Biografía Profesional</Label>
+      {/* Biografía Profesional */}
+      <div className="space-y-3">
+        <div className="flex items-center justify-between">
+          <Label htmlFor="biografia">Biografía Profesional</Label>
+          <Button
+            type="button"
+            variant="ghost"
+            size="sm"
+            onClick={handleImproveBio}
+            disabled={improvingBio || profile.biografia.length < 20}
+            className="text-purple-600 hover:text-purple-700 hover:bg-purple-50 dark:text-purple-400 dark:hover:bg-purple-900/20"
+          >
+            {improvingBio ? (
+              <>
+                <Loader2 className="h-4 w-4 mr-1.5 animate-spin" />
+                Mejorando...
+              </>
+            ) : (
+              <>
+                <Sparkles className="h-4 w-4 mr-1.5" />
+                Mejorar con IA
+              </>
+            )}
+          </Button>
+        </div>
         <Textarea
           id="biografia"
           value={profile.biografia}
           onChange={(e) => setProfile({ ...profile, biografia: e.target.value })}
-          placeholder="Cuéntanos sobre tu experiencia y formación profesional..."
-          rows={4}
+          placeholder="Cuéntanos sobre tu experiencia y formación profesional. La IA puede ayudarte a mejorar la gramática y estructura..."
+          rows={5}
+          className="resize-none"
         />
-        <p className="text-xs text-gray-500">
-          Esta información será visible para tus pacientes
+        <p className="text-xs text-gray-500 dark:text-gray-400">
+          Esta información será visible para tus pacientes. Mínimo 20 caracteres para usar la mejora con IA.
         </p>
       </div>
 
-      {/* Save Button */}
-      <div className="flex justify-end pt-4 border-t">
-        <Button onClick={handleSave} disabled={saving}>
+      {/* Mensaje de estado */}
+      {saveMessage && (
+        <div className={cn(
+          "flex items-center gap-2 p-3 rounded-lg text-sm",
+          saveMessage.type === "success"
+            ? "bg-green-50 text-green-700 dark:bg-green-900/20 dark:text-green-400"
+            : "bg-red-50 text-red-700 dark:bg-red-900/20 dark:text-red-400"
+        )}>
+          {saveMessage.type === "success" ? (
+            <CheckCircle className="h-4 w-4" />
+          ) : (
+            <AlertCircle className="h-4 w-4" />
+          )}
+          {saveMessage.text}
+        </div>
+      )}
+
+      {/* Botón Guardar */}
+      <div className="flex justify-end pt-4 border-t dark:border-gray-700">
+        <Button onClick={handleSave} disabled={saving} size="lg">
           {saving ? (
             <>
               <Loader2 className="h-4 w-4 mr-2 animate-spin" />

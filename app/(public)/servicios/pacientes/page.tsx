@@ -1,78 +1,42 @@
 import type { Metadata } from "next";
-import { PacientesHero } from "@/components/sections/pacientes-hero";
-import { StatsSection } from "@/components/sections/stats-section";
-import { FeaturesSection } from "@/components/sections/features-section";
-import { HowItWorksSection } from "@/components/sections/how-it-works-section";
-import { TestimonialsSection } from "@/components/sections/testimonials-section";
-import { FAQSection } from "@/components/sections/faq-section";
-import { FinalCTASection } from "@/components/sections/final-cta-section";
+import { PacientesHeroSection } from "@/components/sections/pacientes/PacientesHeroSection";
+import { PacientesPainPoints } from "@/components/sections/pacientes/PacientesPainPoints";
+import { PacientesProductShowcase } from "@/components/sections/pacientes/PacientesProductShowcase";
+import { PacientesHowItWorks } from "@/components/sections/pacientes/PacientesHowItWorks";
+import { PacientesTrustSection } from "@/components/sections/pacientes/PacientesTrustSection";
+import { PacientesFinalCTA } from "@/components/sections/pacientes/PacientesFinalCTA";
 
 export const metadata: Metadata = {
-  title: "Servicios para Pacientes | Red Salud",
-  description:
-    "Consultas médicas en línea, historial médico digital y atención personalizada 24/7. Conecta con médicos certificados desde casa. ¡100% Gratis!",
-  keywords: [
-    "telemedicina",
-    "videoconsultas",
-    "médicos en línea",
-    "consulta médica virtual",
-    "historial médico digital",
-    "salud en casa",
-    "Venezuela",
-  ],
-  authors: [{ name: "Red Salud" }],
-  creator: "Red Salud",
-  publisher: "Red Salud",
-  robots: "index, follow",
+  title: "Para Pacientes - Red-Salud | Tu salud, simplificada",
+  description: "Consultas médicas online, historial digital, recetas electrónicas y videoconsultas con médicos verificados. 100% gratis para pacientes.",
+  keywords: "consultas médicas online venezuela, telemedicina gratis, médicos verificados, historial médico digital, videoconsulta, recetas digitales",
   openGraph: {
+    title: "Para Pacientes - Red-Salud | Tu salud, simplificada",
+    description: "Conecta con médicos verificados, agenda citas y gestiona tu salud desde tu celular. 100% gratis.",
     type: "website",
-    url: "https://redsalud.com/servicios/pacientes",
-    title: "Servicios para Pacientes | Red Salud",
-    description:
-      "Consultas médicas en línea, historial médico digital y atención personalizada 24/7",
-    siteName: "Red Salud",
-    images: [
-      {
-        url: "https://redsalud.com/og-pacientes.jpg",
-        width: 1200,
-        height: 630,
-        alt: "Red Salud - Servicios para Pacientes",
-      },
-    ],
-  },
-  twitter: {
-    card: "summary_large_image",
-    title: "Servicios para Pacientes | Red Salud",
-    description:
-      "Consultas médicas en línea, historial médico digital y atención personalizada 24/7",
-    images: ["https://redsalud.com/og-pacientes.jpg"],
   },
 };
 
 export default function PacientesPage() {
   return (
-    <main className="min-h-screen bg-white dark:bg-slate-900">
-      {/* Hero Section */}
-      <PacientesHero />
+    <main className="min-h-screen bg-background">
+      {/* Hero - 100% gratis + beneficios */}
+      <PacientesHeroSection />
 
-      {/* Stats Section with Real Data */}
-      <StatsSection />
+      {/* Pain Points - Problemas que resolvemos */}
+      <PacientesPainPoints />
 
-      {/* Features Grid */}
-      <FeaturesSection />
+      {/* Product Showcase - Demo interactiva */}
+      <PacientesProductShowcase />
 
-      {/* How It Works */}
-      <HowItWorksSection />
+      {/* How It Works - 3 pasos simples */}
+      <PacientesHowItWorks />
 
-      {/* Testimonials */}
-      <TestimonialsSection />
+      {/* Trust - Seguridad y médicos verificados */}
+      <PacientesTrustSection />
 
-      {/* FAQ */}
-      <FAQSection />
-
-      {/* Final CTA */}
-      <FinalCTASection />
+      {/* Final CTA - Registro gratis */}
+      <PacientesFinalCTA />
     </main>
   );
 }
-

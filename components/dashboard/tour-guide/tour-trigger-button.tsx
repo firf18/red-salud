@@ -5,6 +5,7 @@
 
 'use client';
 
+import { useEffect } from 'react';
 import { usePathname } from 'next/navigation';
 import { HelpCircle } from 'lucide-react';
 import { useTourGuide } from '@/hooks/use-tour-guide';
@@ -13,11 +14,19 @@ import { getTourForRoute } from '@/lib/tour-guide/tours';
 export function TourTriggerButton() {
   const pathname = usePathname();
   const { startTour, isTourActive } = useTourGuide();
-  
+
   // Detectar tour disponible para la ruta actual
   const availableTour = getTourForRoute(pathname);
 
   if (isTourActive || !availableTour) return null;
+
+  useEffect(() => {
+    const handleStart = () => {
+      if (availableTour) startTour(availableTour.id);
+    };
+    document.addEventListener('start-tour', handleStart);
+    return () => document.removeEventListener('start-tour', handleStart);
+  }, [availableTour, startTour]);
 
   const handleClick = () => {
     startTour(availableTour.id);
@@ -32,7 +41,7 @@ export function TourTriggerButton() {
       >
         <HelpCircle className="w-5 h-5" />
       </button>
-      
+
       {/* Tooltip en hover */}
       <div className="absolute right-12 top-0 bg-gray-900 text-white text-xs px-3 py-2 rounded-lg shadow-xl whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
         <div className="font-semibold">{availableTour.name}</div>

@@ -51,17 +51,15 @@ export function CalendarMain({
   onDragCancel,
 }: CalendarMainProps) {
   const [currentDate, setCurrentDate] = useState(externalCurrentDate || new Date());
-  const [view, setView] = useState<CalendarView>(externalView || "week");
   const [filterStatus, setFilterStatus] = useState<"all" | "pendiente" | "confirmada" | "completada">("all");
 
-  // Sincronizar con props externas
+  // Usar la vista externa directamente si está disponible, sino usar week por defecto
+  const view = externalView || "week";
+
+  // Sincronizar fecha con props externas
   useEffect(() => {
     if (externalCurrentDate) setCurrentDate(externalCurrentDate);
   }, [externalCurrentDate]);
-
-  useEffect(() => {
-    if (externalView) setView(externalView);
-  }, [externalView]);
 
   const handleDateChange = (date: Date) => {
     setCurrentDate(date);
@@ -69,7 +67,6 @@ export function CalendarMain({
   };
 
   const handleViewChange = (newView: CalendarView) => {
-    setView(newView);
     onViewChange?.(newView);
   };
 
@@ -157,7 +154,7 @@ export function CalendarMain({
       <div className="bg-white rounded-lg shadow-sm border p-4">
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
           {/* Navigation */}
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2" data-tour="date-navigation">
             <Button variant="outline" size="sm" onClick={handleToday}>
               <CalendarIcon className="h-4 w-4 mr-2" />
               Hoy
@@ -189,38 +186,34 @@ export function CalendarMain({
 
         {/* Stats - Clickeable */}
         {view !== "list" && (
-          <div className="flex items-center gap-3 mt-4 pt-4 border-t flex-wrap">
+          <div className="flex items-center gap-3 mt-4 pt-4 border-t flex-wrap" data-tour="calendar-filters">
             <button
-              className={`text-sm px-3 py-1.5 rounded-md transition-colors ${
-                filterStatus === "all" ? "bg-gray-200" : "hover:bg-gray-100"
-              }`}
+              className={`text-sm px-3 py-1.5 rounded-md transition-colors ${filterStatus === "all" ? "bg-gray-200" : "hover:bg-gray-100"
+                }`}
               onClick={() => setFilterStatus("all")}
             >
               <span className="text-gray-600">Total:</span>{" "}
               <span className="font-semibold text-gray-900">{stats.total}</span>
             </button>
             <button
-              className={`text-sm px-3 py-1.5 rounded-md transition-colors ${
-                filterStatus === "pendiente" ? "bg-yellow-100" : "hover:bg-yellow-50"
-              }`}
+              className={`text-sm px-3 py-1.5 rounded-md transition-colors ${filterStatus === "pendiente" ? "bg-yellow-100" : "hover:bg-yellow-50"
+                }`}
               onClick={() => setFilterStatus("pendiente")}
             >
               <span className="text-gray-600">Pendientes:</span>{" "}
               <span className="font-semibold text-yellow-600">{stats.pendientes}</span>
             </button>
             <button
-              className={`text-sm px-3 py-1.5 rounded-md transition-colors ${
-                filterStatus === "confirmada" ? "bg-blue-100" : "hover:bg-blue-50"
-              }`}
+              className={`text-sm px-3 py-1.5 rounded-md transition-colors ${filterStatus === "confirmada" ? "bg-blue-100" : "hover:bg-blue-50"
+                }`}
               onClick={() => setFilterStatus("confirmada")}
             >
               <span className="text-gray-600">Confirmadas:</span>{" "}
               <span className="font-semibold text-blue-600">{stats.confirmadas}</span>
             </button>
             <button
-              className={`text-sm px-3 py-1.5 rounded-md transition-colors ${
-                filterStatus === "completada" ? "bg-green-100" : "hover:bg-green-50"
-              }`}
+              className={`text-sm px-3 py-1.5 rounded-md transition-colors ${filterStatus === "completada" ? "bg-green-100" : "hover:bg-green-50"
+                }`}
               onClick={() => setFilterStatus("completada")}
             >
               <span className="text-gray-600">Completadas:</span>{" "}
@@ -263,7 +256,7 @@ export function CalendarMain({
             appointments={filteredAppointments}
             onDayClick={(date) => {
               setCurrentDate(date);
-              setView("day");
+              handleViewChange("day");
             }}
             onAppointmentClick={onAppointmentClick}
           />

@@ -62,11 +62,10 @@ export function DayView({
   return (
     <div className="flex flex-col h-full bg-white rounded-lg shadow-sm overflow-hidden">
       {/* Header - Sticky */}
-      <div className={`border-b-2 p-6 sticky top-0 z-20 shadow-md ${
-        isCurrentDay 
-          ? "bg-gradient-to-r from-blue-500 to-indigo-600 text-white" 
+      <div className={`border-b-2 p-6 sticky top-0 z-20 shadow-md ${isCurrentDay
+          ? "bg-gradient-to-r from-blue-500 to-indigo-600 text-white"
           : "bg-gradient-to-r from-gray-50 to-gray-100 text-gray-900"
-      }`}>
+        }`}>
         <div className="flex items-center justify-between">
           <div>
             <div className="flex items-center gap-3 mb-2">
@@ -82,21 +81,18 @@ export function DayView({
 
           {/* Mini Stats */}
           <div className="flex gap-3">
-            <div className={`px-4 py-2 rounded-lg ${
-              isCurrentDay ? "bg-white/20 backdrop-blur-sm" : "bg-white shadow-sm"
-            }`}>
+            <div className={`px-4 py-2 rounded-lg ${isCurrentDay ? "bg-white/20 backdrop-blur-sm" : "bg-white shadow-sm"
+              }`}>
               <div className={`text-xs font-medium ${isCurrentDay ? "text-blue-100" : "text-gray-600"}`}>Pendientes</div>
               <div className={`text-2xl font-bold ${isCurrentDay ? "text-white" : "text-yellow-600"}`}>{dayStats.pendientes}</div>
             </div>
-            <div className={`px-4 py-2 rounded-lg ${
-              isCurrentDay ? "bg-white/20 backdrop-blur-sm" : "bg-white shadow-sm"
-            }`}>
+            <div className={`px-4 py-2 rounded-lg ${isCurrentDay ? "bg-white/20 backdrop-blur-sm" : "bg-white shadow-sm"
+              }`}>
               <div className={`text-xs font-medium ${isCurrentDay ? "text-blue-100" : "text-gray-600"}`}>Confirmadas</div>
               <div className={`text-2xl font-bold ${isCurrentDay ? "text-white" : "text-blue-600"}`}>{dayStats.confirmadas}</div>
             </div>
-            <div className={`px-4 py-2 rounded-lg ${
-              isCurrentDay ? "bg-white/20 backdrop-blur-sm" : "bg-white shadow-sm"
-            }`}>
+            <div className={`px-4 py-2 rounded-lg ${isCurrentDay ? "bg-white/20 backdrop-blur-sm" : "bg-white shadow-sm"
+              }`}>
               <div className={`text-xs font-medium ${isCurrentDay ? "text-blue-100" : "text-gray-600"}`}>Completadas</div>
               <div className={`text-2xl font-bold ${isCurrentDay ? "text-white" : "text-green-600"}`}>{dayStats.completadas}</div>
             </div>
@@ -117,14 +113,12 @@ export function DayView({
             return (
               <div
                 key={hour}
-                className={`flex border-b border-gray-200 transition-colors ${
-                  isCurrentHour ? "bg-yellow-50/50 border-yellow-300" : "hover:bg-gray-50/50"
-                }`}
+                className={`flex border-b border-gray-200 transition-colors ${isCurrentHour ? "bg-yellow-50/50 border-yellow-300" : "hover:bg-gray-50/50"
+                  }`}
               >
                 {/* Time Label - Sticky left */}
-                <div className={`w-24 flex-shrink-0 p-4 border-r border-gray-200 bg-gray-50/90 backdrop-blur-sm sticky left-0 z-10 ${
-                  isCurrentHour ? "bg-yellow-100 border-yellow-300" : ""
-                }`}>
+                <div className={`w-24 flex-shrink-0 p-4 border-r border-gray-200 bg-gray-50/90 backdrop-blur-sm sticky left-0 z-10 ${isCurrentHour ? "bg-yellow-100 border-yellow-300" : ""
+                  }`}>
                   <div className="flex items-center gap-2">
                     <Clock className={`h-4 w-4 ${isCurrentHour ? "text-yellow-700" : "text-gray-500"}`} />
                     <div>
@@ -140,13 +134,12 @@ export function DayView({
 
                 {/* Content Area - Fixed height */}
                 <div
-                  className={`flex-1 p-3 h-28 transition-all duration-200 ${
-                    isPast
+                  data-tour="time-slot"
+                  className={`flex-1 p-3 h-28 transition-all duration-200 ${isPast
                       ? "bg-gray-50/70 cursor-not-allowed opacity-60"
                       : "cursor-pointer hover:bg-blue-50 hover:shadow-inner"
-                  } ${
-                    isCurrentHour ? "ring-2 ring-inset ring-yellow-300/50" : ""
-                  }`}
+                    } ${isCurrentHour ? "ring-2 ring-inset ring-yellow-300/50" : ""
+                    }`}
                   onClick={() => {
                     if (!isPast) {
                       onTimeSlotClick?.(date, hour);

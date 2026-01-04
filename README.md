@@ -1,76 +1,82 @@
 # 🩺 Red-Salud
 
-Plataforma de telemedicina que conecta pacientes con profesionales médicos para consultas online y gestión de salud.
+Plataforma SaaS de gestión médica integral que conecta pacientes, médicos, clínicas y laboratorios. Incluye telemedicina, gestión de citas, historiales médicos, y herramientas administrativas.
 
-## 🚀 Inicio rápido
-
-1) Instala dependencias
+## 🚀 Inicio Rápido
 
 ```bash
+# 1. Instalar dependencias
 npm install
-```
 
-2) Configura variables de entorno (`.env.local`)
+# 2. Configurar variables de entorno
+cp .env.example .env.local
+# Editar .env.local con tus credenciales
 
-```bash
-# Supabase (obligatorio)
-NEXT_PUBLIC_SUPABASE_URL=
-NEXT_PUBLIC_SUPABASE_ANON_KEY=
-
-# Google Gemini (opcional para asistente IA)
-GEMINI_API_KEY=
-
-# ICD-11 (opcional)
-ICD_API_CLIENT_ID=
-ICD_API_CLIENT_SECRET=
-```
-
-3) Ejecuta en desarrollo
-
-```bash
+# 3. Ejecutar en desarrollo
 npm run dev
 ```
 
-Abre http://localhost:3000
+Abre [http://localhost:3000](http://localhost:3000)
 
-## 🏗️ Stack
+## 🏗️ Stack Tecnológico
 
-- Next.js (App Router) + React + Tailwind
-- Supabase (auth, DB)
-- shadcn/ui + Radix UI
+| Categoría | Tecnología |
+|-----------|------------|
+| **Framework** | Next.js 16 (App Router) |
+| **UI** | React 19, Tailwind CSS, shadcn/ui |
+| **Backend** | Supabase (Auth, PostgreSQL, Storage) |
+| **Estado** | Redux Toolkit, React Query |
+| **3D/Charts** | Three.js, Recharts |
+| **AI** | Google Gemini (chatbot) |
 
-## 📁 Estructura clave
+## 📁 Estructura del Proyecto
 
 ```
-app/                 # Rutas y layouts
-components/          # Componentes UI y de dominio
-hooks/               # Lógica de estado por feature
-lib/                 # Servicios y utilidades (i18n, supabase, templates)
-public/              # Assets estáticos
-docs/                # Documentación (curada y concisa)
-```
+app/                    # Rutas y layouts (Next.js App Router)
+├── (auth)/             # Páginas de autenticación
+├── (public)/           # Páginas públicas (landing, servicios)
+├── api/                # API Routes
+└── dashboard/          # Dashboards por rol
 
-Convenciones: SRP (una responsabilidad por archivo) y < 400 LOC por archivo fuente.
+components/             # Componentes React
+├── ui/                 # shadcn/ui components
+├── dashboard/          # Componentes de dashboard
+└── sections/           # Secciones de páginas públicas
+
+lib/                    # Servicios y utilidades
+├── supabase/           # Cliente y servicios de Supabase
+├── security/           # Autenticación y sesiones
+└── i18n/               # Internacionalización
+
+hooks/                  # Custom hooks por feature
+```
 
 ## 📚 Documentación
 
-La documentación se ha reiniciado para reflejar el estado actual. Consulta:
+| Documento | Descripción |
+|-----------|-------------|
+| [arquitectura.md](docs/arquitectura.md) | Arquitectura del sistema, capas y flujos |
+| [guia-desarrollo.md](docs/guia-desarrollo.md) | Setup, convenciones y workflows |
+| [base-datos.md](docs/base-datos.md) | Esquemas Supabase y servicios |
+| [componentes.md](docs/componentes.md) | UI components y hooks |
+| [features.md](docs/features.md) | Features implementadas |
+| [deploy.md](docs/deploy.md) | Deployment y configuración |
 
-- `docs/arquitectura.md` – visión del sistema, capas y flujos
-- `docs/guia-desarrollo.md` – estándares, límites de archivo, testing, imports
-- `docs/frontend-next.md` – patrones en App Router
-- `docs/datos-supabase.md` – notas de datos y servicios
-- `docs/deploy.md` – despliegue y variables
-
-## 🔧 Scripts útiles
+## 🔧 Scripts
 
 ```bash
-npm run dev    # desarrollo
-npm run build  # build producción
-npm run start  # servidor producción
-npm run lint   # linter
+npm run dev        # Servidor de desarrollo
+npm run build      # Build de producción
+npm run start      # Servidor de producción
+npm run lint       # Linter
 ```
 
-—
+## 📋 Convenciones
 
-Privado - Red-Salud © 2025
+- **Límite de archivos:** < 400 líneas por archivo
+- **Responsabilidad única:** Un componente/hook = una responsabilidad
+- **TypeScript:** Estricto, sin `any`
+
+---
+
+**Red-Salud** © 2025 | Privado

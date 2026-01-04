@@ -21,7 +21,8 @@ import {
     Pill,
     UserCog,
     Ambulance,
-    ShieldCheck
+    ShieldCheck,
+    GraduationCap
 } from "lucide-react";
 
 interface MainNavProps {
@@ -70,19 +71,13 @@ const categories = [
         ],
     },
     {
-        title: "Otros",
+        title: "Educación",
         items: [
             {
-                title: "Ambulancias",
-                href: "/servicios/ambulancias",
-                description: "Servicios de emergencia.",
-                icon: Ambulance,
-            },
-            {
-                title: "Seguros",
-                href: "/servicios/seguros",
-                description: "Gestión de pólizas.",
-                icon: ShieldCheck,
+                title: "Academy",
+                href: "/academy",
+                description: "Aprende medicina jugando.",
+                icon: GraduationCap,
             },
         ],
     },
@@ -258,7 +253,7 @@ export function MainNav({ isScrolled }: MainNavProps) {
 
 const ListItem = React.forwardRef<
     React.ElementRef<"a">,
-    React.ComponentPropsWithoutRef<"a"> & { icon?: React.ElementType }
+    React.ComponentPropsWithoutRef<"a"> & { icon?: React.ComponentType<{ className?: string }> }
 >(({ className, title, children, icon: Icon, href, ...props }, ref) => {
     return (
         <li>

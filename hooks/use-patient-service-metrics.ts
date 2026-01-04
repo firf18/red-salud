@@ -13,7 +13,7 @@ export function usePatientServiceMetrics(): ServiceMetrics {
   const [metrics, setMetrics] = useState<ServiceMetrics>({
     totalPatients: 0,
     totalDoctors: 0,
-    totalSpecialties: 12,
+    totalSpecialties: 132, // Valor correcto de la BD
     satisfactionPercentage: 0,
     isLoading: true,
     error: null,
@@ -23,7 +23,7 @@ export function usePatientServiceMetrics(): ServiceMetrics {
     const fetchMetrics = async () => {
       try {
         setMetrics(prev => ({ ...prev, isLoading: true }));
-        
+
         const response = await fetch('/api/public-metrics', {
           method: 'GET',
           headers: { 'Content-Type': 'application/json' },
@@ -39,7 +39,7 @@ export function usePatientServiceMetrics(): ServiceMetrics {
         setMetrics({
           totalPatients: data.total_patients || 0,
           totalDoctors: data.total_doctors || 0,
-          totalSpecialties: data.total_specialties || 12,
+          totalSpecialties: data.total_specialties || 132, // Fallback a valor correcto
           satisfactionPercentage: data.satisfaction_percentage || 0,
           isLoading: false,
           error: null,

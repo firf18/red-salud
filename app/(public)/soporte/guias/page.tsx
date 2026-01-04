@@ -192,7 +192,7 @@ const guides: Guide[] = [
   },
 ];
 
-const typeConfig: Record<GuideType, { label: string; icon: React.ElementType; color: string }> = {
+const typeConfig: Record<GuideType, { label: string; icon: typeof FileText; color: string }> = {
   article: { label: "Artículo", icon: FileText, color: "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400" },
   video: { label: "Video", icon: Play, color: "bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400" },
   tutorial: { label: "Tutorial", icon: BookOpen, color: "bg-teal-100 text-teal-700 dark:bg-teal-900/30 dark:text-teal-400" },
@@ -268,7 +268,7 @@ function FeaturedGuide({ guide }: { guide: Guide }) {
       >
         <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full -translate-y-1/2 translate-x-1/2" />
         <div className="absolute bottom-0 left-0 w-48 h-48 bg-white/10 rounded-full translate-y-1/2 -translate-x-1/2" />
-        
+
         <div className="relative z-10">
           <Badge className="bg-white/20 text-white mb-4">
             <TypeIcon className="w-3 h-3 mr-1" />
@@ -328,7 +328,7 @@ export default function GuiasPage() {
       {/* Hero */}
       <section className="relative pt-32 pb-16 px-4 sm:px-6 lg:px-8 overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-br from-teal-50 via-white to-blue-50 dark:from-zinc-900 dark:via-zinc-950 dark:to-zinc-900" />
-        
+
         <div className="max-w-4xl mx-auto relative z-10 text-center">
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
             <span className="inline-flex items-center gap-2 text-sm font-medium text-teal-600 dark:text-teal-400 mb-4">

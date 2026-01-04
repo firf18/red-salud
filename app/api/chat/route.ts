@@ -5,7 +5,7 @@ export const runtime = "nodejs"; // Or 'edge' if Supabase client supports it and
 
 export async function POST(req: NextRequest) {
     try {
-        const { messages } = await req.json();
+        const { messages, context } = await req.json();
 
         if (!messages || !Array.isArray(messages) || messages.length === 0) {
             return NextResponse.json(
@@ -24,18 +24,24 @@ export async function POST(req: NextRequest) {
             );
         }
 
-        const stream = await generateChatResponse(history, lastMessage.content);
+        const stream = await generateChatResponse(history, lastMessage.content, context);
 
-        // Create a ReadableStream from the Gemini stream
+        // Create a ReadableStream from the OpenAI stream
         const readableStream = new ReadableStream({
             async start(controller) {
-                for await (const chunk of stream) {
-                    const text = chunk.text();
-                    if (text) {
-                        controller.enqueue(text);
+                try {
+                    for await (const chunk of stream) {
+                        const text = chunk.choices[0]?.delta?.content || "";
+                        if (text) {
+                            controller.enqueue(text);
+                        }
                     }
+                } catch (streamError) {
+                    console.error("Stream processing error:", streamError);
+                    controller.enqueue("\n\n[Error al generar la respuesta. Por favor intenta de nuevo.]");
+                } finally {
+                    controller.close();
                 }
-                controller.close();
             },
         });
 
@@ -46,9 +52,13 @@ export async function POST(req: NextRequest) {
         });
     } catch (error: any) {
         console.error("Error in chat API:", error);
+        // Check for specific OpenRouter/OpenAI errors
+        const status = error.status || 500;
+        const message = error.error?.message || error.message || "Error interno del servidor";
+
         return NextResponse.json(
-            { error: "Error processing chat request", details: error.message },
-            { status: 500 }
+            { error: "Error processing chat request", details: message },
+            { status: status }
         );
     }
 }

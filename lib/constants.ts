@@ -21,6 +21,10 @@ export const ROUTES = {
   AGENDAR_LLAMADA: "/soporte/agendar-llamada",
   TERMINOS: "/terminos",
   PRIVACIDAD: "/privacidad",
+  // Red Salud Academy
+  ACADEMY: "/academy",
+  ACADEMY_ESPECIALIDADES: "/academy/especialidades",
+  ACADEMY_PRICING: "/academy/pricing",
 } as const;
 
 export const SOCIAL_LINKS = {

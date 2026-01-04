@@ -79,7 +79,7 @@ const config: Config = {
         sm: "calc(var(--radius) - 4px)",
       },
       fontFamily: {
-        sans: ["var(--font-inter)", "var(--font-poppins)", "system-ui", "sans-serif"],
+        sans: ["var(--font-montserrat)", "var(--font-inter)", "system-ui", "sans-serif"],
         mono: ["monospace"],
       },
       keyframes: {
@@ -92,8 +92,9 @@ const config: Config = {
           to: { height: "0" },
         },
         scroll: {
-          "0%": { transform: "translateX(0)" },
-          "100%": { transform: "translateX(-50%)" },
+          to: {
+            transform: "translate(calc(-50% - 0.5rem))",
+          },
         },
         blob: {
           "0%, 100%": { transform: "translate(0, 0) scale(1)" },
@@ -104,7 +105,8 @@ const config: Config = {
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
         "accordion-up": "accordion-up 0.2s ease-out",
-        "scroll": "scroll 40s linear infinite",
+        scroll:
+          "scroll var(--animation-duration, 40s) var(--animation-direction, forwards) linear infinite",
         "blob": "blob 7s infinite",
       },
       zIndex: {

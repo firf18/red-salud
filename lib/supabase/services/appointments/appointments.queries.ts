@@ -44,8 +44,11 @@ interface DoctorAppointmentRow {
     nombre_completo?: string;
     email?: string;
     avatar_url?: string;
+    fecha_nacimiento?: string;
+    genero?: string;
   } | null;
 }
+
 
 interface PublicApiResponse<T> {
   success: boolean;
@@ -77,9 +80,9 @@ async function fetchPublicData<T>(
   const baseUrl = getApiBaseUrl();
   const queryString = params
     ? Object.entries(params)
-        .filter(([, value]) => value !== undefined && value !== null && value !== "")
-        .map(([key, value]) => `${encodeURIComponent(key)}=${encodeURIComponent(String(value))}`)
-        .join("&")
+      .filter(([, value]) => value !== undefined && value !== null && value !== "")
+      .map(([key, value]) => `${encodeURIComponent(key)}=${encodeURIComponent(String(value))}`)
+      .join("&")
     : "";
 
   const url = `${baseUrl}${path}${queryString ? `?${queryString}` : ""}`;
@@ -364,16 +367,29 @@ export async function getDoctorAppointments(doctorId: string) {
       .order("fecha_hora", { ascending: false });
 
     if (error) throw error;
-    
+
     const appointmentRows = (data || []) as DoctorAppointmentRow[];
     const appointments = appointmentRows.map((apt) => {
       const fechaHora = new Date(apt.fecha_hora);
+
+      // IMPORTANTE: Usar métodos locales para evitar problemas de timezone
+      // .toISOString() devuelve UTC y puede causar desfase de días
+      const year = fechaHora.getFullYear();
+      const month = String(fechaHora.getMonth() + 1).padStart(2, '0');
+      const day = String(fechaHora.getDate()).padStart(2, '0');
+      const appointmentDate = `${year}-${month}-${day}`;
+
+      const hours = String(fechaHora.getHours()).padStart(2, '0');
+      const minutes = String(fechaHora.getMinutes()).padStart(2, '0');
+      const seconds = String(fechaHora.getSeconds()).padStart(2, '0');
+      const appointmentTime = `${hours}:${minutes}:${seconds}`;
+
       return {
         id: apt.id,
         patient_id: apt.paciente_id,
         doctor_id: apt.medico_id,
-        appointment_date: fechaHora.toISOString().split('T')[0],
-        appointment_time: fechaHora.toTimeString().split(' ')[0],
+        appointment_date: appointmentDate,
+        appointment_time: appointmentTime,
         duration: apt.duracion_minutos,
         status: apt.status === 'pendiente' ? 'pending' : apt.status === 'confirmada' ? 'confirmed' : apt.status === 'completada' ? 'completed' : 'cancelled',
         consultation_type: 'video' as const,
@@ -384,10 +400,10 @@ export async function getDoctorAppointments(doctorId: string) {
         patient: apt.patient || undefined,
       };
     });
-    
+
     return { success: true, data: appointments as Appointment[] };
   } catch (error) {
-    console.error("Error fetching doctor appointments:", error);
+    console.error("Error fetching doctor appointments:", JSON.stringify(error, null, 2));
     return { success: false, error, data: [] };
   }
 }

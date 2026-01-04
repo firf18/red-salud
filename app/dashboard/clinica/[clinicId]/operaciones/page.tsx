@@ -9,7 +9,8 @@ import { useClinicScope } from '@/components/dashboard/clinica/clinic-scope-prov
 import { useClinicOperations } from '@/hooks/use-clinic-operations';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Skeleton } from '@/components/ui/skeleton';
+
+
 import { Bed, DoorOpen, Activity, Users } from 'lucide-react';
 
 export default function ClinicOperationsPage() {
@@ -31,8 +32,9 @@ export default function ClinicOperationsPage() {
   } = useClinicOperations(selectedLocationIds);
 
   if (isLoading) {
-    return <Skeleton className="h-96 w-full" />;
+    return null;
   }
+
 
   return (
     <div className="space-y-6">

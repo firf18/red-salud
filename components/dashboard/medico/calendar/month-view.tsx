@@ -49,7 +49,7 @@ export function MonthView({
   };
 
   const monthStats = useMemo(() => {
-    const monthAppointments = appointments.filter(apt => 
+    const monthAppointments = appointments.filter(apt =>
       isSameMonth(new Date(apt.fecha_hora), date)
     );
     return {
@@ -117,13 +117,11 @@ export function MonthView({
               return (
                 <div
                   key={day.toISOString()}
-                  className={`h-32 p-2 border-r last:border-r-0 transition-all duration-200 ${
-                    !isCurrentMonth ? "bg-gray-50/70" : ""
-                  } ${isDayToday ? "bg-blue-50 ring-2 ring-inset ring-blue-300" : ""} ${
-                    isPast
+                  className={`h-32 p-2 border-r last:border-r-0 transition-all duration-200 ${!isCurrentMonth ? "bg-gray-50/70" : ""
+                    } ${isDayToday ? "bg-blue-50 ring-2 ring-inset ring-blue-300" : ""} ${isPast
                       ? "bg-gray-100/50 cursor-not-allowed opacity-60"
                       : "cursor-pointer hover:bg-blue-50 hover:shadow-inner"
-                  }`}
+                    }`}
                   onClick={() => {
                     if (!isPast) {
                       onDayClick?.(day);
@@ -133,13 +131,12 @@ export function MonthView({
                   {/* Day Number */}
                   <div className="flex items-center justify-between mb-1">
                     <span
-                      className={`text-sm font-bold transition-all ${
-                        !isCurrentMonth
+                      className={`text-sm font-bold transition-all ${!isCurrentMonth
                           ? "text-gray-400"
                           : isDayToday
-                          ? "text-white bg-blue-600 rounded-full w-7 h-7 flex items-center justify-center shadow-md"
-                          : "text-gray-900"
-                      }`}
+                            ? "text-white bg-blue-600 rounded-full w-7 h-7 flex items-center justify-center shadow-md"
+                            : "text-gray-900"
+                        }`}
                     >
                       {format(day, "d")}
                     </span>
@@ -153,19 +150,22 @@ export function MonthView({
                   {/* Appointments */}
                   <div className="space-y-1 h-[calc(100%-28px)] overflow-y-auto scrollbar-none">
                     {dayAppointments.slice(0, 2).map((apt) => {
-                      const statusColors = {
+                      const statusColors: Record<string, string> = {
                         pendiente: "bg-yellow-50 border-yellow-400 hover:bg-yellow-100",
                         confirmada: "bg-blue-50 border-blue-400 hover:bg-blue-100",
                         completada: "bg-green-50 border-green-400 hover:bg-green-100",
                         cancelada: "bg-red-50 border-red-400 hover:bg-red-100",
+                        en_espera: "bg-orange-50 border-orange-400 hover:bg-orange-100",
+                        en_consulta: "bg-purple-50 border-purple-400 hover:bg-purple-100",
+                        no_asistio: "bg-gray-50 border-gray-400 hover:bg-gray-100",
+                        rechazada: "bg-rose-50 border-rose-400 hover:bg-rose-100",
                       };
 
                       return (
                         <div
                           key={apt.id}
-                          className={`text-xs p-1.5 rounded border-l-2 transition-all duration-150 cursor-pointer ${
-                            statusColors[apt.status] || "bg-white border-gray-400 hover:bg-gray-100"
-                          }`}
+                          className={`text-xs p-1.5 rounded border-l-2 transition-all duration-150 cursor-pointer ${statusColors[apt.status] || "bg-white border-gray-400 hover:bg-gray-100"
+                            }`}
                           onClick={(e) => {
                             e.stopPropagation();
                             onAppointmentClick?.(apt);

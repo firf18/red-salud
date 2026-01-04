@@ -81,8 +81,8 @@ export async function getDoctorProfile(userId: string) {
       .maybeSingle();
 
     if (error) {
-      console.error('Error fetching doctor profile:', error);
-      return { success: false, error: error.message };
+      console.error('Error fetching doctor profile detailed:', JSON.stringify(error, null, 2));
+      return { success: false, error: error.message || 'Error desconocido al obtener perfil' };
     }
 
     if (!data) {
@@ -391,7 +391,7 @@ export async function getDoctorStats(doctorId: string) {
         totalAppointments = appointmentsData.length;
         completedAppointments = appointmentsData.filter((a) => a.status === 'completed').length;
         cancelledAppointments = appointmentsData.filter((a) => a.status === 'cancelled').length;
-        
+
         // Citas de hoy
         const today = new Date().toISOString().split('T')[0];
         todayAppointments = appointmentsData.filter(
@@ -449,7 +449,7 @@ export async function getAvailableSlots(
 ) {
   // Obtener perfil del médico con su horario
   const { data: profile, error: profileError } = await getDoctorProfile(doctorId);
-  
+
   if (profileError || !profile) {
     return { success: false, error: 'Doctor not found' };
   }

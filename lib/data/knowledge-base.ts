@@ -360,6 +360,508 @@ Los pacientes y secretarias tienen acceso gratuito. Los médicos tienen 30 días
             url: "/servicios",
             keywords: ["horario", "atención", "disponible", "cuándo", "abierto"]
         }
+    },
+
+    // ===== ESPECIALIDADES MÉDICAS - LISTADO COMPLETO =====
+    {
+        content: `Red-Salud cuenta con más de 100 especialidades médicas organizadas en categorías:
+
+**Medicina General y Familiar:** Medicina General, Medicina Familiar, Geriatría, Medicina Interna.
+
+**Cardiología y Sistema Cardiovascular:** Cardiología, Cardiología Intervencionista, Electrofisiología Cardíaca, Hemodinamia, Cardiología Pediátrica, Cirugía Cardiovascular.
+
+**Neurología y Sistema Nervioso:** Neurología, Neurocirugía, Neurología Pediátrica, Neurofisiología Clínica, Neuropsicología.
+
+**Sistema Digestivo:** Gastroenterología, Hepatología, Coloproctología, Gastroenterología Pediátrica, Endoscopia Digestiva.
+
+**Sistema Respiratorio:** Neumología, Neumología Pediátrica, Cirugía Torácica, Medicina del Sueño.
+
+**Sistema Renal y Urológico:** Nefrología, Nefrología Pediátrica, Urología, Urología Pediátrica, Andrología.
+
+**Endocrinología y Metabolismo:** Endocrinología, Diabetología, Endocrinología Pediátrica, Nutriología.
+
+**Reumatología:** Reumatología, Reumatología Pediátrica.
+
+**Hematología y Oncología:** Hematología, Oncología Médica, Oncología Radioterápica, Hemato-Oncología Pediátrica, Mastología.
+
+**Infectología e Inmunología:** Infectología, Infectología Pediátrica, Inmunología, Alergología.
+
+**Dermatología:** Dermatología, Dermato-oncología, Dermatopatología, Dermatología Pediátrica.
+
+**Psiquiatría y Salud Mental:** Psiquiatría, Psiquiatría Infantil, Psicología Clínica, Sexología Clínica.
+
+**Cirugía:** Cirugía General, Cirugía Bariátrica, Cirugía Laparoscópica, Cirugía Oncológica, Cirugía Pediátrica.
+
+**Traumatología:** Traumatología y Ortopedia, Artroscopia, Cirugía de Columna, Cirugía de Mano, Medicina del Deporte, Ortopedia Pediátrica.
+
+**Oftalmología:** Oftalmología, Retina y Vítreo, Glaucoma, Oftalmología Pediátrica, Cirugía Refractiva.
+
+**Otorrinolaringología:** Otorrinolaringología, Audiología, Foniatría.
+
+**Ginecología y Obstetricia:** Ginecología, Obstetricia, Medicina Reproductiva, Ginecología Oncológica, Medicina Materno-Fetal.
+
+**Pediatría:** Pediatría, Neonatología, Cuidados Intensivos Pediátricos.
+
+**Odontología:** Odontología, Ortodoncia, Endodoncia, Periodoncia, Implantología Dental, Cirugía Oral.
+
+Para buscar un especialista, ve a /especialidades y usa el buscador o navega por categorías.`,
+        metadata: {
+            title: "Listado completo de especialidades médicas",
+            category: "services",
+            url: "/especialidades",
+            keywords: ["especialidad", "especialidades", "médico", "doctor", "lista", "todas", "categoría", "buscar especialista", "qué especialidades tienen", "cuantas especialidades"]
+        }
+    },
+
+    // ===== CARDIOLOGÍA =====
+    {
+        content: `La Cardiología es la especialidad médica del corazón y sistema cardiovascular. Los cardiólogos diagnostican y tratan enfermedades como hipertensión, arritmias, insuficiencia cardíaca e infarto.
+
+**¿Cuándo consultar a un cardiólogo?**
+- Dolor en el pecho o sensación de opresión
+- Dificultad para respirar
+- Palpitaciones o latidos irregulares
+- Mareos o desmayos frecuentes
+- Hipertensión arterial
+- Antecedentes familiares de enfermedades cardíacas
+
+**Subespecialidades disponibles:**
+- Cardiología Intervencionista
+- Electrofisiología Cardíaca
+- Hemodinamia
+- Cardiología Pediátrica
+- Cirugía Cardiovascular
+
+El chequeo cardíaco preventivo se recomienda a partir de los 40 años o antes si hay factores de riesgo.`,
+        metadata: {
+            title: "Cardiología - Especialistas del corazón",
+            category: "services",
+            url: "/especialidades/cardiologia",
+            keywords: ["cardiología", "cardiólogo", "corazón", "hipertensión", "arritmia", "infarto", "palpitaciones"]
+        }
+    },
+
+    // ===== NEUROLOGÍA =====
+    {
+        content: `La Neurología trata los trastornos del sistema nervioso: cerebro, médula espinal y nervios periféricos. Los neurólogos diagnostican enfermedades como migraña, epilepsia, Parkinson, Alzheimer y esclerosis múltiple.
+
+**¿Cuándo consultar a un neurólogo?**
+- Dolores de cabeza frecuentes o intensos
+- Pérdida de memoria o confusión
+- Mareos o vértigo
+- Hormigueo o adormecimiento
+- Convulsiones
+- Problemas de coordinación o equilibrio
+- Cambios en la visión
+
+**Subespecialidades:**
+- Neurocirugía
+- Neurología Pediátrica
+- Neurofisiología Clínica
+- Neuropsicología`,
+        metadata: {
+            title: "Neurología - Sistema nervioso",
+            category: "services",
+            url: "/especialidades/neurologia",
+            keywords: ["neurología", "neurólogo", "cerebro", "migraña", "dolor de cabeza", "epilepsia", "Parkinson", "Alzheimer", "nervios"]
+        }
+    },
+
+    // ===== PEDIATRÍA =====
+    {
+        content: `La Pediatría es la especialidad médica dedicada a la salud de niños y adolescentes, desde el nacimiento hasta los 18 años. Los pediatras realizan controles de crecimiento, vacunación y tratan enfermedades infantiles.
+
+**¿Cuándo llevar a tu hijo al pediatra?**
+- Controles de niño sano (mensuales el primer año)
+- Fiebre alta o persistente
+- Problemas respiratorios
+- Vómitos o diarrea
+- Sarpullidos o erupciones
+- Dolor persistente
+- Cambios de comportamiento
+- Vacunación según calendario
+
+**Subespecialidades pediátricas:**
+- Neonatología (recién nacidos)
+- Cuidados Intensivos Pediátricos
+- Medicina del Adolescente
+- Cardiología Pediátrica
+- Neurología Pediátrica
+- Gastroenterología Pediátrica`,
+        metadata: {
+            title: "Pediatría - Salud infantil",
+            category: "services",
+            url: "/especialidades/pediatria",
+            keywords: ["pediatría", "pediatra", "niños", "bebé", "infantil", "vacunas", "control niño sano", "adolescente"]
+        }
+    },
+
+    // ===== GINECOLOGÍA =====
+    {
+        content: `La Ginecología atiende la salud del sistema reproductivo femenino. Las ginecólogas/os realizan exámenes preventivos, citologías, controlan el embarazo y tratan trastornos menstruales.
+
+**¿Cuándo consultar a un ginecólogo?**
+- Examen anual preventivo (Papanicolaou)
+- Irregularidades menstruales
+- Dolor pélvico o menstrual intenso
+- Planificación familiar y anticoncepción
+- Síntomas de menopausia
+- Sospecha de embarazo
+- Infecciones o flujo anormal
+
+**Subespecialidades:**
+- Obstetricia (embarazo y parto)
+- Medicina Reproductiva (fertilidad)
+- Ginecología Oncológica
+- Medicina Materno-Fetal`,
+        metadata: {
+            title: "Ginecología y Obstetricia - Salud femenina",
+            category: "services",
+            url: "/especialidades/ginecologia",
+            keywords: ["ginecología", "ginecólogo", "mujer", "menstruación", "embarazo", "obstetricia", "papanicolaou", "citología", "menopausia"]
+        }
+    },
+
+    // ===== DERMATOLOGÍA =====
+    {
+        content: `La Dermatología trata enfermedades de la piel, cabello y uñas. Los dermatólogos diagnostican desde acné y eczema hasta cáncer de piel.
+
+**¿Cuándo consultar a un dermatólogo?**
+- Acné persistente
+- Manchas o lunares que cambian
+- Erupciones, sarpullidos o alergias cutáneas
+- Caída de cabello
+- Psoriasis o dermatitis
+- Hongos en uñas o piel
+- Revisión anual de lunares
+
+**La regla ABCDE para lunares sospechosos:**
+- Asimetría
+- Bordes irregulares
+- Color desigual
+- Diámetro mayor a 6mm
+- Evolución (cambios)`,
+        metadata: {
+            title: "Dermatología - Salud de la piel",
+            category: "services",
+            url: "/especialidades/dermatologia",
+            keywords: ["dermatología", "dermatólogo", "piel", "acné", "manchas", "lunares", "eczema", "psoriasis", "cabello"]
+        }
+    },
+
+    // ===== TRAUMATOLOGÍA =====
+    {
+        content: `La Traumatología y Ortopedia trata lesiones y enfermedades del sistema musculoesquelético: huesos, articulaciones, músculos, tendones y ligamentos.
+
+**¿Cuándo consultar a un traumatólogo?**
+- Fracturas o sospecha de fractura
+- Dolor de espalda o columna
+- Dolor de rodilla, cadera u hombro
+- Esguinces y luxaciones
+- Lesiones deportivas
+- Artritis o artrosis
+- Hernias discales
+
+**Subespecialidades:**
+- Artroscopia (cirugía mínimamente invasiva)
+- Cirugía de Columna
+- Cirugía de Mano
+- Medicina del Deporte
+- Ortopedia Pediátrica`,
+        metadata: {
+            title: "Traumatología y Ortopedia",
+            category: "services",
+            url: "/especialidades/traumatologia",
+            keywords: ["traumatología", "traumatólogo", "ortopedia", "huesos", "fracturas", "espalda", "rodilla", "articulaciones", "deportivo"]
+        }
+    },
+
+    // ===== OFTALMOLOGÍA =====
+    {
+        content: `La Oftalmología es la especialidad de la salud visual. Los oftalmólogos diagnostican y tratan enfermedades de los ojos como cataratas, glaucoma, y problemas de refracción.
+
+**¿Cuándo consultar a un oftalmólogo?**
+- Visión borrosa o cambios en la visión
+- Ojos rojos frecuentes
+- Dolor ocular
+- Sensibilidad a la luz
+- Manchas flotantes (moscas volantes)
+- Diabetes (control oftalmológico anual)
+- Mayores de 40 años (screening de glaucoma)
+
+**Subespecialidades:**
+- Retina y Vítreo
+- Glaucoma
+- Oftalmología Pediátrica
+- Cirugía Refractiva (LASIK)
+- Optometría`,
+        metadata: {
+            title: "Oftalmología - Salud visual",
+            category: "services",
+            url: "/especialidades/oftalmologia",
+            keywords: ["oftalmología", "oftalmólogo", "ojos", "visión", "anteojos", "lentes", "cataratas", "glaucoma", "miopía"]
+        }
+    },
+
+    // ===== PSIQUIATRÍA =====
+    {
+        content: `La Psiquiatría es la especialidad médica de la salud mental. Los psiquiatras diagnostican y tratan trastornos como depresión, ansiedad, trastorno bipolar y esquizofrenia.
+
+**¿Cuándo consultar a un psiquiatra?**
+- Tristeza persistente o depresión
+- Ansiedad que interfiere con la vida diaria
+- Cambios severos de ánimo
+- Insomnio crónico
+- Pensamientos de hacerse daño
+- Adicciones
+- Trastornos de alimentación
+- Alucinaciones o delirios
+
+**Subespecialidades:**
+- Psiquiatría Infantil y del Adolescente
+- Psicología Clínica
+- Sexología Clínica
+- Adicciones y Toxicomanías
+
+La diferencia entre psiquiatra y psicólogo: el psiquiatra es médico y puede recetar medicamentos; el psicólogo realiza terapia psicológica.`,
+        metadata: {
+            title: "Psiquiatría y Salud Mental",
+            category: "services",
+            url: "/especialidades/psiquiatria",
+            keywords: ["psiquiatría", "psiquiatra", "salud mental", "depresión", "ansiedad", "psicólogo", "terapia", "bipolar"]
+        }
+    },
+
+    // ===== ODONTOLOGÍA =====
+    {
+        content: `La Odontología cuida la salud bucal: dientes, encías y boca. Los dentistas realizan limpiezas, extracciones, empastes y tratamientos preventivos.
+
+**¿Cuándo ir al dentista?**
+- Revisión y limpieza semestral
+- Dolor de muelas
+- Sangrado de encías
+- Mal aliento persistente
+- Caries o manchas en dientes
+- Dientes flojos o móviles
+- Corrección de mordida
+
+**Subespecialidades odontológicas:**
+- Ortodoncia (brackets, alineadores)
+- Endodoncia (tratamiento de conducto)
+- Periodoncia (encías)
+- Implantología Dental
+- Cirugía Oral y Maxilofacial
+- Odontopediatría (niños)
+- Prostodoncia (prótesis)`,
+        metadata: {
+            title: "Odontología - Salud bucal",
+            category: "services",
+            url: "/especialidades/odontologia",
+            keywords: ["odontología", "dentista", "dientes", "muelas", "encías", "ortodoncia", "brackets", "caries", "limpieza dental"]
+        }
+    },
+
+    // ===== GASTROENTEROLOGÍA =====
+    {
+        content: `La Gastroenterología trata enfermedades del sistema digestivo: esófago, estómago, intestinos, hígado, páncreas y vesícula.
+
+**¿Cuándo consultar a un gastroenterólogo?**
+- Acidez o reflujo frecuente
+- Dolor abdominal persistente
+- Náuseas o vómitos recurrentes
+- Diarrea o estreñimiento crónico
+- Sangre en las heces
+- Problemas de hígado
+- Pérdida de peso inexplicable
+
+**Subespecialidades:**
+- Hepatología (hígado)
+- Coloproctología (colon y recto)
+- Endoscopia Digestiva
+- Gastroenterología Pediátrica`,
+        metadata: {
+            title: "Gastroenterología - Sistema digestivo",
+            category: "services",
+            url: "/especialidades/gastroenterologia",
+            keywords: ["gastroenterología", "gastroenterólogo", "digestivo", "estómago", "intestino", "hígado", "reflujo", "acidez", "colonoscopia"]
+        }
+    },
+
+    // ===== UROLOGÍA =====
+    {
+        content: `La Urología trata enfermedades del sistema urinario (hombres y mujeres) y del aparato reproductor masculino.
+
+**¿Cuándo consultar a un urólogo?**
+- Dificultad para orinar
+- Dolor al orinar o sangre en orina
+- Infecciones urinarias recurrentes
+- Problemas de próstata (hombres mayores de 50)
+- Cálculos renales (piedras)
+- Incontinencia urinaria
+- Disfunción eréctil
+
+**Subespecialidades:**
+- Nefrología (riñones - enfoque médico)
+- Urología Pediátrica
+- Andrología (salud sexual masculina)`,
+        metadata: {
+            title: "Urología - Sistema urinario",
+            category: "services",
+            url: "/especialidades/urologia",
+            keywords: ["urología", "urólogo", "orina", "riñón", "próstata", "vejiga", "cálculos", "piedras", "incontinencia"]
+        }
+    },
+
+    // ===== ENDOCRINOLOGÍA =====
+    {
+        content: `La Endocrinología trata trastornos hormonales y del metabolismo: diabetes, tiroides, obesidad, osteoporosis.
+
+**¿Cuándo consultar a un endocrinólogo?**
+- Diabetes tipo 1 o 2
+- Problemas de tiroides (hiper/hipotiroidismo)
+- Sobrepeso u obesidad
+- Trastornos de crecimiento
+- Síndrome de ovario poliquístico
+- Osteoporosis
+- Menopausia con síntomas severos
+
+**Subespecialidades:**
+- Diabetología
+- Endocrinología Pediátrica
+- Nutriología`,
+        metadata: {
+            title: "Endocrinología - Hormonas y metabolismo",
+            category: "services",
+            url: "/especialidades/endocrinologia",
+            keywords: ["endocrinología", "endocrinólogo", "diabetes", "tiroides", "hormonas", "metabolismo", "obesidad", "osteoporosis"]
+        }
+    },
+
+    // ===== NEUMOLOGÍA =====
+    {
+        content: `La Neumología trata enfermedades del sistema respiratorio: pulmones, bronquios y vías respiratorias.
+
+**¿Cuándo consultar a un neumólogo?**
+- Tos persistente (más de 3 semanas)
+- Dificultad para respirar
+- Silbidos al respirar (sibilancias)
+- Asma mal controlada
+- Ronquidos fuertes y apnea del sueño
+- Fumadores (evaluación preventiva)
+- COVID-19 con secuelas pulmonares
+
+**Subespecialidades:**
+- Neumología Pediátrica
+- Cirugía Torácica
+- Medicina del Sueño`,
+        metadata: {
+            title: "Neumología - Sistema respiratorio",
+            category: "services",
+            url: "/especialidades/neumologia",
+            keywords: ["neumología", "neumólogo", "pulmones", "respirar", "asma", "tos", "bronquitis", "apnea", "ronquidos"]
+        }
+    },
+
+    // ===== OTORRINOLARINGOLOGÍA =====
+    {
+        content: `La Otorrinolaringología (ORL) trata enfermedades de oído, nariz y garganta, incluyendo problemas de voz y equilibrio.
+
+**¿Cuándo consultar a un otorrino?**
+- Pérdida de audición o zumbidos
+- Infecciones de oído recurrentes
+- Sinusitis o congestión nasal crónica
+- Ronquera persistente
+- Amigdalitis frecuentes
+- Vértigo o problemas de equilibrio
+- Sangrado nasal frecuente
+
+**Subespecialidades:**
+- Audiología
+- Foniatría (voz y habla)
+- Cirugía de Cabeza y Cuello`,
+        metadata: {
+            title: "Otorrinolaringología - Oído, nariz y garganta",
+            category: "services",
+            url: "/especialidades/otorrinolaringologia",
+            keywords: ["otorrinolaringología", "otorrino", "oído", "nariz", "garganta", "sinusitis", "amígdalas", "audición", "sordera"]
+        }
+    },
+
+    // ===== ONCOLOGÍA =====
+    {
+        content: `La Oncología es la especialidad del diagnóstico y tratamiento del cáncer. Los oncólogos coordinan quimioterapia, inmunoterapia y cuidados integrales del paciente oncológico.
+
+**¿Cuándo consultar a un oncólogo?**
+- Diagnóstico de cáncer confirmado
+- Bultos o masas sospechosas
+- Pérdida de peso inexplicable
+- Síntomas persistentes sin causa clara
+- Segunda opinión oncológica
+- Antecedentes familiares fuertes de cáncer
+
+**Tipos de oncología:**
+- Oncología Médica (quimioterapia)
+- Oncología Radioterápica (radioterapia)
+- Cirugía Oncológica
+- Hemato-Oncología (cánceres de sangre)
+- Mastología (mama)`,
+        metadata: {
+            title: "Oncología - Tratamiento del cáncer",
+            category: "services",
+            url: "/especialidades/oncologia",
+            keywords: ["oncología", "oncólogo", "cáncer", "tumor", "quimioterapia", "radioterapia", "biopsia", "mastología", "mama"]
+        }
+    },
+
+    // ===== ALERGOLOGÍA =====
+    {
+        content: `La Alergología diagnostica y trata reacciones alérgicas: rinitis, asma alérgica, alergias alimentarias, urticaria y anafilaxia.
+
+**¿Cuándo consultar a un alergólogo?**
+- Estornudos y congestión nasal frecuente
+- Ojos llorosos y con picazón
+- Urticaria o ronchas recurrentes
+- Sospecha de alergia alimentaria
+- Reacciones a medicamentos
+- Asma alérgica
+- Eczema o dermatitis atópica
+
+**Pruebas de alergia:**
+- Test cutáneos (prick test)
+- Análisis de sangre (IgE)
+- Pruebas de provocación`,
+        metadata: {
+            title: "Alergología e Inmunología",
+            category: "services",
+            url: "/especialidades/alergologia",
+            keywords: ["alergología", "alergólogo", "alergia", "rinitis", "urticaria", "asma", "inmunología", "ronchas", "estornudos"]
+        }
+    },
+
+    // ===== MEDICINA FÍSICA Y REHABILITACIÓN =====
+    {
+        content: `La Medicina Física y Rehabilitación ayuda a recuperar la función después de lesiones, cirugías o enfermedades. Incluye fisioterapia, terapia ocupacional y rehabilitación.
+
+**¿Cuándo necesitas rehabilitación?**
+- Después de una cirugía ortopédica
+- Accidente cerebrovascular (ACV)
+- Dolor de espalda crónico
+- Lesiones deportivas
+- Parálisis o debilidad muscular
+- Enfermedades neurológicas
+- Después de fracturas
+
+**Disciplinas relacionadas:**
+- Fisioterapia
+- Terapia Ocupacional
+- Quiropráctica
+- Fonoaudiología`,
+        metadata: {
+            title: "Medicina Física y Rehabilitación",
+            category: "services",
+            url: "/especialidades/rehabilitacion",
+            keywords: ["rehabilitación", "fisioterapia", "terapia física", "recuperación", "ejercicios", "dolor espalda", "lesión"]
+        }
     }
 ];
 
@@ -374,6 +876,48 @@ export const suggestedQuestions = [
     "¿Cómo funciona la telemedicina?",
     "¿Cómo cancelo mi suscripción?"
 ];
+
+/**
+ * Page-specific suggestions
+ */
+export const pageSuggestions: Record<string, string[]> = {
+    "/precios": [
+        "¿Es gratis para pacientes?",
+        "¿Cuánto cuesta el plan médico?",
+        "¿Tienen planes para clínicas?",
+        "¿Cómo funciona la prueba gratis?"
+    ],
+    "/servicios": [
+        "¿Qué especialidades tienen?",
+        "¿Tienen pediatría?",
+        "¿Cómo funciona la telemedicina?",
+        "¿Hacen pruebas de laboratorio?"
+    ],
+    "/auth/register": [
+        "¿Es gratis registrarse?",
+        "¿Cómo me registro como médico?",
+        "¿Qué datos necesito?",
+        "¿Puedo registrarme como secretaria?"
+    ],
+    "/soporte": [
+        "¿Cuál es el horario de atención?",
+        "Quiero hablar con un humano",
+        "Olvidé mi contraseña",
+        "¿Cómo reportar un problema?"
+    ],
+    "/dashboard/medico": [
+        "¿Cómo agendo un paciente?",
+        "Resumen de mis citas hoy",
+        "¿Cómo creo una receta?",
+        "Ver historial de paciente"
+    ],
+    "/dashboard/medico/citas": [
+        "¿Cómo reprogramo una cita?",
+        "¿Qué significan los colores de las citas?",
+        "¿Cómo agendo un paciente sin cuenta?",
+        "Ver citas pendientes de confirmar"
+    ]
+};
 
 /**
  * Categories for organizing knowledge

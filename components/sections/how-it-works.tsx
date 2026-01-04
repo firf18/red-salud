@@ -1,273 +1,194 @@
+/**
+ * @file how-it-works.tsx
+ * @description Sección "Proceso Simplificado" rediseñada con scroll-timeline y animaciones premium.
+ * Implementa un efecto sticky donde la explicación general acompaña el scroll de las tarjetas.
+ */
+
 "use client";
 
-import { useState } from "react";
-import { motion } from "framer-motion";
-import { 
-  Calendar, 
-  Users, 
-  Stethoscope, 
-  CheckCircle2,
-  UserCircle,
-  Pill,
-  FlaskConical,
-  Briefcase,
-  UserCog,
-  Hospital,
-  HeartPulse,
-  Ambulance
-} from "lucide-react";
-import { fadeInUp, staggerContainer } from "@/lib/animations";
+import { useRef } from "react";
+import { motion, useScroll, useTransform, useSpring, useInView } from "framer-motion";
+import { UserCircle, Settings, Share2, ArrowRight, Sparkles, CheckCircle2 } from "lucide-react";
+import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
 import Link from "next/link";
 
 const steps = [
   {
+    id: 1,
+    title: "Crea tu Cuenta",
+    subtitle: "El inicio de tu ecosistema",
+    description: "Accede a la plataforma unificada de salud. Un solo registro te conecta con todo lo que necesitas, ya seas paciente que busca atención o especialista que ofrece sus servicios.",
     icon: UserCircle,
-    number: "01",
-    title: "Regístrate",
-    description: "Crea tu cuenta y completa tu perfil en minutos.",
+    color: "from-blue-500 to-cyan-400",
+    shadow: "shadow-blue-500/20",
+    features: ["Registro unificado", "Verificación segura", "Acceso inmediato"]
   },
   {
-    icon: Calendar,
-    number: "02",
-    title: "Conéctate",
-    description: "Encuentra servicios, agenda citas o gestiona tu consulta.",
+    id: 2,
+    title: "Personaliza tu Experiencia",
+    subtitle: "Adaptado a tus necesidades",
+    description: "Configura tu perfil según tu rol. Los pacientes definen sus preferencias de búsqueda y los médicos establecen sus horarios y especialidades con herramientas flexibles.",
+    icon: Settings,
+    color: "from-violet-500 to-fuchsia-400",
+    shadow: "shadow-violet-500/20",
+    features: ["Ajustes flexibles", "Interfaz intuitiva", "Control total"]
   },
   {
-    icon: HeartPulse,
-    number: "03",
-    title: "Aprovecha",
-    description: "Accede a todas las funciones de tu rol desde un solo lugar.",
-  },
-];
-
-const roles = [
-  { 
-    id: "paciente", 
-    name: "Paciente", 
-    icon: Users, 
-    color: "from-blue-600 to-blue-700",
-    href: "/servicios/pacientes",
-    description: "Agenda citas y gestiona tu salud"
-  },
-  { 
-    id: "medico", 
-    name: "Médico", 
-    icon: Stethoscope, 
-    color: "from-teal-600 to-teal-700",
-    href: "/servicios/medicos",
-    description: "Atiende pacientes y administra consultas"
-  },
-  { 
-    id: "farmacia", 
-    name: "Farmacia", 
-    icon: Pill, 
-    color: "from-green-600 to-green-700",
-    href: "/servicios/farmacias",
-    description: "Gestiona recetas y dispensación"
-  },
-  { 
-    id: "laboratorio", 
-    name: "Laboratorio", 
-    icon: FlaskConical, 
-    color: "from-purple-600 to-purple-700",
-    href: "/servicios/laboratorios",
-    description: "Procesa muestras y entrega resultados"
-  },
-  { 
-    id: "aseguradora", 
-    name: "Aseguradora", 
-    icon: Briefcase, 
-    color: "from-orange-600 to-orange-700",
-    href: "/servicios/seguros",
-    description: "Administra pólizas y reembolsos"
-  },
-  { 
-    id: "secretaria", 
-    name: "Secretaria", 
-    icon: UserCog, 
-    color: "from-pink-600 to-pink-700",
-    href: "/servicios/secretarias",
-    description: "Organiza agendas y apoya al médico"
-  },
-  { 
-    id: "clinica", 
-    name: "Clínica", 
-    icon: Hospital, 
-    color: "from-indigo-600 to-indigo-700",
-    href: "/servicios/clinicas",
-    description: "Coordina servicios hospitalarios"
-  },
-  { 
-    id: "ambulancia", 
-    name: "Ambulancias", 
-    icon: Ambulance, 
-    color: "from-red-600 to-red-700",
-    href: "/servicios/ambulancias",
-    description: "Servicio de emergencias médicas"
-  },
+    id: 3,
+    title: "Conecta y Gestiona",
+    subtitle: "Interacción sin límites",
+    description: "Comienza a interactuar. Agenda citas, gestiona consultas y mantén el control total de tu salud o práctica médica desde un dashboard centralizado e inteligente.",
+    icon: Share2,
+    color: "from-emerald-500 to-teal-400",
+    shadow: "shadow-emerald-500/20",
+    features: ["Gestión centralizada", "Comunicación fluida", "Soporte constante"]
+  }
 ];
 
 export function HowItWorksSection() {
-  const [selectedRole, setSelectedRole] = useState<string | null>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const { scrollYProgress } = useScroll({
+    target: containerRef,
+    offset: ["start start", "end end"]
+  });
+
+  const springScroll = useSpring(scrollYProgress, {
+    stiffness: 100,
+    damping: 30,
+    restDelta: 0.001
+  });
 
   return (
-    <section className="py-20 lg:py-28 bg-gradient-to-b from-background via-secondary/5 to-background dark:from-background dark:via-background dark:to-background relative overflow-hidden">
-      {/* Fondo sutil animado */}
-      <div className="absolute inset-0 opacity-5 dark:opacity-10">
-        <div className="absolute top-20 left-10 w-96 h-96 bg-primary rounded-full mix-blend-multiply filter blur-3xl animate-blob" />
-        <div className="absolute bottom-20 right-10 w-96 h-96 bg-secondary rounded-full mix-blend-multiply filter blur-3xl animate-blob animation-delay-2000" />
+    <section ref={containerRef} className="relative bg-background">
+      {/* Dynamic Background */}
+      <div className="absolute inset-0 pointer-events-none overflow-hidden">
+        <div className="absolute top-0 left-1/4 w-[500px] h-[500px] bg-primary/5 rounded-full blur-[100px] -translate-y-1/2" />
+        <div className="absolute bottom-0 right-1/4 w-[500px] h-[500px] bg-blue-500/5 rounded-full blur-[100px] translate-y-1/2" />
+        <div className="absolute inset-0 bg-[url('/noise.png')] opacity-[0.02] mix-blend-overlay" />
       </div>
 
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-        {/* Header */}
-        <motion.div
-          className="text-center max-w-3xl mx-auto mb-16"
-          variants={staggerContainer}
-          initial="initial"
-          whileInView="animate"
-          viewport={{ once: true, margin: "-100px" }}
-        >
-          <motion.div
-            variants={fadeInUp}
-            className="inline-block px-4 py-2 rounded-full bg-primary/10 dark:bg-primary/20 text-primary text-sm font-semibold mb-4 border border-primary/20 dark:border-primary/30"
-          >
-            Cómo funciona
-          </motion.div>
-          <motion.h2
-            variants={fadeInUp}
-            className="text-4xl sm:text-5xl lg:text-6xl font-bold text-foreground mb-6"
-          >
-            Solo{" "}
-            <span className="gradient-text">
-              3 pasos
-            </span>
-            {" "}para empezar
-          </motion.h2>
-          <motion.p
-            variants={fadeInUp}
-            className="text-xl text-muted-foreground leading-relaxed"
-          >
-            Un proceso simple para todos los roles de nuestra plataforma
-          </motion.p>
-        </motion.div>
+      <div className="container px-4 mx-auto">
+        <div className="flex flex-col lg:flex-row gap-12 lg:gap-24 relative">
 
-        {/* Steps */}
-        <motion.div
-          className="grid grid-cols-1 md:grid-cols-3 gap-8 lg:gap-12 max-w-6xl mx-auto mb-20"
-          variants={staggerContainer}
-          initial="initial"
-          whileInView="animate"
-          viewport={{ once: true, margin: "-100px" }}
-        >
-          {steps.map((step, index) => {
-            const Icon = step.icon;
-            return (
+          {/* Sticky Header Section */}
+          <div className="lg:w-1/2 lg:h-screen lg:sticky lg:top-0 py-12 lg:py-0 flex flex-col justify-center z-10 transition-all duration-300">
+            <div className="relative">
               <motion.div
-                key={step.number}
-                variants={fadeInUp}
-                className="relative group"
+                initial={{ opacity: 0, x: -20 }}
+                whileInView={{ opacity: 1, x: 0 }}
+                viewport={{ once: true }}
               >
-                {/* Línea conectora */}
-                {index < steps.length - 1 && (
-                  <div className="hidden md:block absolute top-16 left-[calc(100%-2rem)] w-[calc(100%+4rem)] h-0.5 bg-gradient-to-r from-primary/30 to-transparent dark:from-primary/20 dark:to-transparent z-0" />
-                )}
+                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 border border-primary/20 text-primary text-xs font-bold uppercase tracking-widest mb-6 w-fit">
+                  <Sparkles className="w-3.5 h-3.5" />
+                  <span>Proceso Simplificado</span>
+                </div>
 
-                <div className="relative bg-card border border-border rounded-2xl p-8 transition-all duration-500 hover-lift hover:border-primary/50 h-full flex flex-col">
-                  <div className="absolute -top-4 -right-4 w-12 h-12 rounded-full bg-gradient-to-br from-primary to-secondary flex items-center justify-center text-white font-bold text-lg shadow-lg">
-                    {step.number}
-                  </div>
+                <h2 className="text-4xl md:text-5xl lg:text-7xl font-black tracking-tight mb-8 leading-tight text-foreground">
+                  Empieza en <br />
+                  <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary via-blue-600 to-teal-500">
+                    3 simples pasos
+                  </span>
+                </h2>
 
-                  <div className="mb-6">
-                    <div className="inline-flex p-4 rounded-2xl bg-gradient-to-br from-primary to-secondary shadow-lg transition-transform duration-500 group-hover:scale-110 group-hover:rotate-3">
-                      <Icon className="h-8 w-8 text-white" />
-                    </div>
-                  </div>
+                <p className="text-lg text-muted-foreground leading-relaxed max-w-lg mb-10">
+                  Hemos simplificado la experiencia de salud digital.
+                  Sin burocracia, sin esperas y con la tecnología más avanzada
+                  trabajando para ti.
+                </p>
 
-                  <h3 className="text-2xl font-bold text-foreground mb-4">
-                    {step.title}
-                  </h3>
-                  <p className="text-muted-foreground leading-relaxed flex-1">
-                    {step.description}
-                  </p>
-
-                  <div className="mt-6 pt-6 border-t border-border dark:border-border">
-                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                      <CheckCircle2 className="h-4 w-4 text-secondary" />
-                      <span>Rápido y seguro</span>
-                    </div>
-                  </div>
+                <div className="flex flex-wrap gap-4">
+                  <Button asChild size="lg" className="rounded-full px-8 text-base h-12 shadow-lg shadow-primary/25 hover:shadow-primary/40 transition-shadow">
+                    <Link href="/auth/register">
+                      Comenzar Ahora
+                      <ArrowRight className="ml-2 w-4 h-4" />
+                    </Link>
+                  </Button>
+                  <Button asChild variant="outline" size="lg" className="rounded-full px-8 text-base h-12">
+                    <Link href="/about">
+                      Más Información
+                    </Link>
+                  </Button>
                 </div>
               </motion.div>
-            );
-          })}
-        </motion.div>
 
-        {/* Selector de roles */}
-        <motion.div
-          className="max-w-6xl mx-auto"
-          variants={staggerContainer}
-          initial="initial"
-          whileInView="animate"
-          viewport={{ once: true }}
-        >
-          <motion.div variants={fadeInUp} className="text-center mb-12">
-            <h3 className="text-3xl sm:text-4xl font-bold text-foreground mb-4">
-              ¿Quieres ver el{" "}
-              <span className="gradient-text">
-                verdadero potencial
-              </span>
-              ?
-            </h3>
-            <p className="text-lg text-muted-foreground">
-              Descubre cómo nuestra plataforma se adapta a tu rol
-            </p>
-          </motion.div>
+              {/* Decorative Line on Desktop */}
+              <div className="hidden lg:block absolute -left-8 top-1/2 -translate-y-1/2 h-3/4 w-[1px] bg-border/50">
+                <motion.div
+                  style={{ height: springScroll, scaleY: scrollYProgress }}
+                  className="absolute top-0 left-0 w-full bg-primary origin-top"
+                />
+              </div>
+            </div>
+          </div>
 
-          <motion.div 
-            variants={fadeInUp}
-            className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4"
-          >
-            {roles.map((role) => {
-              const Icon = role.icon;
-              const isSelected = selectedRole === role.id;
-              
-              return (
-                <Link
-                  key={role.id}
-                  href={role.href}
-                  onMouseEnter={() => setSelectedRole(role.id)}
-                  onMouseLeave={() => setSelectedRole(null)}
-                  className="group"
-                >
-                  <div className={`
-                    relative p-6 rounded-2xl border transition-all duration-300 h-full
-                    ${isSelected 
-                      ? 'bg-gradient-to-br ' + role.color + ' border-transparent shadow-2xl scale-105' 
-                      : 'bg-card border-border hover:border-primary/50 hover-lift'
-                    }
-                  `}>
-                    <div className={`flex flex-col items-center gap-3 transition-colors duration-300 ${isSelected ? 'text-white' : 'text-foreground'}`}>
-                      <div className={`p-3 rounded-xl transition-all duration-300 ${
-                        isSelected 
-                          ? 'bg-white/20' 
-                          : 'bg-gradient-to-br ' + role.color + ' text-white'
-                      }`}>
-                        <Icon className="h-6 w-6" />
-                      </div>
-                      <div className="text-center">
-                        <div className="font-bold text-sm mb-1">{role.name}</div>
-                        <div className={`text-xs transition-opacity duration-300 ${isSelected ? 'text-white/90' : 'text-muted-foreground'}`}>
-                          {role.description}
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </Link>
-              );
-            })}
-          </motion.div>
-        </motion.div>
+          {/* Scrolling Steps Section */}
+          <div className="lg:w-1/2 py-12 lg:py-32 flex flex-col gap-32 lg:gap-[50vh] relative z-0">
+            {steps.map((step, index) => (
+              <StepCard key={step.id} step={step} index={index} />
+            ))}
+          </div>
+
+        </div>
       </div>
     </section>
+  );
+}
+
+function StepCard({ step, index }: { step: typeof steps[0], index: number }) {
+  const ref = useRef(null);
+  const isInView = useInView(ref, { margin: "-20% 0px -20% 0px" });
+
+  return (
+    <motion.div
+      ref={ref}
+      initial={{ opacity: 0, y: 50, scale: 0.9 }}
+      whileInView={{ opacity: 1, y: 0, scale: 1 }}
+      viewport={{ once: true, margin: "-100px" }}
+      transition={{ duration: 0.7, type: "spring", bounce: 0.3 }}
+      className={cn(
+        "relative rounded-3xl p-8 md:p-12 overflow-hidden border border-white/10 dark:border-white/5",
+        "bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl shadow-2xl",
+        step.shadow
+      )}
+    >
+      {/* Background Gradient */}
+      <div className={cn(
+        "absolute -top-24 -right-24 w-64 h-64 rounded-full bg-gradient-to-br opacity-20 blur-3xl",
+        step.color
+      )} />
+
+      <div className="relative z-10">
+        <div className="flex items-center gap-4 mb-8">
+          <div className={cn(
+            "w-16 h-16 rounded-2xl flex items-center justify-center text-white shadow-lg bg-gradient-to-br",
+            step.color
+          )}>
+            <step.icon className="w-8 h-8" />
+          </div>
+          <span className="text-8xl font-black text-foreground/5 font-serif absolute -top-4 right-0 pointer-events-none select-none">
+            0{step.id}
+          </span>
+        </div>
+
+        <h3 className="text-3xl font-bold mb-2">{step.title}</h3>
+        <p className={cn("text-lg font-medium mb-6 bg-gradient-to-r bg-clip-text text-transparent w-fit", step.color)}>
+          {step.subtitle}
+        </p>
+
+        <p className="text-muted-foreground leading-relaxed mb-8 text-lg">
+          {step.description}
+        </p>
+
+        <div className="space-y-3">
+          {step.features.map((feature, i) => (
+            <div key={i} className="flex items-center gap-3">
+              <CheckCircle2 className={cn("w-5 h-5", step.id === 1 ? "text-blue-500" : step.id === 2 ? "text-violet-500" : "text-emerald-500")} />
+              <span className="text-sm font-medium text-foreground/80">{feature}</span>
+            </div>
+          ))}
+        </div>
+      </div>
+    </motion.div>
   );
 }

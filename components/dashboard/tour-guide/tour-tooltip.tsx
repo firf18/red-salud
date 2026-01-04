@@ -54,8 +54,8 @@ export function TourTooltip({
       }
 
       // Obtener elemento target
-      const element = typeof target === 'string' 
-        ? document.querySelector(target) 
+      const element = typeof target === 'string'
+        ? document.querySelector(target)
         : target;
 
       if (!(element instanceof HTMLElement)) {
@@ -117,77 +117,85 @@ export function TourTooltip({
 
   return (
     <div
-      className={`fixed bg-white rounded-xl shadow-2xl p-6 w-[360px] transition-all duration-300 ${
-        isVisible ? 'opacity-100 scale-100' : 'opacity-0 scale-95'
-      }`}
-      style={{ 
-        left: coords.x, 
+      className={`fixed bg-white/95 backdrop-blur-md border border-white/20 rounded-2xl shadow-2xl p-6 w-[360px] transition-all duration-500 ease-out z-[9999] ${isVisible ? 'opacity-100 translate-y-0 scale-100' : 'opacity-0 translate-y-4 scale-95'
+        }`}
+      style={{
+        left: coords.x,
         top: coords.y,
-        zIndex: 9999,
       }}
       role="dialog"
       aria-labelledby="tour-title"
       aria-describedby="tour-description"
     >
+      {/* Decorative gradient orb */}
+      <div className="absolute -top-10 -right-10 w-32 h-32 bg-purple-500/10 rounded-full blur-3xl pointer-events-none" />
+      <div className="absolute -bottom-10 -left-10 w-32 h-32 bg-blue-500/10 rounded-full blur-3xl pointer-events-none" />
+
       {/* Header */}
-      <div className="flex items-start justify-between mb-3">
+      <div className="relative flex items-start justify-between mb-4">
         <div className="flex-1">
-          <div className="text-xs font-semibold text-purple-600 mb-1">
-            Paso {step} de {totalSteps}
+          <div className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-purple-50 border border-purple-100 text-[10px] font-medium text-purple-600 mb-2">
+            <span className="relative flex h-1.5 w-1.5">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-purple-400 opacity-75"></span>
+              <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-purple-500"></span>
+            </span>
+            PASO {step}/{totalSteps}
           </div>
-          <h3 id="tour-title" className="text-lg font-bold text-gray-900">
+          <h3 id="tour-title" className="text-lg font-bold text-slate-800 tracking-tight">
             {title}
           </h3>
         </div>
         <button
           onClick={onClose}
-          className="text-gray-400 hover:text-gray-600 transition-colors ml-2"
+          className="text-slate-400 hover:text-slate-600 hover:bg-slate-100 p-1.5 rounded-full transition-colors"
           aria-label="Cerrar tour"
         >
-          <X className="w-5 h-5" />
+          <X className="w-4 h-4" />
         </button>
       </div>
 
       {/* Description */}
-      <p 
-        id="tour-description"
-        className="text-gray-600 text-sm mb-4 leading-relaxed whitespace-pre-line"
-      >
-        {description}
-      </p>
+      <div className="relative mb-6">
+        <p
+          id="tour-description"
+          className="text-slate-600 text-sm leading-relaxed whitespace-pre-line"
+        >
+          {description}
+        </p>
+      </div>
 
       {/* Progress bar */}
-      <div className="mb-5">
-        <div className="h-2 bg-gray-200 rounded-full overflow-hidden">
+      <div className="relative mb-6">
+        <div className="h-1.5 bg-slate-100 rounded-full overflow-hidden">
           <div
-            className="h-full bg-gradient-to-r from-purple-500 to-pink-500 transition-all duration-500"
+            className="h-full bg-gradient-to-r from-purple-500 to-indigo-500 transition-all duration-500 ease-out shadow-[0_0_10px_rgba(168,85,247,0.4)]"
             style={{ width: `${progress}%` }}
           />
         </div>
       </div>
 
       {/* Navigation */}
-      <div className="flex items-center justify-between gap-3">
+      <div className="relative flex items-center justify-between gap-3">
         <button
           onClick={onSkip}
-          className="text-sm text-gray-500 hover:text-gray-700 transition-colors"
+          className="text-xs font-medium text-slate-400 hover:text-slate-600 transition-colors px-2 py-1"
         >
-          Omitir tour
+          Saltar
         </button>
 
-        <div className="flex gap-2">
+        <div className="flex items-center gap-2">
           <button
             onClick={onPrev}
             disabled={step === 1}
-            className="px-4 py-2 text-sm font-medium border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed transition-all"
+            className="px-3 py-2 text-xs font-medium text-slate-600 border border-slate-200 rounded-lg hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed transition-all"
           >
-            ◀ Anterior
+            Atrás
           </button>
           <button
             onClick={onNext}
-            className="px-5 py-2 text-sm font-medium bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-lg hover:shadow-lg hover:scale-105 transition-all"
+            className="px-4 py-2 text-xs font-semibold bg-gradient-to-r from-purple-600 to-indigo-600 text-white rounded-lg shadow-lg shadow-purple-500/20 hover:shadow-purple-500/30 hover:scale-[1.02] active:scale-[0.98] transition-all flex items-center gap-1.5"
           >
-            {step === totalSteps ? '✓ Finalizar' : 'Siguiente ▶'}
+            {step === totalSteps ? 'Finalizar' : 'Siguiente'}
           </button>
         </div>
       </div>

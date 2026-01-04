@@ -19,7 +19,7 @@ export async function GET(request: NextRequest) {
     // Alternatively, we can fetch all verified doctors and count them in memory (efficient enough for < 1000 doctors)
     const { data: doctorsData, error: doctorsError } = await supabaseAdmin
       .from("doctor_details")
-      .select("specialty_id")
+      .select("especialidad_id")
       .eq("verified", true);
 
     if (doctorsError) throw doctorsError;
@@ -27,8 +27,8 @@ export async function GET(request: NextRequest) {
     // Count doctors per specialty
     const doctorCounts = new Map<string, number>();
     (doctorsData || []).forEach((doc: any) => {
-      if (doc.specialty_id) {
-        doctorCounts.set(doc.specialty_id, (doctorCounts.get(doc.specialty_id) || 0) + 1);
+      if (doc.especialidad_id) {
+        doctorCounts.set(doc.especialidad_id, (doctorCounts.get(doc.especialidad_id) || 0) + 1);
       }
     });
 

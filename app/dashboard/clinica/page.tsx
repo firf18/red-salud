@@ -6,11 +6,12 @@ import { useQuery } from '@tanstack/react-query';
 import { getUserClinics } from '@/lib/supabase/services/clinics-service';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Building2, Loader2, Plus } from 'lucide-react';
+import { Building2 } from 'lucide-react';
+
 
 export default function DashboardClinicaPage() {
   const router = useRouter();
-  
+
   const { data: clinics, isLoading } = useQuery({
     queryKey: ['user-clinics'],
     queryFn: getUserClinics,
@@ -25,27 +26,15 @@ export default function DashboardClinicaPage() {
   }, [clinics, isLoading, router]);
 
   if (isLoading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-center">
-          <Loader2 className="h-12 w-12 animate-spin mx-auto mb-4 text-primary" />
-          <p className="text-muted-foreground">Cargando clínicas...</p>
-        </div>
-      </div>
-    );
+    return null;
   }
 
-  // Si hay clínicas, mostrar mientras redirige
+
+  // Si hay clínicas, redirigir sin mostrar nada
   if (clinics && clinics.length > 0) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-center">
-          <Loader2 className="h-12 w-12 animate-spin mx-auto mb-4 text-primary" />
-          <p className="text-muted-foreground">Redirigiendo a {clinics[0].name}...</p>
-        </div>
-      </div>
-    );
+    return null;
   }
+
 
   // No hay clínicas - mostrar mensaje para crear primera clínica
   return (
@@ -94,8 +83,8 @@ export default function DashboardClinicaPage() {
             </Button>
           </div>
 
-          <Button 
-            className="w-full" 
+          <Button
+            className="w-full"
             onClick={() => router.refresh()}
             variant="default"
           >
