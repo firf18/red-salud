@@ -26,6 +26,7 @@ import { ThemeToggle } from "@/components/ui/theme-toggle";
 import { useCurrentOffice } from "@/hooks/use-current-office";
 import { OfficeQuickSelectorDropdown } from "@/components/dashboard/medico/office-quick-selector-dropdown";
 import { OfficeQuickSelectorModal } from "@/components/dashboard/medico/office-quick-selector-modal";
+import { FullDashboardSkeleton } from "@/components/dashboard/medico/dashboard/dashboard-skeleton";
 
 export default function DoctorDashboardPage() {
   const router = useRouter();
@@ -93,7 +94,15 @@ export default function DoctorDashboardPage() {
   const formattedDate = today.toLocaleDateString("es-ES", dateOptions);
 
   if (authLoading || loading) {
-    return null;
+    return (
+      <div className="relative min-h-screen">
+        {/* Background simplificado para loading */}
+        <div className="fixed inset-0 bg-gradient-to-br from-background via-background to-primary/5 dark:to-primary/20 -z-10" />
+        <div className="container mx-auto px-4 py-8 relative z-10">
+          <FullDashboardSkeleton />
+        </div>
+      </div>
+    );
   }
 
   // Main render logic

@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useCallback, useEffect } from "react";
 import {
   DndContext,
   closestCenter,
@@ -18,7 +18,7 @@ import {
   sortableKeyboardCoordinates,
   rectSortingStrategy,
 } from "@dnd-kit/sortable";
-import { AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
 import type {
   WidgetId,
@@ -26,7 +26,6 @@ import type {
   WidgetPosition,
 } from "@/lib/types/dashboard-types";
 import { WIDGET_CONFIGS } from "@/lib/types/dashboard-types";
-import { useWidgetModes } from "@/hooks/use-widget-modes";
 
 // Extracted components
 import { SortableWidgetItem } from "./SortableWidgetItem";
@@ -55,18 +54,20 @@ export function DashboardWidgetGrid({
   doctorId,
 }: DashboardWidgetGridProps) {
   const [activeId, setActiveId] = useState<string | null>(null);
+  const [isDragging, setIsDragging] = useState(false);
+  const [isTransitioning, setIsTransitioning] = useState(false);
 
-  // Widget modes hook
-  const {
-    getWidgetMode,
-    toggleWidgetMode,
-    loading: modesLoading,
-  } = useWidgetModes({ doctorId });
+  // Animación de transición entre modos
+  useEffect(() => {
+    setIsTransitioning(true);
+    const timer = setTimeout(() => setIsTransitioning(false), 300);
+    return () => clearTimeout(timer);
+  }, [mode]);
 
   const sensors = useSensors(
     useSensor(PointerSensor, {
       activationConstraint: {
-        distance: 4,
+        distance: 5,
       },
     }),
     useSensor(KeyboardSensor, {
@@ -74,7 +75,7 @@ export function DashboardWidgetGrid({
     }),
   );
 
-  // Filter visible widgets for current mode
+  // Filter visible widgets for current mode - memoized for performance
   const visibleWidgets = useMemo(() => {
     return positions.filter(
       (pos) =>
@@ -83,26 +84,55 @@ export function DashboardWidgetGrid({
     );
   }, [positions, hiddenWidgets, mode]);
 
-  const handleDragStart = (event: DragStartEvent) => {
+  // Optimize drag handlers with useCallback
+  const handleDragStart = useCallback((event: DragStartEvent) => {
     setActiveId(event.active.id as string);
-  };
+    setIsDragging(true);
+  }, []);
 
-  const handleDragEnd = (event: DragEndEvent) => {
-    const { active, over } = event;
-    setActiveId(null);
+  const handleDragEnd = useCallback(
+    (event: DragEndEvent) => {
+      const { active, over } = event;
+      setActiveId(null);
+      setIsDragging(false);
 
-    if (over && active.id !== over.id) {
-      const oldIndex = visibleWidgets.findIndex((w) => w.id === active.id);
-      const newIndex = visibleWidgets.findIndex((w) => w.id === over.id);
+      if (over && active.id !== over.id) {
+        const oldIndex = visibleWidgets.findIndex((w) => w.id === active.id);
+        const newIndex = visibleWidgets.findIndex((w) => w.id === over.id);
 
-      const newPositions = arrayMove(visibleWidgets, oldIndex, newIndex);
-      onPositionsChange(newPositions);
-    }
-  };
+        if (oldIndex !== -1 && newIndex !== -1) {
+          const newPositions = arrayMove(visibleWidgets, oldIndex, newIndex);
+          onPositionsChange(newPositions);
+        }
+      }
+    },
+    [visibleWidgets, onPositionsChange],
+  );
 
   const activeWidget = activeId
     ? visibleWidgets.find((w) => w.id === activeId)
     : null;
+
+  // Contar widgets por modo para mostrar información
+  const simpleWidgetCount = useMemo(
+    () =>
+      positions.filter(
+        (pos) =>
+          !hiddenWidgets.includes(pos.id) &&
+          WIDGET_CONFIGS[pos.id]?.modes.includes("simple"),
+      ).length,
+    [positions, hiddenWidgets],
+  );
+
+  const proWidgetCount = useMemo(
+    () =>
+      positions.filter(
+        (pos) =>
+          !hiddenWidgets.includes(pos.id) &&
+          WIDGET_CONFIGS[pos.id]?.modes.includes("pro"),
+      ).length,
+    [positions, hiddenWidgets],
+  );
 
   return (
     <div className="space-y-6">
@@ -113,6 +143,8 @@ export function DashboardWidgetGrid({
         onResetLayout={onResetLayout}
         hiddenWidgets={hiddenWidgets}
         onToggleWidget={onToggleWidget}
+        simpleWidgetCount={simpleWidgetCount}
+        proWidgetCount={proWidgetCount}
       />
 
       {/* Drag & Drop Grid */}
@@ -128,47 +160,71 @@ export function DashboardWidgetGrid({
         >
           <div
             className={cn(
-              "grid gap-3",
+              "grid gap-3 transition-all duration-300",
               "grid-cols-1 md:grid-cols-2 lg:grid-cols-4",
               "auto-rows-[minmax(170px,auto)]",
+              isTransitioning && "opacity-50 scale-[0.99]",
             )}
             data-tour="dashboard-grid"
           >
             <AnimatePresence mode="popLayout">
-              {visibleWidgets.map((widget) => (
-                <SortableWidgetItem
+              {visibleWidgets.map((widget, index) => (
+                <motion.div
                   key={widget.id}
-                  id={widget.id}
-                  position={widget}
+                  layout
+                  initial={{ opacity: 0, scale: 0.9, y: 20 }}
+                  animate={{
+                    opacity: 1,
+                    scale: 1,
+                    y: 0,
+                  }}
+                  exit={{
+                    opacity: 0,
+                    scale: 0.9,
+                    y: -10,
+                  }}
+                  transition={{
+                    type: "spring",
+                    stiffness: 400,
+                    damping: 30,
+                    delay: index * 0.03, // Stagger animation
+                  }}
                 >
-                  {renderWidget(widget.id, {
-                    doctorId,
-                  })}
-                </SortableWidgetItem>
+                  <SortableWidgetItem
+                    id={widget.id}
+                    position={widget}
+                    isDraggingFromParent={isDragging && activeId === widget.id}
+                  >
+                    {renderWidget(widget.id, {
+                      doctorId,
+                    })}
+                  </SortableWidgetItem>
+                </motion.div>
               ))}
             </AnimatePresence>
           </div>
         </SortableContext>
 
-        {/* Drag Overlay - Widget flotante durante el arrastre */}
+        {/* Drag Overlay - Optimizado */}
         <DragOverlay
           dropAnimation={{
-            duration: 300,
-            easing: "cubic-bezier(0.25, 0.1, 0.25, 1)",
+            duration: 200,
+            easing: "cubic-bezier(0.2, 0, 0, 1)",
           }}
         >
           {activeWidget ? (
             <div
-              style={{
-                gridColumn: `span ${activeWidget.w}`,
-                gridRow: `span ${activeWidget.h}`,
-                transform: "scale(1.02) rotate(1deg)",
-              }}
               className={cn(
                 "pointer-events-none",
-                "drop-shadow-2xl",
-                "ring-2 ring-primary/30 ring-offset-2 ring-offset-background rounded-2xl",
+                "drop-shadow-xl",
+                "ring-2 ring-primary/50 ring-offset-2 ring-offset-background rounded-2xl",
+                "scale-105 opacity-90",
               )}
+              style={{
+                width: activeWidget.w
+                  ? `calc(${activeWidget.w * 25}% - 9px)`
+                  : undefined,
+              }}
             >
               {renderWidget(activeWidget.id, {
                 doctorId,

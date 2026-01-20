@@ -2,153 +2,148 @@
 
 /**
  * @file SortableWidgetItem.tsx
- * @description Wrapper para widgets que permite arrastrar y soltar usando dnd-kit.
- * Incluye animaciones suaves con framer-motion para transiciones premium.
- * 
+ * @description Wrapper optimizado para widgets arrastrables con dnd-kit.
+ * Optimizado para v1 con React.memo y animaciones mejoradas.
+ *
  * @module Dashboard
  */
 
 import React from "react";
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
 import { GripVertical } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { WidgetPosition } from "@/lib/types/dashboard-types";
 
 interface SortableWidgetItemProps {
-    /** ID único del widget */
-    id: string;
-    /** Posición del widget en el grid */
-    position: WidgetPosition;
-    /** Contenido del widget */
-    children: React.ReactNode;
+  /** ID único del widget */
+  id: string;
+  /** Posición del widget en el grid */
+  position: WidgetPosition;
+  /** Contenido del widget */
+  children: React.ReactNode;
+  /** Si este widget específico está siendo arrastrado (optimización) */
+  isDraggingFromParent?: boolean;
 }
 
 /**
  * Componente wrapper que hace a los widgets arrastrables.
- * Incluye animaciones de entrada, salida y durante el arrastre.
- * 
+ * Optimizado con React.memo para evitar renders innecesarios.
+ *
  * @example
  * <SortableWidgetItem id="stats-overview" position={position}>
  *   <StatsOverviewWidget />
  * </SortableWidgetItem>
  */
-export function SortableWidgetItem({
-    id,
-    position,
-    children,
+function SortableWidgetItemComponent({
+  id,
+  position,
+  children,
+  isDraggingFromParent,
 }: SortableWidgetItemProps) {
-    const {
-        attributes,
-        listeners,
-        setNodeRef,
-        setActivatorNodeRef,
-        transform,
-        transition,
-        isDragging,
-        isOver,
-    } = useSortable({ id });
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    setActivatorNodeRef,
+    transform,
+    transition,
+    isDragging: isDraggingFromDnd,
+    isOver,
+  } = useSortable({ id });
 
-    // Transición CSS optimizada combinada con transform de dnd-kit
-    const style = {
-        transform: CSS.Transform.toString(transform),
-        transition: transition || "transform 250ms cubic-bezier(0.25, 0.1, 0.25, 1)",
-        gridColumn: `span ${position.w}`,
-        gridRow: `span ${position.h}`,
-        zIndex: isDragging ? 50 : isOver ? 10 : undefined,
-    };
+  // Usar el estado de dragging más preciso
+  const isDragging = isDraggingFromParent ?? isDraggingFromDnd;
 
-    return (
-        <motion.div
-            ref={setNodeRef}
-            style={style}
-            data-widget={id}
-            layout
-            initial={{ opacity: 0, scale: 0.9, y: 20 }}
-            animate={{
-                opacity: isDragging ? 0.7 : 1,
-                scale: isDragging ? 1.03 : isOver ? 0.98 : 1,
-                y: 0,
-                rotate: isDragging ? 1 : 0,
-            }}
-            exit={{ opacity: 0, scale: 0.9, y: -10 }}
-            transition={{
-                type: "spring",
-                stiffness: 400,
-                damping: 30,
-                mass: 0.8
-            }}
-            className={cn(
-                "relative h-full",
-                "will-change-transform",
-                isDragging && "z-50 drop-shadow-2xl",
-                isOver && "ring-2 ring-primary/20 ring-offset-2 ring-offset-background rounded-2xl"
-            )}
-        >
-            {/* Drag Handle con micro-animaciones */}
-            <motion.button
-                ref={setActivatorNodeRef}
-                {...attributes}
-                {...listeners}
-                type="button"
-                whileHover={{ scale: 1.1, backgroundColor: "hsl(var(--muted))" }}
-                whileTap={{ scale: 0.95 }}
-                className={cn(
-                    "absolute top-3 left-3 z-20",
-                    "flex items-center justify-center p-1.5 rounded-lg",
-                    "bg-background/90 backdrop-blur-md",
-                    "border border-border/40",
-                    "text-muted-foreground/50 hover:text-foreground",
-                    "shadow-sm hover:shadow-md",
-                    "transition-all duration-200",
-                    "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary",
-                    "select-none",
-                    isDragging && "text-primary bg-primary/15 border-primary/40 cursor-grabbing shadow-lg",
-                    !isDragging && "cursor-grab"
-                )}
-                style={{ touchAction: "none" }}
-                title="Arrastrar para mover"
-                aria-label="Arrastrar widget"
-            >
-                <motion.div
-                    animate={{
-                        rotate: isDragging ? [0, -5, 5, -5, 0] : 0
-                    }}
-                    transition={{
-                        duration: 0.5,
-                        repeat: isDragging ? Infinity : 0,
-                        repeatDelay: 0.2
-                    }}
-                >
-                    <GripVertical className="h-4 w-4" />
-                </motion.div>
-            </motion.button>
+  // Transición CSS optimizada - más rápida para mejor responsiveness
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition: transition || "transform 200ms cubic-bezier(0.2, 0, 0, 1)",
+    gridColumn: `span ${position.w}`,
+    gridRow: `span ${position.h}`,
+    zIndex: isDragging ? 50 : isOver ? 10 : undefined,
+  };
 
-            {/* Indicador visual cuando otro widget está sobre este */}
-            <AnimatePresence>
-                {isOver && !isDragging && (
-                    <motion.div
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        exit={{ opacity: 0 }}
-                        className="absolute inset-0 rounded-2xl bg-primary/5 pointer-events-none"
-                    />
-                )}
-            </AnimatePresence>
+  return (
+    <motion.div
+      ref={setNodeRef}
+      style={style}
+      data-widget={id}
+      layout="position" // Solo animar posición, no layout completo (más rápido)
+      initial={{ opacity: 0, scale: 0.95, y: 10 }}
+      animate={{
+        opacity: isDragging ? 0.8 : 1,
+        scale: isDragging ? 1.02 : 1,
+        y: 0,
+      }}
+      transition={{
+        type: "spring",
+        stiffness: 500, // Más rápido
+        damping: 40,
+        mass: 0.4, // Más ligero
+      }}
+      className={cn(
+        "relative h-full",
+        "will-change-transform", // Hint para el navegador
+        isDragging && "z-50 drop-shadow-xl",
+        isOver &&
+          "ring-2 ring-primary/30 ring-offset-2 ring-offset-background rounded-2xl",
+      )}
+    >
+      {/* Drag Handle - simplificado para mejor rendimiento */}
+      <motion.button
+        ref={setActivatorNodeRef}
+        {...attributes}
+        {...listeners}
+        type="button"
+        whileHover={{ scale: 1.05 }}
+        whileTap={{ scale: 0.95 }}
+        className={cn(
+          "absolute top-3 left-3 z-20",
+          "flex items-center justify-center p-1.5 rounded-lg",
+          "bg-background/90 backdrop-blur-sm",
+          "border border-border/40",
+          "text-muted-foreground/50 hover:text-foreground",
+          "shadow-sm hover:shadow-md",
+          "transition-all duration-150",
+          "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary",
+          "select-none touch-none",
+          isDragging
+            ? "text-primary bg-primary/15 border-primary/40 cursor-grabbing shadow-lg"
+            : "cursor-grab opacity-0 hover:opacity-100", // Oculto por defecto, visible al hover
+        )}
+        title="Arrastrar para mover"
+        aria-label="Arrastrar widget"
+      >
+        <GripVertical className="h-4 w-4" />
+      </motion.button>
 
-            {/* Widget content con animación de escala durante arrastre */}
-            <motion.div
-                animate={{
-                    filter: isDragging ? "brightness(1.05)" : "brightness(1)",
-                }}
-                transition={{ duration: 0.2 }}
-                className="h-full"
-            >
-                {React.cloneElement(children as React.ReactElement<any>, {
-                    isDragging,
-                })}
-            </motion.div>
-        </motion.div>
-    );
+      {/* Indicador visual cuando otro widget está sobre este - sin AnimatePresence */}
+      {isOver && !isDragging && (
+        <div className="absolute inset-0 rounded-2xl bg-primary/5 pointer-events-none" />
+      )}
+
+      {/* Widget content - sin animación de filter (costosa) */}
+      <div className="h-full">
+        {React.cloneElement(children as React.ReactElement<any>, {
+          isDragging,
+        })}
+      </div>
+    </motion.div>
+  );
 }
+
+// Memoizar para evitar re-renders cuando otros widgets cambian
+export const SortableWidgetItem = React.memo(
+  SortableWidgetItemComponent,
+  (prevProps, nextProps) => {
+    return (
+      prevProps.id === nextProps.id &&
+      prevProps.position === nextProps.position &&
+      prevProps.isDraggingFromParent === nextProps.isDraggingFromParent
+    );
+  },
+);
+
+SortableWidgetItem.displayName = "SortableWidgetItem";
