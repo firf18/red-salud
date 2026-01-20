@@ -2,17 +2,23 @@
  * Página principal del dashboard de clínica (Overview)
  */
 
-'use client';
+"use client";
 
-import { useParams } from 'next/navigation';
-import { useClinicScope } from '@/components/dashboard/clinica/clinic-scope-provider';
-import { useClinicOverview } from '@/hooks/use-clinic-overview';
-import { StatsGrid } from '@/components/dashboard/clinica/stats-grid';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { AlertCircle, RefreshCw, Building2 } from 'lucide-react';
-import Link from 'next/link';
+import { useParams } from "next/navigation";
+import { useClinicScope } from "@/components/dashboard/clinica/clinic-scope-provider";
+import { useClinicOverview } from "@/hooks/use-clinic-overview";
+import { StatsGrid } from "@/components/dashboard/clinica/stats-grid";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { AlertCircle, RefreshCw, Building2 } from "lucide-react";
+import Link from "next/link";
 
 export default function ClinicOverviewPage() {
   const params = useParams();
@@ -51,10 +57,10 @@ export default function ClinicOverviewPage() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-3xl font-bold tracking-tight">{currentClinic.name}</h2>
-          <p className="text-muted-foreground">
-            Panel de control ejecutivo
-          </p>
+          <h2 className="text-3xl font-bold tracking-tight">
+            {currentClinic.name}
+          </h2>
+          <p className="text-muted-foreground">Panel de control ejecutivo</p>
         </div>
         <div className="flex items-center gap-2">
           <Button variant="outline" size="sm" onClick={handleRefresh}>
@@ -119,7 +125,9 @@ export default function ClinicOverviewPage() {
           availableResources: stats.available_resources,
           alertsCount: stats.alerts_count,
         }}
-        currency={currentClinic.metadata?.currency || 'MXN'}
+        currency={
+          (currentClinic.metadata?.currency as string | undefined) || "MXN"
+        }
       />
 
       {/* Accesos Rápidos */}

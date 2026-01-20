@@ -4,15 +4,35 @@ import { supabaseAdmin } from "@/lib/supabase/admin";
 export const dynamic = "force-dynamic";
 
 const ESTADOS_VENEZUELA = [
-  "Amazonas", "Anzoátegui", "Apure", "Aragua", "Barinas", "Bolívar", 
-  "Carabobo", "Cojedes", "Delta Amacuro", "Distrito Capital", "Falcón", 
-  "Guárico", "Lara", "Mérida", "Miranda", "Monagas", "Nueva Esparta", 
-  "Portuguesa", "Sucre", "Táchira", "Trujillo", "La Guaira", "Yaracuy", "Zulia"
+  "Amazonas",
+  "Anzoátegui",
+  "Apure",
+  "Aragua",
+  "Barinas",
+  "Bolívar",
+  "Carabobo",
+  "Cojedes",
+  "Delta Amacuro",
+  "Distrito Capital",
+  "Falcón",
+  "Guárico",
+  "Lara",
+  "Mérida",
+  "Miranda",
+  "Monagas",
+  "Nueva Esparta",
+  "Portuguesa",
+  "Sucre",
+  "Táchira",
+  "Trujillo",
+  "La Guaira",
+  "Yaracuy",
+  "Zulia",
 ];
 
 /**
  * GET /api/public/geographic-coverage
- * 
+ *
  * Retorna estadísticas de cobertura geográfica en Venezuela
  */
 export async function GET() {
@@ -20,22 +40,25 @@ export async function GET() {
     // Obtener médicos verificados con su estado
     const { data: doctors, error } = await supabaseAdmin
       .from("doctor_details")
-      .select(`
+      .select(
+        `
         id,
         profile:profiles(estado)
-      `)
+      `,
+      )
       .eq("verified", true);
 
     if (error) throw error;
 
-    const stateCounts: Record<string, { medicos: number, total: number }> = {};
+    const stateCounts: Record<string, { medicos: number; total: number }> = {};
 
     // Inicializar contadores
-    ESTADOS_VENEZUELA.forEach(estado => {
+    ESTADOS_VENEZUELA.forEach((estado) => {
       stateCounts[estado] = { medicos: 0, total: 0 };
     });
 
     // Contar médicos por estado
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     doctors?.forEach((doc: any) => {
       const estado = doc.profile?.estado;
       if (estado && ESTADOS_VENEZUELA.includes(estado)) {
@@ -45,9 +68,13 @@ export async function GET() {
     });
 
     // Calcular estadísticas
-    const estadosConCobertura = Object.values(stateCounts).filter(s => s.total > 0).length;
+    const estadosConCobertura = Object.values(stateCounts).filter(
+      (s) => s.total > 0,
+    ).length;
     const totalEstados = ESTADOS_VENEZUELA.length;
-    const porcentajePenetracion = Math.round((estadosConCobertura / totalEstados) * 100);
+    const porcentajePenetracion = Math.round(
+      (estadosConCobertura / totalEstados) * 100,
+    );
 
     const serviciosPorEstado = Object.entries(stateCounts)
       .filter(([_, counts]) => counts.total > 0)
@@ -72,12 +99,14 @@ export async function GET() {
         serviciosPorEstado,
       },
     });
-
   } catch (error) {
     console.error("Error al obtener cobertura geográfica:", error);
-    return NextResponse.json({
-      success: false,
-      error: "Error al procesar la solicitud",
-    }, { status: 500 });
+    return NextResponse.json(
+      {
+        success: false,
+        error: "Error al procesar la solicitud",
+      },
+      { status: 500 },
+    );
   }
 }

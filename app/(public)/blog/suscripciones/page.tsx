@@ -12,19 +12,56 @@ import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { fadeInUp, staggerContainer } from "@/lib/animations";
 import {
-  ArrowLeft, Users, Tag, FolderOpen, Bell, BellOff,
-  CheckCircle, Settings, Trash2
+  ArrowLeft,
+  Users,
+  Tag,
+  FolderOpen,
+  Bell,
+  CheckCircle,
+  Trash2,
 } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 
 interface Subscription {
   id: string;
-  type: 'author' | 'category' | 'tag';
+  type: "author" | "category" | "tag";
   name: string;
   avatar?: string;
   isVerified?: boolean;
   notifyPosts: boolean;
   notifyAnswers: boolean;
+}
+
+interface AuthorSubscriptionRow {
+  id: string;
+  notify_new_posts: boolean;
+  notify_new_answers: boolean;
+  author: {
+    id: string;
+    nombre_completo: string | null;
+    avatar_url: string | null;
+    doctor_details: {
+      verified: boolean | null;
+    } | null;
+  } | null;
+}
+
+interface CategorySubscriptionRow {
+  id: string;
+  notify_new_posts: boolean;
+  notify_new_questions: boolean;
+  category: {
+    id: string;
+    name: string;
+  } | null;
+}
+
+interface TagSubscriptionRow {
+  id: string;
+  tag: {
+    id: string;
+    name: string;
+  } | null;
 }
 
 export default function SubscriptionsPage() {
@@ -35,12 +72,15 @@ export default function SubscriptionsPage() {
 
   useEffect(() => {
     loadSubscriptions();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   async function loadSubscriptions() {
     setLoading(true);
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
       if (!user) {
         setLoading(false);
         return;
@@ -48,55 +88,70 @@ export default function SubscriptionsPage() {
 
       // Load author subscriptions
       const { data: authorSubs } = await supabase
-        .from('author_subscriptions')
-        .select(`
+        .from("author_subscriptions")
+        .select(
+          `
           id, notify_new_posts, notify_new_answers,
           author:profiles!author_id(id, nombre_completo, avatar_url, doctor_details(verified))
-        `)
-        .eq('subscriber_id', user.id);
+        `,
+        )
+        .eq("subscriber_id", user.id);
 
       // Load category subscriptions
       const { data: categorySubs } = await supabase
-        .from('category_subscriptions')
-        .select(`
+        .from("category_subscriptions")
+        .select(
+          `
           id, notify_new_posts, notify_new_questions,
           category:blog_categories!category_id(id, name, color)
-        `)
-        .eq('user_id', user.id);
+        `,
+        )
+        .eq("user_id", user.id);
 
       // Load tag subscriptions
       const { data: tagSubs } = await supabase
-        .from('tag_subscriptions')
-        .select(`
+        .from("tag_subscriptions")
+        .select(
+          `
           id,
           tag:content_tags!tag_id(id, name)
-        `)
-        .eq('user_id', user.id);
+        `,
+        )
+        .eq("user_id", user.id);
 
       const allSubs: Subscription[] = [
-        ...(authorSubs || []).map((s: any) => ({
-          id: s.id,
-          type: 'author' as const,
-          name: s.author?.nombre_completo || 'Usuario',
-          avatar: s.author?.avatar_url,
-          isVerified: s.author?.doctor_details?.verified,
-          notifyPosts: s.notify_new_posts,
-          notifyAnswers: s.notify_new_answers,
-        })),
-        ...(categorySubs || []).map((s: any) => ({
-          id: s.id,
-          type: 'category' as const,
-          name: s.category?.name || 'Categoría',
-          notifyPosts: s.notify_new_posts,
-          notifyAnswers: s.notify_new_questions,
-        })),
-        ...(tagSubs || []).map((s: any) => ({
-          id: s.id,
-          type: 'tag' as const,
-          name: s.tag?.name || 'Tag',
-          notifyPosts: true,
-          notifyAnswers: true,
-        })),
+        ...(authorSubs || []).map((s: unknown) => {
+          const row = s as AuthorSubscriptionRow;
+          return {
+            id: row.id,
+            type: "author" as const,
+            name: row.author?.nombre_completo || "Usuario",
+            avatar: row.author?.avatar_url ?? undefined,
+            isVerified: row.author?.doctor_details?.verified ?? undefined,
+            notifyPosts: row.notify_new_posts,
+            notifyAnswers: row.notify_new_answers,
+          };
+        }),
+        ...(categorySubs || []).map((s: unknown) => {
+          const row = s as CategorySubscriptionRow;
+          return {
+            id: row.id,
+            type: "category" as const,
+            name: row.category?.name || "Categoría",
+            notifyPosts: row.notify_new_posts,
+            notifyAnswers: row.notify_new_questions,
+          };
+        }),
+        ...(tagSubs || []).map((s: unknown) => {
+          const row = s as TagSubscriptionRow;
+          return {
+            id: row.id,
+            type: "tag" as const,
+            name: row.tag?.name || "Tag",
+            notifyPosts: true,
+            notifyAnswers: true,
+          };
+        }),
       ];
 
       setSubscriptions(allSubs);
@@ -109,52 +164,67 @@ export default function SubscriptionsPage() {
 
   async function handleUnsubscribe(subscription: Subscription) {
     try {
-      const table = subscription.type === 'author' 
-        ? 'author_subscriptions' 
-        : subscription.type === 'category'
-        ? 'category_subscriptions'
-        : 'tag_subscriptions';
+      const table =
+        subscription.type === "author"
+          ? "author_subscriptions"
+          : subscription.type === "category"
+            ? "category_subscriptions"
+            : "tag_subscriptions";
 
-      await supabase.from(table).delete().eq('id', subscription.id);
-      setSubscriptions(prev => prev.filter(s => s.id !== subscription.id));
+      await supabase.from(table).delete().eq("id", subscription.id);
+      setSubscriptions((prev) => prev.filter((s) => s.id !== subscription.id));
     } catch (error) {
       console.error("Error unsubscribing:", error);
     }
   }
 
-  async function handleToggleNotification(subscription: Subscription, field: 'notifyPosts' | 'notifyAnswers') {
+  async function handleToggleNotification(
+    subscription: Subscription,
+    field: "notifyPosts" | "notifyAnswers",
+  ) {
     try {
-      const table = subscription.type === 'author' 
-        ? 'author_subscriptions' 
-        : 'category_subscriptions';
+      const table =
+        subscription.type === "author"
+          ? "author_subscriptions"
+          : "category_subscriptions";
 
-      const updateField = field === 'notifyPosts' 
-        ? (subscription.type === 'author' ? 'notify_new_posts' : 'notify_new_posts')
-        : (subscription.type === 'author' ? 'notify_new_answers' : 'notify_new_questions');
+      const updateField =
+        field === "notifyPosts"
+          ? subscription.type === "author"
+            ? "notify_new_posts"
+            : "notify_new_posts"
+          : subscription.type === "author"
+            ? "notify_new_answers"
+            : "notify_new_questions";
 
       await supabase
         .from(table)
         .update({ [updateField]: !subscription[field] })
-        .eq('id', subscription.id);
+        .eq("id", subscription.id);
 
-      setSubscriptions(prev => prev.map(s => 
-        s.id === subscription.id ? { ...s, [field]: !s[field] } : s
-      ));
+      setSubscriptions((prev) =>
+        prev.map((s) =>
+          s.id === subscription.id ? { ...s, [field]: !s[field] } : s,
+        ),
+      );
     } catch (error) {
       console.error("Error updating notification:", error);
     }
   }
 
-  const authorSubs = subscriptions.filter(s => s.type === 'author');
-  const categorySubs = subscriptions.filter(s => s.type === 'category');
-  const tagSubs = subscriptions.filter(s => s.type === 'tag');
+  const authorSubs = subscriptions.filter((s) => s.type === "author");
+  const categorySubs = subscriptions.filter((s) => s.type === "category");
+  const tagSubs = subscriptions.filter((s) => s.type === "tag");
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
       {/* Header */}
       <div className="bg-white dark:bg-gray-800 border-b">
         <div className="container mx-auto px-4 py-4">
-          <Link href="/blog" className="inline-flex items-center text-gray-600 hover:text-blue-600 transition-colors">
+          <Link
+            href="/blog"
+            className="inline-flex items-center text-gray-600 hover:text-blue-600 transition-colors"
+          >
             <ArrowLeft className="h-4 w-4 mr-2" />
             Volver al blog
           </Link>
@@ -218,9 +288,12 @@ export default function SubscriptionsPage() {
                   {authorSubs.length === 0 ? (
                     <Card className="p-12 text-center">
                       <Users className="h-12 w-12 mx-auto text-gray-400 mb-4" />
-                      <h3 className="text-lg font-semibold mb-2">No sigues a ningún autor</h3>
+                      <h3 className="text-lg font-semibold mb-2">
+                        No sigues a ningún autor
+                      </h3>
                       <p className="text-gray-500 mb-4">
-                        Sigue a médicos y expertos para recibir sus últimos artículos
+                        Sigue a médicos y expertos para recibir sus últimos
+                        artículos
                       </p>
                       <Link href="/blog">
                         <Button>Explorar autores</Button>
@@ -235,10 +308,12 @@ export default function SubscriptionsPage() {
                     >
                       {authorSubs.map((sub) => (
                         <motion.div key={sub.id} variants={fadeInUp}>
-                          <SubscriptionCard 
+                          <SubscriptionCard
                             subscription={sub}
                             onUnsubscribe={() => handleUnsubscribe(sub)}
-                            onToggleNotification={(field) => handleToggleNotification(sub, field)}
+                            onToggleNotification={(field) =>
+                              handleToggleNotification(sub, field)
+                            }
                           />
                         </motion.div>
                       ))}
@@ -250,9 +325,12 @@ export default function SubscriptionsPage() {
                   {categorySubs.length === 0 ? (
                     <Card className="p-12 text-center">
                       <FolderOpen className="h-12 w-12 mx-auto text-gray-400 mb-4" />
-                      <h3 className="text-lg font-semibold mb-2">No sigues ninguna categoría</h3>
+                      <h3 className="text-lg font-semibold mb-2">
+                        No sigues ninguna categoría
+                      </h3>
                       <p className="text-gray-500 mb-4">
-                        Sigue categorías para recibir contenido de tus temas favoritos
+                        Sigue categorías para recibir contenido de tus temas
+                        favoritos
                       </p>
                       <Link href="/blog">
                         <Button>Explorar categorías</Button>
@@ -267,10 +345,12 @@ export default function SubscriptionsPage() {
                     >
                       {categorySubs.map((sub) => (
                         <motion.div key={sub.id} variants={fadeInUp}>
-                          <SubscriptionCard 
+                          <SubscriptionCard
                             subscription={sub}
                             onUnsubscribe={() => handleUnsubscribe(sub)}
-                            onToggleNotification={(field) => handleToggleNotification(sub, field)}
+                            onToggleNotification={(field) =>
+                              handleToggleNotification(sub, field)
+                            }
                           />
                         </motion.div>
                       ))}
@@ -282,9 +362,12 @@ export default function SubscriptionsPage() {
                   {tagSubs.length === 0 ? (
                     <Card className="p-12 text-center">
                       <Tag className="h-12 w-12 mx-auto text-gray-400 mb-4" />
-                      <h3 className="text-lg font-semibold mb-2">No sigues ningún tag</h3>
+                      <h3 className="text-lg font-semibold mb-2">
+                        No sigues ningún tag
+                      </h3>
                       <p className="text-gray-500 mb-4">
-                        Sigue tags para recibir contenido sobre temas específicos
+                        Sigue tags para recibir contenido sobre temas
+                        específicos
                       </p>
                       <Link href="/blog">
                         <Button>Explorar tags</Button>
@@ -299,8 +382,8 @@ export default function SubscriptionsPage() {
                     >
                       {tagSubs.map((sub) => (
                         <motion.div key={sub.id} variants={fadeInUp}>
-                          <Badge 
-                            variant="secondary" 
+                          <Badge
+                            variant="secondary"
                             className="px-4 py-2 text-sm cursor-pointer hover:bg-red-100 group"
                             onClick={() => handleUnsubscribe(sub)}
                           >
@@ -321,26 +404,26 @@ export default function SubscriptionsPage() {
   );
 }
 
-function SubscriptionCard({ 
-  subscription, 
+function SubscriptionCard({
+  subscription,
   onUnsubscribe,
-  onToggleNotification 
-}: { 
+  onToggleNotification,
+}: {
   subscription: Subscription;
   onUnsubscribe: () => void;
-  onToggleNotification: (field: 'notifyPosts' | 'notifyAnswers') => void;
+  onToggleNotification: (field: "notifyPosts" | "notifyAnswers") => void;
 }) {
   return (
     <Card className="p-4">
       <div className="flex items-center gap-4">
-        {subscription.type === 'author' ? (
+        {subscription.type === "author" ? (
           <Avatar className="h-12 w-12">
-            <AvatarImage src={subscription.avatar || ''} />
+            <AvatarImage src={subscription.avatar || ""} />
             <AvatarFallback>{subscription.name[0]}</AvatarFallback>
           </Avatar>
         ) : (
           <div className="w-12 h-12 rounded-full bg-blue-100 dark:bg-blue-900 flex items-center justify-center">
-            {subscription.type === 'category' ? (
+            {subscription.type === "category" ? (
               <FolderOpen className="h-6 w-6 text-blue-600" />
             ) : (
               <Tag className="h-6 w-6 text-blue-600" />
@@ -355,18 +438,23 @@ function SubscriptionCard({
               <CheckCircle className="h-4 w-4 text-blue-500 flex-shrink-0" />
             )}
           </div>
-          <p className="text-sm text-gray-500 capitalize">{subscription.type}</p>
+          <p className="text-sm text-gray-500 capitalize">
+            {subscription.type}
+          </p>
         </div>
 
-        {subscription.type !== 'tag' && (
+        {subscription.type !== "tag" && (
           <div className="flex items-center gap-6">
             <div className="flex items-center gap-2">
               <Switch
                 id={`posts-${subscription.id}`}
                 checked={subscription.notifyPosts}
-                onCheckedChange={() => onToggleNotification('notifyPosts')}
+                onCheckedChange={() => onToggleNotification("notifyPosts")}
               />
-              <Label htmlFor={`posts-${subscription.id}`} className="text-sm text-gray-500">
+              <Label
+                htmlFor={`posts-${subscription.id}`}
+                className="text-sm text-gray-500"
+              >
                 Artículos
               </Label>
             </div>
@@ -374,17 +462,20 @@ function SubscriptionCard({
               <Switch
                 id={`answers-${subscription.id}`}
                 checked={subscription.notifyAnswers}
-                onCheckedChange={() => onToggleNotification('notifyAnswers')}
+                onCheckedChange={() => onToggleNotification("notifyAnswers")}
               />
-              <Label htmlFor={`answers-${subscription.id}`} className="text-sm text-gray-500">
-                {subscription.type === 'author' ? 'Respuestas' : 'Preguntas'}
+              <Label
+                htmlFor={`answers-${subscription.id}`}
+                className="text-sm text-gray-500"
+              >
+                {subscription.type === "author" ? "Respuestas" : "Preguntas"}
               </Label>
             </div>
           </div>
         )}
 
-        <Button 
-          variant="ghost" 
+        <Button
+          variant="ghost"
           size="icon"
           className="text-red-500 hover:text-red-600 hover:bg-red-50"
           onClick={onUnsubscribe}

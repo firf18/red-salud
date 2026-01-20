@@ -10,13 +10,13 @@ export interface ApiErrorResponse {
   error: string;
   message: string;
   statusCode: number;
-  details?: any;
+  details?: unknown;
 }
 
 /**
  * Standard API success response
  */
-export interface ApiSuccessResponse<T = any> {
+export interface ApiSuccessResponse<T = unknown> {
   success: true;
   data: T;
   message?: string;
@@ -25,7 +25,7 @@ export interface ApiSuccessResponse<T = any> {
 /**
  * Combined API response type
  */
-export type ApiResponse<T = any> = ApiSuccessResponse<T> | ApiErrorResponse;
+export type ApiResponse<T = unknown> = ApiSuccessResponse<T> | ApiErrorResponse;
 
 /**
  * Request with pagination
@@ -42,7 +42,7 @@ export interface PaginatedRequest {
  */
 export interface SearchRequest extends PaginatedRequest {
   query: string;
-  filters?: Record<string, any>;
+  filters?: Record<string, unknown>;
 }
 
 /**
@@ -52,7 +52,7 @@ export interface FileUploadRequest {
   file: File;
   bucket: string;
   path?: string;
-  metadata?: Record<string, any>;
+  metadata?: Record<string, string | number | boolean | null>;
 }
 
 /**

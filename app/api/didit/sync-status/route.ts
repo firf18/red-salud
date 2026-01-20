@@ -4,7 +4,7 @@ import { createClient } from "@supabase/supabase-js";
 const DIDIT_API_KEY = process.env.DIDIT_API_KEY;
 const supabaseAdmin = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
+  process.env.SUPABASE_SERVICE_ROLE_KEY!,
 );
 
 export async function POST(request: NextRequest) {
@@ -12,17 +12,14 @@ export async function POST(request: NextRequest) {
     if (!DIDIT_API_KEY) {
       return NextResponse.json(
         { error: "Configuración de Didit incompleta" },
-        { status: 500 }
+        { status: 500 },
       );
     }
 
     const { userId } = await request.json();
 
     if (!userId) {
-      return NextResponse.json(
-        { error: "userId requerido" },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: "userId requerido" }, { status: 400 });
     }
 
     // Obtener el session_id del perfil
@@ -35,11 +32,14 @@ export async function POST(request: NextRequest) {
     if (profileError || !profile || !profile.didit_request_id) {
       return NextResponse.json(
         { error: "No hay sesión de verificación activa" },
-        { status: 404 }
+        { status: 404 },
       );
     }
 
-    console.log("🔄 Sincronizando estado para sesión:", profile.didit_request_id);
+    console.log(
+      "🔄 Sincronizando estado para sesión:",
+      profile.didit_request_id,
+    );
 
     // Consultar el estado en Didit
     const diditResponse = await fetch(
@@ -47,10 +47,10 @@ export async function POST(request: NextRequest) {
       {
         method: "GET",
         headers: {
-          "accept": "application/json",
+          accept: "application/json",
           "x-api-key": DIDIT_API_KEY,
         },
-      }
+      },
     );
 
     if (!diditResponse.ok) {
@@ -58,7 +58,7 @@ export async function POST(request: NextRequest) {
       console.error("Error al consultar Didit:", errorData);
       return NextResponse.json(
         { error: "Error al consultar estado de verificación" },
-        { status: diditResponse.status }
+        { status: diditResponse.status },
       );
     }
 
@@ -67,7 +67,21 @@ export async function POST(request: NextRequest) {
 
     // Si está aprobado, actualizar el perfil
     if (sessionData.status === "Approved" && sessionData.decision) {
-      const updateData: any = {
+      const updateData: {
+        cedula_verificada: boolean;
+        photo_verified: boolean;
+        cedula_verified_at: string;
+        cedula_photo_verified_at: string;
+        updated_at: string;
+        cedula?: string;
+        primer_nombre?: string;
+        segundo_nombre?: string;
+        primer_apellido?: string;
+        segundo_apellido?: string;
+        nombre?: string;
+        fecha_nacimiento?: string;
+        sexo_biologico?: string;
+      } = {
         cedula_verificada: true,
         photo_verified: true,
         cedula_verified_at: new Date().toISOString(),
@@ -78,11 +92,11 @@ export async function POST(request: NextRequest) {
       // Extraer datos del documento
       if (sessionData.decision.id_verification) {
         const idData = sessionData.decision.id_verification;
-        
+
         if (idData.document_number) {
           updateData.cedula = idData.document_number;
         }
-        
+
         if (idData.first_name) {
           const nombres = idData.first_name.split(" ");
           updateData.primer_nombre = nombres[0];
@@ -90,7 +104,7 @@ export async function POST(request: NextRequest) {
             updateData.segundo_nombre = nombres.slice(1).join(" ");
           }
         }
-        
+
         if (idData.last_name) {
           const apellidos = idData.last_name.split(" ");
           updateData.primer_apellido = apellidos[0];
@@ -98,17 +112,18 @@ export async function POST(request: NextRequest) {
             updateData.segundo_apellido = apellidos.slice(1).join(" ");
           }
         }
-        
+
         if (idData.first_name && idData.last_name) {
           updateData.nombre = `${idData.first_name} ${idData.last_name}`.trim();
         }
-        
+
         if (idData.date_of_birth) {
           updateData.fecha_nacimiento = idData.date_of_birth;
         }
-        
+
         if (idData.gender) {
-          updateData.sexo_biologico = idData.gender === "F" ? "femenino" : "masculino";
+          updateData.sexo_biologico =
+            idData.gender === "F" ? "femenino" : "masculino";
         }
       }
 
@@ -123,7 +138,7 @@ export async function POST(request: NextRequest) {
         console.error("❌ Error al actualizar perfil:", updateError);
         return NextResponse.json(
           { error: "Error al actualizar perfil" },
-          { status: 500 }
+          { status: 500 },
         );
       }
 
@@ -147,7 +162,7 @@ export async function POST(request: NextRequest) {
     console.error("Error en sync-status:", error);
     return NextResponse.json(
       { error: "Error interno del servidor" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

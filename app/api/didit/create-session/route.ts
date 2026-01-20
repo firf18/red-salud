@@ -5,19 +5,22 @@ const DIDIT_API_KEY = process.env.DIDIT_API_KEY;
 const DIDIT_WORKFLOW_ID = process.env.DIDIT_WORKFLOW_ID;
 const DIDIT_API_URL = "https://verification.didit.me/v2/session/";
 
-export async function POST(request: NextRequest) {
+export async function POST() {
   try {
     // Verificar que las variables de entorno estén configuradas
     if (!DIDIT_API_KEY || !DIDIT_WORKFLOW_ID) {
       console.error("Faltan variables de entorno de Didit");
       return NextResponse.json(
-        { error: "Configuración de Didit incompleta. Contacta al administrador." },
-        { status: 500 }
+        {
+          error:
+            "Configuración de Didit incompleta. Contacta al administrador.",
+        },
+        { status: 500 },
       );
     }
 
     const supabase = await createClient();
-    
+
     // Verificar autenticación
     const {
       data: { user },
@@ -25,10 +28,7 @@ export async function POST(request: NextRequest) {
     } = await supabase.auth.getUser();
 
     if (authError || !user) {
-      return NextResponse.json(
-        { error: "No autenticado" },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: "No autenticado" }, { status: 401 });
     }
 
     // Obtener datos del perfil
@@ -41,12 +41,24 @@ export async function POST(request: NextRequest) {
     if (profileError || !profile) {
       return NextResponse.json(
         { error: "Perfil no encontrado" },
-        { status: 404 }
+        { status: 404 },
       );
     }
 
     // Crear sesión en Didit
-    const requestBody: any = {
+    const requestBody: {
+      workflow_id: string | undefined;
+      vendor_data: string;
+      contact_details: {
+        email: string | null | undefined;
+        email_lang: string;
+      };
+      callback: string;
+      expected_details?: {
+        first_name: string;
+        last_name: string;
+      };
+    } = {
       workflow_id: DIDIT_WORKFLOW_ID,
       vendor_data: user.id, // ID del usuario para identificarlo en el webhook
       contact_details: {
@@ -58,10 +70,16 @@ export async function POST(request: NextRequest) {
 
     // Solo enviar expected_details si tenemos datos completos del perfil
     // Esto evita discrepancias con el documento real
-    if (profile.primer_nombre && profile.segundo_nombre && profile.primer_apellido && profile.segundo_apellido) {
+    if (
+      profile.primer_nombre &&
+      profile.segundo_nombre &&
+      profile.primer_apellido &&
+      profile.segundo_apellido
+    ) {
       requestBody.expected_details = {
         first_name: `${profile.primer_nombre} ${profile.segundo_nombre}`.trim(),
-        last_name: `${profile.primer_apellido} ${profile.segundo_apellido}`.trim(),
+        last_name:
+          `${profile.primer_apellido} ${profile.segundo_apellido}`.trim(),
       };
     }
 
@@ -74,7 +92,7 @@ export async function POST(request: NextRequest) {
     const diditResponse = await fetch(DIDIT_API_URL, {
       method: "POST",
       headers: {
-        "accept": "application/json",
+        accept: "application/json",
         "content-type": "application/json",
         "x-api-key": DIDIT_API_KEY,
       },
@@ -86,7 +104,7 @@ export async function POST(request: NextRequest) {
       console.error("Error de Didit:", errorData);
       return NextResponse.json(
         { error: "Error al crear sesión de verificación", details: errorData },
-        { status: diditResponse.status }
+        { status: diditResponse.status },
       );
     }
 
@@ -124,7 +142,7 @@ export async function POST(request: NextRequest) {
     console.error("Error en create-session:", error);
     return NextResponse.json(
       { error: "Error interno del servidor" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

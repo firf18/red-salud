@@ -35,14 +35,14 @@ export function AppointmentCard({
 
   const getStatusColor = (status: string) => {
     const colors = {
-      pendiente: "bg-yellow-100 text-yellow-800 border-yellow-300",
-      confirmada: "bg-blue-100 text-blue-800 border-blue-300",
-      en_espera: "bg-purple-100 text-purple-800 border-purple-300",
-      en_consulta: "bg-indigo-100 text-indigo-800 border-indigo-300",
-      completada: "bg-green-100 text-green-800 border-green-300",
-      no_asistio: "bg-orange-100 text-orange-800 border-orange-300",
-      cancelada: "bg-red-100 text-red-800 border-red-300",
-      rechazada: "bg-gray-100 text-gray-800 border-gray-300",
+      pendiente: "bg-yellow-100 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-200 border-yellow-300 dark:border-yellow-700",
+      confirmada: "bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-200 border-blue-300 dark:border-blue-700",
+      en_espera: "bg-purple-100 dark:bg-purple-900/30 text-purple-800 dark:text-purple-200 border-purple-300 dark:border-purple-700",
+      en_consulta: "bg-indigo-100 dark:bg-indigo-900/30 text-indigo-800 dark:text-indigo-200 border-indigo-300 dark:border-indigo-700",
+      completada: "bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-200 border-green-300 dark:border-green-700",
+      no_asistio: "bg-orange-100 dark:bg-orange-900/30 text-orange-800 dark:text-orange-200 border-orange-300 dark:border-orange-700",
+      cancelada: "bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-200 border-red-300 dark:border-red-700",
+      rechazada: "bg-gray-100 dark:bg-gray-800 text-gray-800 dark:text-gray-200 border-gray-300 dark:border-gray-600",
     };
     return colors[status as keyof typeof colors] || colors.pendiente;
   };
@@ -60,7 +60,7 @@ export function AppointmentCard({
   if (compact) {
     return (
       <div
-        className="p-2 rounded-md border-l-4 hover:shadow-md transition-shadow cursor-pointer bg-white"
+        className="p-2 rounded-md border-l-4 hover:shadow-md transition-shadow cursor-pointer bg-card"
         style={{ borderLeftColor: appointment.color }}
         data-tour="appointment-card"
         data-type={appointment.tipo_cita}
@@ -78,8 +78,8 @@ export function AppointmentCard({
               </AvatarFallback>
             </Avatar>
             <div className="flex-1 min-w-0">
-              <p className="text-sm font-medium truncate">{appointment.paciente_nombre}</p>
-              <p className="text-xs text-gray-500 truncate">{appointment.motivo}</p>
+              <p className="text-sm font-medium truncate text-foreground">{appointment.paciente_nombre}</p>
+              <p className="text-xs text-muted-foreground truncate">{appointment.motivo}</p>
             </div>
           </div>
           <div className="flex items-center gap-1 flex-shrink-0">
@@ -98,7 +98,7 @@ export function AppointmentCard({
 
   return (
     <div
-      className="p-4 rounded-lg border-l-4 hover:shadow-lg transition-shadow bg-white"
+      className="p-4 rounded-lg border-l-4 hover:shadow-lg transition-shadow bg-card"
       style={{ borderLeftColor: appointment.color }}
       data-tour="appointment-card"
       data-type={appointment.tipo_cita}
@@ -112,8 +112,8 @@ export function AppointmentCard({
         <div className="flex-1 min-w-0">
           <div className="flex items-start justify-between gap-2 mb-2">
             <div className="flex-1 min-w-0">
-              <h3 className="font-semibold text-lg truncate">{appointment.paciente_nombre}</h3>
-              <p className="text-sm text-gray-600">{appointment.motivo}</p>
+              <h3 className="font-semibold text-lg truncate text-foreground">{appointment.paciente_nombre}</h3>
+              <p className="text-sm text-muted-foreground">{appointment.motivo}</p>
             </div>
             <Badge
               variant="outline"
@@ -123,7 +123,7 @@ export function AppointmentCard({
             </Badge>
           </div>
 
-          <div className="flex items-center gap-4 text-sm text-gray-500 mb-3">
+          <div className="flex items-center gap-4 text-sm text-muted-foreground mb-3">
             <div className="flex items-center gap-1">
               <Clock className="h-4 w-4" />
               {format(new Date(appointment.fecha_hora), "HH:mm")} -
@@ -137,7 +137,7 @@ export function AppointmentCard({
           </div>
 
           {appointment.notas_internas && (
-            <p className="text-xs text-gray-500 italic mb-3">
+            <p className="text-xs text-muted-foreground italic mb-3">
               Nota: {appointment.notas_internas}
             </p>
           )}

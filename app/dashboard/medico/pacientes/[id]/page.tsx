@@ -276,6 +276,7 @@ export default function PatientDetailPage() {
         {/* Quick Actions */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
           <Button
+            variant="outline"
             onClick={() => router.push(`/dashboard/medico/recetas/nueva?paciente=${patientId}`)}
             className="h-auto py-4"
           >

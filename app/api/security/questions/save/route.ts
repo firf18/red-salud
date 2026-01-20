@@ -9,24 +9,33 @@ export async function POST(request: Request) {
     if (!questions || questions.length !== 3) {
       return NextResponse.json(
         { success: false, message: "Se requieren 3 preguntas de seguridad" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
     const supabase = await createClient();
 
-    const { data: { user }, error: userError } = await supabase.auth.getUser();
-    
+    const {
+      data: { user },
+      error: userError,
+    } = await supabase.auth.getUser();
+
     if (userError || !user) {
       return NextResponse.json(
         { success: false, message: "No autenticado" },
-        { status: 401 }
+        { status: 401 },
       );
     }
 
     // Hashear las respuestas
+    interface SecurityQuestion {
+      question: string;
+      answer: string;
+    }
     const hashedAnswers = await Promise.all(
-      questions.map((q: any) => bcrypt.hash(q.answer.toLowerCase().trim(), 10))
+      questions.map((q: SecurityQuestion) =>
+        bcrypt.hash(q.answer.toLowerCase().trim(), 10),
+      ),
     );
 
     // Guardar en la base de datos
@@ -46,7 +55,7 @@ export async function POST(request: Request) {
     if (upsertError) {
       return NextResponse.json(
         { success: false, message: "Error al guardar preguntas" },
-        { status: 500 }
+        { status: 500 },
       );
     }
 
@@ -66,7 +75,7 @@ export async function POST(request: Request) {
     console.error("Error saving security questions:", error);
     return NextResponse.json(
       { success: false, message: "Error al guardar preguntas" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

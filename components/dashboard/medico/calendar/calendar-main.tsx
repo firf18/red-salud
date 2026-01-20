@@ -151,7 +151,7 @@ export function CalendarMain({
   return (
     <div className="flex flex-col h-full space-y-4">
       {/* Header Controls */}
-      <div className="bg-white rounded-lg shadow-sm border p-4">
+      <div className="bg-card rounded-lg shadow-sm border border-border p-4">
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
           {/* Navigation */}
           <div className="flex items-center gap-2" data-tour="date-navigation">
@@ -167,7 +167,7 @@ export function CalendarMain({
                 <ChevronRight className="h-4 w-4" />
               </Button>
             </div>
-            <div className="text-lg font-semibold text-gray-900 min-w-[200px]">
+            <div className="text-lg font-semibold text-foreground min-w-[200px]">
               {getDateRangeText()}
             </div>
           </div>
@@ -186,38 +186,38 @@ export function CalendarMain({
 
         {/* Stats - Clickeable */}
         {view !== "list" && (
-          <div className="flex items-center gap-3 mt-4 pt-4 border-t flex-wrap" data-tour="calendar-filters">
+          <div className="flex items-center gap-3 mt-4 pt-4 border-t border-border flex-wrap" data-tour="calendar-filters">
             <button
-              className={`text-sm px-3 py-1.5 rounded-md transition-colors ${filterStatus === "all" ? "bg-gray-200" : "hover:bg-gray-100"
+              className={`text-sm px-3 py-1.5 rounded-md transition-colors ${filterStatus === "all" ? "bg-muted" : "hover:bg-muted"
                 }`}
               onClick={() => setFilterStatus("all")}
             >
-              <span className="text-gray-600">Total:</span>{" "}
-              <span className="font-semibold text-gray-900">{stats.total}</span>
+              <span className="text-muted-foreground">Total:</span>{" "}
+              <span className="font-semibold text-foreground">{stats.total}</span>
             </button>
             <button
-              className={`text-sm px-3 py-1.5 rounded-md transition-colors ${filterStatus === "pendiente" ? "bg-yellow-100" : "hover:bg-yellow-50"
+              className={`text-sm px-3 py-1.5 rounded-md transition-colors ${filterStatus === "pendiente" ? "bg-yellow-100 dark:bg-yellow-900/30" : "hover:bg-yellow-50 dark:hover:bg-yellow-900/20"
                 }`}
               onClick={() => setFilterStatus("pendiente")}
             >
-              <span className="text-gray-600">Pendientes:</span>{" "}
-              <span className="font-semibold text-yellow-600">{stats.pendientes}</span>
+              <span className="text-muted-foreground">Pendientes:</span>{" "}
+              <span className="font-semibold text-yellow-600 dark:text-yellow-400">{stats.pendientes}</span>
             </button>
             <button
-              className={`text-sm px-3 py-1.5 rounded-md transition-colors ${filterStatus === "confirmada" ? "bg-blue-100" : "hover:bg-blue-50"
+              className={`text-sm px-3 py-1.5 rounded-md transition-colors ${filterStatus === "confirmada" ? "bg-blue-100 dark:bg-blue-900/30" : "hover:bg-blue-50 dark:hover:bg-blue-900/20"
                 }`}
               onClick={() => setFilterStatus("confirmada")}
             >
-              <span className="text-gray-600">Confirmadas:</span>{" "}
-              <span className="font-semibold text-blue-600">{stats.confirmadas}</span>
+              <span className="text-muted-foreground">Confirmadas:</span>{" "}
+              <span className="font-semibold text-blue-600 dark:text-blue-400">{stats.confirmadas}</span>
             </button>
             <button
-              className={`text-sm px-3 py-1.5 rounded-md transition-colors ${filterStatus === "completada" ? "bg-green-100" : "hover:bg-green-50"
+              className={`text-sm px-3 py-1.5 rounded-md transition-colors ${filterStatus === "completada" ? "bg-green-100 dark:bg-green-900/30" : "hover:bg-green-50 dark:hover:bg-green-900/20"
                 }`}
               onClick={() => setFilterStatus("completada")}
             >
-              <span className="text-gray-600">Completadas:</span>{" "}
-              <span className="font-semibold text-green-600">{stats.completadas}</span>
+              <span className="text-muted-foreground">Completadas:</span>{" "}
+              <span className="font-semibold text-green-600 dark:text-green-400">{stats.completadas}</span>
             </button>
           </div>
         )}
@@ -262,7 +262,7 @@ export function CalendarMain({
           />
         )}
         {view === "list" && (
-          <div className="h-full overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100 bg-gray-50 rounded-lg p-4">
+          <div className="h-full overflow-y-auto scrollbar-thin scrollbar-thumb-muted-foreground/30 scrollbar-track-muted bg-muted/50 dark:bg-muted/30 rounded-lg p-4">
             {filteredAppointments.length > 0 ? (
               <div className="space-y-3">
                 {filteredAppointments.map((apt) => (
@@ -277,12 +277,12 @@ export function CalendarMain({
               </div>
             ) : (
               <div className="h-full flex items-center justify-center">
-                <div className="text-center py-12 bg-white rounded-lg border-2 border-dashed border-gray-300 max-w-md">
-                  <CalendarIcon className="h-16 w-16 text-gray-400 mx-auto mb-4" />
-                  <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                <div className="text-center py-12 bg-card rounded-lg border-2 border-dashed border-border max-w-md">
+                  <CalendarIcon className="h-16 w-16 text-muted-foreground mx-auto mb-4" />
+                  <h3 className="text-lg font-semibold text-foreground mb-2">
                     No hay citas programadas
                   </h3>
-                  <p className="text-gray-600 mb-4">
+                  <p className="text-muted-foreground mb-4">
                     Las citas que agendes aparecerán aquí
                   </p>
                   <Button onClick={onNewAppointment} size="lg">

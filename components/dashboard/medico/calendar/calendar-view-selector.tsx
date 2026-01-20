@@ -19,18 +19,17 @@ export function CalendarViewSelector({ currentView, onViewChange }: CalendarView
   ];
 
   return (
-    <div className="flex items-center gap-1 bg-gray-100 p-1 rounded-lg">
+    <div className="flex items-center gap-1 bg-muted p-1 rounded-lg">
       {views.map((view) => (
         <Button
           key={view.value}
           variant={currentView === view.value ? "default" : "ghost"}
           size="sm"
           onClick={() => onViewChange(view.value)}
-          className={`gap-2 ${
-            currentView === view.value
-              ? "bg-blue-600 text-white hover:bg-blue-700 shadow-sm"
-              : "text-gray-700 hover:bg-gray-200"
-          }`}
+          className={`gap-2 ${currentView === view.value
+              ? "bg-primary text-primary-foreground hover:bg-primary/90 shadow-sm"
+              : "text-muted-foreground hover:bg-muted hover:text-foreground"
+            }`}
         >
           {view.icon}
           <span className="hidden sm:inline">{view.label}</span>

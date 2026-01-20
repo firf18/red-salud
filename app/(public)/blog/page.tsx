@@ -10,13 +10,36 @@ import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { fadeInUp, staggerContainer } from "@/lib/animations";
-import { 
-  Calendar, User, ArrowRight, Search, TrendingUp, 
-  MessageCircle, ThumbsUp, Eye, BookOpen, Award,
-  Clock, Filter, ChevronRight, Sparkles, Users
+import {
+  Calendar,
+  User,
+  ArrowRight,
+  Search,
+  TrendingUp,
+  MessageCircle,
+  ThumbsUp,
+  Eye,
+  BookOpen,
+  Award,
+  Clock,
+  Filter,
+  ChevronRight,
+  Sparkles,
+  Users,
 } from "lucide-react";
-import { getPosts, getCategories, getPopularTags, getFeaturedPosts, getTopContributors } from "@/lib/api/blog";
-import type { BlogPost, BlogCategory, ContentTag, UserReputation } from "@/lib/types/blog";
+import {
+  getPosts,
+  getCategories,
+  getPopularTags,
+  getFeaturedPosts,
+  getTopContributors,
+} from "@/lib/api/blog";
+import type {
+  BlogPost,
+  BlogCategory,
+  ContentTag,
+  UserReputation,
+} from "@/lib/types/blog";
 
 export default function BlogPage() {
   const [posts, setPosts] = useState<BlogPost[]>([]);
@@ -40,12 +63,13 @@ export default function BlogPage() {
 
   async function loadInitialData() {
     try {
-      const [categoriesData, tagsData, featuredData, contributorsData] = await Promise.all([
-        getCategories(),
-        getPopularTags(15),
-        getFeaturedPosts(3),
-        getTopContributors(5),
-      ]);
+      const [categoriesData, tagsData, featuredData, contributorsData] =
+        await Promise.all([
+          getCategories(),
+          getPopularTags(15),
+          getFeaturedPosts(3),
+          getTopContributors(5),
+        ]);
       setCategories(categoriesData);
       setPopularTags(tagsData);
       setFeaturedPosts(featuredData);
@@ -59,13 +83,15 @@ export default function BlogPage() {
     setLoading(true);
     try {
       const result = await getPosts(
-        { 
-          category: selectedCategory || undefined, 
-          search: searchQuery || undefined 
+        {
+          category: selectedCategory || undefined,
+          search: searchQuery || undefined,
         },
-        { page, limit: 9 }
+        { page, limit: 9 },
       );
-      setPosts(prev => page === 1 ? result.data : [...prev, ...result.data]);
+      setPosts((prev) =>
+        page === 1 ? result.data : [...prev, ...result.data],
+      );
       setHasMore(result.hasMore);
     } catch (error) {
       console.error("Error loading posts:", error);
@@ -90,32 +116,37 @@ export default function BlogPage() {
       <section className="relative bg-gradient-to-br from-blue-600 via-blue-700 to-teal-600 text-white py-20 overflow-hidden">
         <div className="absolute inset-0 opacity-10 bg-[radial-gradient(circle_at_2px_2px,white_1px,transparent_0)] bg-[length:50px_50px]" />
         <div className="container mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-          <motion.div 
+          <motion.div
             className="max-w-4xl mx-auto text-center"
             variants={staggerContainer}
             initial="initial"
             animate="animate"
           >
-            <motion.div variants={fadeInUp} className="flex items-center justify-center gap-2 mb-4">
+            <motion.div
+              variants={fadeInUp}
+              className="flex items-center justify-center gap-2 mb-4"
+            >
               <Sparkles className="h-6 w-6 text-yellow-300" />
-              <span className="text-blue-200 font-medium">Conocimiento médico verificado</span>
+              <span className="text-blue-200 font-medium">
+                Conocimiento médico verificado
+              </span>
             </motion.div>
-            <motion.h1 
-              variants={fadeInUp} 
+            <motion.h1
+              variants={fadeInUp}
               className="text-4xl sm:text-5xl lg:text-6xl font-bold mb-6"
             >
               Blog Médico & Comunidad
             </motion.h1>
-            <motion.p 
-              variants={fadeInUp} 
+            <motion.p
+              variants={fadeInUp}
               className="text-xl text-blue-100 mb-8 max-w-2xl mx-auto"
             >
-              Artículos escritos por médicos verificados, preguntas de la comunidad 
-              y las últimas noticias en salud
+              Artículos escritos por médicos verificados, preguntas de la
+              comunidad y las últimas noticias en salud
             </motion.p>
-            
+
             {/* Search Bar */}
-            <motion.form 
+            <motion.form
               variants={fadeInUp}
               onSubmit={handleSearch}
               className="max-w-2xl mx-auto"
@@ -129,7 +160,7 @@ export default function BlogPage() {
                   onChange={(e) => setSearchQuery(e.target.value)}
                   className="pl-12 pr-4 py-6 text-lg rounded-full bg-white/10 backdrop-blur-sm border-white/20 text-white placeholder:text-blue-200 focus:bg-white focus:text-gray-900 focus:placeholder:text-gray-400 transition-all"
                 />
-                <Button 
+                <Button
                   type="submit"
                   className="absolute right-2 top-1/2 -translate-y-1/2 rounded-full bg-white text-blue-600 hover:bg-blue-50"
                 >
@@ -139,15 +170,24 @@ export default function BlogPage() {
             </motion.form>
 
             {/* Quick Links */}
-            <motion.div variants={fadeInUp} className="flex flex-wrap justify-center gap-3 mt-6">
+            <motion.div
+              variants={fadeInUp}
+              className="flex flex-wrap justify-center gap-3 mt-6"
+            >
               <Link href="/blog/preguntas">
-                <Button variant="outline" className="border-white/30 text-white hover:bg-white/10">
+                <Button
+                  variant="outline"
+                  className="border-white/30 text-white hover:bg-white/10"
+                >
                   <MessageCircle className="h-4 w-4 mr-2" />
                   Preguntas y Respuestas
                 </Button>
               </Link>
               <Link href="/blog/escribir">
-                <Button variant="outline" className="border-white/30 text-white hover:bg-white/10">
+                <Button
+                  variant="outline"
+                  className="border-white/30 text-white hover:bg-white/10"
+                >
                   <BookOpen className="h-4 w-4 mr-2" />
                   Escribir Artículo
                 </Button>
@@ -173,8 +213,8 @@ export default function BlogPage() {
                     <Card className="h-full overflow-hidden group hover:shadow-xl transition-all duration-300 bg-white dark:bg-gray-800">
                       <div className="relative h-48 bg-gradient-to-br from-blue-500 to-teal-500">
                         {post.cover_image && (
-                          <img 
-                            src={post.cover_image} 
+                          <img
+                            src={post.cover_image}
                             alt={post.title}
                             className="w-full h-full object-cover"
                           />
@@ -188,10 +228,13 @@ export default function BlogPage() {
                       </div>
                       <div className="p-5">
                         {post.category && (
-                          <Badge 
-                            variant="secondary" 
+                          <Badge
+                            variant="secondary"
                             className="mb-2"
-                            style={{ backgroundColor: `${post.category.color}20`, color: post.category.color }}
+                            style={{
+                              backgroundColor: `${post.category.color}20`,
+                              color: post.category.color,
+                            }}
                           >
                             {post.category.name}
                           </Badge>
@@ -205,10 +248,16 @@ export default function BlogPage() {
                         <div className="flex items-center justify-between text-sm text-gray-500">
                           <div className="flex items-center gap-2">
                             <Avatar className="h-6 w-6">
-                              <AvatarImage src={post.author?.avatar_url || ''} />
-                              <AvatarFallback>{post.author?.nombre_completo?.[0] || 'A'}</AvatarFallback>
+                              <AvatarImage
+                                src={post.author?.avatar_url || ""}
+                              />
+                              <AvatarFallback>
+                                {post.author?.nombre_completo?.[0] || "A"}
+                              </AvatarFallback>
                             </Avatar>
-                            <span className="truncate max-w-[100px]">{post.author?.nombre_completo}</span>
+                            <span className="truncate max-w-[100px]">
+                              {post.author?.nombre_completo}
+                            </span>
                           </div>
                           <div className="flex items-center gap-3">
                             <span className="flex items-center gap-1">
@@ -247,9 +296,9 @@ export default function BlogPage() {
                   <button
                     onClick={() => handleCategoryChange(null)}
                     className={`w-full text-left px-3 py-2 rounded-lg transition-colors ${
-                      !selectedCategory 
-                        ? 'bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300' 
-                        : 'hover:bg-gray-100 dark:hover:bg-gray-800'
+                      !selectedCategory
+                        ? "bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300"
+                        : "hover:bg-gray-100 dark:hover:bg-gray-800"
                     }`}
                   >
                     Todas las categorías
@@ -259,13 +308,13 @@ export default function BlogPage() {
                       key={category.id}
                       onClick={() => handleCategoryChange(category.id)}
                       className={`w-full text-left px-3 py-2 rounded-lg transition-colors flex items-center gap-2 ${
-                        selectedCategory === category.id 
-                          ? 'bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300' 
-                          : 'hover:bg-gray-100 dark:hover:bg-gray-800'
+                        selectedCategory === category.id
+                          ? "bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300"
+                          : "hover:bg-gray-100 dark:hover:bg-gray-800"
                       }`}
                     >
-                      <span 
-                        className="w-3 h-3 rounded-full" 
+                      <span
+                        className="w-3 h-3 rounded-full"
                         style={{ backgroundColor: category.color }}
                       />
                       {category.name}
@@ -283,8 +332,8 @@ export default function BlogPage() {
                 <div className="flex flex-wrap gap-2">
                   {popularTags.map((tag) => (
                     <Link key={tag.id} href={`/blog?tag=${tag.slug}`}>
-                      <Badge 
-                        variant="outline" 
+                      <Badge
+                        variant="outline"
                         className="cursor-pointer hover:bg-blue-50 dark:hover:bg-blue-900/30"
                       >
                         #{tag.name}
@@ -301,27 +350,38 @@ export default function BlogPage() {
                   Top Contribuidores
                 </h3>
                 <div className="space-y-3">
-                  {topContributors.map((contributor: any, index) => (
-                    <Link 
-                      key={contributor.user_id} 
+                  {topContributors.map((contributor: UserReputation, index) => (
+                    <Link
+                      key={contributor.user_id}
                       href={`/blog/autor/${contributor.user_id}`}
                       className="flex items-center gap-3 p-2 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
                     >
-                      <span className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold ${
-                        index === 0 ? 'bg-yellow-100 text-yellow-700' :
-                        index === 1 ? 'bg-gray-100 text-gray-700' :
-                        index === 2 ? 'bg-orange-100 text-orange-700' :
-                        'bg-blue-50 text-blue-600'
-                      }`}>
+                      <span
+                        className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold ${
+                          index === 0
+                            ? "bg-yellow-100 text-yellow-700"
+                            : index === 1
+                              ? "bg-gray-100 text-gray-700"
+                              : index === 2
+                                ? "bg-orange-100 text-orange-700"
+                                : "bg-blue-50 text-blue-600"
+                        }`}
+                      >
                         {index + 1}
                       </span>
                       <Avatar className="h-8 w-8">
-                        <AvatarImage src={contributor.user?.avatar_url || ''} />
-                        <AvatarFallback>{contributor.user?.nombre_completo?.[0] || 'U'}</AvatarFallback>
+                        <AvatarImage src={contributor.user?.avatar_url || ""} />
+                        <AvatarFallback>
+                          {contributor.user?.nombre_completo?.[0] || "U"}
+                        </AvatarFallback>
                       </Avatar>
                       <div className="flex-1 min-w-0">
-                        <p className="text-sm font-medium truncate">{contributor.user?.nombre_completo}</p>
-                        <p className="text-xs text-gray-500">{contributor.total_points} pts</p>
+                        <p className="text-sm font-medium truncate">
+                          {contributor.user?.nombre_completo}
+                        </p>
+                        <p className="text-xs text-gray-500">
+                          {contributor.total_points} pts
+                        </p>
                       </div>
                     </Link>
                   ))}
@@ -361,11 +421,13 @@ export default function BlogPage() {
               ) : posts.length === 0 ? (
                 <Card className="p-12 text-center">
                   <BookOpen className="h-12 w-12 mx-auto text-gray-400 mb-4" />
-                  <h3 className="text-lg font-semibold mb-2">No hay artículos</h3>
+                  <h3 className="text-lg font-semibold mb-2">
+                    No hay artículos
+                  </h3>
                   <p className="text-gray-500 mb-4">
-                    {searchQuery 
+                    {searchQuery
                       ? `No encontramos artículos para "${searchQuery}"`
-                      : 'Aún no hay artículos publicados en esta categoría'}
+                      : "Aún no hay artículos publicados en esta categoría"}
                   </p>
                   <Link href="/blog/escribir">
                     <Button>
@@ -376,7 +438,7 @@ export default function BlogPage() {
                 </Card>
               ) : (
                 <>
-                  <motion.div 
+                  <motion.div
                     className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
                     variants={staggerContainer}
                     initial="initial"
@@ -391,12 +453,12 @@ export default function BlogPage() {
 
                   {hasMore && (
                     <div className="text-center mt-8">
-                      <Button 
-                        variant="outline" 
-                        onClick={() => setPage(p => p + 1)}
+                      <Button
+                        variant="outline"
+                        onClick={() => setPage((p) => p + 1)}
                         disabled={loading}
                       >
-                        {loading ? 'Cargando...' : 'Cargar más artículos'}
+                        {loading ? "Cargando..." : "Cargar más artículos"}
                       </Button>
                     </div>
                   )}
@@ -412,20 +474,30 @@ export default function BlogPage() {
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <div className="max-w-3xl mx-auto text-center">
             <Users className="h-12 w-12 mx-auto mb-4 opacity-80" />
-            <h2 className="text-3xl font-bold mb-4">¿Eres médico verificado?</h2>
+            <h2 className="text-3xl font-bold mb-4">
+              ¿Eres médico verificado?
+            </h2>
             <p className="text-xl text-blue-100 mb-6">
-              Comparte tu conocimiento con miles de pacientes. Escribe artículos, 
-              responde preguntas y construye tu reputación profesional.
+              Comparte tu conocimiento con miles de pacientes. Escribe
+              artículos, responde preguntas y construye tu reputación
+              profesional.
             </p>
             <div className="flex flex-wrap justify-center gap-4">
               <Link href="/blog/escribir">
-                <Button size="lg" className="bg-white text-blue-600 hover:bg-blue-50">
+                <Button
+                  size="lg"
+                  className="bg-white text-blue-600 hover:bg-blue-50"
+                >
                   <BookOpen className="h-5 w-5 mr-2" />
                   Escribir Artículo
                 </Button>
               </Link>
               <Link href="/blog/preguntas">
-                <Button size="lg" variant="outline" className="border-white text-white hover:bg-white/10">
+                <Button
+                  size="lg"
+                  variant="outline"
+                  className="border-white text-white hover:bg-white/10"
+                >
                   <MessageCircle className="h-5 w-5 mr-2" />
                   Responder Preguntas
                 </Button>
@@ -445,8 +517,8 @@ function PostCard({ post }: { post: BlogPost }) {
       <Card className="h-full overflow-hidden group hover:shadow-lg transition-all duration-300">
         <div className="relative h-40 bg-gradient-to-br from-blue-500 to-teal-500">
           {post.cover_image && (
-            <img 
-              src={post.cover_image} 
+            <img
+              src={post.cover_image}
               alt={post.title}
               className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
             />
@@ -454,10 +526,13 @@ function PostCard({ post }: { post: BlogPost }) {
         </div>
         <div className="p-5">
           {post.category && (
-            <Badge 
-              variant="secondary" 
+            <Badge
+              variant="secondary"
               className="mb-2 text-xs"
-              style={{ backgroundColor: `${post.category.color}20`, color: post.category.color }}
+              style={{
+                backgroundColor: `${post.category.color}20`,
+                color: post.category.color,
+              }}
             >
               {post.category.name}
             </Badge>
@@ -471,12 +546,14 @@ function PostCard({ post }: { post: BlogPost }) {
           <div className="flex items-center justify-between text-xs text-gray-500">
             <div className="flex items-center gap-2">
               <Avatar className="h-5 w-5">
-                <AvatarImage src={post.author?.avatar_url || ''} />
+                <AvatarImage src={post.author?.avatar_url || ""} />
                 <AvatarFallback className="text-[10px]">
-                  {post.author?.nombre_completo?.[0] || 'A'}
+                  {post.author?.nombre_completo?.[0] || "A"}
                 </AvatarFallback>
               </Avatar>
-              <span className="truncate max-w-[80px]">{post.author?.nombre_completo}</span>
+              <span className="truncate max-w-[80px]">
+                {post.author?.nombre_completo}
+              </span>
             </div>
             <div className="flex items-center gap-1">
               <Clock className="h-3 w-3" />

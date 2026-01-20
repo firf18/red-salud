@@ -1,11 +1,18 @@
 export type PacienteParams = {
-  cedula: string | null;
-  nombre: string | null;
-  edad: string | null;
-  genero: string | null;
+  id?: string;
+  cedula: string;
+  nombre_completo: string;
+  edad: number | null;
+  genero: string;
+  fecha_nacimiento?: string;
+  telefono?: string | null;
+  email?: string | null;
+  direccion?: string | null;
 };
 
-export function buildPacienteFromParams(params: URLSearchParams) {
+export function buildPacienteFromParams(
+  params: URLSearchParams,
+): PacienteParams {
   const cedula = params.get("cedula") || "";
   const nombre = params.get("nombre") || "";
   const edadStr = params.get("edad");

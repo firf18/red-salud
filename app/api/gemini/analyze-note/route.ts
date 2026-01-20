@@ -1,7 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 import { GoogleGenerativeAI } from "@google/generative-ai";
 
-const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || "AIzaSyAt9v_eTe0-oFMEZa0A6pMiooZmy2dPajY");
+const genAI = new GoogleGenerativeAI(
+  process.env.GEMINI_API_KEY || "AIzaSyAt9v_eTe0-oFMEZa0A6pMiooZmy2dPajY",
+);
 
 export async function POST(request: NextRequest) {
   try {
@@ -10,7 +12,7 @@ export async function POST(request: NextRequest) {
     if (!nota || !nota.trim()) {
       return NextResponse.json(
         { success: false, error: "La nota médica es requerida" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -42,7 +44,7 @@ Responde en formato JSON:
   "diagnosticosSugeridos": ["Diagnóstico 1", "Diagnóstico 2"]
 }
 
-IMPORTANTE: 
+IMPORTANTE:
 - Recomendaciones deben ser preguntas específicas o acciones concretas
 - Alertas deben ser información faltante o puntos críticos
 - Sé breve y directo (máximo 3-4 items por categoría)
@@ -53,7 +55,7 @@ IMPORTANTE:
     const text = response.text();
 
     // Extraer JSON de la respuesta
-    let jsonMatch = text.match(/\{[\s\S]*\}/);
+    const jsonMatch = text.match(/\{[\s\S]*\}/);
     if (!jsonMatch) {
       throw new Error("No se pudo extraer JSON de la respuesta");
     }
@@ -69,14 +71,18 @@ IMPORTANTE:
         diagnosticosSugeridos: analysis.diagnosticosSugeridos || [],
       },
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("Error analyzing note:", error);
+    const errorMessage =
+      error instanceof Error
+        ? error.message
+        : "Error al analizar la nota médica";
     return NextResponse.json(
       {
         success: false,
-        error: error.message || "Error al analizar la nota médica",
+        error: errorMessage,
       },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

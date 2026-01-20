@@ -26,6 +26,7 @@ interface AppointmentRow {
     doctor_profile?: {
       consultation_price?: number | string;
       consultation_duration?: number;
+      tarifa_consulta?: number | string;
       specialty?: MedicalSpecialty | null;
     } | null;
   } | null;
@@ -44,14 +45,14 @@ export async function GET(request: NextRequest) {
   if (authError || !user) {
     return NextResponse.json(
       { success: false, error: "No autorizado" },
-      { status: 401 }
+      { status: 401 },
     );
   }
 
   if (requestedPatientId && requestedPatientId !== user.id) {
     return NextResponse.json(
       { success: false, error: "Paciente no coincide" },
-      { status: 403 }
+      { status: 403 },
     );
   }
 
@@ -60,7 +61,8 @@ export async function GET(request: NextRequest) {
   try {
     const { data, error } = await supabaseAdmin
       .from("appointments")
-      .select(`
+      .select(
+        `
         *,
         doctor:profiles!appointments_medico_id_fkey(
           id,
@@ -71,14 +73,16 @@ export async function GET(request: NextRequest) {
             specialty:specialties(id, name, description, icon)
           )
         )
-      `)
+      `,
+      )
       .eq("paciente_id", targetPatientId)
       .order("fecha_hora", { ascending: false });
 
     if (error) throw error;
 
     const appointments: Appointment[] = (data || []).map((apt) => {
-      const row = apt as any; // Using any to bypass strict type check for now as we changed DB schema
+      // Dynamic data from Supabase join with changing schema - cast to AppointmentRow
+      const row = apt as unknown as AppointmentRow;
       const fechaHora = new Date(row.fecha_hora);
       return {
         id: row.id,
@@ -91,39 +95,39 @@ export async function GET(request: NextRequest) {
           row.status === "pendiente"
             ? "pending"
             : row.status === "confirmada"
-            ? "confirmed"
-            : row.status === "completada"
-            ? "completed"
-            : "cancelled",
+              ? "confirmed"
+              : row.status === "completada"
+                ? "completed"
+                : "cancelled",
         consultation_type: row.tipo_cita || "video",
         reason: row.motivo,
         notes: row.notas,
         created_at: row.created_at,
         updated_at: row.updated_at,
-        doctor: {
-          id: row.doctor?.id,
-          verified: true,
-          created_at: row.created_at,
-          updated_at: row.updated_at,
-          profile: {
-            id: row.doctor?.id,
-            nombre_completo: row.doctor?.nombre_completo,
-            avatar_url: row.doctor?.avatar_url,
-          },
-          specialty:
-            row.doctor?.doctor_profile?.specialty || {
-              id: "",
-              name: "Medicina General",
-              description: null,
-              icon: "stethoscope",
+        doctor: row.doctor?.id
+          ? {
+              id: row.doctor.id,
+              verified: true,
               created_at: row.created_at,
-            },
-          tarifa_consulta:
-            row.doctor?.doctor_profile?.tarifa_consulta
-              ? Number(row.doctor?.doctor_profile?.tarifa_consulta)
-              : undefined,
-          consultation_duration: 30,
-        },
+              updated_at: row.updated_at,
+              profile: {
+                id: row.doctor.id,
+                nombre_completo: row.doctor.nombre_completo,
+                avatar_url: row.doctor.avatar_url,
+              },
+              specialty: row.doctor?.doctor_profile?.specialty || {
+                id: "",
+                name: "Medicina General",
+                description: undefined,
+                icon: "stethoscope",
+                created_at: row.created_at,
+              },
+              tarifa_consulta: row.doctor?.doctor_profile?.tarifa_consulta
+                ? Number(row.doctor?.doctor_profile?.tarifa_consulta)
+                : undefined,
+              consultation_duration: 30,
+            }
+          : undefined,
       };
     });
 
@@ -135,7 +139,7 @@ export async function GET(request: NextRequest) {
         success: false,
         error: error instanceof Error ? error.message : "Unknown error",
       },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

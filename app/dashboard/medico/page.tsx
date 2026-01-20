@@ -11,7 +11,7 @@ import {
   Clock,
   CircleHelp,
   Crown,
-  MessageCircle
+  MessageCircle,
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -23,12 +23,17 @@ import { supabase } from "@/lib/supabase/client";
 import { fadeInUp, staggerContainer } from "@/lib/animations";
 import { DashboardWidgetGrid } from "@/components/dashboard/medico/dashboard";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
+import { useCurrentOffice } from "@/hooks/use-current-office";
+import { OfficeQuickSelectorDropdown } from "@/components/dashboard/medico/office-quick-selector-dropdown";
+import { OfficeQuickSelectorModal } from "@/components/dashboard/medico/office-quick-selector-modal";
 
 export default function DoctorDashboardPage() {
   const router = useRouter();
   const [userId, setUserId] = useState<string | null>(null);
   const [authLoading, setAuthLoading] = useState(true);
-  const { profile, stats, loading, error } = useDoctorProfile(userId || undefined);
+  const { profile, stats, loading, error } = useDoctorProfile(
+    userId || undefined,
+  );
   const [needsSetup, setNeedsSetup] = useState(false);
   const { startTour } = useTourGuide();
 
@@ -44,9 +49,14 @@ export default function DoctorDashboardPage() {
     isLoading: widgetsLoading,
   } = useDashboardWidgets(userId || undefined);
 
+  // Current office state
+  const { currentOffice, allOffices, updateCurrentOffice } = useCurrentOffice();
+
   useEffect(() => {
     const getUser = async () => {
-      const { data: { user } } = await supabase.auth.getUser();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
       if (user) {
         setUserId(user.id);
       } else {
@@ -75,17 +85,16 @@ export default function DoctorDashboardPage() {
   // Get current date info
   const today = new Date();
   const dateOptions: Intl.DateTimeFormatOptions = {
-    weekday: 'long',
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric'
+    weekday: "long",
+    year: "numeric",
+    month: "long",
+    day: "numeric",
   };
-  const formattedDate = today.toLocaleDateString('es-ES', dateOptions);
+  const formattedDate = today.toLocaleDateString("es-ES", dateOptions);
 
   if (authLoading || loading) {
     return null;
   }
-
 
   // Main render logic
   const dashboardContent = (
@@ -99,12 +108,12 @@ export default function DoctorDashboardPage() {
           animate={{
             x: [0, 30, 0],
             y: [0, -20, 0],
-            scale: [1, 1.1, 1]
+            scale: [1, 1.1, 1],
           }}
           transition={{
             duration: 8,
             repeat: Infinity,
-            ease: "easeInOut"
+            ease: "easeInOut",
           }}
           className="absolute top-[10%] right-[10%] w-[400px] h-[400px] rounded-full bg-gradient-to-br from-primary/15 to-secondary/15 dark:from-primary/25 dark:to-secondary/25 blur-[100px]"
         />
@@ -112,26 +121,26 @@ export default function DoctorDashboardPage() {
           animate={{
             x: [0, -20, 0],
             y: [0, 30, 0],
-            scale: [1, 0.9, 1]
+            scale: [1, 0.9, 1],
           }}
           transition={{
             duration: 10,
             repeat: Infinity,
             ease: "easeInOut",
-            delay: 1
+            delay: 1,
           }}
           className="absolute bottom-[20%] left-[5%] w-[350px] h-[350px] rounded-full bg-gradient-to-br from-secondary/10 to-primary/10 dark:from-secondary/18 dark:to-primary/18 blur-[100px]"
         />
         <motion.div
           animate={{
             x: [0, 15, 0],
-            y: [0, -15, 0]
+            y: [0, -15, 0],
           }}
           transition={{
             duration: 6,
             repeat: Infinity,
             ease: "easeInOut",
-            delay: 2
+            delay: 2,
           }}
           className="absolute top-[50%] left-[50%] w-[250px] h-[250px] rounded-full bg-gradient-to-br from-primary/5 to-secondary/5 dark:from-primary/18 dark:to-secondary/18 blur-[80px]"
         />
@@ -142,7 +151,7 @@ export default function DoctorDashboardPage() {
         className="fixed inset-0 opacity-[0.02] dark:opacity-[0.06] -z-10 pointer-events-none"
         style={{
           backgroundImage: `radial-gradient(circle at 1px 1px, hsl(var(--foreground)) 1px, transparent 0)`,
-          backgroundSize: '32px 32px'
+          backgroundSize: "32px 32px",
         }}
       />
 
@@ -165,19 +174,48 @@ export default function DoctorDashboardPage() {
               <h1 className="text-3xl md:text-4xl font-bold tracking-tight">
                 {getGreeting()},{" "}
                 <span className="bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
-                  Dr. {profile?.nombre_completo?.split(' ')[0] || "Doctor"}
+                  Dr. {profile?.nombre_completo?.split(" ")[0] || "Doctor"}
                 </span>
               </h1>
 
               {/* Date and specialty */}
-              <div className="flex items-center gap-3 text-muted-foreground">
+              <div className="flex flex-wrap items-center gap-3 text-muted-foreground">
                 <div className="flex items-center gap-1.5">
                   <Clock className="h-4 w-4" />
                   <span className="text-sm capitalize">{formattedDate}</span>
                 </div>
+
+                {/* Current Office - Opción A: Dropdown */}
+                {currentOffice && (
+                  <>
+                    <span className="text-border">•</span>
+                    <OfficeQuickSelectorDropdown
+                      currentOffice={currentOffice}
+                      offices={allOffices}
+                      onChange={updateCurrentOffice}
+                    />
+                  </>
+                )}
+
+                {/* Alternative: Opción B: Modal (comentado, activar si prefieres esta opción) */}
+                {/*
+                {currentOffice && (
+                  <>
+                    <span className="text-border">•</span>
+                    <OfficeQuickSelectorModal
+                      currentOffice={currentOffice}
+                      offices={allOffices}
+                      onChange={updateCurrentOffice}
+                    />
+                  </>
+                )}
+                */}
+
                 <span className="text-border">•</span>
                 <span className="text-sm">
-                  {profile?.specialty?.name || profile?.sacs_especialidad || "Médico"}
+                  {profile?.specialty?.name ||
+                    profile?.sacs_especialidad ||
+                    "Médico"}
                 </span>
                 {(profile?.is_verified || profile?.sacs_verified) && (
                   <>
@@ -197,7 +235,9 @@ export default function DoctorDashboardPage() {
               <Button
                 variant="ghost"
                 size="icon"
-                onClick={() => document.dispatchEvent(new CustomEvent('toggle-chat'))}
+                onClick={() =>
+                  document.dispatchEvent(new CustomEvent("toggle-chat"))
+                }
                 className="text-muted-foreground hover:text-primary"
                 title="Chat Asistente"
               >
@@ -211,7 +251,7 @@ export default function DoctorDashboardPage() {
               <Button
                 variant="ghost"
                 size="icon"
-                onClick={() => startTour('dashboard-overview')}
+                onClick={() => startTour("dashboard-overview")}
                 className="text-muted-foreground hover:text-primary"
                 title="Iniciar Tour"
                 data-tour="help-button"
@@ -227,16 +267,28 @@ export default function DoctorDashboardPage() {
                 transition={{ duration: 0.5, ease: "easeInOut" }}
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
-                onClick={() => setMode(currentMode === 'simple' ? 'pro' : 'simple')}
+                onClick={() =>
+                  setMode(currentMode === "simple" ? "pro" : "simple")
+                }
                 className="cursor-pointer flex items-center gap-2 px-4 py-2 rounded-full bg-muted/50 backdrop-blur-sm border border-border/30 hover:bg-muted/80 hover:border-primary/30 transition-colors select-none"
                 title="Click para cambiar modo"
               >
-                <span className="text-sm font-medium text-muted-foreground" data-tour="mode-indicator">
-                  Modo: <span className={currentMode === 'pro' ? "text-transparent bg-clip-text bg-gradient-to-r from-amber-500 to-orange-500 font-bold" : "text-primary capitalize"}>
+                <span
+                  className="text-sm font-medium text-muted-foreground"
+                  data-tour="mode-indicator"
+                >
+                  Modo:{" "}
+                  <span
+                    className={
+                      currentMode === "pro"
+                        ? "text-transparent bg-clip-text bg-gradient-to-r from-amber-500 to-orange-500 font-bold"
+                        : "text-primary capitalize"
+                    }
+                  >
                     {currentMode}
                   </span>
                 </span>
-                {currentMode === 'pro' && (
+                {currentMode === "pro" && (
                   <Crown className="h-4 w-4 text-amber-500 fill-amber-500/20 animate-pulse" />
                 )}
               </motion.div>
@@ -249,8 +301,8 @@ export default function DoctorDashboardPage() {
               <Alert className="bg-yellow-500/10 border-yellow-500/30 dark:bg-yellow-500/15 dark:border-yellow-500/40">
                 <AlertCircle className="h-4 w-4 text-yellow-600 dark:text-yellow-500" />
                 <AlertDescription className="text-yellow-700 dark:text-yellow-300">
-                  Tu perfil está pendiente de verificación. Mientras tanto, puedes
-                  configurar tu agenda y perfil.
+                  Tu perfil está pendiente de verificación. Mientras tanto,
+                  puedes configurar tu agenda y perfil.
                 </AlertDescription>
               </Alert>
             </motion.div>
@@ -267,8 +319,6 @@ export default function DoctorDashboardPage() {
               onResetLayout={resetLayout}
               onToggleWidget={toggleWidgetVisibility}
               doctorId={userId || undefined}
-              stats={stats}
-              profile={profile}
             />
           </motion.div>
         </motion.div>
@@ -301,8 +351,8 @@ export default function DoctorDashboardPage() {
                   Completa tu Perfil Profesional
                 </CardTitle>
                 <p className="text-muted-foreground mt-2">
-                  Para comenzar a usar Red-Salud, necesitamos verificar tu identidad
-                  como profesional de la salud en Venezuela
+                  Para comenzar a usar Red-Salud, necesitamos verificar tu
+                  identidad como profesional de la salud en Venezuela
                 </p>
               </CardHeader>
               <CardContent className="space-y-6">
@@ -319,7 +369,9 @@ export default function DoctorDashboardPage() {
                     </li>
                     <li className="flex items-start gap-2">
                       <span className="text-primary mt-0.5">✓</span>
-                      <span>Acceso a historiales clínicos de tus pacientes</span>
+                      <span>
+                        Acceso a historiales clínicos de tus pacientes
+                      </span>
                     </li>
                     <li className="flex items-start gap-2">
                       <span className="text-primary mt-0.5">✓</span>
@@ -327,7 +379,9 @@ export default function DoctorDashboardPage() {
                     </li>
                     <li className="flex items-start gap-2">
                       <span className="text-primary mt-0.5">✓</span>
-                      <span>Emisión de recetas y órdenes médicas digitales</span>
+                      <span>
+                        Emisión de recetas y órdenes médicas digitales
+                      </span>
                     </li>
                   </ul>
                 </div>
@@ -348,7 +402,9 @@ export default function DoctorDashboardPage() {
                       <div className="w-8 h-8 rounded-full bg-primary/10 text-primary flex items-center justify-center font-semibold">
                         2
                       </div>
-                      <span>Verificamos tu registro en el SACS automáticamente</span>
+                      <span>
+                        Verificamos tu registro en el SACS automáticamente
+                      </span>
                     </div>
                     <div className="flex items-center gap-3">
                       <div className="w-8 h-8 rounded-full bg-primary/10 text-primary flex items-center justify-center font-semibold">
@@ -370,8 +426,8 @@ export default function DoctorDashboardPage() {
                 </Button>
 
                 <p className="text-xs text-center text-muted-foreground">
-                  La verificación es instantánea y utiliza datos públicos del SACS
-                  (Sistema de Atención al Ciudadano en Salud)
+                  La verificación es instantánea y utiliza datos públicos del
+                  SACS (Sistema de Atención al Ciudadano en Salud)
                 </p>
               </CardContent>
             </Card>

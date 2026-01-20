@@ -2,7 +2,7 @@
 
 import React, { forwardRef } from "react";
 import { motion } from "framer-motion";
-import { Minimize2, Maximize2, X, Settings } from "lucide-react";
+import { Minimize2, Maximize2, X, Settings, Expand, Shrink } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import {
@@ -29,12 +29,16 @@ interface WidgetWrapperProps {
     isDragging?: boolean;
     /** Si el widget está minimizado */
     isMinimized?: boolean;
+    /** Modo actual del widget */
+    mode?: 'compact' | 'expanded';
     /** Si mostrar los controles */
     showControls?: boolean;
     /** Callback al minimizar */
     onMinimize?: () => void;
     /** Callback al maximizar */
     onMaximize?: () => void;
+    /** Callback al cambiar modo */
+    onModeChange?: () => void;
     /** Callback al configurar */
     onSettings?: () => void;
     /** Callback al eliminar */
@@ -52,9 +56,11 @@ export const WidgetWrapper = forwardRef<HTMLDivElement, WidgetWrapperProps>(
             headerClassName,
             isDragging = false,
             isMinimized = false,
+            mode = 'compact',
             showControls = true,
             onMinimize,
             onMaximize,
+            onModeChange,
             onSettings,
             onRemove,
         },
@@ -127,38 +133,88 @@ export const WidgetWrapper = forwardRef<HTMLDivElement, WidgetWrapperProps>(
                     {showControls && (
                         <div className="flex items-center gap-1">
                             {onSettings && (
-                                <Button
-                                    variant="ghost"
-                                    size="icon"
-                                    className="h-7 w-7 text-muted-foreground hover:text-foreground"
-                                    onClick={onSettings}
-                                >
-                                    <Settings className="h-3.5 w-3.5" />
-                                </Button>
+                                <TooltipProvider>
+                                    <Tooltip>
+                                        <TooltipTrigger asChild>
+                                            <Button
+                                                variant="ghost"
+                                                size="icon"
+                                                className="h-7 w-7 text-muted-foreground hover:text-foreground"
+                                                onClick={onSettings}
+                                            >
+                                                <Settings className="h-3.5 w-3.5" />
+                                            </Button>
+                                        </TooltipTrigger>
+                                        <TooltipContent>
+                                            <p>Configurar widget</p>
+                                        </TooltipContent>
+                                    </Tooltip>
+                                </TooltipProvider>
+                            )}
+                            {onModeChange && (
+                                <TooltipProvider>
+                                    <Tooltip>
+                                        <TooltipTrigger asChild>
+                                            <Button
+                                                variant="ghost"
+                                                size="icon"
+                                                className="h-7 w-7 text-muted-foreground hover:text-foreground"
+                                                onClick={onModeChange}
+                                            >
+                                                {mode === 'compact' ? (
+                                                    <Expand className="h-3.5 w-3.5" />
+                                                ) : (
+                                                    <Shrink className="h-3.5 w-3.5" />
+                                                )}
+                                            </Button>
+                                        </TooltipTrigger>
+                                        <TooltipContent>
+                                            <p>{mode === 'compact' ? 'Expandir widget' : 'Compactar widget'}</p>
+                                        </TooltipContent>
+                                    </Tooltip>
+                                </TooltipProvider>
                             )}
                             {(onMinimize || onMaximize) && (
-                                <Button
-                                    variant="ghost"
-                                    size="icon"
-                                    className="h-7 w-7 text-muted-foreground hover:text-foreground"
-                                    onClick={isMinimized ? onMaximize : onMinimize}
-                                >
-                                    {isMinimized ? (
-                                        <Maximize2 className="h-3.5 w-3.5" />
-                                    ) : (
-                                        <Minimize2 className="h-3.5 w-3.5" />
-                                    )}
-                                </Button>
+                                <TooltipProvider>
+                                    <Tooltip>
+                                        <TooltipTrigger asChild>
+                                            <Button
+                                                variant="ghost"
+                                                size="icon"
+                                                className="h-7 w-7 text-muted-foreground hover:text-foreground"
+                                                onClick={isMinimized ? onMaximize : onMinimize}
+                                            >
+                                                {isMinimized ? (
+                                                    <Maximize2 className="h-3.5 w-3.5" />
+                                                ) : (
+                                                    <Minimize2 className="h-3.5 w-3.5" />
+                                                )}
+                                            </Button>
+                                        </TooltipTrigger>
+                                        <TooltipContent>
+                                            <p>{isMinimized ? 'Maximizar' : 'Minimizar'}</p>
+                                        </TooltipContent>
+                                    </Tooltip>
+                                </TooltipProvider>
                             )}
                             {onRemove && (
-                                <Button
-                                    variant="ghost"
-                                    size="icon"
-                                    className="h-7 w-7 text-muted-foreground hover:text-destructive"
-                                    onClick={onRemove}
-                                >
-                                    <X className="h-3.5 w-3.5" />
-                                </Button>
+                                <TooltipProvider>
+                                    <Tooltip>
+                                        <TooltipTrigger asChild>
+                                            <Button
+                                                variant="ghost"
+                                                size="icon"
+                                                className="h-7 w-7 text-muted-foreground hover:text-destructive"
+                                                onClick={onRemove}
+                                            >
+                                                <X className="h-3.5 w-3.5" />
+                                            </Button>
+                                        </TooltipTrigger>
+                                        <TooltipContent>
+                                            <p>Remover widget</p>
+                                        </TooltipContent>
+                                    </Tooltip>
+                                </TooltipProvider>
                             )}
                         </div>
                     )}

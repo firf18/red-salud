@@ -24,11 +24,13 @@ import {
   Eye,
   Activity,
   CreditCard,
+  MapPin,
 } from "lucide-react";
 import { VerificationGuard } from "@/components/dashboard/medico/features/verification-guard";
 import { ProfileSection } from "@/components/dashboard/medico/configuracion/profile-section";
 import { InfoProfesionalSection } from "@/components/dashboard/medico/configuracion/info-profesional-section";
 import { DocumentsSection } from "@/components/dashboard/medico/configuracion/documents-section";
+import { OfficesSection } from "@/components/dashboard/medico/configuracion/offices-section";
 import { ScheduleSection } from "@/components/dashboard/medico/configuracion/schedule-section";
 import { SecretariesSection } from "@/components/dashboard/medico/configuracion/secretaries-section";
 import { NotificationsSection } from "@/components/dashboard/medico/configuracion/notifications-section";
@@ -46,6 +48,7 @@ type TabType =
   | "perfil"
   | "info-profesional"
   | "documentos"
+  | "consultorios"
   | "horarios"
   | "secretarias"
   | "notificaciones"
@@ -74,6 +77,7 @@ const TABS: TabConfig[] = [
   { id: "perfil", label: "Perfil Básico", icon: User, description: "Datos personales", category: "perfil" },
   { id: "info-profesional", label: "Info. Profesional", icon: Briefcase, description: "Bio y certificados", category: "perfil" },
   { id: "documentos", label: "Documentos", icon: FileText, description: "Verificación", category: "perfil" },
+  { id: "consultorios", label: "Consultorios", icon: MapPin, description: "Ubicaciones", category: "consultorio" },
   { id: "horarios", label: "Horarios", icon: Clock, description: "Atención", category: "consultorio" },
   { id: "secretarias", label: "Secretarias", icon: Users, description: "Equipo", category: "consultorio" },
   { id: "notificaciones", label: "Notificaciones", icon: Bell, description: "Alertas", category: "sistema" },
@@ -118,6 +122,7 @@ export default function ConfiguracionMedicoPage() {
       case "perfil": return <ProfileSection />;
       case "info-profesional": return <InfoProfesionalSection />;
       case "documentos": return <DocumentsSection />;
+      case "consultorios": return <OfficesSection />;
       case "horarios": return <ScheduleSection />;
       case "secretarias": return <SecretariesSection />;
       case "notificaciones": return <NotificationsSection />;

@@ -4,21 +4,37 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { motion } from "framer-motion";
 import { Card } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { fadeInUp, staggerContainer } from "@/lib/animations";
 import {
-  ArrowLeft, Trophy, Medal, Award, Star, TrendingUp,
-  BookOpen, MessageCircle, CheckCircle, Flame, Crown,
-  Shield, Users
+  ArrowLeft,
+  Trophy,
+  Medal,
+  Award,
+  Star,
+  TrendingUp,
+  BookOpen,
+  MessageCircle,
+  CheckCircle,
+  Flame,
+  Crown,
+  Shield,
+  Users,
 } from "lucide-react";
 import { getTopContributors } from "@/lib/api/blog";
 import type { UserReputation } from "@/lib/types/blog";
 
+interface ContributorWithUser extends Omit<UserReputation, "user"> {
+  user: {
+    avatar_url?: string;
+    nombre_completo?: string;
+    role?: string;
+  } | null;
+}
+
 export default function RankingPage() {
-  const [contributors, setContributors] = useState<any[]>([]);
+  const [contributors, setContributors] = useState<ContributorWithUser[]>([]);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState("puntos");
 
@@ -30,7 +46,8 @@ export default function RankingPage() {
     setLoading(true);
     try {
       const data = await getTopContributors(50);
-      setContributors(data);
+      // Cast to ContributorWithUser since we know the data structure matches
+      setContributors(data as ContributorWithUser[]);
     } catch (error) {
       console.error("Error loading ranking:", error);
     } finally {
@@ -42,13 +59,18 @@ export default function RankingPage() {
     if (index === 0) return <Crown className="h-6 w-6 text-yellow-500" />;
     if (index === 1) return <Medal className="h-6 w-6 text-gray-400" />;
     if (index === 2) return <Medal className="h-6 w-6 text-orange-400" />;
-    return <span className="text-lg font-bold text-gray-400">#{index + 1}</span>;
+    return (
+      <span className="text-lg font-bold text-gray-400">#{index + 1}</span>
+    );
   }
 
   function getRankBg(index: number) {
-    if (index === 0) return "bg-gradient-to-r from-yellow-50 to-yellow-100 dark:from-yellow-900/20 dark:to-yellow-800/20 border-yellow-200";
-    if (index === 1) return "bg-gradient-to-r from-gray-50 to-gray-100 dark:from-gray-800/50 dark:to-gray-700/50 border-gray-200";
-    if (index === 2) return "bg-gradient-to-r from-orange-50 to-orange-100 dark:from-orange-900/20 dark:to-orange-800/20 border-orange-200";
+    if (index === 0)
+      return "bg-gradient-to-r from-yellow-50 to-yellow-100 dark:from-yellow-900/20 dark:to-yellow-800/20 border-yellow-200";
+    if (index === 1)
+      return "bg-gradient-to-r from-gray-50 to-gray-100 dark:from-gray-800/50 dark:to-gray-700/50 border-gray-200";
+    if (index === 2)
+      return "bg-gradient-to-r from-orange-50 to-orange-100 dark:from-orange-900/20 dark:to-orange-800/20 border-orange-200";
     return "";
   }
 
@@ -57,7 +79,10 @@ export default function RankingPage() {
       {/* Header */}
       <div className="bg-white dark:bg-gray-800 border-b">
         <div className="container mx-auto px-4 py-4">
-          <Link href="/blog" className="inline-flex items-center text-gray-600 hover:text-blue-600 transition-colors">
+          <Link
+            href="/blog"
+            className="inline-flex items-center text-gray-600 hover:text-blue-600 transition-colors"
+          >
             <ArrowLeft className="h-4 w-4 mr-2" />
             Volver al blog
           </Link>
@@ -152,7 +177,9 @@ export default function RankingPage() {
           ) : contributors.length === 0 ? (
             <Card className="p-12 text-center">
               <Trophy className="h-12 w-12 mx-auto text-gray-400 mb-4" />
-              <h3 className="text-lg font-semibold mb-2">Sin datos de ranking</h3>
+              <h3 className="text-lg font-semibold mb-2">
+                Sin datos de ranking
+              </h3>
               <p className="text-gray-500">
                 Aún no hay suficientes contribuidores para mostrar el ranking
               </p>
@@ -172,15 +199,23 @@ export default function RankingPage() {
                     <Card className="p-4 text-center bg-gradient-to-b from-gray-100 to-gray-50 dark:from-gray-800 dark:to-gray-900 border-gray-300">
                       <div className="relative">
                         <Avatar className="h-16 w-16 mx-auto mb-2 border-4 border-gray-300">
-                          <AvatarImage src={contributors[1]?.user?.avatar_url || ''} />
-                          <AvatarFallback>{contributors[1]?.user?.nombre_completo?.[0] || '2'}</AvatarFallback>
+                          <AvatarImage
+                            src={contributors[1]?.user?.avatar_url || ""}
+                          />
+                          <AvatarFallback>
+                            {contributors[1]?.user?.nombre_completo?.[0] || "2"}
+                          </AvatarFallback>
                         </Avatar>
                         <div className="absolute -top-2 -right-2 w-8 h-8 bg-gray-400 rounded-full flex items-center justify-center text-white font-bold">
                           2
                         </div>
                       </div>
-                      <h3 className="font-semibold text-sm truncate">{contributors[1]?.user?.nombre_completo}</h3>
-                      <p className="text-lg font-bold text-gray-600">{contributors[1]?.total_points} pts</p>
+                      <h3 className="font-semibold text-sm truncate">
+                        {contributors[1]?.user?.nombre_completo}
+                      </h3>
+                      <p className="text-lg font-bold text-gray-600">
+                        {contributors[1]?.total_points} pts
+                      </p>
                     </Card>
                   </motion.div>
 
@@ -190,15 +225,23 @@ export default function RankingPage() {
                       <Crown className="h-8 w-8 mx-auto mb-2 text-yellow-500" />
                       <div className="relative">
                         <Avatar className="h-20 w-20 mx-auto mb-2 border-4 border-yellow-400">
-                          <AvatarImage src={contributors[0]?.user?.avatar_url || ''} />
-                          <AvatarFallback className="text-xl">{contributors[0]?.user?.nombre_completo?.[0] || '1'}</AvatarFallback>
+                          <AvatarImage
+                            src={contributors[0]?.user?.avatar_url || ""}
+                          />
+                          <AvatarFallback className="text-xl">
+                            {contributors[0]?.user?.nombre_completo?.[0] || "1"}
+                          </AvatarFallback>
                         </Avatar>
                         <div className="absolute -top-2 -right-2 w-8 h-8 bg-yellow-500 rounded-full flex items-center justify-center text-white font-bold">
                           1
                         </div>
                       </div>
-                      <h3 className="font-bold truncate">{contributors[0]?.user?.nombre_completo}</h3>
-                      <p className="text-xl font-bold text-yellow-600">{contributors[0]?.total_points} pts</p>
+                      <h3 className="font-bold truncate">
+                        {contributors[0]?.user?.nombre_completo}
+                      </h3>
+                      <p className="text-xl font-bold text-yellow-600">
+                        {contributors[0]?.total_points} pts
+                      </p>
                     </Card>
                   </motion.div>
 
@@ -207,15 +250,23 @@ export default function RankingPage() {
                     <Card className="p-4 text-center bg-gradient-to-b from-orange-100 to-orange-50 dark:from-orange-900/30 dark:to-orange-800/20 border-orange-300">
                       <div className="relative">
                         <Avatar className="h-14 w-14 mx-auto mb-2 border-4 border-orange-300">
-                          <AvatarImage src={contributors[2]?.user?.avatar_url || ''} />
-                          <AvatarFallback>{contributors[2]?.user?.nombre_completo?.[0] || '3'}</AvatarFallback>
+                          <AvatarImage
+                            src={contributors[2]?.user?.avatar_url || ""}
+                          />
+                          <AvatarFallback>
+                            {contributors[2]?.user?.nombre_completo?.[0] || "3"}
+                          </AvatarFallback>
                         </Avatar>
                         <div className="absolute -top-2 -right-2 w-8 h-8 bg-orange-400 rounded-full flex items-center justify-center text-white font-bold">
                           3
                         </div>
                       </div>
-                      <h3 className="font-semibold text-sm truncate">{contributors[2]?.user?.nombre_completo}</h3>
-                      <p className="text-lg font-bold text-orange-600">{contributors[2]?.total_points} pts</p>
+                      <h3 className="font-semibold text-sm truncate">
+                        {contributors[2]?.user?.nombre_completo}
+                      </h3>
+                      <p className="text-lg font-bold text-orange-600">
+                        {contributors[2]?.total_points} pts
+                      </p>
                     </Card>
                   </motion.div>
                 </div>
@@ -225,19 +276,27 @@ export default function RankingPage() {
               {contributors.slice(3).map((contributor, index) => (
                 <motion.div key={contributor.user_id} variants={fadeInUp}>
                   <Link href={`/blog/autor/${contributor.user_id}`}>
-                    <Card className={`p-4 hover:shadow-lg transition-all ${getRankBg(index + 3)}`}>
+                    <Card
+                      className={`p-4 hover:shadow-lg transition-all ${getRankBg(index + 3)}`}
+                    >
                       <div className="flex items-center gap-4">
                         <div className="w-10 flex justify-center">
                           {getRankIcon(index + 3)}
                         </div>
                         <Avatar className="h-12 w-12">
-                          <AvatarImage src={contributor.user?.avatar_url || ''} />
-                          <AvatarFallback>{contributor.user?.nombre_completo?.[0] || 'U'}</AvatarFallback>
+                          <AvatarImage
+                            src={contributor.user?.avatar_url || ""}
+                          />
+                          <AvatarFallback>
+                            {contributor.user?.nombre_completo?.[0] || "U"}
+                          </AvatarFallback>
                         </Avatar>
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center gap-2">
-                            <h3 className="font-semibold truncate">{contributor.user?.nombre_completo}</h3>
-                            {contributor.user?.role === 'medico' && (
+                            <h3 className="font-semibold truncate">
+                              {contributor.user?.nombre_completo}
+                            </h3>
+                            {contributor.user?.role === "medico" && (
                               <Shield className="h-4 w-4 text-blue-500 flex-shrink-0" />
                             )}
                           </div>
@@ -248,20 +307,28 @@ export default function RankingPage() {
                           </div>
                         </div>
                         <div className="text-right">
-                          <p className="text-xl font-bold text-blue-600">{contributor.total_points}</p>
+                          <p className="text-xl font-bold text-blue-600">
+                            {contributor.total_points}
+                          </p>
                           <p className="text-xs text-gray-500">puntos</p>
                         </div>
                         <div className="hidden sm:flex items-center gap-6 text-sm text-gray-500">
                           <div className="text-center">
-                            <p className="font-semibold text-gray-700">{contributor.total_posts}</p>
+                            <p className="font-semibold text-gray-700">
+                              {contributor.total_posts}
+                            </p>
                             <p className="text-xs">artículos</p>
                           </div>
                           <div className="text-center">
-                            <p className="font-semibold text-gray-700">{contributor.total_answers}</p>
+                            <p className="font-semibold text-gray-700">
+                              {contributor.total_answers}
+                            </p>
                             <p className="text-xs">respuestas</p>
                           </div>
                           <div className="text-center">
-                            <p className="font-semibold text-gray-700">{contributor.current_streak}</p>
+                            <p className="font-semibold text-gray-700">
+                              {contributor.current_streak}
+                            </p>
                             <p className="text-xs">racha</p>
                           </div>
                         </div>
@@ -278,14 +345,18 @@ export default function RankingPage() {
       {/* How to earn points */}
       <section className="py-12 bg-white dark:bg-gray-800">
         <div className="container mx-auto px-4 max-w-4xl">
-          <h2 className="text-2xl font-bold text-center mb-8">¿Cómo ganar puntos?</h2>
+          <h2 className="text-2xl font-bold text-center mb-8">
+            ¿Cómo ganar puntos?
+          </h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             <Card className="p-5 text-center">
               <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-3">
                 <BookOpen className="h-6 w-6 text-blue-600" />
               </div>
               <h3 className="font-semibold mb-2">Publicar artículos</h3>
-              <p className="text-sm text-gray-500">+50 puntos por artículo publicado</p>
+              <p className="text-sm text-gray-500">
+                +50 puntos por artículo publicado
+              </p>
             </Card>
             <Card className="p-5 text-center">
               <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-3">
@@ -320,7 +391,9 @@ export default function RankingPage() {
                 <Award className="h-6 w-6 text-teal-600" />
               </div>
               <h3 className="font-semibold mb-2">Obtener insignias</h3>
-              <p className="text-sm text-gray-500">+10-100 puntos por insignia</p>
+              <p className="text-sm text-gray-500">
+                +10-100 puntos por insignia
+              </p>
             </Card>
           </div>
         </div>

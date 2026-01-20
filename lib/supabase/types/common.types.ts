@@ -51,5 +51,5 @@ export type FilterOperator = 'eq' | 'neq' | 'gt' | 'gte' | 'lt' | 'lte' | 'like'
 export interface FilterParam {
   field: string;
   operator: FilterOperator;
-  value: any;
+  value: unknown;
 }

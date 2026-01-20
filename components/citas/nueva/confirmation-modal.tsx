@@ -36,27 +36,27 @@ interface AppointmentConfirmationModalProps {
 const tipoCitaConfig: Record<string, { label: string; color: string; icon: React.ReactNode }> = {
   presencial: {
     label: "Presencial",
-    color: "bg-blue-100 text-blue-800",
+    color: "bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-200",
     icon: <MapPin className="h-4 w-4" />,
   },
   telemedicina: {
     label: "Telemedicina",
-    color: "bg-green-100 text-green-800",
+    color: "bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-200",
     icon: <Video className="h-4 w-4" />,
   },
   urgencia: {
     label: "Urgencia",
-    color: "bg-red-100 text-red-800",
+    color: "bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-200",
     icon: <AlertCircle className="h-4 w-4" />,
   },
   seguimiento: {
     label: "Seguimiento",
-    color: "bg-purple-100 text-purple-800",
+    color: "bg-purple-100 dark:bg-purple-900/30 text-purple-800 dark:text-purple-200",
     icon: <Calendar className="h-4 w-4" />,
   },
   primera_vez: {
     label: "Primera Vez",
-    color: "bg-amber-100 text-amber-800",
+    color: "bg-amber-100 dark:bg-amber-900/30 text-amber-800 dark:text-amber-200",
     icon: <User className="h-4 w-4" />,
   },
 };
@@ -95,23 +95,23 @@ export function AppointmentConfirmationModal({
           <div className="space-y-3">
             {/* Paciente */}
             <div className="flex items-start gap-3">
-              <User className="h-5 w-5 text-gray-400 mt-0.5" />
+              <User className="h-5 w-5 text-muted-foreground mt-0.5" />
               <div className="flex-1">
-                <p className="text-xs text-gray-500 font-medium">Paciente</p>
-                <p className="text-sm font-medium text-gray-900">{selectedPatientName}</p>
+                <p className="text-xs text-muted-foreground font-medium">Paciente</p>
+                <p className="text-sm font-medium text-foreground">{selectedPatientName}</p>
               </div>
             </div>
 
             {/* Fecha */}
             <div className="flex items-start gap-3">
-              <Calendar className="h-5 w-5 text-gray-400 mt-0.5" />
+              <Calendar className="h-5 w-5 text-muted-foreground mt-0.5" />
               <div className="flex-1">
-                <p className="text-xs text-gray-500 font-medium">Fecha</p>
-                <p className="text-sm font-medium text-gray-900">
+                <p className="text-xs text-muted-foreground font-medium">Fecha</p>
+                <p className="text-sm font-medium text-foreground">
                   {formData.fecha
                     ? format(parseISO(formData.fecha), "EEEE, d 'de' MMMM 'de' yyyy", {
-                        locale: es,
-                      })
+                      locale: es,
+                    })
                     : "—"}
                 </p>
               </div>
@@ -119,10 +119,10 @@ export function AppointmentConfirmationModal({
 
             {/* Hora y duración */}
             <div className="flex items-start gap-3">
-              <Clock className="h-5 w-5 text-gray-400 mt-0.5" />
+              <Clock className="h-5 w-5 text-muted-foreground mt-0.5" />
               <div className="flex-1">
-                <p className="text-xs text-gray-500 font-medium">Horario</p>
-                <p className="text-sm font-medium text-gray-900">
+                <p className="text-xs text-muted-foreground font-medium">Horario</p>
+                <p className="text-sm font-medium text-foreground">
                   {formData.hora} ({formData.duracion_minutos} min)
                 </p>
               </div>
@@ -131,10 +131,10 @@ export function AppointmentConfirmationModal({
             {/* Motivo */}
             {formData.motivo && (
               <div className="flex items-start gap-3">
-                <FileText className="h-5 w-5 text-gray-400 mt-0.5" />
+                <FileText className="h-5 w-5 text-muted-foreground mt-0.5" />
                 <div className="flex-1">
-                  <p className="text-xs text-gray-500 font-medium">Motivo</p>
-                  <p className="text-sm text-gray-900">{formData.motivo}</p>
+                  <p className="text-xs text-muted-foreground font-medium">Motivo</p>
+                  <p className="text-sm text-foreground">{formData.motivo}</p>
                 </div>
               </div>
             )}
@@ -142,10 +142,10 @@ export function AppointmentConfirmationModal({
             {/* Precio */}
             {formData.precio && (
               <div className="flex items-start gap-3">
-                <DollarSign className="h-5 w-5 text-gray-400 mt-0.5" />
+                <DollarSign className="h-5 w-5 text-muted-foreground mt-0.5" />
                 <div className="flex-1">
-                  <p className="text-xs text-gray-500 font-medium">Precio</p>
-                  <p className="text-sm font-medium text-gray-900">${formData.precio}</p>
+                  <p className="text-xs text-muted-foreground font-medium">Precio</p>
+                  <p className="text-sm font-medium text-foreground">${formData.precio}</p>
                 </div>
               </div>
             )}
@@ -156,9 +156,9 @@ export function AppointmentConfirmationModal({
 
           {/* Notas internas si existen */}
           {formData.notas_internas && (
-            <div className="p-3 bg-gray-50 border border-gray-200 rounded-md">
-              <p className="text-xs text-gray-600 font-medium mb-1">Notas internas:</p>
-              <p className="text-xs text-gray-700">{formData.notas_internas}</p>
+            <div className="p-3 bg-muted border border-border rounded-md">
+              <p className="text-xs text-muted-foreground font-medium mb-1">Notas internas:</p>
+              <p className="text-xs text-foreground">{formData.notas_internas}</p>
             </div>
           )}
         </div>

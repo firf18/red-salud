@@ -1,7 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 import { GoogleGenerativeAI } from "@google/generative-ai";
 
-const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || "AIzaSyAt9v_eTe0-oFMEZa0A6pMiooZmy2dPajY");
+const genAI = new GoogleGenerativeAI(
+  process.env.GEMINI_API_KEY || "AIzaSyAt9v_eTe0-oFMEZa0A6pMiooZmy2dPajY",
+);
 
 export async function POST(request: NextRequest) {
   try {
@@ -10,7 +12,7 @@ export async function POST(request: NextRequest) {
     if (!currentLine || currentLine.trim().length < 2) {
       return NextResponse.json(
         { success: false, error: "Texto muy corto para autocompletar" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -48,7 +50,7 @@ Ejemplos:
     const text = response.text();
 
     // Extraer array JSON de la respuesta
-    let jsonMatch = text.match(/\[[\s\S]*?\]/);
+    const jsonMatch = text.match(/\[[\s\S]*?\]/);
     if (!jsonMatch) {
       throw new Error("No se pudo extraer sugerencias de la respuesta");
     }
@@ -61,14 +63,16 @@ Ejemplos:
         suggestions: Array.isArray(suggestions) ? suggestions.slice(0, 5) : [],
       },
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("Error generating autocomplete:", error);
+    const errorMessage =
+      error instanceof Error ? error.message : "Error al generar sugerencias";
     return NextResponse.json(
       {
         success: false,
-        error: error.message || "Error al generar sugerencias",
+        error: errorMessage,
       },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

@@ -6,7 +6,9 @@ export async function GET(request: NextRequest) {
   const specialtyId = searchParams.get("specialtyId");
   const featuredOnly = searchParams.get("featured") === "true";
   const limitParam = searchParams.get("limit");
-  const limit = limitParam ? Math.min(Math.max(parseInt(limitParam, 10) || 0, 1), 24) : undefined;
+  const limit = limitParam
+    ? Math.min(Math.max(parseInt(limitParam, 10) || 0, 1), 24)
+    : undefined;
 
   try {
     let query = supabaseAdmin
@@ -40,7 +42,7 @@ export async function GET(request: NextRequest) {
           icon,
           created_at
         )
-      `
+      `,
       )
       .eq("verified", true)
       .order("created_at", { ascending: true });
@@ -57,19 +59,27 @@ export async function GET(request: NextRequest) {
           .select("doctor_profile_id");
 
         if (!fErr && Array.isArray(featured) && featured.length > 0) {
-          const ids = featured.map((f: any) => f.doctor_profile_id).filter(Boolean);
+          const ids = featured
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Dynamic data from featured_doctors table
+            .map((f: any) => f.doctor_profile_id)
+            .filter(Boolean);
           if (ids.length > 0) {
-            // @ts-ignore - in() está disponible en el cliente de Supabase
+            // in() is available in Supabase client despite TypeScript limitations
             query = query.in("id", ids);
           }
         } else {
           // Si no hay tabla o no hay destacados, ignoramos el filtro y devolvemos los más recientes
           // Esto asegura que la UI no se quede vacía
-          console.warn("No featured doctors found or table missing, returning latest verified doctors.");
+          console.warn(
+            "No featured doctors found or table missing, returning latest verified doctors.",
+          );
         }
       } catch (e) {
         // Tabla no existe u otro error: ignoramos el filtro
-        console.warn("Error checking featured_doctors, returning latest verified doctors.", e);
+        console.warn(
+          "Error checking featured_doctors, returning latest verified doctors.",
+          e,
+        );
       }
     }
 
@@ -77,6 +87,7 @@ export async function GET(request: NextRequest) {
 
     if (error) throw error;
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     let doctors = (data || []).map((row: any) => {
       const profile = row.profile
         ? {
@@ -101,14 +112,13 @@ export async function GET(request: NextRequest) {
         created_at: row.created_at,
         updated_at: row.updated_at,
         profile,
-        specialty:
-          row.specialty || {
-            id: row.especialidad_id || "",
-            name: "Medicina General",
-            description: "",
-            icon: "stethoscope",
-            created_at: row.created_at,
-          },
+        specialty: row.specialty || {
+          id: row.especialidad_id || "",
+          name: "Medicina General",
+          description: "",
+          icon: "stethoscope",
+          created_at: row.created_at,
+        },
       };
     });
 
@@ -124,7 +134,7 @@ export async function GET(request: NextRequest) {
         success: false,
         error: error instanceof Error ? error.message : "Unknown error",
       },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

@@ -160,6 +160,7 @@ export function CustomTemplateCreator({
                       value={templateName}
                       onChange={(e) => setTemplateName(e.target.value)}
                       placeholder="Ej: Consulta de Medicina Familiar"
+                      className="w-full"
                     />
                   </div>
 
@@ -171,13 +172,14 @@ export function CustomTemplateCreator({
                       onChange={(e) => setTemplateDescription(e.target.value)}
                       placeholder="Describe para qué sirve este template..."
                       rows={2}
+                      className="w-full"
                     />
                   </div>
 
                   <div className="space-y-2">
                     <Label htmlFor="templateCategory">Categoría</Label>
                     <Select value={templateCategory} onValueChange={setTemplateCategory}>
-                      <SelectTrigger>
+                      <SelectTrigger className="w-full">
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
@@ -197,6 +199,7 @@ export function CustomTemplateCreator({
                       value={templateTags}
                       onChange={(e) => setTemplateTags(e.target.value)}
                       placeholder="Ej: medicina-familiar, consulta-rapida"
+                      className="w-full"
                     />
                   </div>
                 </div>
@@ -212,6 +215,7 @@ export function CustomTemplateCreator({
                       value={currentField.label}
                       onChange={(e) => setCurrentField({ ...currentField, label: e.target.value })}
                       placeholder="Ej: MOTIVO DE CONSULTA"
+                      className="w-full"
                     />
                   </div>
 
@@ -221,7 +225,7 @@ export function CustomTemplateCreator({
                       value={currentField.type} 
                       onValueChange={(value) => setCurrentField({ ...currentField, type: value as any })}
                     >
-                      <SelectTrigger>
+                      <SelectTrigger className="w-full">
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
@@ -240,6 +244,7 @@ export function CustomTemplateCreator({
                       value={currentField.placeholder}
                       onChange={(e) => setCurrentField({ ...currentField, placeholder: e.target.value })}
                       placeholder="Texto de ayuda para el campo..."
+                      className="w-full"
                     />
                   </div>
 
@@ -253,6 +258,7 @@ export function CustomTemplateCreator({
                         max="10"
                         value={currentField.rows}
                         onChange={(e) => setCurrentField({ ...currentField, rows: parseInt(e.target.value) })}
+                        className="w-full"
                       />
                     </div>
                   )}

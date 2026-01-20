@@ -1,4 +1,4 @@
-import { LucideIcon, Heart, Brain, Stethoscope, Microscope, Scissors, Activity, Baby, Sparkles, Smile, Shield } from "lucide-react";
+import { LucideIcon, Heart, Brain, Microscope, Scissors, Activity, Baby, Sparkles, Smile } from "lucide-react";
 
 export type SpecialtyThemeColor = "red" | "rose" | "orange" | "amber" | "yellow" | "lime" | "green" | "emerald" | "teal" | "cyan" | "sky" | "blue" | "indigo" | "violet" | "purple" | "fuchsia" | "pink" | "slate";
 

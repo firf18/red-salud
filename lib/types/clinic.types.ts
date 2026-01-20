@@ -18,31 +18,37 @@ export type ShiftStatus = 'scheduled' | 'active' | 'completed' | 'cancelled' | '
 export type PayerType = 'insurance' | 'government' | 'corporate' | 'international' | 'self_pay';
 export type ContractStatus = 'active' | 'pending' | 'suspended' | 'expired';
 
-export type ClaimStatus = 
-  | 'draft' 
-  | 'submitted' 
-  | 'in_review' 
-  | 'approved' 
-  | 'partially_paid' 
-  | 'paid' 
-  | 'denied' 
-  | 'appealed' 
+export type ClaimStatus =
+  | 'draft'
+  | 'submitted'
+  | 'in_review'
+  | 'approved'
+  | 'partially_paid'
+  | 'paid'
+  | 'denied'
+  | 'appealed'
   | 'cancelled';
 
 export type ClaimType = 'outpatient' | 'inpatient' | 'emergency' | 'surgical' | 'diagnostic' | 'preventive';
 export type PaymentMethod = 'cash' | 'credit_card' | 'debit_card' | 'transfer' | 'check' | 'insurance_payment' | 'other';
 
 export type InternationalPatientStatus = 'pending' | 'confirmed' | 'arrived' | 'in_treatment' | 'discharged' | 'cancelled';
-export type DocumentType = 
-  | 'passport' 
-  | 'visa' 
-  | 'medical_clearance' 
-  | 'insurance_card' 
-  | 'consent_form' 
-  | 'prescription' 
-  | 'medical_records' 
-  | 'invoice' 
+export type DocumentType =
+  | 'passport'
+  | 'visa'
+  | 'medical_clearance'
+  | 'insurance_card'
+  | 'consent_form'
+  | 'prescription'
+  | 'medical_records'
+  | 'invoice'
   | 'other';
+
+export type AreaStatus = 'active' | 'inactive' | 'maintenance';
+export type AssignmentStatus = 'active' | 'discharged' | 'transferred';
+export type InventoryStatus = 'active' | 'discontinued' | 'out_of_stock';
+export type MovementType = 'purchase' | 'consumption' | 'transfer_in' | 'transfer_out' | 'adjustment' | 'expiry' | 'return';
+export type InventoryCategory = 'medication' | 'supplies' | 'equipment';
 
 // Entidades principales
 
@@ -62,7 +68,7 @@ export interface Clinic {
   created_at: string;
   updated_at: string;
   created_by?: string;
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
 }
 
 export interface ClinicLocation {
@@ -85,7 +91,7 @@ export interface ClinicLocation {
   specialties?: string[];
   created_at: string;
   updated_at: string;
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
 }
 
 export interface ClinicRoleAssignment {
@@ -94,7 +100,7 @@ export interface ClinicRoleAssignment {
   user_id: string;
   role: ClinicRole;
   location_id?: string;
-  permissions?: Record<string, any>;
+  permissions?: Record<string, unknown>;
   status: RoleStatus;
   granted_by?: string;
   granted_at: string;
@@ -117,7 +123,7 @@ export interface ClinicResource {
   notes?: string;
   created_at: string;
   updated_at: string;
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
 }
 
 export interface StaffShift {
@@ -168,10 +174,10 @@ export interface PayerContract {
   contact_name?: string;
   contact_email?: string;
   contact_phone?: string;
-  billing_rules?: Record<string, any>;
+  billing_rules?: Record<string, unknown>;
   created_at: string;
   updated_at: string;
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
 }
 
 export interface RCMClaim {
@@ -200,7 +206,7 @@ export interface RCMClaim {
   notes?: string;
   created_at: string;
   updated_at: string;
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
 }
 
 export interface RCMClaimItem {
@@ -236,7 +242,7 @@ export interface RCMPayment {
   notes?: string;
   created_at: string;
   updated_at: string;
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
 }
 
 export interface InternationalPatient {
@@ -250,9 +256,9 @@ export interface InternationalPatient {
   preferred_language: string;
   needs_translation: boolean;
   needs_accommodation: boolean;
-  accommodation_details?: Record<string, any>;
+  accommodation_details?: Record<string, unknown>;
   needs_transportation: boolean;
-  transportation_details?: Record<string, any>;
+  transportation_details?: Record<string, unknown>;
   emergency_contact_name?: string;
   emergency_contact_phone?: string;
   emergency_contact_country?: string;
@@ -266,7 +272,7 @@ export interface InternationalPatient {
   status: InternationalPatientStatus;
   created_at: string;
   updated_at: string;
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
 }
 
 export interface TravelDocument {
@@ -344,7 +350,7 @@ export interface ClinicAlert {
   created_at: string;
   resolved: boolean;
   resolved_at?: string;
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
 }
 
 // Filtros y parámetros de búsqueda
@@ -443,4 +449,168 @@ export interface CreateInternationalPatientInput {
   estimated_arrival_date?: string;
   estimated_departure_date?: string;
   special_requirements?: string;
+}
+
+// Nuevas interfaces para extensiones del sistema
+
+export interface ClinicArea {
+  id: string;
+  location_id: string;
+  name: string;
+  code: string;
+  floor: number;
+  department?: string;
+  color: string;
+  map_x?: number;
+  map_y?: number;
+  map_width?: number;
+  map_height?: number;
+  capacity: number;
+  status: AreaStatus;
+  notes?: string;
+  created_at: string;
+  updated_at: string;
+  metadata?: Record<string, unknown>;
+}
+
+export interface ResourceAssignment {
+  id: string;
+  resource_id: string;
+  patient_id: string;
+  admission_date: string;
+  discharge_date?: string;
+  status: AssignmentStatus;
+  admission_reason?: string;
+  discharge_notes?: string;
+  assigned_by?: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface ClinicInventoryItem {
+  id: string;
+  location_id: string;
+  product_code: string;
+  product_name: string;
+  category?: InventoryCategory;
+  unit_of_measure: string;
+  current_stock: number;
+  minimum_stock: number;
+  maximum_stock?: number;
+  unit_cost?: number;
+  currency: string;
+  supplier?: string;
+  expiry_date?: string;
+  is_shared: boolean;
+  status: InventoryStatus;
+  created_at: string;
+  updated_at: string;
+  metadata?: Record<string, unknown>;
+}
+
+export interface InventoryMovement {
+  id: string;
+  inventory_id: string;
+  movement_type: MovementType;
+  quantity: number;
+  from_location_id?: string;
+  to_location_id?: string;
+  reference_number?: string;
+  notes?: string;
+  performed_by?: string;
+  movement_date: string;
+  created_at: string;
+}
+
+export interface FloorPlan {
+  id: string;
+  location_id: string;
+  floor: number;
+  plan_name: string;
+  background_image_url?: string;
+  scale_meters_per_pixel: number;
+  width_pixels: number;
+  height_pixels: number;
+  created_at: string;
+  updated_at: string;
+  metadata?: Record<string, unknown>;
+}
+
+// Tipos extendidos con datos espaciales
+export interface ResourceWithPosition extends ClinicResource {
+  position_x?: number;
+  position_y?: number;
+  floor?: number;
+  area_id?: string;
+  rotation?: number;
+  width?: number;
+  height?: number;
+  area?: ClinicArea;
+  current_assignment?: ResourceAssignment;
+}
+
+export interface AreaWithResources extends ClinicArea {
+  resources?: ResourceWithPosition[];
+  resource_count?: number;
+  occupied_count?: number;
+}
+
+// Input types para formularios
+export interface CreateAreaInput {
+  location_id: string;
+  name: string;
+  code: string;
+  floor: number;
+  department?: string;
+  color?: string;
+  map_x?: number;
+  map_y?: number;
+  map_width?: number;
+  map_height?: number;
+  capacity: number;
+}
+
+export interface CreateResourceInput {
+  location_id: string;
+  type: ResourceType;
+  name: string;
+  code: string;
+  department?: string;
+  area_id?: string;
+  capacity?: number;
+  cost_per_hour?: number;
+  floor?: number;
+  position_x?: number;
+  position_y?: number;
+  width?: number;
+  height?: number;
+}
+
+export interface AssignResourceInput {
+  resource_id: string;
+  patient_id: string;
+  admission_reason?: string;
+}
+
+export interface CreateInventoryInput {
+  location_id: string;
+  product_code: string;
+  product_name: string;
+  category: InventoryCategory;
+  unit_of_measure: string;
+  current_stock: number;
+  minimum_stock: number;
+  maximum_stock?: number;
+  unit_cost?: number;
+  currency?: string;
+  is_shared?: boolean;
+}
+
+export interface RecordMovementInput {
+  inventory_id: string;
+  movement_type: MovementType;
+  quantity: number;
+  from_location_id?: string;
+  to_location_id?: string;
+  notes?: string;
 }

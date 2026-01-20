@@ -33,7 +33,7 @@ export interface ContentTag {
 // BLOG POSTS
 // ============================================
 
-export type PostStatus = 'draft' | 'pending_review' | 'published' | 'archived';
+export type PostStatus = "draft" | "pending_review" | "published" | "archived";
 
 export interface BlogPost {
   id: string;
@@ -84,7 +84,7 @@ export interface BlogComment {
 // Q&A SYSTEM
 // ============================================
 
-export type QuestionStatus = 'open' | 'answered' | 'closed' | 'archived';
+export type QuestionStatus = "open" | "answered" | "closed" | "archived";
 
 export interface QAQuestion {
   id: string;
@@ -143,8 +143,13 @@ export interface QAAnswerComment {
 // VOTOS Y LIKES
 // ============================================
 
-export type VoteType = 'upvote' | 'downvote';
-export type ContentType = 'post' | 'question' | 'answer' | 'comment' | 'answer_comment';
+export type VoteType = "upvote" | "downvote";
+export type ContentType =
+  | "post"
+  | "question"
+  | "answer"
+  | "comment"
+  | "answer_comment";
 
 export interface ContentVote {
   id: string;
@@ -166,7 +171,7 @@ export interface ContentLike {
 export interface ContentBookmark {
   id: string;
   user_id: string;
-  content_type: 'post' | 'question';
+  content_type: "post" | "question";
   content_id: string;
   created_at: string;
 }
@@ -195,9 +200,14 @@ export interface UserReputation {
   last_activity_date: string | null;
   created_at: string;
   updated_at: string;
+  user?: {
+    avatar_url?: string;
+    nombre_completo?: string;
+    role?: string;
+  } | null;
 }
 
-export type BadgeType = 'bronze' | 'silver' | 'gold' | 'platinum';
+export type BadgeType = "bronze" | "silver" | "gold" | "platinum";
 
 export interface Badge {
   id: string;
@@ -247,17 +257,17 @@ export interface CategorySubscription {
 // NOTIFICACIONES
 // ============================================
 
-export type NotificationType = 
-  | 'new_post' 
-  | 'new_answer' 
-  | 'answer_accepted' 
-  | 'new_comment'
-  | 'vote_received' 
-  | 'badge_earned' 
-  | 'mention' 
-  | 'new_follower'
-  | 'bounty_awarded' 
-  | 'post_featured';
+export type NotificationType =
+  | "new_post"
+  | "new_answer"
+  | "answer_accepted"
+  | "new_comment"
+  | "vote_received"
+  | "badge_earned"
+  | "mention"
+  | "new_follower"
+  | "bounty_awarded"
+  | "post_featured";
 
 export interface CommunityNotification {
   id: string;

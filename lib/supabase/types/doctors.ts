@@ -57,7 +57,7 @@ export interface DoctorProfile {
   is_verified: boolean;
   is_active: boolean;
   sacs_verified: boolean;
-  sacs_data: any | null;
+  sacs_data: Record<string, unknown> | null;
   average_rating: number;
   total_reviews: number;
   schedule?: DoctorSchedule;
@@ -124,8 +124,8 @@ export interface MedicalNote {
   content: string;
   diagnosis: string | null;
   treatment_plan: string | null;
-  prescriptions: any[];
-  attachments: any[];
+  prescriptions: Array<Record<string, unknown>>;
+  attachments: Array<Record<string, unknown>>;
   is_private: boolean;
   created_at: string;
   updated_at: string;

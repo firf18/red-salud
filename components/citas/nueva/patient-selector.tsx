@@ -56,7 +56,7 @@ export function PatientSelector({
               Paciente <span className="text-red-500">*</span>
             </Label>
             {loadingPatients ? (
-              <div className="flex items-center gap-2 text-gray-500 py-2">
+              <div className="flex items-center gap-2 text-muted-foreground py-2">
                 <Loader2 className="h-4 w-4 animate-spin" />
                 <span className="text-sm">Cargando pacientes...</span>
               </div>
@@ -105,8 +105,8 @@ export function PatientSelector({
               <p className="text-sm text-red-500">Error: No form context available</p>
             )}
           </div>
-          <div className="p-3 bg-blue-50 border border-blue-200 rounded-lg">
-            <p className="text-xs text-gray-700 mb-2">
+          <div className="p-3 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg">
+            <p className="text-xs text-blue-800 dark:text-blue-300 mb-2">
               ¿No encuentras al paciente?
             </p>
             <Button

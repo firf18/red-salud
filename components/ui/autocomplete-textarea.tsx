@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useEffect, KeyboardEvent } from "react";
+import { useRef, useEffect, KeyboardEvent } from "react";
 import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils";
 
@@ -13,6 +13,8 @@ interface AutocompleteTextareaProps {
   rows?: number;
   id?: string;
   className?: string;
+  containerClassName?: string;
+  mode?: "comma" | "line";
 }
 
 export function AutocompleteTextarea({
@@ -24,163 +26,136 @@ export function AutocompleteTextarea({
   rows = 3,
   id,
   className,
+  containerClassName,
+  mode = "comma",
 }: AutocompleteTextareaProps) {
-  const [showSuggestions, setShowSuggestions] = useState(false);
-  const [selectedIndex, setSelectedIndex] = useState(0);
+  // Ref para manejar la selección del cursor después de renderizar
   const textareaRef = useRef<HTMLTextAreaElement>(null);
-  const suggestionsRef = useRef<HTMLDivElement>(null);
+  const cursorSelectionRef = useRef<{ start: number; end: number } | null>(null);
+  const lastValueRef = useRef(value);
 
-  // Obtener el texto actual que se está escribiendo (después de la última coma)
-  const getCurrentTerm = () => {
-    const cursorPosition = textareaRef.current?.selectionStart || value.length;
-    const textBeforeCursor = value.substring(0, cursorPosition);
-    const lastCommaIndex = textBeforeCursor.lastIndexOf(",");
-    
-    if (lastCommaIndex === -1) {
-      return textBeforeCursor.trim();
-    }
-    
-    return textBeforeCursor.substring(lastCommaIndex + 1).trim();
-  };
-
-  // Mostrar sugerencias cuando hay texto
+  // Aplicar la selección del cursor después de que React actualice el DOM
   useEffect(() => {
-    const currentTerm = getCurrentTerm();
-    setShowSuggestions(suggestions.length > 0 && currentTerm.length >= 2);
-    setSelectedIndex(0);
-  }, [suggestions, value]);
-
-  // Manejar teclas
-  const handleKeyDown = (e: KeyboardEvent<HTMLTextAreaElement>) => {
-    if (!showSuggestions || suggestions.length === 0) return;
-
-    switch (e.key) {
-      case "ArrowDown":
-        e.preventDefault();
-        setSelectedIndex((prev) => 
-          prev < suggestions.length - 1 ? prev + 1 : prev
-        );
-        break;
-      
-      case "ArrowUp":
-        e.preventDefault();
-        setSelectedIndex((prev) => (prev > 0 ? prev - 1 : 0));
-        break;
-      
-      case "Tab":
-      case "Enter":
-        if (showSuggestions && suggestions[selectedIndex]) {
-          e.preventDefault();
-          selectSuggestion(suggestions[selectedIndex]);
-        }
-        break;
-      
-      case "Escape":
-        e.preventDefault();
-        setShowSuggestions(false);
-        break;
+    if (cursorSelectionRef.current && textareaRef.current) {
+      textareaRef.current.setSelectionRange(
+        cursorSelectionRef.current.start,
+        cursorSelectionRef.current.end
+      );
+      cursorSelectionRef.current = null;
     }
-  };
+  }, [value]);
 
-  // Seleccionar sugerencia
-  const selectSuggestion = (suggestion: string) => {
-    const cursorPosition = textareaRef.current?.selectionStart || value.length;
-    const textBeforeCursor = value.substring(0, cursorPosition);
-    const textAfterCursor = value.substring(cursorPosition);
-    const lastCommaIndex = textBeforeCursor.lastIndexOf(",");
+  const handleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    const newValue = e.target.value;
+    const newCursorPos = e.target.selectionStart;
     
-    let newValue: string;
+    // Detectar si el usuario está borrando (backspace/delete) o pegando texto largo
+    // Solo autocompletamos si está escribiendo caracteres uno a uno al final
+    const isAddingText = newValue.length > lastValueRef.current.length;
+    const isSingleChar = newValue.length - lastValueRef.current.length === 1;
     
-    if (lastCommaIndex === -1) {
-      // No hay comas, reemplazar todo el texto
-      newValue = suggestion + textAfterCursor;
+    // Actualizamos la referencia del último valor
+    lastValueRef.current = newValue;
+
+    if (!isAddingText || !isSingleChar) {
+      onChange(newValue);
+      return;
+    }
+
+    // Lógica de autocompletado inline
+    // 1. Obtener el término actual (después de la última coma)
+    const textBeforeCursor = newValue.substring(0, newCursorPos);
+    let currentTermStart = 0;
+    let currentTerm = "";
+    if (mode === "comma") {
+      const lastCommaIndex = textBeforeCursor.lastIndexOf(",");
+      currentTermStart = lastCommaIndex + 1;
+      currentTerm = textBeforeCursor.substring(currentTermStart);
     } else {
-      // Hay comas, reemplazar solo el término actual
-      const beforeLastComma = textBeforeCursor.substring(0, lastCommaIndex + 1);
-      newValue = beforeLastComma + " " + suggestion + textAfterCursor;
+      const lastBreakIndex = Math.max(textBeforeCursor.lastIndexOf("\n"), textBeforeCursor.lastIndexOf("\r"));
+      const lineStart = lastBreakIndex + 1;
+      const lineText = textBeforeCursor.substring(lineStart);
+      const lastSpaceIndex = Math.max(lineText.lastIndexOf(" "), lineText.lastIndexOf("\t"));
+      currentTermStart = lineStart + lastSpaceIndex + 1;
+      currentTerm = textBeforeCursor.substring(currentTermStart);
     }
-    
-    onChange(newValue);
-    setShowSuggestions(false);
-    
-    // Posicionar el cursor después del texto insertado
-    setTimeout(() => {
-      if (textareaRef.current) {
-        const newCursorPosition = lastCommaIndex === -1 
-          ? suggestion.length 
-          : lastCommaIndex + 2 + suggestion.length;
-        textareaRef.current.selectionStart = newCursorPosition;
-        textareaRef.current.selectionEnd = newCursorPosition;
-        textareaRef.current.focus();
-      }
-    }, 0);
+
+    // Solo sugerir si hay al menos 2 caracteres y no empieza con espacio (salvo el espacio post-coma)
+    const trimmedTerm = currentTerm.trimStart(); 
+    if (trimmedTerm.length < 2) {
+      onChange(newValue);
+      return;
+    }
+
+    // 2. Buscar coincidencia (case insensitive)
+    const match = suggestions.find(s => 
+      s.toLowerCase().startsWith(trimmedTerm.toLowerCase())
+    );
+
+    if (match) {
+      // 3. Construir el nuevo valor con la sugerencia completada
+      // Respetar el casing original del usuario para la parte ya escrita, usar el de la sugerencia para el resto
+      const completion = match.substring(trimmedTerm.length);
+      
+      const textAfterCursor = newValue.substring(newCursorPos);
+      
+      // Reconstruir: Todo antes del término + término escrito + completación + resto
+      const prefix = newValue.substring(0, currentTermStart + (currentTerm.length - trimmedTerm.length));
+      const termWritten = trimmedTerm;
+      
+      const suggestionValue = prefix + termWritten + completion + textAfterCursor;
+      
+      // 4. Calcular selección: queremos seleccionar SOLO la parte sugerida (completion)
+      const selectionStart = newCursorPos;
+      const selectionEnd = selectionStart + completion.length;
+
+      // Guardar selección para aplicar en useEffect
+      cursorSelectionRef.current = { start: selectionStart, end: selectionEnd };
+      
+      onChange(suggestionValue);
+    } else {
+      onChange(newValue);
+    }
   };
 
-  // Scroll automático en la lista de sugerencias
-  useEffect(() => {
-    if (suggestionsRef.current && showSuggestions) {
-      const selectedElement = suggestionsRef.current.children[selectedIndex] as HTMLElement;
-      if (selectedElement) {
-        selectedElement.scrollIntoView({
-          block: "nearest",
-          behavior: "smooth",
-        });
+  const handleKeyDown = (e: KeyboardEvent<HTMLTextAreaElement>) => {
+    // Permitir navegar o aceptar la selección con teclas comunes
+    if (textareaRef.current) {
+      const { selectionStart, selectionEnd } = textareaRef.current;
+      
+      // Si hay texto seleccionado (nuestra sugerencia inline)
+      if (selectionStart !== selectionEnd) {
+        if (e.key === "Tab" || e.key === "Enter" || e.key === "ArrowRight") {
+          e.preventDefault();
+          // Mover cursor al final de la selección (aceptar sugerencia)
+          textareaRef.current.setSelectionRange(selectionEnd, selectionEnd);
+          
+          // Si fue Tab o Enter, agregar una coma y espacio para el siguiente término
+          if (mode === "comma" && (e.key === "Tab" || e.key === "Enter")) {
+             const val = textareaRef.current.value;
+             const newVal = val.substring(0, selectionEnd) + ", " + val.substring(selectionEnd);
+             onChange(newVal);
+             // Ajustar cursor después de la coma
+             cursorSelectionRef.current = { start: selectionEnd + 2, end: selectionEnd + 2 };
+          }
+        }
       }
     }
-  }, [selectedIndex, showSuggestions]);
+  };
 
   return (
-    <div className="relative">
+    <div className={cn("relative", containerClassName)}>
       <Textarea
         ref={textareaRef}
         id={id}
         value={value}
-        onChange={(e) => onChange(e.target.value)}
+        onChange={handleChange}
         onKeyDown={handleKeyDown}
         placeholder={placeholder}
         required={required}
         rows={rows}
         className={cn("resize-none", className)}
-        onBlur={() => {
-          // Delay para permitir click en sugerencias
-          setTimeout(() => setShowSuggestions(false), 200);
-        }}
-        onFocus={() => {
-          if (suggestions.length > 0 && value.length >= 2) {
-            setShowSuggestions(true);
-          }
-        }}
       />
-      
-      {showSuggestions && suggestions.length > 0 && (
-        <div
-          ref={suggestionsRef}
-          className="absolute z-50 w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg max-h-60 overflow-y-auto"
-        >
-          <div className="p-2 text-xs text-gray-500 border-b flex items-center justify-between">
-            <span>💡 Usa ↑↓ para navegar, Tab/Enter para seleccionar</span>
-            {value.includes(",") && (
-              <span className="text-blue-600 font-medium">
-                Múltiples motivos
-              </span>
-            )}
-          </div>
-          {suggestions.map((suggestion, index) => (
-            <button
-              key={index}
-              type="button"
-              onClick={() => selectSuggestion(suggestion)}
-              className={cn(
-                "w-full text-left px-4 py-2.5 text-sm transition-colors",
-                "hover:bg-blue-50 focus:bg-blue-50 focus:outline-none",
-                index === selectedIndex && "bg-blue-100 text-blue-900 font-medium"
-              )}
-            >
-              {suggestion}
-            </button>
-          ))}
-        </div>
-      )}
     </div>
   );
 }

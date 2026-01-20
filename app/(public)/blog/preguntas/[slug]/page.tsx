@@ -9,16 +9,34 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Textarea } from "@/components/ui/textarea";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Separator } from "@/components/ui/separator";
 import {
-  ArrowLeft, ArrowUp, ArrowDown, CheckCircle, Clock, Eye,
-  MessageCircle, Bookmark, Share2, Award, Shield, Send, Flag
+  ArrowLeft,
+  ArrowUp,
+  ArrowDown,
+  CheckCircle,
+  Clock,
+  Eye,
+  MessageCircle,
+  Bookmark,
+  Share2,
+  Shield,
+  Send,
+  Flag,
 } from "lucide-react";
 import {
-  getQuestionBySlug, getAnswers, createAnswer, vote,
-  bookmarkContent, acceptAnswer
+  getQuestionBySlug,
+  getAnswers,
+  createAnswer,
+  vote,
+  bookmarkContent,
+  acceptAnswer,
 } from "@/lib/api/blog";
-import type { QAQuestion, QAAnswer } from "@/lib/types/blog";
+import type {
+  QAQuestion,
+  QAAnswer,
+  AuthorInfo,
+  ContentTag,
+} from "@/lib/types/blog";
 import { formatDistanceToNow } from "date-fns";
 import { es } from "date-fns/locale";
 
@@ -32,12 +50,15 @@ export default function QuestionDetailPage() {
   const [newAnswer, setNewAnswer] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [isBookmarked, setIsBookmarked] = useState(false);
-  const [userVotes, setUserVotes] = useState<Record<string, 'upvote' | 'downvote' | null>>({});
+  const [userVotes, setUserVotes] = useState<
+    Record<string, "upvote" | "downvote" | null>
+  >({});
 
   useEffect(() => {
     if (slug) {
       loadQuestion();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [slug]);
 
   async function loadQuestion() {
@@ -56,33 +77,41 @@ export default function QuestionDetailPage() {
     }
   }
 
-  async function handleVote(contentType: 'question' | 'answer', contentId: string, voteType: 'upvote' | 'downvote') {
+  async function handleVote(
+    contentType: "question" | "answer",
+    contentId: string,
+    voteType: "upvote" | "downvote",
+  ) {
     try {
       await vote(contentType, contentId, voteType);
-      
+
       const currentVote = userVotes[contentId];
       let delta = 0;
-      
+
       if (currentVote === voteType) {
         // Removing vote
-        delta = voteType === 'upvote' ? -1 : 1;
-        setUserVotes(prev => ({ ...prev, [contentId]: null }));
+        delta = voteType === "upvote" ? -1 : 1;
+        setUserVotes((prev) => ({ ...prev, [contentId]: null }));
       } else if (currentVote) {
         // Changing vote
-        delta = voteType === 'upvote' ? 2 : -2;
-        setUserVotes(prev => ({ ...prev, [contentId]: voteType }));
+        delta = voteType === "upvote" ? 2 : -2;
+        setUserVotes((prev) => ({ ...prev, [contentId]: voteType }));
       } else {
         // New vote
-        delta = voteType === 'upvote' ? 1 : -1;
-        setUserVotes(prev => ({ ...prev, [contentId]: voteType }));
+        delta = voteType === "upvote" ? 1 : -1;
+        setUserVotes((prev) => ({ ...prev, [contentId]: voteType }));
       }
 
-      if (contentType === 'question') {
-        setQuestion(prev => prev ? { ...prev, vote_count: prev.vote_count + delta } : null);
+      if (contentType === "question") {
+        setQuestion((prev) =>
+          prev ? { ...prev, vote_count: prev.vote_count + delta } : null,
+        );
       } else {
-        setAnswers(prev => prev.map(a => 
-          a.id === contentId ? { ...a, vote_count: a.vote_count + delta } : a
-        ));
+        setAnswers((prev) =>
+          prev.map((a) =>
+            a.id === contentId ? { ...a, vote_count: a.vote_count + delta } : a,
+          ),
+        );
       }
     } catch (error) {
       console.error("Error voting:", error);
@@ -92,7 +121,7 @@ export default function QuestionDetailPage() {
   async function handleBookmark() {
     if (!question) return;
     try {
-      const bookmarked = await bookmarkContent('question', question.id);
+      const bookmarked = await bookmarkContent("question", question.id);
       setIsBookmarked(bookmarked);
     } catch (error) {
       console.error("Error bookmarking:", error);
@@ -107,9 +136,11 @@ export default function QuestionDetailPage() {
         question_id: question.id,
         content: newAnswer,
       });
-      setAnswers(prev => [...prev, answer]);
+      setAnswers((prev) => [...prev, answer]);
       setNewAnswer("");
-      setQuestion(prev => prev ? { ...prev, answer_count: prev.answer_count + 1 } : null);
+      setQuestion((prev) =>
+        prev ? { ...prev, answer_count: prev.answer_count + 1 } : null,
+      );
     } catch (error) {
       console.error("Error creating answer:", error);
     } finally {
@@ -121,8 +152,14 @@ export default function QuestionDetailPage() {
     if (!question) return;
     try {
       await acceptAnswer(question.id, answerId);
-      setQuestion(prev => prev ? { ...prev, accepted_answer_id: answerId, status: 'answered' } : null);
-      setAnswers(prev => prev.map(a => ({ ...a, is_accepted: a.id === answerId })));
+      setQuestion((prev) =>
+        prev
+          ? { ...prev, accepted_answer_id: answerId, status: "answered" }
+          : null,
+      );
+      setAnswers((prev) =>
+        prev.map((a) => ({ ...a, is_accepted: a.id === answerId })),
+      );
     } catch (error) {
       console.error("Error accepting answer:", error);
     }
@@ -147,8 +184,11 @@ export default function QuestionDetailPage() {
             <div className="h-8 bg-gray-200 dark:bg-gray-700 rounded w-3/4" />
             <div className="h-32 bg-gray-200 dark:bg-gray-700 rounded" />
             <div className="space-y-4">
-              {[1, 2].map(i => (
-                <div key={i} className="h-40 bg-gray-200 dark:bg-gray-700 rounded" />
+              {[1, 2].map((i) => (
+                <div
+                  key={i}
+                  className="h-40 bg-gray-200 dark:bg-gray-700 rounded"
+                />
               ))}
             </div>
           </div>
@@ -173,7 +213,7 @@ export default function QuestionDetailPage() {
     );
   }
 
-  const author = question.author as any;
+  const author = question.author as AuthorInfo | undefined;
   const isVerifiedDoctor = author?.doctor_details?.verified;
 
   return (
@@ -181,7 +221,10 @@ export default function QuestionDetailPage() {
       {/* Header */}
       <div className="bg-white dark:bg-gray-800 border-b">
         <div className="container mx-auto px-4 py-4">
-          <Link href="/blog/preguntas" className="inline-flex items-center text-gray-600 hover:text-purple-600 transition-colors">
+          <Link
+            href="/blog/preguntas"
+            className="inline-flex items-center text-gray-600 hover:text-purple-600 transition-colors"
+          >
             <ArrowLeft className="h-4 w-4 mr-2" />
             Volver a preguntas
           </Link>
@@ -201,32 +244,41 @@ export default function QuestionDetailPage() {
                 <Button
                   variant="ghost"
                   size="sm"
-                  className={`p-2 ${userVotes[question.id] === 'upvote' ? 'text-green-600 bg-green-50' : ''}`}
-                  onClick={() => handleVote('question', question.id, 'upvote')}
+                  className={`p-2 ${userVotes[question.id] === "upvote" ? "text-green-600 bg-green-50" : ""}`}
+                  onClick={() => handleVote("question", question.id, "upvote")}
                 >
                   <ArrowUp className="h-6 w-6" />
                 </Button>
-                <span className={`text-xl font-bold ${
-                  question.vote_count > 0 ? 'text-green-600' :
-                  question.vote_count < 0 ? 'text-red-600' : 'text-gray-600'
-                }`}>
+                <span
+                  className={`text-xl font-bold ${
+                    question.vote_count > 0
+                      ? "text-green-600"
+                      : question.vote_count < 0
+                        ? "text-red-600"
+                        : "text-gray-600"
+                  }`}
+                >
                   {question.vote_count}
                 </span>
                 <Button
                   variant="ghost"
                   size="sm"
-                  className={`p-2 ${userVotes[question.id] === 'downvote' ? 'text-red-600 bg-red-50' : ''}`}
-                  onClick={() => handleVote('question', question.id, 'downvote')}
+                  className={`p-2 ${userVotes[question.id] === "downvote" ? "text-red-600 bg-red-50" : ""}`}
+                  onClick={() =>
+                    handleVote("question", question.id, "downvote")
+                  }
                 >
                   <ArrowDown className="h-6 w-6" />
                 </Button>
                 <Button
                   variant="ghost"
                   size="sm"
-                  className={`p-2 mt-2 ${isBookmarked ? 'text-yellow-600' : ''}`}
+                  className={`p-2 mt-2 ${isBookmarked ? "text-yellow-600" : ""}`}
                   onClick={handleBookmark}
                 >
-                  <Bookmark className={`h-5 w-5 ${isBookmarked ? 'fill-current' : ''}`} />
+                  <Bookmark
+                    className={`h-5 w-5 ${isBookmarked ? "fill-current" : ""}`}
+                  />
                 </Button>
               </div>
 
@@ -246,13 +298,16 @@ export default function QuestionDetailPage() {
                 </div>
 
                 {/* Tags */}
-                {question.tags && (question.tags as any[]).length > 0 && (
+                {question.tags && (question.tags as unknown[]).length > 0 && (
                   <div className="flex flex-wrap gap-2 mb-4">
-                    {(question.tags as any[]).map((tagWrapper) => (
-                      <Badge key={tagWrapper.tag.id} variant="secondary">
-                        {tagWrapper.tag.name}
-                      </Badge>
-                    ))}
+                    {(question.tags as unknown[]).map((tagItem: unknown) => {
+                      const tagWrapper = tagItem as { tag: ContentTag };
+                      return (
+                        <Badge key={tagWrapper.tag.id} variant="secondary">
+                          {tagWrapper.tag.name}
+                        </Badge>
+                      );
+                    })}
                   </div>
                 )}
 
@@ -260,19 +315,26 @@ export default function QuestionDetailPage() {
                 <div className="flex items-center justify-between flex-wrap gap-4 pt-4 border-t">
                   <div className="flex items-center gap-3">
                     <Avatar className="h-10 w-10">
-                      <AvatarImage src={author?.avatar_url || ''} />
-                      <AvatarFallback>{author?.nombre_completo?.[0] || 'U'}</AvatarFallback>
+                      <AvatarImage src={author?.avatar_url || ""} />
+                      <AvatarFallback>
+                        {author?.nombre_completo?.[0] || "U"}
+                      </AvatarFallback>
                     </Avatar>
                     <div>
                       <div className="flex items-center gap-2">
-                        <span className="font-medium">{author?.nombre_completo}</span>
+                        <span className="font-medium">
+                          {author?.nombre_completo}
+                        </span>
                         {isVerifiedDoctor && (
                           <Shield className="h-4 w-4 text-blue-500" />
                         )}
                       </div>
                       <div className="text-sm text-gray-500 flex items-center gap-2">
                         <Clock className="h-3 w-3" />
-                        {formatDistanceToNow(new Date(question.created_at), { addSuffix: true, locale: es })}
+                        {formatDistanceToNow(new Date(question.created_at), {
+                          addSuffix: true,
+                          locale: es,
+                        })}
                         <span>•</span>
                         <Eye className="h-3 w-3" />
                         {question.view_count} vistas
@@ -297,13 +359,15 @@ export default function QuestionDetailPage() {
         <div className="mb-8">
           <h2 className="text-xl font-bold mb-4 flex items-center gap-2">
             <MessageCircle className="h-5 w-5" />
-            {answers.length} {answers.length === 1 ? 'Respuesta' : 'Respuestas'}
+            {answers.length} {answers.length === 1 ? "Respuesta" : "Respuestas"}
           </h2>
 
           {answers.length === 0 ? (
             <Card className="p-8 text-center">
               <MessageCircle className="h-12 w-12 mx-auto text-gray-400 mb-4" />
-              <p className="text-gray-500">Sé el primero en responder esta pregunta</p>
+              <p className="text-gray-500">
+                Sé el primero en responder esta pregunta
+              </p>
             </Card>
           ) : (
             <div className="space-y-4">
@@ -317,9 +381,10 @@ export default function QuestionDetailPage() {
                   <AnswerCard
                     key={answer.id}
                     answer={answer}
-                    questionAuthorId={question.author_id}
                     userVote={userVotes[answer.id]}
-                    onVote={(voteType) => handleVote('answer', answer.id, voteType)}
+                    onVote={(voteType) =>
+                      handleVote("answer", answer.id, voteType)
+                    }
                     onAccept={() => handleAcceptAnswer(answer.id)}
                   />
                 ))}
@@ -341,9 +406,12 @@ export default function QuestionDetailPage() {
             <p className="text-sm text-gray-500">
               Usa formato claro y proporciona fuentes si es posible.
             </p>
-            <Button onClick={handleSubmitAnswer} disabled={!newAnswer.trim() || submitting}>
+            <Button
+              onClick={handleSubmitAnswer}
+              disabled={!newAnswer.trim() || submitting}
+            >
               <Send className="h-4 w-4 mr-2" />
-              {submitting ? 'Enviando...' : 'Publicar Respuesta'}
+              {submitting ? "Enviando..." : "Publicar Respuesta"}
             </Button>
           </div>
         </Card>
@@ -355,52 +423,54 @@ export default function QuestionDetailPage() {
 // Answer Card Component
 function AnswerCard({
   answer,
-  questionAuthorId,
   userVote,
   onVote,
   onAccept,
 }: {
   answer: QAAnswer;
-  questionAuthorId: string;
-  userVote: 'upvote' | 'downvote' | null | undefined;
-  onVote: (voteType: 'upvote' | 'downvote') => void;
+  userVote: "upvote" | "downvote" | null | undefined;
+  onVote: (voteType: "upvote" | "downvote") => void;
   onAccept: () => void;
 }) {
-  const author = answer.author as any;
+  const author = answer.author as AuthorInfo | undefined;
   const isVerifiedDoctor = author?.doctor_details?.verified;
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 10 }}
-      animate={{ opacity: 1, y: 0 }}
-    >
-      <Card className={`p-6 ${answer.is_accepted ? 'border-green-500 border-2 bg-green-50/50 dark:bg-green-900/10' : ''}`}>
+    <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}>
+      <Card
+        className={`p-6 ${answer.is_accepted ? "border-green-500 border-2 bg-green-50/50 dark:bg-green-900/10" : ""}`}
+      >
         <div className="flex gap-4">
           {/* Voting */}
           <div className="flex flex-col items-center gap-1">
             <Button
               variant="ghost"
               size="sm"
-              className={`p-2 ${userVote === 'upvote' ? 'text-green-600 bg-green-50' : ''}`}
-              onClick={() => onVote('upvote')}
+              className={`p-2 ${userVote === "upvote" ? "text-green-600 bg-green-50" : ""}`}
+              onClick={() => onVote("upvote")}
             >
               <ArrowUp className="h-5 w-5" />
             </Button>
-            <span className={`text-lg font-bold ${
-              answer.vote_count > 0 ? 'text-green-600' :
-              answer.vote_count < 0 ? 'text-red-600' : 'text-gray-600'
-            }`}>
+            <span
+              className={`text-lg font-bold ${
+                answer.vote_count > 0
+                  ? "text-green-600"
+                  : answer.vote_count < 0
+                    ? "text-red-600"
+                    : "text-gray-600"
+              }`}
+            >
               {answer.vote_count}
             </span>
             <Button
               variant="ghost"
               size="sm"
-              className={`p-2 ${userVote === 'downvote' ? 'text-red-600 bg-red-50' : ''}`}
-              onClick={() => onVote('downvote')}
+              className={`p-2 ${userVote === "downvote" ? "text-red-600 bg-red-50" : ""}`}
+              onClick={() => onVote("downvote")}
             >
               <ArrowDown className="h-5 w-5" />
             </Button>
-            
+
             {answer.is_accepted ? (
               <div className="mt-2 p-2 bg-green-500 text-white rounded-full">
                 <CheckCircle className="h-5 w-5" />
@@ -435,12 +505,16 @@ function AnswerCard({
             <div className="flex items-center justify-between flex-wrap gap-4 pt-4 border-t">
               <div className="flex items-center gap-3">
                 <Avatar className="h-8 w-8">
-                  <AvatarImage src={author?.avatar_url || ''} />
-                  <AvatarFallback>{author?.nombre_completo?.[0] || 'U'}</AvatarFallback>
+                  <AvatarImage src={author?.avatar_url || ""} />
+                  <AvatarFallback>
+                    {author?.nombre_completo?.[0] || "U"}
+                  </AvatarFallback>
                 </Avatar>
                 <div>
                   <div className="flex items-center gap-2">
-                    <span className="font-medium text-sm">{author?.nombre_completo}</span>
+                    <span className="font-medium text-sm">
+                      {author?.nombre_completo}
+                    </span>
                     {isVerifiedDoctor && (
                       <Badge variant="secondary" className="text-xs">
                         <Shield className="h-3 w-3 mr-1" />
@@ -449,7 +523,10 @@ function AnswerCard({
                     )}
                   </div>
                   <div className="text-xs text-gray-500">
-                    {formatDistanceToNow(new Date(answer.created_at), { addSuffix: true, locale: es })}
+                    {formatDistanceToNow(new Date(answer.created_at), {
+                      addSuffix: true,
+                      locale: es,
+                    })}
                   </div>
                 </div>
               </div>

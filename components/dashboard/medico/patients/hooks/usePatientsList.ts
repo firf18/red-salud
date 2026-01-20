@@ -102,7 +102,7 @@ export function usePatientsList(doctorId: string | null) {
   };
 
   const filterAndSortPatients = () => {
-    let filtered = allPatients.filter((p) => {
+    const filtered = allPatients.filter((p) => {
       const isRegistered = "patient" in p;
       const pData = isRegistered ? (p as RegisteredPatient).patient : (p as OfflinePatient);
       const name = pData.nombre_completo;

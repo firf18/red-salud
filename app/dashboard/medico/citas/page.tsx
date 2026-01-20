@@ -401,11 +401,11 @@ export default function DoctorCitasPage() {
     <VerificationGuard>
       <div className="flex flex-col h-screen overflow-hidden" data-tour="calendar-section">
         {/* Header - Fixed */}
-        <div className="flex-shrink-0 px-4 py-6 sm:px-6 border-b border-gray-200/60 bg-white shadow-sm">
+        <div className="flex-shrink-0 px-4 py-6 sm:px-6 border-b border-border bg-card shadow-sm">
           <div className="flex items-center justify-between">
             <div>
               <div className="flex items-center gap-3">
-                <h1 className="text-3xl font-bold text-gray-900">Agenda</h1>
+                <h1 className="text-3xl font-bold text-foreground">Agenda</h1>
                 {!loading && (
                   <span
                     className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-green-100 text-green-700 text-xs font-medium"
@@ -416,19 +416,19 @@ export default function DoctorCitasPage() {
                   </span>
                 )}
               </div>
-              <p className="text-gray-600 mt-1">
+              <p className="text-muted-foreground mt-1">
                 Gestiona tus citas y disponibilidad • Actualizaciones en tiempo real
               </p>
             </div>
             <div className="flex items-center gap-4">
               {/* Integrated Tools - Timer, Chat & Tour */}
               <div className="flex items-center gap-2">
-                <div className="flex items-center gap-2 border-l border-gray-200/60 pl-3">
+                <div className="flex items-center gap-2 border-l border-border pl-3">
                   <SessionTimer showWarning={true} />
                   <Button
                     variant="ghost"
                     size="icon"
-                    className="text-gray-500 hover:text-blue-600"
+                    className="text-muted-foreground hover:text-primary"
                     data-tour="chatbot-button"
                     onClick={() => document.dispatchEvent(new Event('toggle-chat'))}
                     title="Abrir Chatbot"
@@ -438,7 +438,7 @@ export default function DoctorCitasPage() {
                   <Button
                     variant="ghost"
                     size="icon"
-                    className="text-gray-500 hover:text-purple-600"
+                    className="text-muted-foreground hover:text-secondary"
                     onClick={() => document.dispatchEvent(new Event('start-tour'))}
                     title="Iniciar Tour"
                   >

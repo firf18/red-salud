@@ -9,7 +9,8 @@ export async function GET() {
       .select("id", { count: "exact", head: true })
       .eq("role", "paciente");
 
-    if (patientsError) console.warn("[metrics] patients error:", patientsError.message);
+    if (patientsError)
+      console.warn("[metrics] patients error:", patientsError.message);
 
     // Médicos
     const { count: doctorsCount, error: doctorsError } = await supabaseAdmin
@@ -17,7 +18,8 @@ export async function GET() {
       .select("id", { count: "exact", head: true })
       .eq("role", "medico");
 
-    if (doctorsError) console.warn("[metrics] doctors error:", doctorsError.message);
+    if (doctorsError)
+      console.warn("[metrics] doctors error:", doctorsError.message);
 
     // Especialidades - AHORA desde la tabla specialties (única fuente de verdad)
     const { count: specialtiesCount, error: specError } = await supabaseAdmin
@@ -35,19 +37,28 @@ export async function GET() {
       .from("doctor_reviews")
       .select("rating");
     if (!reviewsError && Array.isArray(reviews) && reviews.length > 0) {
-      const avg = reviews.reduce((sum, r) => sum + (r.rating || 0), 0) / reviews.length;
+      const avg =
+        reviews.reduce((sum, r) => sum + (r.rating || 0), 0) / reviews.length;
       satisfaction = Math.round((avg / 5) * 100);
     }
 
-    return NextResponse.json({
-      total_patients: patientsCount || 0,
-      total_doctors: doctorsCount || 0,
-      total_specialties: specialtiesCount || 132, // Fallback a 132 si hay error
-      satisfaction_percentage: satisfaction,
-    }, { status: 200 });
-  } catch (error: any) {
-    console.error("[metrics] error:", error?.message || error);
-    return NextResponse.json({ error: "failed to fetch metrics" }, { status: 500 });
+    return NextResponse.json(
+      {
+        total_patients: patientsCount || 0,
+        total_doctors: doctorsCount || 0,
+        total_specialties: specialtiesCount || 132, // Fallback a 132 si hay error
+        satisfaction_percentage: satisfaction,
+      },
+      { status: 200 },
+    );
+  } catch (error: unknown) {
+    console.error(
+      "[metrics] error:",
+      error instanceof Error ? error.message : error,
+    );
+    return NextResponse.json(
+      { error: "failed to fetch metrics" },
+      { status: 500 },
+    );
   }
 }
-

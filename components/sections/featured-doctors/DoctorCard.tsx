@@ -6,11 +6,21 @@ import { Clock, Stethoscope } from "lucide-react";
 import type { Doctor } from "./featured-doctors-data";
 import { formatUSD } from "./featured-doctors-data";
 
+import { useBCVRate } from "@/hooks/use-bcv-rate";
+
 interface DoctorCardProps {
     doctor: Doctor;
 }
 
 export function DoctorCard({ doctor }: DoctorCardProps) {
+    const { data: bcvData } = useBCVRate();
+
+    const calculateVes = (usdAmount: number) => {
+        const usdRate = bcvData?.rates?.find(r => r.currency === 'USD')?.rate;
+        if (!usdRate) return null;
+        return (usdAmount * usdRate).toLocaleString("es-VE", { maximumFractionDigits: 2 });
+    };
+
     return (
         <Card className="h-full border border-border shadow-sm hover:shadow-lg hover:border-primary/50 group bg-card min-w-[280px] transition-all duration-300">
             <CardContent className="p-5 flex items-center gap-4">
@@ -36,13 +46,20 @@ export function DoctorCard({ doctor }: DoctorCardProps) {
                         {doctor?.specialty?.name || "Medicina General"}
                     </div>
                     {typeof doctor?.tarifa_consulta !== "undefined" && (
-                        <div className="flex items-center gap-2 text-sm text-primary font-semibold mt-1.5 tabular-nums">
-                            <span>{formatUSD(doctor.tarifa_consulta)}</span>
-                            <span className="text-muted-foreground/50">·</span>
-                            <span className="flex items-center gap-1 text-muted-foreground font-normal text-xs">
-                                <Clock className="w-3 h-3" />
-                                {doctor?.consultation_duration || 30} min
-                            </span>
+                        <div className="flex flex-col mt-1.5">
+                            <div className="flex items-center gap-2 text-sm text-primary font-semibold tabular-nums">
+                                <span>{formatUSD(doctor.tarifa_consulta)}</span>
+                                <span className="text-muted-foreground/50">·</span>
+                                <span className="flex items-center gap-1 text-muted-foreground font-normal text-xs">
+                                    <Clock className="w-3 h-3" />
+                                    {doctor?.consultation_duration || 30} min
+                                </span>
+                            </div>
+                            {bcvData?.rates && calculateVes(doctor.tarifa_consulta) && (
+                                <span className="text-[10px] text-muted-foreground font-medium">
+                                    Aprox. Bs. {calculateVes(doctor.tarifa_consulta)} (BCV)
+                                </span>
+                            )}
                         </div>
                     )}
                 </div>

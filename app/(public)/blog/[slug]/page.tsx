@@ -10,23 +10,42 @@ import { Badge } from "@/components/ui/badge";
 import { Textarea } from "@/components/ui/textarea";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Separator } from "@/components/ui/separator";
-import { 
-  Calendar, Clock, Eye, ThumbsUp, MessageCircle, Bookmark,
-  Share2, ArrowLeft, CheckCircle, Award, ChevronRight,
-  Send, Reply, MoreHorizontal, Flag, Heart
+import {
+  Clock,
+  Eye,
+  ThumbsUp,
+  MessageCircle,
+  Bookmark,
+  Share2,
+  ArrowLeft,
+  CheckCircle,
+  ChevronRight,
+  Send,
+  Reply,
+  Heart,
 } from "lucide-react";
-import { 
-  getPostBySlug, getPostComments, createComment, 
-  likeContent, bookmarkContent, subscribeToAuthor, getAuthorSubscribers 
+import {
+  getPostBySlug,
+  getPostComments,
+  createComment,
+  likeContent,
+  bookmarkContent,
+  subscribeToAuthor,
+  getAuthorSubscribers,
 } from "@/lib/api/blog";
-import type { BlogPost, BlogComment } from "@/lib/types/blog";
+import type {
+  BlogPost,
+  BlogComment,
+  AuthorInfo,
+  ContentTag,
+} from "@/lib/types/blog";
 import { formatDistanceToNow } from "date-fns";
 import { es } from "date-fns/locale";
 
 export default function BlogPostPage() {
   const params = useParams();
   const slug = params.slug as string;
-  
+
   const [post, setPost] = useState<BlogPost | null>(null);
   const [comments, setComments] = useState<BlogComment[]>([]);
   const [loading, setLoading] = useState(true);
@@ -43,6 +62,7 @@ export default function BlogPostPage() {
     if (slug) {
       loadPost();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [slug]);
 
   async function loadPost() {
@@ -54,7 +74,7 @@ export default function BlogPostPage() {
       ]);
       setPost(postData);
       setComments(commentsData);
-      
+
       if (postData?.author_id) {
         const count = await getAuthorSubscribers(postData.author_id);
         setSubscriberCount(count);
@@ -69,12 +89,16 @@ export default function BlogPostPage() {
   async function handleLike() {
     if (!post) return;
     try {
-      const liked = await likeContent('post', post.id);
+      const liked = await likeContent("post", post.id);
       setIsLiked(liked);
-      setPost(prev => prev ? { 
-        ...prev, 
-        like_count: liked ? prev.like_count + 1 : prev.like_count - 1 
-      } : null);
+      setPost((prev) =>
+        prev
+          ? {
+              ...prev,
+              like_count: liked ? prev.like_count + 1 : prev.like_count - 1,
+            }
+          : null,
+      );
     } catch (error) {
       console.error("Error liking post:", error);
     }
@@ -83,7 +107,7 @@ export default function BlogPostPage() {
   async function handleBookmark() {
     if (!post) return;
     try {
-      const bookmarked = await bookmarkContent('post', post.id);
+      const bookmarked = await bookmarkContent("post", post.id);
       setIsBookmarked(bookmarked);
     } catch (error) {
       console.error("Error bookmarking post:", error);
@@ -95,7 +119,7 @@ export default function BlogPostPage() {
     try {
       const subscribed = await subscribeToAuthor(post.author_id);
       setIsSubscribed(subscribed);
-      setSubscriberCount(prev => subscribed ? prev + 1 : prev - 1);
+      setSubscriberCount((prev) => (subscribed ? prev + 1 : prev - 1));
     } catch (error) {
       console.error("Error subscribing:", error);
     }
@@ -109,9 +133,11 @@ export default function BlogPostPage() {
         post_id: post.id,
         content: newComment,
       });
-      setComments(prev => [...prev, comment]);
+      setComments((prev) => [...prev, comment]);
       setNewComment("");
-      setPost(prev => prev ? { ...prev, comment_count: prev.comment_count + 1 } : null);
+      setPost((prev) =>
+        prev ? { ...prev, comment_count: prev.comment_count + 1 } : null,
+      );
     } catch (error) {
       console.error("Error creating comment:", error);
     } finally {
@@ -128,11 +154,13 @@ export default function BlogPostPage() {
         parent_id: parentId,
         content: replyContent,
       });
-      setComments(prev => prev.map(c => 
-        c.id === parentId 
-          ? { ...c, replies: [...(c.replies || []), reply] }
-          : c
-      ));
+      setComments((prev) =>
+        prev.map((c) =>
+          c.id === parentId
+            ? { ...c, replies: [...(c.replies || []), reply] }
+            : c,
+        ),
+      );
       setReplyingTo(null);
       setReplyContent("");
     } catch (error) {
@@ -146,7 +174,7 @@ export default function BlogPostPage() {
     if (navigator.share) {
       await navigator.share({
         title: post?.title,
-        text: post?.excerpt || '',
+        text: post?.excerpt || "",
         url: window.location.href,
       });
     } else {
@@ -189,7 +217,7 @@ export default function BlogPostPage() {
     );
   }
 
-  const author = post.author as any;
+  const author = post.author as AuthorInfo | undefined;
   const isVerifiedDoctor = author?.doctor_details?.verified;
 
   return (
@@ -197,7 +225,10 @@ export default function BlogPostPage() {
       {/* Header */}
       <div className="bg-white dark:bg-gray-800 border-b">
         <div className="container mx-auto px-4 py-4">
-          <Link href="/blog" className="inline-flex items-center text-gray-600 hover:text-blue-600 transition-colors">
+          <Link
+            href="/blog"
+            className="inline-flex items-center text-gray-600 hover:text-blue-600 transition-colors"
+          >
             <ArrowLeft className="h-4 w-4 mr-2" />
             Volver al blog
           </Link>
@@ -217,8 +248,11 @@ export default function BlogPostPage() {
                 <div className="flex flex-wrap items-center gap-3 mb-4">
                   {post.category && (
                     <Link href={`/blog?category=${post.category.id}`}>
-                      <Badge 
-                        style={{ backgroundColor: `${post.category.color}20`, color: post.category.color }}
+                      <Badge
+                        style={{
+                          backgroundColor: `${post.category.color}20`,
+                          color: post.category.color,
+                        }}
                       >
                         {post.category.name}
                       </Badge>
@@ -237,46 +271,56 @@ export default function BlogPostPage() {
 
                 {/* Author Info */}
                 <div className="flex items-center justify-between flex-wrap gap-4 mb-6">
-                  <Link href={`/blog/autor/${post.author_id}`} className="flex items-center gap-3">
+                  <Link
+                    href={`/blog/autor/${post.author_id}`}
+                    className="flex items-center gap-3"
+                  >
                     <Avatar className="h-12 w-12">
-                      <AvatarImage src={author?.avatar_url || ''} />
-                      <AvatarFallback>{author?.nombre_completo?.[0] || 'A'}</AvatarFallback>
+                      <AvatarImage src={author?.avatar_url || ""} />
+                      <AvatarFallback>
+                        {author?.nombre_completo?.[0] || "A"}
+                      </AvatarFallback>
                     </Avatar>
                     <div>
                       <div className="flex items-center gap-2">
-                        <span className="font-semibold">{author?.nombre_completo}</span>
+                        <span className="font-semibold">
+                          {author?.nombre_completo}
+                        </span>
                         {isVerifiedDoctor && (
                           <CheckCircle className="h-4 w-4 text-blue-500" />
                         )}
                       </div>
                       <div className="text-sm text-gray-500 flex items-center gap-2">
-                        {isVerifiedDoctor && author?.doctor_details?.specialty?.name && (
-                          <span>{author.doctor_details.specialty.name}</span>
-                        )}
+                        {isVerifiedDoctor &&
+                          author?.doctor_details?.specialty?.name && (
+                            <span>{author.doctor_details.specialty.name}</span>
+                          )}
                         <span>•</span>
                         <span>
-                          {post.published_at && formatDistanceToNow(new Date(post.published_at), { 
-                            addSuffix: true, 
-                            locale: es 
-                          })}
+                          {post.published_at &&
+                            formatDistanceToNow(new Date(post.published_at), {
+                              addSuffix: true,
+                              locale: es,
+                            })}
                         </span>
                       </div>
                     </div>
                   </Link>
-                  <Button 
+                  <Button
                     variant={isSubscribed ? "secondary" : "default"}
                     size="sm"
                     onClick={handleSubscribe}
                   >
-                    {isSubscribed ? 'Siguiendo' : 'Seguir'}
+                    {isSubscribed ? "Siguiendo" : "Seguir"}
                   </Button>
                 </div>
 
                 {/* Cover Image */}
                 {post.cover_image && (
                   <div className="rounded-xl overflow-hidden mb-8">
-                    <img 
-                      src={post.cover_image} 
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img
+                      src={post.cover_image}
                       alt={post.title}
                       className="w-full h-auto"
                     />
@@ -285,7 +329,7 @@ export default function BlogPostPage() {
 
                 {/* Content */}
                 <Card className="p-6 sm:p-8 mb-8">
-                  <div 
+                  <div
                     className="prose prose-lg dark:prose-invert max-w-none"
                     dangerouslySetInnerHTML={{ __html: post.content }}
                   />
@@ -294,13 +338,19 @@ export default function BlogPostPage() {
                 {/* Tags */}
                 {post.tags && post.tags.length > 0 && (
                   <div className="flex flex-wrap gap-2 mb-8">
-                    {post.tags.map((tagWrapper: any) => (
-                      <Link key={tagWrapper.tag.id} href={`/blog?tag=${tagWrapper.tag.slug}`}>
-                        <Badge variant="outline" className="hover:bg-blue-50">
-                          #{tagWrapper.tag.name}
-                        </Badge>
-                      </Link>
-                    ))}
+                    {post.tags.map((tagWrapper: unknown) => {
+                      const wrapper = tagWrapper as { tag: ContentTag };
+                      return (
+                        <Link
+                          key={wrapper.tag.id}
+                          href={`/blog?tag=${wrapper.tag.slug}`}
+                        >
+                          <Badge variant="outline" className="hover:bg-blue-50">
+                            #{wrapper.tag.name}
+                          </Badge>
+                        </Link>
+                      );
+                    })}
                   </div>
                 )}
 
@@ -308,13 +358,15 @@ export default function BlogPostPage() {
                 <Card className="p-4 mb-8">
                   <div className="flex items-center justify-between flex-wrap gap-4">
                     <div className="flex items-center gap-4">
-                      <Button 
-                        variant={isLiked ? "default" : "ghost"} 
+                      <Button
+                        variant={isLiked ? "default" : "ghost"}
                         size="sm"
                         onClick={handleLike}
                         className={isLiked ? "bg-red-500 hover:bg-red-600" : ""}
                       >
-                        <Heart className={`h-4 w-4 mr-2 ${isLiked ? 'fill-current' : ''}`} />
+                        <Heart
+                          className={`h-4 w-4 mr-2 ${isLiked ? "fill-current" : ""}`}
+                        />
                         {post.like_count}
                       </Button>
                       <Button variant="ghost" size="sm">
@@ -327,12 +379,14 @@ export default function BlogPostPage() {
                       </Button>
                     </div>
                     <div className="flex items-center gap-2">
-                      <Button 
-                        variant={isBookmarked ? "secondary" : "ghost"} 
+                      <Button
+                        variant={isBookmarked ? "secondary" : "ghost"}
                         size="sm"
                         onClick={handleBookmark}
                       >
-                        <Bookmark className={`h-4 w-4 ${isBookmarked ? 'fill-current' : ''}`} />
+                        <Bookmark
+                          className={`h-4 w-4 ${isBookmarked ? "fill-current" : ""}`}
+                        />
                       </Button>
                       <Button variant="ghost" size="sm" onClick={handleShare}>
                         <Share2 className="h-4 w-4" />
@@ -358,12 +412,12 @@ export default function BlogPostPage() {
                       rows={3}
                     />
                     <div className="flex justify-end">
-                      <Button 
+                      <Button
                         onClick={handleSubmitComment}
                         disabled={!newComment.trim() || submitting}
                       >
                         <Send className="h-4 w-4 mr-2" />
-                        {submitting ? 'Enviando...' : 'Comentar'}
+                        {submitting ? "Enviando..." : "Comentar"}
                       </Button>
                     </div>
                   </div>
@@ -378,7 +432,7 @@ export default function BlogPostPage() {
                   ) : (
                     <div className="space-y-6">
                       {comments.map((comment) => (
-                        <CommentItem 
+                        <CommentItem
                           key={comment.id}
                           comment={comment}
                           replyingTo={replyingTo}
@@ -402,9 +456,9 @@ export default function BlogPostPage() {
                 <h3 className="font-bold mb-4">Sobre el autor</h3>
                 <div className="text-center mb-4">
                   <Avatar className="h-20 w-20 mx-auto mb-3">
-                    <AvatarImage src={author?.avatar_url || ''} />
+                    <AvatarImage src={author?.avatar_url || ""} />
                     <AvatarFallback className="text-2xl">
-                      {author?.nombre_completo?.[0] || 'A'}
+                      {author?.nombre_completo?.[0] || "A"}
                     </AvatarFallback>
                   </Avatar>
                   <h4 className="font-semibold flex items-center justify-center gap-2">
@@ -413,17 +467,22 @@ export default function BlogPostPage() {
                       <CheckCircle className="h-4 w-4 text-blue-500" />
                     )}
                   </h4>
-                  {isVerifiedDoctor && author?.doctor_details?.specialty?.name && (
-                    <p className="text-sm text-gray-500">{author.doctor_details.specialty.name}</p>
-                  )}
-                  <p className="text-sm text-gray-500 mt-1">{subscriberCount} seguidores</p>
+                  {isVerifiedDoctor &&
+                    author?.doctor_details?.specialty?.name && (
+                      <p className="text-sm text-gray-500">
+                        {author.doctor_details.specialty.name}
+                      </p>
+                    )}
+                  <p className="text-sm text-gray-500 mt-1">
+                    {subscriberCount} seguidores
+                  </p>
                 </div>
-                <Button 
+                <Button
                   className="w-full"
                   variant={isSubscribed ? "secondary" : "default"}
                   onClick={handleSubscribe}
                 >
-                  {isSubscribed ? 'Siguiendo' : 'Seguir autor'}
+                  {isSubscribed ? "Siguiendo" : "Seguir autor"}
                 </Button>
                 <Link href={`/blog/autor/${post.author_id}`}>
                   <Button variant="ghost" className="w-full mt-2">
@@ -447,14 +506,14 @@ export default function BlogPostPage() {
 }
 
 // Comment Item Component
-function CommentItem({ 
-  comment, 
-  replyingTo, 
-  setReplyingTo, 
-  replyContent, 
+function CommentItem({
+  comment,
+  replyingTo,
+  setReplyingTo,
+  replyContent,
   setReplyContent,
   onSubmitReply,
-  submitting 
+  submitting,
 }: {
   comment: BlogComment;
   replyingTo: string | null;
@@ -464,26 +523,33 @@ function CommentItem({
   onSubmitReply: (parentId: string) => void;
   submitting: boolean;
 }) {
-  const author = comment.author as any;
+  const author = comment.author as AuthorInfo | undefined;
 
   return (
     <div className="space-y-4">
       <div className="flex gap-3">
         <Avatar className="h-10 w-10 flex-shrink-0">
-          <AvatarImage src={author?.avatar_url || ''} />
-          <AvatarFallback>{author?.nombre_completo?.[0] || 'U'}</AvatarFallback>
+          <AvatarImage src={author?.avatar_url || ""} />
+          <AvatarFallback>{author?.nombre_completo?.[0] || "U"}</AvatarFallback>
         </Avatar>
         <div className="flex-1">
           <div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-4">
             <div className="flex items-center justify-between mb-2">
               <div className="flex items-center gap-2">
-                <span className="font-semibold text-sm">{author?.nombre_completo}</span>
+                <span className="font-semibold text-sm">
+                  {author?.nombre_completo}
+                </span>
                 {comment.is_highlighted && (
-                  <Badge variant="secondary" className="text-xs">Destacado</Badge>
+                  <Badge variant="secondary" className="text-xs">
+                    Destacado
+                  </Badge>
                 )}
               </div>
               <span className="text-xs text-gray-500">
-                {formatDistanceToNow(new Date(comment.created_at), { addSuffix: true, locale: es })}
+                {formatDistanceToNow(new Date(comment.created_at), {
+                  addSuffix: true,
+                  locale: es,
+                })}
               </span>
             </div>
             <p className="text-sm">{comment.content}</p>
@@ -493,9 +559,11 @@ function CommentItem({
               <ThumbsUp className="h-3 w-3" />
               {comment.like_count > 0 && comment.like_count}
             </button>
-            <button 
+            <button
               className="text-gray-500 hover:text-blue-600 flex items-center gap-1"
-              onClick={() => setReplyingTo(replyingTo === comment.id ? null : comment.id)}
+              onClick={() =>
+                setReplyingTo(replyingTo === comment.id ? null : comment.id)
+              }
             >
               <Reply className="h-3 w-3" />
               Responder
@@ -513,15 +581,15 @@ function CommentItem({
                 rows={2}
               />
               <div className="flex gap-2">
-                <Button 
+                <Button
                   size="sm"
                   onClick={() => onSubmitReply(comment.id)}
                   disabled={!replyContent.trim() || submitting}
                 >
-                  {submitting ? 'Enviando...' : 'Responder'}
+                  {submitting ? "Enviando..." : "Responder"}
                 </Button>
-                <Button 
-                  size="sm" 
+                <Button
+                  size="sm"
                   variant="ghost"
                   onClick={() => {
                     setReplyingTo(null);
@@ -538,21 +606,26 @@ function CommentItem({
           {comment.replies && comment.replies.length > 0 && (
             <div className="mt-4 pl-4 border-l-2 border-gray-200 space-y-4">
               {comment.replies.map((reply) => {
-                const replyAuthor = reply.author as any;
+                const replyAuthor = reply.author as AuthorInfo | undefined;
                 return (
                   <div key={reply.id} className="flex gap-3">
                     <Avatar className="h-8 w-8 flex-shrink-0">
-                      <AvatarImage src={replyAuthor?.avatar_url || ''} />
+                      <AvatarImage src={replyAuthor?.avatar_url || ""} />
                       <AvatarFallback className="text-xs">
-                        {replyAuthor?.nombre_completo?.[0] || 'U'}
+                        {replyAuthor?.nombre_completo?.[0] || "U"}
                       </AvatarFallback>
                     </Avatar>
                     <div className="flex-1">
                       <div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-3">
                         <div className="flex items-center justify-between mb-1">
-                          <span className="font-semibold text-sm">{replyAuthor?.nombre_completo}</span>
+                          <span className="font-semibold text-sm">
+                            {replyAuthor?.nombre_completo}
+                          </span>
                           <span className="text-xs text-gray-500">
-                            {formatDistanceToNow(new Date(reply.created_at), { addSuffix: true, locale: es })}
+                            {formatDistanceToNow(new Date(reply.created_at), {
+                              addSuffix: true,
+                              locale: es,
+                            })}
                           </span>
                         </div>
                         <p className="text-sm">{reply.content}</p>

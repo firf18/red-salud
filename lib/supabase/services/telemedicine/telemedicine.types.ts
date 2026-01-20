@@ -18,5 +18,5 @@ export type {
 export interface TelemedicineServiceResponse<T> {
   success: boolean;
   data: T;
-  error?: any;
+  error?: unknown;
 }

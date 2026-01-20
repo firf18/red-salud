@@ -2,9 +2,9 @@
 
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   Dialog,
   DialogContent,
@@ -13,7 +13,6 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import {
-  Search,
   FileText,
   Stethoscope,
   Activity,
@@ -37,6 +36,7 @@ import {
   ClipboardCheck,
   UserPlus,
   AlertTriangle,
+  Star,
 } from "lucide-react";
 import { StructuredTemplate } from "@/lib/templates/structured-templates";
 import { getAllTemplates } from "@/lib/templates/extended-templates";
@@ -143,49 +143,55 @@ export function StructuredTemplateMarketplace({
   return (
     <>
       <Dialog open={open} onOpenChange={onClose}>
-        <DialogContent className="w-[98vw] max-w-[98vw] h-[95vh] p-0 gap-0">
-          <DialogHeader className="px-6 py-4 border-b">
+      <DialogContent className="w-[98vw] max-w-[98vw] sm:max-w-[98vw] h-[95vh] p-0 gap-0 flex flex-col">
+          <DialogHeader className="px-6 py-4 border-b flex-shrink-0">
             <DialogTitle className="text-xl flex items-center gap-2">
               <div className="h-10 w-10 rounded-lg bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center">
                 <FileText className="h-5 w-5 text-white" />
               </div>
-              Templates Estructurados
+              Marketplace de Templates
             </DialogTitle>
             <DialogDescription>
-              Selecciona un template con campos organizados para tu consulta
+              Explora y usa templates médicos creados por RED-SALUD y la comunidad
             </DialogDescription>
           </DialogHeader>
 
-          <div className="flex-1 flex flex-col overflow-hidden">
+          <div className="flex-1 flex flex-col overflow-hidden min-h-0">
             {/* Search and Filters */}
-            <div className="px-6 py-4 border-b space-y-4">
-              <div className="relative">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
-                <Input
-                  placeholder="Buscar templates..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="pl-10"
-                />
-              </div>
-
-              <div className="flex gap-2 flex-wrap">
-                {categories.map((cat) => (
-                  <Button
-                    key={cat.value}
-                    variant={selectedCategory === cat.value ? "default" : "outline"}
-                    size="sm"
-                    onClick={() => setSelectedCategory(cat.value)}
-                  >
-                    {cat.label}
-                  </Button>
-                ))}
-              </div>
+            <div className="px-6 py-4 border-b space-y-4 bg-gray-50/50">
+              <Tabs value={selectedCategory} onValueChange={setSelectedCategory} className="w-full">
+                <TabsList className="w-full justify-start h-auto p-1 bg-gray-200/50 flex flex-wrap gap-1">
+                  <TabsTrigger value="all" className="flex-1 min-w-[100px] text-xs py-2 data-[state=active]:bg-white data-[state=active]:shadow-sm">
+                    Todos
+                  </TabsTrigger>
+                  <TabsTrigger value="favorites" className="flex-1 min-w-[100px] text-xs py-2 data-[state=active]:bg-white data-[state=active]:shadow-sm">
+                    <Star className="h-3 w-3 mr-1" />
+                    Favoritos
+                  </TabsTrigger>
+                  <TabsTrigger value="general" className="flex-1 min-w-[100px] text-xs py-2 data-[state=active]:bg-white data-[state=active]:shadow-sm">
+                    General
+                  </TabsTrigger>
+                  <TabsTrigger value="especialidad" className="flex-1 min-w-[100px] text-xs py-2 data-[state=active]:bg-white data-[state=active]:shadow-sm">
+                    Especialidad
+                  </TabsTrigger>
+                  <TabsTrigger value="emergencia" className="flex-1 min-w-[100px] text-xs py-2 data-[state=active]:bg-white data-[state=active]:shadow-sm">
+                    Emergencia
+                  </TabsTrigger>
+                  <TabsTrigger value="control" className="flex-1 min-w-[100px] text-xs py-2 data-[state=active]:bg-white data-[state=active]:shadow-sm">
+                    Control
+                  </TabsTrigger>
+                  <TabsTrigger value="custom" className="flex-1 min-w-[100px] text-xs py-2 data-[state=active]:bg-white data-[state=active]:shadow-sm">
+                    <User className="h-3 w-3 mr-1" />
+                    Mis Templates
+                  </TabsTrigger>
+                </TabsList>
+              </Tabs>
             </div>
 
             {/* Templates Grid */}
-            <ScrollArea className="flex-1 px-6 py-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 pb-4">
+            <ScrollArea className="flex-1">
+              <div className="p-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                 {filteredTemplates.map((template) => {
                   const Icon = IconComponent(template.icon);
                   
@@ -286,6 +292,7 @@ export function StructuredTemplateMarketplace({
                   </p>
                 </div>
               )}
+            </div>
             </ScrollArea>
 
             {/* Footer */}

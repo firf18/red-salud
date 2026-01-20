@@ -2,7 +2,7 @@
  * @file page.tsx
  * @description Página de chat de soporte público con asistente AI
  * @module soporte/chat
- * 
+ *
  * Esta página proporciona un chat integrado con el sistema RAG real
  * usando streaming de respuestas y sistema de feedback.
  */
@@ -14,10 +14,8 @@ import { motion, AnimatePresence } from "framer-motion";
 import {
   Send,
   Bot,
-  User,
   Paperclip,
   Smile,
-  MoreVertical,
   Phone,
   Video,
   ArrowLeft,
@@ -31,7 +29,7 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
 import ReactMarkdown from "react-markdown";
@@ -82,7 +80,7 @@ function loadHistory(): Message[] {
     if (saved) {
       const parsed = JSON.parse(saved);
       // Reconvertir timestamps a Date
-      return parsed.map((m: any) => ({
+      return parsed.map((m: Message) => ({
         ...m,
         timestamp: new Date(m.timestamp),
       }));
@@ -120,12 +118,17 @@ function MessageBubble({
     <motion.div
       initial={{ opacity: 0, y: 10, scale: 0.95 }}
       animate={{ opacity: 1, y: 0, scale: 1 }}
-      className={cn("flex gap-3 max-w-[85%]", isUser ? "ml-auto flex-row-reverse" : "")}
+      className={cn(
+        "flex gap-3 max-w-[85%]",
+        isUser ? "ml-auto flex-row-reverse" : "",
+      )}
     >
       {/* Avatar */}
       <Avatar className="w-8 h-8 shrink-0">
         {isUser ? (
-          <AvatarFallback className="bg-teal-500 text-white text-xs">TÚ</AvatarFallback>
+          <AvatarFallback className="bg-teal-500 text-white text-xs">
+            TÚ
+          </AvatarFallback>
         ) : (
           <AvatarFallback className="bg-gradient-to-br from-teal-500 to-blue-500 text-white">
             <Bot className="w-4 h-4" />
@@ -134,13 +137,18 @@ function MessageBubble({
       </Avatar>
 
       {/* Contenido del mensaje */}
-      <div className={cn("flex flex-col gap-1", isUser ? "items-end" : "items-start")}>
+      <div
+        className={cn(
+          "flex flex-col gap-1",
+          isUser ? "items-end" : "items-start",
+        )}
+      >
         <div
           className={cn(
             "px-4 py-3 rounded-2xl text-sm",
             isUser
               ? "bg-teal-500 text-white rounded-br-md"
-              : "bg-zinc-100 dark:bg-zinc-800 text-zinc-900 dark:text-white rounded-bl-md"
+              : "bg-zinc-100 dark:bg-zinc-800 text-zinc-900 dark:text-white rounded-bl-md",
           )}
         >
           {/* Estado de carga para mensajes del bot vacíos */}
@@ -177,7 +185,10 @@ function MessageBubble({
         {/* Timestamp y estado */}
         <div className="flex items-center gap-1.5 text-xs text-zinc-400">
           <span>
-            {message.timestamp.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
+            {message.timestamp.toLocaleTimeString([], {
+              hour: "2-digit",
+              minute: "2-digit",
+            })}
           </span>
           {isUser && message.status && (
             <span>
@@ -204,7 +215,7 @@ function MessageBubble({
                   ? "text-green-600 bg-green-100 dark:bg-green-900/30"
                   : message.feedback === "negative"
                     ? "text-muted-foreground/30 cursor-not-allowed"
-                    : "text-muted-foreground hover:text-green-600 hover:bg-green-100 dark:hover:bg-green-900/30"
+                    : "text-muted-foreground hover:text-green-600 hover:bg-green-100 dark:hover:bg-green-900/30",
               )}
               title="Respuesta útil"
             >
@@ -219,7 +230,7 @@ function MessageBubble({
                   ? "text-red-600 bg-red-100 dark:bg-red-900/30"
                   : message.feedback === "positive"
                     ? "text-muted-foreground/30 cursor-not-allowed"
-                    : "text-muted-foreground hover:text-red-600 hover:bg-red-100 dark:hover:bg-red-900/30"
+                    : "text-muted-foreground hover:text-red-600 hover:bg-red-100 dark:hover:bg-red-900/30",
               )}
               title="Respuesta no útil"
             >
@@ -294,6 +305,7 @@ export default function ChatPage() {
     } else {
       setMessages([welcomeMessage]);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // Guardar historial cuando cambia
@@ -346,7 +358,9 @@ export default function ChatPage() {
    */
   const handleFeedback = (messageId: string, type: "positive" | "negative") => {
     setMessages((prev) =>
-      prev.map((msg) => (msg.id === messageId ? { ...msg, feedback: type } : msg))
+      prev.map((msg) =>
+        msg.id === messageId ? { ...msg, feedback: type } : msg,
+      ),
     );
 
     const message = messages.find((m) => m.id === messageId);
@@ -377,7 +391,9 @@ export default function ChatPage() {
     // Simular envío
     setTimeout(() => {
       setMessages((prev) =>
-        prev.map((m) => (m.id === userMessage.id ? { ...m, status: "delivered" } : m))
+        prev.map((m) =>
+          m.id === userMessage.id ? { ...m, status: "delivered" } : m,
+        ),
       );
     }, 500);
 
@@ -434,7 +450,9 @@ export default function ChatPage() {
       // Marcar mensaje del usuario como leído
       setTimeout(() => {
         setMessages((prev) =>
-          prev.map((m) => (m.id === userMessage.id ? { ...m, status: "read" } : m))
+          prev.map((m) =>
+            m.id === userMessage.id ? { ...m, status: "read" } : m,
+          ),
         );
       }, 1000);
     } catch (error) {
@@ -512,10 +530,20 @@ export default function ChatPage() {
             >
               <Trash2 className="w-5 h-5" />
             </Button>
-            <Button variant="ghost" size="icon" className="text-zinc-500" disabled>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="text-zinc-500"
+              disabled
+            >
               <Phone className="w-5 h-5" />
             </Button>
-            <Button variant="ghost" size="icon" className="text-zinc-500" disabled>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="text-zinc-500"
+              disabled
+            >
               <Video className="w-5 h-5" />
             </Button>
           </div>
@@ -550,7 +578,9 @@ export default function ChatPage() {
           </AnimatePresence>
 
           {/* Typing indicator - solo mostrar cuando está cargando y no hay mensaje vacío del bot */}
-          {isLoading && messages[messages.length - 1]?.content !== "" && <TypingIndicator />}
+          {isLoading && messages[messages.length - 1]?.content !== "" && (
+            <TypingIndicator />
+          )}
 
           <div ref={messagesEndRef} />
         </div>
@@ -578,7 +608,13 @@ export default function ChatPage() {
       <div className="bg-white dark:bg-zinc-900 border-t border-zinc-200 dark:border-zinc-800 px-4 py-4">
         <form onSubmit={handleSubmit} className="max-w-3xl mx-auto">
           <div className="flex items-center gap-2">
-            <Button type="button" variant="ghost" size="icon" className="text-zinc-500 shrink-0" disabled>
+            <Button
+              type="button"
+              variant="ghost"
+              size="icon"
+              className="text-zinc-500 shrink-0"
+              disabled
+            >
               <Paperclip className="w-5 h-5" />
             </Button>
             <div className="flex-1 relative">

@@ -54,13 +54,15 @@ export function MedicalWorkspace({
   onBack,
   loading,
 }: MedicalWorkspaceProps) {
-  const [activeTab, setActiveTab] = useState("estructurado");
+  const [activeTab, setActiveTab] = useState("notas");
   const [showHistorial, setShowHistorial] = useState(true);
   const [showStructuredMarketplace, setShowStructuredMarketplace] = useState(false);
   const [selectedStructuredTemplate, setSelectedStructuredTemplate] = useState<StructuredTemplate | null>(null);
+  const [freeNotesContent, setFreeNotesContent] = useState(notasMedicas);
+  const [structuredNotesContent, setStructuredNotesContent] = useState("");
 
   // Custom hooks
-  const autocomplete = useAutocomplete({ notasMedicas, paciente });
+  const autocomplete = useAutocomplete({ notasMedicas: freeNotesContent });
   const historial = useHistorial(paciente.cedula);
   const aiAnalysis = useAIAnalysis({
     notasMedicas,
@@ -75,6 +77,36 @@ export function MedicalWorkspace({
 
 
 
+
+  useEffect(() => {
+    if (activeTab === "notas") {
+      setFreeNotesContent(notasMedicas);
+    }
+  }, [activeTab, notasMedicas]);
+
+  const handleFreeNotesChange = (value: string) => {
+    setFreeNotesContent(value);
+    if (activeTab === "notas") {
+      setNotasMedicas(value);
+    }
+  };
+
+  const handleStructuredNotesChange = (value: string) => {
+    setStructuredNotesContent(value);
+    if (activeTab === "estructurado") {
+      setNotasMedicas(value);
+    }
+  };
+
+  const handleTabChange = (value: string) => {
+    if (value === "notas") {
+      setNotasMedicas(freeNotesContent);
+    }
+    if (value === "estructurado") {
+      setNotasMedicas(structuredNotesContent);
+    }
+    setActiveTab(value);
+  };
 
   const handlePrint = () => {
     window.print();
@@ -92,7 +124,7 @@ export function MedicalWorkspace({
 
       <div className="flex-1 flex min-h-0">
         <div className="flex-1 flex flex-col min-w-0 bg-white">
-          <Tabs value={activeTab} onValueChange={setActiveTab} className="flex-1 flex flex-col">
+          <Tabs value={activeTab} onValueChange={handleTabChange} className="flex-1 flex flex-col">
             <TabsHeader
               activeTab={activeTab}
               selectedStructuredTemplate={selectedStructuredTemplate}
@@ -108,7 +140,7 @@ export function MedicalWorkspace({
                   <ScrollArea className="flex-1 bg-white">
                     <StructuredTemplateEditor
                       template={selectedStructuredTemplate}
-                      onChange={(content: string) => setNotasMedicas(content)}
+                      onChange={handleStructuredNotesChange}
                       paciente={paciente}
                       medications={medicamentosActuales}
                       onMedicationsChange={setMedicamentosActuales}
@@ -129,8 +161,8 @@ export function MedicalWorkspace({
               <TabsContent value="notas" className="flex-1 m-0 flex flex-col overflow-hidden">
                 <div className="flex-1 flex overflow-hidden">
                   <FreeNotesEditor
-                    notasMedicas={notasMedicas}
-                    setNotasMedicas={setNotasMedicas}
+                    notasMedicas={freeNotesContent}
+                    setNotasMedicas={handleFreeNotesChange}
                     autocomplete={autocomplete}
                   />
 

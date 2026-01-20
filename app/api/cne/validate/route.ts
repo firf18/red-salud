@@ -26,17 +26,17 @@ export async function GET(request: NextRequest) {
     if (!cedula) {
       return NextResponse.json(
         { error: "Cédula es requerida" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
     // Limpiar la cédula (solo dígitos)
     const cleanCedula = cedula.replace(/\D/g, "");
-    
+
     if (cleanCedula.length < 6 || cleanCedula.length > 8) {
       return NextResponse.json(
         { error: "Formato de cédula inválido" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -53,7 +53,7 @@ export async function GET(request: NextRequest) {
     if (!response.ok) {
       return NextResponse.json(
         { error: "Error al consultar la API de cédula" },
-        { status: response.status }
+        { status: response.status },
       );
     }
 
@@ -62,35 +62,40 @@ export async function GET(request: NextRequest) {
     if (data.error) {
       return NextResponse.json(
         {
-          error: typeof data.error_str === "string" ? data.error_str : "Cédula no encontrada",
+          error:
+            typeof data.error_str === "string"
+              ? data.error_str
+              : "Cédula no encontrada",
         },
-        { status: 404 }
+        { status: 404 },
       );
     }
 
     if (!data.data) {
       return NextResponse.json(
         { error: "No se encontraron datos para esta cédula" },
-        { status: 404 }
+        { status: 404 },
       );
     }
 
     // Formatear respuesta
-    const nombreCompleto = `${data.data.primer_nombre} ${data.data.segundo_nombre || ""} ${data.data.primer_apellido} ${data.data.segundo_apellido || ""}`.trim();
+    const nombreCompleto =
+      `${data.data.primer_nombre} ${data.data.segundo_nombre || ""} ${data.data.primer_apellido} ${data.data.segundo_apellido || ""}`.trim();
 
     return NextResponse.json({
       nombre: data.data.primer_nombre,
-      apellido: `${data.data.primer_apellido} ${data.data.segundo_apellido || ""}`.trim(),
+      apellido:
+        `${data.data.primer_apellido} ${data.data.segundo_apellido || ""}`.trim(),
       nombre_completo: nombreCompleto,
       cedula: cleanCedula,
       nacionalidad: data.data.nacionalidad,
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("Error validating cedula:", error);
-    
+
     return NextResponse.json(
       { error: "Error interno del servidor" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

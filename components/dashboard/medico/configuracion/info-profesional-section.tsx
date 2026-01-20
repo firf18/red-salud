@@ -71,20 +71,8 @@ interface ProfesionalData {
     subespecialidades: string;
     /** Idiomas que habla */
     idiomas: string[];
-    /** Tarifa de consulta presencial */
-    tarifa_consulta: number | null;
-    /** Duración promedio de consulta en minutos */
-    duracion_consulta: number;
-    /** Si acepta seguros médicos */
-    acepta_seguros: boolean;
-    /** Aseguradoras aceptadas */
-    aseguradoras: string[];
-    /** Métodos de pago aceptados */
-    metodos_pago: string[];
     /** Enfermedades y condiciones tratadas */
     condiciones_tratadas: string[];
-    /** Grupos de edad atendidos */
-    propositos_edad: string[];
     /** Redes sociales */
     redes_sociales: Record<string, string>;
 }
@@ -93,11 +81,6 @@ interface ProfesionalData {
 const IDIOMAS_DISPONIBLES = [
     'Español', 'Inglés', 'Francés', 'Portugués',
     'Italiano', 'Alemán', 'Mandarín', 'Árabe', 'Ruso'
-];
-
-/** Lista de métodos de pago disponibles */
-const METODOS_PAGO_DISPONIBLES = [
-    'Efectivo', 'Transferencia', 'Pago Móvil', 'Tarjeta de Crédito', 'Zelle', 'PayPal'
 ];
 
 /**
@@ -119,13 +102,7 @@ export function InfoProfesionalSection() {
         certificaciones: "",
         subespecialidades: "",
         idiomas: ["Español"],
-        tarifa_consulta: null,
-        duracion_consulta: 30,
-        acepta_seguros: false,
-        aseguradoras: [],
-        metodos_pago: ["Efectivo"],
         condiciones_tratadas: [],
-        propositos_edad: [],
         redes_sociales: {},
     });
 
@@ -180,13 +157,7 @@ export function InfoProfesionalSection() {
                     certificaciones: profile.certifications_info || "",
                     subespecialidades: profile.subspecialties || "",
                     idiomas: Array.isArray(profile.languages) ? profile.languages : ["Español"],
-                    tarifa_consulta: profile.consultation_price || null,
-                    duracion_consulta: profile.consultation_duration || 30,
-                    acepta_seguros: profile.accepts_insurance || false,
-                    aseguradoras: Array.isArray(profile.insurance_companies) ? profile.insurance_companies : [],
-                    metodos_pago: Array.isArray(profile.payment_methods) ? profile.payment_methods : [],
                     condiciones_tratadas: Array.isArray(profile.conditions_treated) ? profile.conditions_treated : [],
-                    propositos_edad: Array.isArray(profile.patient_age_groups) ? profile.patient_age_groups : [],
                     redes_sociales: (profile.social_media as Record<string, string>) || {},
                 });
             }
@@ -216,13 +187,7 @@ export function InfoProfesionalSection() {
                     certifications_info: data.certificaciones,
                     subspecialties: data.subespecialidades,
                     languages: data.idiomas,
-                    consultation_price: data.tarifa_consulta,
-                    consultation_duration: data.duracion_consulta,
-                    accepts_insurance: data.acepta_seguros,
-                    insurance_companies: data.aseguradoras,
-                    payment_methods: data.metodos_pago,
                     conditions_treated: data.condiciones_tratadas,
-                    patient_age_groups: data.propositos_edad,
                     social_media: data.redes_sociales,
                     updated_at: new Date().toISOString(),
                     // Campos requeridos mínimos si es nuevo registro (aunque idealmente deberían estar)
@@ -251,35 +216,7 @@ export function InfoProfesionalSection() {
         }));
     };
 
-    /** Alterna la selección de un método de pago */
-    const toggleMetodoPago = (metodo: string) => {
-        setData(prev => ({
-            ...prev,
-            metodos_pago: prev.metodos_pago.includes(metodo)
-                ? prev.metodos_pago.filter(m => m !== metodo)
-                : [...prev.metodos_pago, metodo]
-        }));
-    };
 
-    /** Manejo de aseguradoras */
-    const toggleAseguradora = (aseguradora: string) => {
-        setData(prev => ({
-            ...prev,
-            aseguradoras: prev.aseguradoras.includes(aseguradora)
-                ? prev.aseguradoras.filter(a => a !== aseguradora)
-                : [...prev.aseguradoras, aseguradora]
-        }));
-    };
-
-    /** Manejo de grupos de edad */
-    const toggleGrupoEdad = (grupo: string) => {
-        setData(prev => ({
-            ...prev,
-            propositos_edad: prev.propositos_edad.includes(grupo)
-                ? prev.propositos_edad.filter(g => g !== grupo)
-                : [...prev.propositos_edad, grupo]
-        }));
-    };
 
     /** Añadir condición tratada */
     const addCondicion = (condicion: string) => {
@@ -359,8 +296,8 @@ export function InfoProfesionalSection() {
                 )}
             </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                {/* Columna izquierda: Formación, Bio, Credenciales */}
+            <div className="grid grid-cols-1 gap-6">
+                {/* Columna Principal: Formación, Bio, Credenciales */}
                 <div className="space-y-6">
                     {/* Universidad y Credenciales */}
                     <div className="border dark:border-gray-700 rounded-lg p-4">
@@ -639,213 +576,7 @@ export function InfoProfesionalSection() {
                                 );
                             })}
                         </div>
-                    </div>
-                </div>
 
-                {/* Columna derecha: Servicios, Tarifas, Seguros */}
-                <div className="space-y-6">
-                    {/* Tarifa y Duración */}
-                    <div className="border dark:border-gray-700 rounded-lg p-4">
-                        <div className="flex items-center gap-2 mb-4">
-                            <div className="p-2 bg-green-100 dark:bg-green-900/30 rounded-lg">
-                                <DollarSign className="h-4 w-4 text-green-600 dark:text-green-400" />
-                            </div>
-                            <Label className="font-semibold text-gray-900 dark:text-gray-100">
-                                Consulta y Honorarios
-                            </Label>
-                        </div>
-
-                        <div className="grid grid-cols-2 gap-4">
-                            <div>
-                                <Label className="text-xs text-gray-500 mb-1.5 block">Costo Consulta ($)</Label>
-                                {isEditing ? (
-                                    <div className="relative">
-                                        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500">$</span>
-                                        <Input
-                                            type="number"
-                                            min="0"
-                                            step="0.01"
-                                            value={data.tarifa_consulta || ""}
-                                            onChange={(e) => setData({ ...data, tarifa_consulta: parseFloat(e.target.value) || null })}
-                                            className="pl-7 dark:bg-gray-800"
-                                            placeholder="0.00"
-                                        />
-                                    </div>
-                                ) : (
-                                    <p className="text-lg font-semibold text-gray-900 dark:text-gray-100">
-                                        {data.tarifa_consulta ? `$${data.tarifa_consulta.toFixed(2)}` : "No esp."}
-                                    </p>
-                                )}
-                            </div>
-
-                            <div>
-                                <Label className="text-xs text-gray-500 mb-1.5 block">Duración (min)</Label>
-                                {isEditing ? (
-                                    <select
-                                        value={data.duracion_consulta}
-                                        onChange={(e) => setData({ ...data, duracion_consulta: parseInt(e.target.value) })}
-                                        className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-sm focus:ring-2 focus:ring-blue-500 dark:bg-gray-800 dark:text-gray-100"
-                                    >
-                                        <option value={15}>15 min</option>
-                                        <option value={30}>30 min</option>
-                                        <option value={45}>45 min</option>
-                                        <option value={60}>60 min</option>
-                                    </select>
-                                ) : (
-                                    <div className="flex items-center gap-1">
-                                        <Clock className="h-3 w-3 text-gray-400" />
-                                        <p className="text-sm text-gray-700 dark:text-gray-300">
-                                            {data.duracion_consulta} min
-                                        </p>
-                                    </div>
-                                )}
-                            </div>
-                        </div>
-
-                        <div className="mt-4 pt-4 border-t dark:border-gray-700">
-                            <Label className="text-xs text-gray-500 mb-2 block">Métodos de Pago</Label>
-                            {isEditing ? (
-                                <div className="flex flex-wrap gap-2">
-                                    {METODOS_PAGO_DISPONIBLES.map((metodo) => (
-                                        <button
-                                            key={metodo}
-                                            type="button"
-                                            onClick={() => toggleMetodoPago(metodo)}
-                                            className={`px-3 py-1 text-xs rounded-full transition-colors border ${data.metodos_pago.includes(metodo)
-                                                ? "bg-green-600 text-white border-green-600"
-                                                : "bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 border-gray-200 dark:border-gray-600 hover:border-green-400"
-                                                }`}
-                                        >
-                                            {metodo}
-                                        </button>
-                                    ))}
-                                </div>
-                            ) : (
-                                <div className="flex flex-wrap gap-2">
-                                    {data.metodos_pago.length > 0 ? (
-                                        data.metodos_pago.map((metodo) => (
-                                            <span key={metodo} className="text-xs bg-gray-100 dark:bg-gray-800 px-2 py-1 rounded text-gray-600 dark:text-gray-400">
-                                                {metodo}
-                                            </span>
-                                        ))
-                                    ) : (
-                                        <span className="text-xs text-gray-500">No especificado</span>
-                                    )}
-                                </div>
-                            )}
-                        </div>
-                    </div>
-
-                    {/* Seguros Médicos */}
-                    <div className="border dark:border-gray-700 rounded-lg p-4">
-                        <div className="flex items-center justify-between mb-4">
-                            <div className="flex items-center gap-2">
-                                <div className="p-2 bg-red-100 dark:bg-red-900/30 rounded-lg">
-                                    <Shield className="h-4 w-4 text-red-600 dark:text-red-400" />
-                                </div>
-                                <Label className="font-semibold text-gray-900 dark:text-gray-100">
-                                    Seguros Médicos
-                                </Label>
-                            </div>
-                            {isEditing ? (
-                                <div className="flex items-center gap-2">
-                                    <span className="text-xs text-gray-500">{data.acepta_seguros ? "Acepta" : "No acepta"}</span>
-                                    <label className="relative inline-flex items-center cursor-pointer">
-                                        <input
-                                            type="checkbox"
-                                            className="sr-only peer"
-                                            checked={data.acepta_seguros}
-                                            onChange={(e) => setData({ ...data, acepta_seguros: e.target.checked })}
-                                        />
-                                        <div className="w-9 h-5 bg-gray-200 peer-focus:outline-none rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-red-600"></div>
-                                    </label>
-                                </div>
-                            ) : (
-                                <Badge variant={data.acepta_seguros ? "default" : "outline"} className={!data.acepta_seguros ? "text-gray-500" : ""}>
-                                    {data.acepta_seguros ? "Acepta Seguros" : "No Acepta Seguros"}
-                                </Badge>
-                            )}
-                        </div>
-
-                        {data.acepta_seguros && (
-                            <div className="mt-3">
-                                <Label className="text-xs text-gray-500 mb-2 block">Aseguradoras Aceptadas</Label>
-                                {isEditing ? (
-                                    <div className="h-48 overflow-y-auto border rounded-md p-2 space-y-1 dark:border-gray-700 dark:bg-gray-800">
-                                        {INSURANCE_COMPANIES.map((seguro) => (
-                                            <div key={seguro.value} className="flex items-center space-x-2 p-1 hover:bg-gray-50 dark:hover:bg-gray-700/50 rounded">
-                                                <Checkbox
-                                                    id={`seguro-${seguro.value}`}
-                                                    checked={data.aseguradoras.includes(seguro.value)}
-                                                    onCheckedChange={() => toggleAseguradora(seguro.value)}
-                                                />
-                                                <label
-                                                    htmlFor={`seguro-${seguro.value}`}
-                                                    className="text-sm cursor-pointer w-full text-gray-700 dark:text-gray-300"
-                                                >
-                                                    {seguro.label}
-                                                </label>
-                                            </div>
-                                        ))}
-                                    </div>
-                                ) : (
-                                    <div className="flex flex-wrap gap-1.5">
-                                        {data.aseguradoras.length > 0 ? (
-                                            data.aseguradoras.map((seguro) => (
-                                                <Badge key={seguro} variant="secondary" className="text-xs font-normal">
-                                                    {seguro}
-                                                </Badge>
-                                            ))
-                                        ) : (
-                                            <span className="text-sm text-gray-500 italic">No hsa seleccionado aseguradoras específicas</span>
-                                        )}
-                                    </div>
-                                )}
-                            </div>
-                        )}
-                    </div>
-
-                    {/* Público Objetivo */}
-                    <div className="border dark:border-gray-700 rounded-lg p-4">
-                        <div className="flex items-center gap-2 mb-3">
-                            <div className="p-2 bg-cyan-100 dark:bg-cyan-900/30 rounded-lg">
-                                <Users className="h-4 w-4 text-cyan-600 dark:text-cyan-400" />
-                            </div>
-                            <Label className="font-semibold text-gray-900 dark:text-gray-100">
-                                Pacientes
-                            </Label>
-                        </div>
-                        <p className="text-xs text-gray-500 dark:text-gray-400 mb-3">
-                            Grupos de edad que atiendes
-                        </p>
-
-                        <div className="flex flex-wrap gap-2">
-                            {AGE_GROUPS.map((grupo) => {
-                                const isSelected = data.propositos_edad.includes(grupo.value);
-                                return isEditing ? (
-                                    <button
-                                        key={grupo.value}
-                                        type="button"
-                                        onClick={() => toggleGrupoEdad(grupo.value)}
-                                        className={`px-3 py-1.5 rounded-md text-xs font-medium transition-all border ${isSelected
-                                            ? "bg-cyan-50 border-cyan-200 text-cyan-700 dark:bg-cyan-900/40 dark:border-cyan-800 dark:text-cyan-300"
-                                            : "bg-transparent border-gray-200 text-gray-600 dark:border-gray-700 dark:text-gray-400 hover:border-cyan-300"
-                                            }`}
-                                    >
-                                        {grupo.label}
-                                    </button>
-                                ) : (
-                                    isSelected && (
-                                        <Badge key={grupo.value} variant="outline" className="border-cyan-200 text-cyan-700 bg-cyan-50">
-                                            {grupo.label}
-                                        </Badge>
-                                    )
-                                );
-                            })}
-                            {!isEditing && data.propositos_edad.length === 0 && (
-                                <span className="text-sm text-gray-500">No especificado</span>
-                            )}
-                        </div>
                     </div>
 
                     {/* Idiomas */}

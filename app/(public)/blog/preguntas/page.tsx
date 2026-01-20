@@ -7,7 +7,7 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   Dialog,
@@ -28,12 +28,30 @@ import {
 } from "@/components/ui/select";
 import { fadeInUp, staggerContainer } from "@/lib/animations";
 import {
-  Search, MessageCircle, ThumbsUp, ThumbsDown, Eye, CheckCircle,
-  Clock, Filter, Plus, Award, TrendingUp, HelpCircle, Coins,
-  ArrowUp, ArrowDown, Bookmark, Share2
+  Search,
+  Eye,
+  CheckCircle,
+  Clock,
+  Filter,
+  Plus,
+  TrendingUp,
+  HelpCircle,
+  Coins,
 } from "lucide-react";
-import { getQuestions, getCategories, getPopularTags, createQuestion } from "@/lib/api/blog";
-import type { QAQuestion, BlogCategory, ContentTag, CreateQuestionInput } from "@/lib/types/blog";
+import {
+  getQuestions,
+  getCategories,
+  getPopularTags,
+  createQuestion,
+} from "@/lib/api/blog";
+import type {
+  QAQuestion,
+  BlogCategory,
+  ContentTag,
+  CreateQuestionInput,
+  QuestionFilters,
+  AuthorInfo,
+} from "@/lib/types/blog";
 import { formatDistanceToNow } from "date-fns";
 import { es } from "date-fns/locale";
 
@@ -62,6 +80,7 @@ export default function QuestionsPage() {
 
   useEffect(() => {
     loadQuestions();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedCategory, searchQuery, activeTab, page]);
 
   async function loadInitialData() {
@@ -80,7 +99,7 @@ export default function QuestionsPage() {
   async function loadQuestions() {
     setLoading(true);
     try {
-      const filters: any = {
+      const filters: QuestionFilters = {
         category: selectedCategory || undefined,
         search: searchQuery || undefined,
       };
@@ -92,7 +111,9 @@ export default function QuestionsPage() {
       }
 
       const result = await getQuestions(filters, { page, limit: 10 });
-      setQuestions(prev => page === 1 ? result.data : [...prev, ...result.data]);
+      setQuestions((prev) =>
+        page === 1 ? result.data : [...prev, ...result.data],
+      );
       setHasMore(result.hasMore);
     } catch (error) {
       console.error("Error loading questions:", error);
@@ -113,13 +134,18 @@ export default function QuestionsPage() {
 
   async function handleCreateQuestion() {
     if (!newQuestion.title.trim() || !newQuestion.content.trim()) return;
-    
+
     setSubmitting(true);
     try {
       const question = await createQuestion(newQuestion);
-      setQuestions(prev => [question, ...prev]);
+      setQuestions((prev) => [question, ...prev]);
       setShowNewQuestion(false);
-      setNewQuestion({ title: "", content: "", category_id: undefined, tags: [] });
+      setNewQuestion({
+        title: "",
+        content: "",
+        category_id: undefined,
+        tags: [],
+      });
     } catch (error) {
       console.error("Error creating question:", error);
     } finally {
@@ -139,19 +165,35 @@ export default function QuestionsPage() {
             initial="initial"
             animate="animate"
           >
-            <motion.div variants={fadeInUp} className="flex items-center justify-center gap-2 mb-4">
+            <motion.div
+              variants={fadeInUp}
+              className="flex items-center justify-center gap-2 mb-4"
+            >
               <HelpCircle className="h-6 w-6 text-purple-200" />
-              <span className="text-purple-200 font-medium">Comunidad de Salud</span>
+              <span className="text-purple-200 font-medium">
+                Comunidad de Salud
+              </span>
             </motion.div>
-            <motion.h1 variants={fadeInUp} className="text-4xl sm:text-5xl font-bold mb-6">
+            <motion.h1
+              variants={fadeInUp}
+              className="text-4xl sm:text-5xl font-bold mb-6"
+            >
               Preguntas y Respuestas
             </motion.h1>
-            <motion.p variants={fadeInUp} className="text-xl text-purple-100 mb-8 max-w-2xl mx-auto">
-              Haz preguntas sobre salud y recibe respuestas de médicos verificados y la comunidad
+            <motion.p
+              variants={fadeInUp}
+              className="text-xl text-purple-100 mb-8 max-w-2xl mx-auto"
+            >
+              Haz preguntas sobre salud y recibe respuestas de médicos
+              verificados y la comunidad
             </motion.p>
 
             {/* Search Bar */}
-            <motion.form variants={fadeInUp} onSubmit={handleSearch} className="max-w-2xl mx-auto mb-6">
+            <motion.form
+              variants={fadeInUp}
+              onSubmit={handleSearch}
+              className="max-w-2xl mx-auto mb-6"
+            >
               <div className="relative">
                 <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
                 <Input
@@ -161,7 +203,10 @@ export default function QuestionsPage() {
                   onChange={(e) => setSearchQuery(e.target.value)}
                   className="pl-12 pr-4 py-6 text-lg rounded-full bg-white/10 backdrop-blur-sm border-white/20 text-white placeholder:text-purple-200 focus:bg-white focus:text-gray-900 transition-all"
                 />
-                <Button type="submit" className="absolute right-2 top-1/2 -translate-y-1/2 rounded-full bg-white text-purple-600 hover:bg-purple-50">
+                <Button
+                  type="submit"
+                  className="absolute right-2 top-1/2 -translate-y-1/2 rounded-full bg-white text-purple-600 hover:bg-purple-50"
+                >
                   Buscar
                 </Button>
               </div>
@@ -170,7 +215,10 @@ export default function QuestionsPage() {
             <motion.div variants={fadeInUp}>
               <Dialog open={showNewQuestion} onOpenChange={setShowNewQuestion}>
                 <DialogTrigger asChild>
-                  <Button size="lg" className="bg-white text-purple-600 hover:bg-purple-50">
+                  <Button
+                    size="lg"
+                    className="bg-white text-purple-600 hover:bg-purple-50"
+                  >
                     <Plus className="h-5 w-5 mr-2" />
                     Hacer una Pregunta
                   </Button>
@@ -179,7 +227,8 @@ export default function QuestionsPage() {
                   <DialogHeader>
                     <DialogTitle>Nueva Pregunta</DialogTitle>
                     <DialogDescription>
-                      Describe tu pregunta de forma clara y detallada para obtener mejores respuestas.
+                      Describe tu pregunta de forma clara y detallada para
+                      obtener mejores respuestas.
                     </DialogDescription>
                   </DialogHeader>
                   <div className="space-y-4 mt-4">
@@ -189,7 +238,12 @@ export default function QuestionsPage() {
                         id="title"
                         placeholder="¿Cuál es tu pregunta?"
                         value={newQuestion.title}
-                        onChange={(e) => setNewQuestion(prev => ({ ...prev, title: e.target.value }))}
+                        onChange={(e) =>
+                          setNewQuestion((prev) => ({
+                            ...prev,
+                            title: e.target.value,
+                          }))
+                        }
                         className="mt-1"
                       />
                     </div>
@@ -199,7 +253,12 @@ export default function QuestionsPage() {
                         id="content"
                         placeholder="Proporciona más detalles sobre tu pregunta..."
                         value={newQuestion.content}
-                        onChange={(e) => setNewQuestion(prev => ({ ...prev, content: e.target.value }))}
+                        onChange={(e) =>
+                          setNewQuestion((prev) => ({
+                            ...prev,
+                            content: e.target.value,
+                          }))
+                        }
                         className="mt-1"
                         rows={5}
                       />
@@ -208,7 +267,12 @@ export default function QuestionsPage() {
                       <Label htmlFor="category">Categoría</Label>
                       <Select
                         value={newQuestion.category_id}
-                        onValueChange={(value) => setNewQuestion(prev => ({ ...prev, category_id: value }))}
+                        onValueChange={(value) =>
+                          setNewQuestion((prev) => ({
+                            ...prev,
+                            category_id: value,
+                          }))
+                        }
                       >
                         <SelectTrigger className="mt-1">
                           <SelectValue placeholder="Selecciona una categoría" />
@@ -223,10 +287,16 @@ export default function QuestionsPage() {
                       </Select>
                     </div>
                     <div className="flex justify-end gap-3 pt-4">
-                      <Button variant="outline" onClick={() => setShowNewQuestion(false)}>
+                      <Button
+                        variant="outline"
+                        onClick={() => setShowNewQuestion(false)}
+                      >
                         Cancelar
                       </Button>
-                      <Button onClick={handleCreateQuestion} disabled={submitting}>
+                      <Button
+                        onClick={handleCreateQuestion}
+                        disabled={submitting}
+                      >
                         {submitting ? "Publicando..." : "Publicar Pregunta"}
                       </Button>
                     </div>
@@ -276,7 +346,10 @@ export default function QuestionsPage() {
                 </h3>
                 <div className="space-y-2">
                   <button
-                    onClick={() => { setSelectedCategory(null); setPage(1); }}
+                    onClick={() => {
+                      setSelectedCategory(null);
+                      setPage(1);
+                    }}
                     className={`w-full text-left px-3 py-2 rounded-lg transition-colors ${
                       !selectedCategory
                         ? "bg-purple-100 text-purple-700 dark:bg-purple-900 dark:text-purple-300"
@@ -288,14 +361,20 @@ export default function QuestionsPage() {
                   {categories.map((category) => (
                     <button
                       key={category.id}
-                      onClick={() => { setSelectedCategory(category.id); setPage(1); }}
+                      onClick={() => {
+                        setSelectedCategory(category.id);
+                        setPage(1);
+                      }}
                       className={`w-full text-left px-3 py-2 rounded-lg transition-colors flex items-center gap-2 ${
                         selectedCategory === category.id
                           ? "bg-purple-100 text-purple-700 dark:bg-purple-900 dark:text-purple-300"
                           : "hover:bg-gray-100 dark:hover:bg-gray-800"
                       }`}
                     >
-                      <span className="w-3 h-3 rounded-full" style={{ backgroundColor: category.color }} />
+                      <span
+                        className="w-3 h-3 rounded-full"
+                        style={{ backgroundColor: category.color }}
+                      />
                       {category.name}
                     </button>
                   ))}
@@ -342,7 +421,11 @@ export default function QuestionsPage() {
 
             {/* Questions List */}
             <div className="lg:col-span-3">
-              <Tabs value={activeTab} onValueChange={handleTabChange} className="mb-6">
+              <Tabs
+                value={activeTab}
+                onValueChange={handleTabChange}
+                className="mb-6"
+              >
                 <TabsList>
                   <TabsTrigger value="recientes">Recientes</TabsTrigger>
                   <TabsTrigger value="populares">Populares</TabsTrigger>
@@ -375,7 +458,9 @@ export default function QuestionsPage() {
               ) : questions.length === 0 ? (
                 <Card className="p-12 text-center">
                   <HelpCircle className="h-12 w-12 mx-auto text-gray-400 mb-4" />
-                  <h3 className="text-lg font-semibold mb-2">No hay preguntas</h3>
+                  <h3 className="text-lg font-semibold mb-2">
+                    No hay preguntas
+                  </h3>
                   <p className="text-gray-500 mb-4">
                     {searchQuery
                       ? `No encontramos preguntas para "${searchQuery}"`
@@ -424,7 +509,7 @@ export default function QuestionsPage() {
 
 // Question Card Component
 function QuestionCard({ question }: { question: QAQuestion }) {
-  const author = question.author as any;
+  const author = question.author as AuthorInfo | undefined;
   const hasAcceptedAnswer = question.accepted_answer_id !== null;
 
   return (
@@ -433,23 +518,27 @@ function QuestionCard({ question }: { question: QAQuestion }) {
         <div className="flex gap-4">
           {/* Vote Stats */}
           <div className="flex flex-col items-center gap-2 text-center min-w-[60px]">
-            <div className={`px-3 py-2 rounded-lg ${
-              question.vote_count > 0 
-                ? "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400"
-                : question.vote_count < 0
-                ? "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400"
-                : "bg-gray-100 text-gray-600 dark:bg-gray-800"
-            }`}>
+            <div
+              className={`px-3 py-2 rounded-lg ${
+                question.vote_count > 0
+                  ? "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400"
+                  : question.vote_count < 0
+                    ? "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400"
+                    : "bg-gray-100 text-gray-600 dark:bg-gray-800"
+              }`}
+            >
               <p className="text-lg font-bold">{question.vote_count}</p>
               <p className="text-xs">votos</p>
             </div>
-            <div className={`px-3 py-2 rounded-lg ${
-              hasAcceptedAnswer
-                ? "bg-green-500 text-white"
-                : question.answer_count > 0
-                ? "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400 border border-green-300"
-                : "bg-gray-100 text-gray-600 dark:bg-gray-800"
-            }`}>
+            <div
+              className={`px-3 py-2 rounded-lg ${
+                hasAcceptedAnswer
+                  ? "bg-green-500 text-white"
+                  : question.answer_count > 0
+                    ? "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400 border border-green-300"
+                    : "bg-gray-100 text-gray-600 dark:bg-gray-800"
+              }`}
+            >
               <p className="text-lg font-bold flex items-center justify-center gap-1">
                 {hasAcceptedAnswer && <CheckCircle className="h-4 w-4" />}
                 {question.answer_count}
@@ -470,8 +559,7 @@ function QuestionCard({ question }: { question: QAQuestion }) {
               </h3>
               {question.bounty_amount > 0 && (
                 <Badge className="bg-yellow-500 text-yellow-900 flex-shrink-0">
-                  <Coins className="h-3 w-3 mr-1" />
-                  +{question.bounty_amount}
+                  <Coins className="h-3 w-3 mr-1" />+{question.bounty_amount}
                 </Badge>
               )}
             </div>
@@ -483,11 +571,20 @@ function QuestionCard({ question }: { question: QAQuestion }) {
             {/* Tags */}
             {question.tags && question.tags.length > 0 && (
               <div className="flex flex-wrap gap-1 mb-3">
-                {(question.tags as any[]).slice(0, 4).map((tagWrapper) => (
-                  <Badge key={tagWrapper.tag.id} variant="secondary" className="text-xs">
-                    {tagWrapper.tag.name}
-                  </Badge>
-                ))}
+                {(question.tags as unknown[])
+                  .slice(0, 4)
+                  .map((tagItem: unknown) => {
+                    const tagWrapper = tagItem as { tag: ContentTag };
+                    return (
+                      <Badge
+                        key={tagWrapper.tag.id}
+                        variant="secondary"
+                        className="text-xs"
+                      >
+                        {tagWrapper.tag.name}
+                      </Badge>
+                    );
+                  })}
               </div>
             )}
 
@@ -500,14 +597,19 @@ function QuestionCard({ question }: { question: QAQuestion }) {
                     {author?.nombre_completo?.[0] || "U"}
                   </AvatarFallback>
                 </Avatar>
-                <span className="truncate max-w-[100px]">{author?.nombre_completo}</span>
+                <span className="truncate max-w-[100px]">
+                  {author?.nombre_completo}
+                </span>
                 {question.category && (
                   <>
                     <span>•</span>
                     <Badge
                       variant="outline"
                       className="text-xs"
-                      style={{ borderColor: question.category.color, color: question.category.color }}
+                      style={{
+                        borderColor: question.category.color,
+                        color: question.category.color,
+                      }}
                     >
                       {question.category.name}
                     </Badge>
@@ -516,7 +618,10 @@ function QuestionCard({ question }: { question: QAQuestion }) {
               </div>
               <span className="flex items-center gap-1">
                 <Clock className="h-3 w-3" />
-                {formatDistanceToNow(new Date(question.created_at), { addSuffix: true, locale: es })}
+                {formatDistanceToNow(new Date(question.created_at), {
+                  addSuffix: true,
+                  locale: es,
+                })}
               </span>
             </div>
           </div>

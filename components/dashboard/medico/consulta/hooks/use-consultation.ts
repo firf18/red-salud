@@ -172,7 +172,7 @@ export function useConsultation(appointmentId: string | null, pacienteId: string
                     medicamentos: medicamentosActuales.join(", "),
                 };
 
-                let medicalRecordId = appointment.medical_record_id;
+                const medicalRecordId = appointment.medical_record_id;
 
                 if (medicalRecordId) {
                     await supabase

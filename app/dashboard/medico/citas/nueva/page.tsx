@@ -139,21 +139,21 @@ function NuevaCitaContent() {
 
   return (
     <VerificationGuard>
-      <div className="min-h-screen bg-gray-50 px-4 sm:px-6 py-6">
+      <div className="min-h-screen bg-background px-4 sm:px-6 py-6">
         {/* Header */}
-        <div className="mb-8 max-w-4xl mx-auto">
+        <div className="mb-8 w-full">
           <button
             type="button"
             onClick={() => router.back()}
-            className="inline-flex items-center gap-2 text-sm text-gray-600 hover:text-gray-900 transition-colors mb-4"
+            className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors mb-4"
           >
             <ArrowLeft className="h-4 w-4" />
             <span>Volver</span>
           </button>
           <div className="flex items-center justify-between">
             <div className="page-title flex-1">
-              <h1 className="text-3xl font-bold text-gray-900">Nueva Cita</h1>
-              <p className="text-gray-600 mt-1">Crea una cita con pacientes registrados u offline</p>
+              <h1 className="text-3xl font-bold text-foreground">Nueva Cita</h1>
+              <p className="text-muted-foreground mt-1">Crea una cita con pacientes registrados u offline</p>
             </div>
             <div className="flex items-center gap-2">
               <TourButton tourType="nueva-cita" />
@@ -161,11 +161,10 @@ function NuevaCitaContent() {
                 type="button"
                 onClick={() => setAdvancedMode(!advancedMode)}
                 data-tour="advanced-toggle"
-                className={`px-3 py-1.5 text-sm font-medium rounded-md transition-colors ${
-                  advancedMode
-                    ? "bg-blue-100 text-blue-700 hover:bg-blue-200"
-                    : "bg-gray-200 text-gray-700 hover:bg-gray-300"
-                }`}
+                className={`px-3 py-1.5 text-sm font-medium rounded-md transition-colors ${advancedMode
+                    ? "bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 hover:bg-blue-200 dark:hover:bg-blue-900/40"
+                    : "bg-muted text-muted-foreground hover:bg-muted/80"
+                  }`}
               >
                 {advancedMode ? "Modo Simple" : "Modo Avanzado"}
               </button>
@@ -173,11 +172,11 @@ function NuevaCitaContent() {
           </div>
         </div>
 
-        <div className="max-w-4xl mx-auto">
+        <div className="w-full">
           <FormProvider {...form}>
             <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
               {/* Formulario compacto */}
-              <div className="bg-white rounded-lg shadow-sm border border-gray-200">
+              <div className="bg-card rounded-lg shadow-sm border border-border">
                 <div className="p-6">
                   <CompactAppointmentForm
                     getMinDate={getMinDate}

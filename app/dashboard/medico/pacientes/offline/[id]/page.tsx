@@ -26,6 +26,7 @@ import {
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
 import { VerificationGuard } from "@/components/dashboard/medico/features/verification-guard";
+import { ConsultationActionButton } from "@/components/dashboard/medico/pacientes/consultation-action-button";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 
 interface OfflinePatient {
@@ -192,6 +193,14 @@ export default function OfflinePatientDetailPage() {
             </div>
           </CardContent>
         </Card>
+
+        {/* Quick Actions */}
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+          <ConsultationActionButton 
+            patientId={patient.id} 
+            patientType="offline" 
+          />
+        </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {/* Contact Information */}

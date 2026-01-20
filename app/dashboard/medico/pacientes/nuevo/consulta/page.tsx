@@ -5,12 +5,15 @@ import { useEffect, useMemo, useState } from "react";
 import { supabase } from "@/lib/supabase/client";
 import { VerificationGuard } from "@/components/dashboard/medico/features/verification-guard";
 import { MedicalWorkspace } from "@/components/dashboard/medico/medical-workspace";
+import { QuickRegistrationModal } from "@/components/dashboard/medico/pacientes/quick-registration-modal";
 import { buildPacienteFromParams } from "../_utils/consulta";
 
 export default function ConsultaPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const paciente = useMemo(() => buildPacienteFromParams(searchParams as unknown as URLSearchParams), [searchParams]);
+  // Inicialmente construimos desde params, pero podemos actualizarlo tras el registro rápido
+  const [paciente, setPaciente] = useState(() => buildPacienteFromParams(searchParams as unknown as URLSearchParams));
+  const [showRegistration, setShowRegistration] = useState(false);
 
   const [alergias, setAlergias] = useState<string[]>([]);
   const [condicionesCronicas, setCondicionesCronicas] = useState<string[]>([]);
@@ -20,10 +23,39 @@ export default function ConsultaPage() {
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    if (!paciente.cedula || !paciente.nombre_completo) {
+    // Si no hay ID (es un paciente nuevo desde params) y tenemos datos básicos, mostrar modal
+    // Verificamos si ya estamos "registrados" en el estado local (paciente.id)
+    if ((!paciente.id && paciente.cedula && paciente.nombre_completo) && !showRegistration) {
+      // Verificar si realmente no existe (doble check opcional, pero aquí asumimos que el flujo anterior ya buscó)
+      // Mostramos el modal para completar datos
+      setShowRegistration(true);
+    } else if (!paciente.cedula || !paciente.nombre_completo) {
       router.replace("/dashboard/medico/pacientes/nuevo");
     }
   }, [paciente, router]);
+
+  const handleRegistrationSuccess = (patientId: string, patientData: any) => {
+    // Actualizar el estado del paciente con los datos reales de la BD
+    setPaciente({
+      ...paciente,
+      id: patientId,
+      ...patientData,
+      // Asegurar que usamos el formato correcto para MedicalWorkspace
+      edad: patientData.fecha_nacimiento ? calculateAge(patientData.fecha_nacimiento) : null,
+    });
+    setShowRegistration(false);
+  };
+
+  const calculateAge = (birthDate: string) => {
+    const today = new Date();
+    const birth = new Date(birthDate);
+    let age = today.getFullYear() - birth.getFullYear();
+    const m = today.getMonth() - birth.getMonth();
+    if (m < 0 || (m === 0 && today.getDate() < birth.getDate())) {
+      age--;
+    }
+    return age;
+  };
 
   const onSave = async () => {
     setLoading(true);
@@ -33,34 +65,47 @@ export default function ConsultaPage() {
         router.push("/login/medico");
         return;
       }
+      
       const notasConDiagnosticos = notasMedicas + (diagnosticos.length > 0 ? `\n\nDiagnósticos:\n${diagnosticos.join("\n")}` : "");
-      const { data: offlinePatient, error: insertError } = await supabase
-        .from("offline_patients")
-        .insert({
-          doctor_id: user.id,
-          cedula: paciente.cedula,
-          nombre_completo: paciente.nombre_completo,
-          fecha_nacimiento: null,
-          genero: paciente.genero || null,
-          telefono: null,
-          email: null,
-          direccion: null,
-          alergias: alergias.length > 0 ? alergias : null,
-          condiciones_cronicas: condicionesCronicas.length > 0 ? condicionesCronicas : null,
-          medicamentos_actuales: medicamentosActuales.length > 0 ? medicamentosActuales : null,
-          notas_medico: notasConDiagnosticos || null,
-          status: "offline",
-        })
-        .select()
-        .single();
-      if (insertError) throw insertError;
-      await supabase.from("user_activity_log").insert({
-        user_id: user.id,
-        activity_type: "offline_patient_created",
-        description: `Paciente offline registrado: ${paciente.nombre_completo} (${paciente.cedula})`,
-        status: "success",
-      });
-      router.push(`/dashboard/medico/pacientes/offline/${offlinePatient.id}`);
+
+      // Si ya tenemos ID (registrado vía modal), actualizamos
+      if (paciente.id) {
+        const { error: updateError } = await supabase
+          .from("offline_patients")
+          .update({
+             alergias: alergias.length > 0 ? alergias : null,
+             condiciones_cronicas: condicionesCronicas.length > 0 ? condicionesCronicas : null,
+             medicamentos_actuales: medicamentosActuales.length > 0 ? medicamentosActuales : null,
+             notas_medico: notasConDiagnosticos || null,
+          })
+          .eq("id", paciente.id);
+          
+        if (updateError) throw updateError;
+        router.push(`/dashboard/medico/pacientes/offline/${paciente.id}`);
+      } else {
+        // Fallback original (por si acaso)
+        const { data: offlinePatient, error: insertError } = await supabase
+          .from("offline_patients")
+          .insert({
+            doctor_id: user.id,
+            cedula: paciente.cedula,
+            nombre_completo: paciente.nombre_completo,
+            fecha_nacimiento: null,
+            genero: paciente.genero || null,
+            telefono: null,
+            email: null,
+            direccion: null,
+            alergias: alergias.length > 0 ? alergias : null,
+            condiciones_cronicas: condicionesCronicas.length > 0 ? condicionesCronicas : null,
+            medicamentos_actuales: medicamentosActuales.length > 0 ? medicamentosActuales : null,
+            notas_medico: notasConDiagnosticos || null,
+            status: "offline",
+          })
+          .select()
+          .single();
+        if (insertError) throw insertError;
+        router.push(`/dashboard/medico/pacientes/offline/${offlinePatient.id}`);
+      }
     } finally {
       setLoading(false);
     }
@@ -83,6 +128,14 @@ export default function ConsultaPage() {
         onSave={onSave}
         onBack={() => router.push("/dashboard/medico/pacientes/nuevo")}
         loading={loading}
+      />
+      
+      <QuickRegistrationModal 
+        open={showRegistration}
+        onOpenChange={setShowRegistration}
+        cedula={paciente.cedula || ""}
+        nombre={paciente.nombre_completo || ""}
+        onSuccess={handleRegistrationSuccess}
       />
     </VerificationGuard>
   );

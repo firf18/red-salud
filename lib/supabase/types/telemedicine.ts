@@ -29,7 +29,7 @@ export interface TelemedicineSession {
   connection_quality?: ConnectionQuality;
   session_notes?: string;
   technical_issues?: string;
-  metadata: Record<string, any>;
+  metadata: Record<string, unknown>;
   created_at: string;
   updated_at: string;
   // Datos relacionados
@@ -66,7 +66,7 @@ export interface TelemedicineParticipant {
   video_enabled: boolean;
   audio_enabled: boolean;
   screen_sharing: boolean;
-  device_info: Record<string, any>;
+  device_info: Record<string, unknown>;
   created_at: string;
   updated_at: string;
 }
@@ -82,7 +82,7 @@ export interface TelemedicineChatMessage {
   file_size?: number;
   file_type?: string;
   is_read: boolean;
-  metadata: Record<string, any>;
+  metadata: Record<string, unknown>;
   created_at: string;
   // Datos del remitente
   sender?: {
@@ -103,7 +103,7 @@ export interface TelemedicineRecording {
   is_available_to_patient: boolean;
   is_available_to_doctor: boolean;
   expires_at?: string;
-  metadata: Record<string, any>;
+  metadata: Record<string, unknown>;
   created_at: string;
   updated_at: string;
 }
@@ -206,7 +206,7 @@ export interface JoinSessionData {
   role: ParticipantRole;
   video_enabled?: boolean;
   audio_enabled?: boolean;
-  device_info?: Record<string, any>;
+  device_info?: Record<string, unknown>;
 }
 
 // Tipos para estadísticas

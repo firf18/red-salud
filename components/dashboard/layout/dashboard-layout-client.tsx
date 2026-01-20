@@ -109,6 +109,7 @@ export function DashboardLayoutClient({
           items: [
             { key: "dashboard", label: "Dashboard", icon: "LayoutDashboard", route: "/dashboard/medico" },
             { key: "citas", label: "Agenda", icon: "Calendar", route: "/dashboard/medico/citas" },
+            { key: "consulta", label: "Consulta", icon: "Stethoscope", route: "/dashboard/medico/consulta" },
             { key: "pacientes", label: "Pacientes", icon: "User", route: "/dashboard/medico/pacientes" },
           ],
         },
