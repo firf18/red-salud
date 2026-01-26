@@ -1,6 +1,5 @@
 "use client";
 
-import { motion } from "framer-motion";
 import Link from "next/link";
 import {
   UserCircle,
@@ -13,10 +12,9 @@ import {
   UserCog,
 } from "lucide-react";
 import { Card } from "@/components/ui/card";
-import { ROLE_CONFIG, USER_ROLES, type UserRole, ROUTES } from "@/lib/constants";
+import { ROLE_CONFIG, type UserRole, ROUTES } from "@/lib/constants";
 import { Logo } from "@/components/ui/logo";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
-import { fadeInUp, staggerContainer } from "@/lib/animations";
 
 /**
  * Página de selección de rol para Registro

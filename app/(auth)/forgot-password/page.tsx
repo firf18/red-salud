@@ -48,7 +48,7 @@ export default function ForgotPasswordPage() {
       }
 
       setSuccess(true);
-    } catch (err) {
+    } catch {
       setError("Error al enviar el correo de recuperación");
       setIsLoading(false);
     }

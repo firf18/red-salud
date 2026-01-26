@@ -64,7 +64,7 @@ export async function POST(request: NextRequest) {
 
     // Verificar si la cédula ya está registrada en otra cuenta
     const cedulaFormateada = `${nacionalidad}-${cedulaLimpia}`;
-    const { data: existingProfile, error: checkError } = await supabase
+    const { data: existingProfile } = await supabase
       .from("profiles")
       .select("id, nombre_completo, email")
       .eq("cedula", cedulaFormateada)
@@ -157,3 +157,4 @@ export async function POST(request: NextRequest) {
     );
   }
 }
+

@@ -9,6 +9,8 @@
  * const { appointments, messages, notifications, stats, isLoading } = useDashboardData(doctorId);
  */
 
+import type { Appointment } from '@/lib/supabase/types/appointments';
+
 "use client";
 
 import { useState, useEffect, useCallback, useMemo } from "react";
@@ -67,7 +69,7 @@ export interface DashboardStats {
 /** Datos completos del dashboard */
 export interface DashboardData {
     /** Citas crudas */
-    appointments: any[];
+    appointments: Appointment[];
     /** Citas del día */
     todayAppointments: TodayAppointment[];
     /** Citas de la semana */

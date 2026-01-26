@@ -1,13 +1,12 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { motion } from "framer-motion";
 import {
   CheckCircle2,
   AlertTriangle,
   XCircle,
   Clock,
-  Activity,
   Server,
   Database,
   Globe,
@@ -17,7 +16,6 @@ import {
   Shield,
   RefreshCw,
   Bell,
-  ExternalLink,
   Calendar,
   type LucideIcon,
 } from "lucide-react";

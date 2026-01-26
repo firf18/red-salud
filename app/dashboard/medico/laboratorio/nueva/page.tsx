@@ -77,7 +77,7 @@ export default function NewLabOrderPage() {
             } else {
                 throw new Error((result.error as Error)?.message || "Error al crear la orden");
             }
-        } catch (error: any) {
+        } catch (error) {
             console.error("Error creating order:", error);
             toast.error("Error al crear la orden");
         } finally {
@@ -186,7 +186,7 @@ export default function NewLabOrderPage() {
                             <CardContent className="space-y-4">
                                 <div className="space-y-2">
                                     <Label>Prioridad</Label>
-                                    <Select value={priority} onValueChange={(v: any) => setPriority(v)}>
+                                    <Select value={priority} onValueChange={(v) => setPriority(v as "normal" | "urgente" | "stat")}>
                                         <SelectTrigger>
                                             <SelectValue />
                                         </SelectTrigger>

@@ -1,9 +1,9 @@
 'use client';
 
 import { motion } from 'framer-motion';
-import { ShieldCheck, Clock, FileText, UserCheck, HeartHandshake, Smartphone } from 'lucide-react';
+import { ShieldCheck, Clock, FileText, UserCheck, HeartHandshake, Smartphone, LucideIcon } from 'lucide-react';
 
-const iconMap: Record<string, any> = {
+const iconMap: Record<string, LucideIcon> = {
   Clock, 
   UserCheck, 
   FileText, 
@@ -12,7 +12,14 @@ const iconMap: Record<string, any> = {
   Smartphone
 };
 
-const defaultBenefits = [
+interface Benefit {
+  icon: LucideIcon;
+  title: string;
+  description: string;
+  color: string;
+}
+
+const defaultBenefits: Benefit[] = [
   {
     icon: Clock,
     title: "Atención 24/7",
@@ -51,7 +58,7 @@ const defaultBenefits = [
   }
 ];
 
-export function Benefits({ data }: { data?: any[] }) {
+export function Benefits({ data }: { data?: Benefit[] }) {
   const benefitsToDisplay = data && data.length > 0 ? data : defaultBenefits;
 
   return (

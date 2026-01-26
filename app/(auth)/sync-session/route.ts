@@ -11,7 +11,7 @@ import type { CookieOptions } from '@supabase/ssr'
  * 2. El user_metadata esté disponible para el proxy
  * 3. La redirección al dashboard sea inmediata
  */
-export async function POST(request: Request) {
+export async function POST() {
   try {
     const cookieStore = await cookies()
     

@@ -45,7 +45,7 @@ export function PricingCards({ isAnnual }: PricingCardsProps) {
                         ctaText="Crear cuenta gratis"
                         ctaHref={`${AUTH_ROUTES.REGISTER}?tipo=paciente`}
                         variant="default"
-                        position="first"
+                        _position="first"
                     />
 
                     {/* Plan Médico Pro - Destacado */}
@@ -60,7 +60,7 @@ export function PricingCards({ isAnnual }: PricingCardsProps) {
                         ctaHref={`${AUTH_ROUTES.REGISTER}?tipo=medico`}
                         variant="featured"
                         badge="Más Popular"
-                        position="middle"
+                        _position="middle"
                     />
 
                     {/* Plan Organizaciones */}
@@ -73,7 +73,7 @@ export function PricingCards({ isAnnual }: PricingCardsProps) {
                         ctaText="Contactar ventas"
                         ctaHref={ROUTES.CONTACTO}
                         variant="default"
-                        position="middle"
+                        _position="middle"
                     />
 
                     {/* Plan Enterprise */}
@@ -86,7 +86,7 @@ export function PricingCards({ isAnnual }: PricingCardsProps) {
                         ctaText="Hablar con un experto"
                         ctaHref={ROUTES.CONTACTO}
                         variant="ghost"
-                        position="last"
+                        _position="last"
                     />
                 </div>
             </div>
@@ -120,7 +120,7 @@ interface PricingCardProps {
     /** Badge opcional (ej: "Más Popular") */
     badge?: string;
     /** Posición en el grid para bordes */
-    position: "first" | "middle" | "last";
+    _position: "first" | "middle" | "last";
 }
 
 function PricingCard({
@@ -134,7 +134,6 @@ function PricingCard({
     ctaHref,
     variant,
     badge,
-    position,
 }: PricingCardProps) {
     const isFeatured = variant === "featured";
 
@@ -214,3 +213,4 @@ function PricingCard({
         </motion.div>
     );
 }
+

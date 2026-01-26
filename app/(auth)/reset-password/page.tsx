@@ -73,7 +73,7 @@ export default function ResetPasswordPage() {
       setTimeout(() => {
         router.push("/login");
       }, 3000);
-    } catch (err) {
+    } catch {
       setError("Error al restablecer la contraseña");
       setIsLoading(false);
     }

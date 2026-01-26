@@ -113,10 +113,10 @@ export function ConsultationActionButton({ patientId, patientType, className }: 
       
       router.push(`/dashboard/medico/pacientes/consulta?${params.toString()}`);
 
-    } catch (err: any) {
+    } catch (err) {
       console.error("Error starting consultation:", err);
       toast.error("Error", {
-        description: "No se pudo iniciar la consulta: " + (err.message || "Error desconocido"),
+        description: "No se pudo iniciar la consulta: " + (err instanceof Error ? err.message : "Error desconocido"),
       });
     } finally {
       setActionLoading(false);

@@ -27,6 +27,35 @@ import { format } from "date-fns";
 import { es } from "date-fns/locale";
 import { VerificationGuard } from "@/components/dashboard/medico/features/verification-guard";
 
+interface Appointment {
+  id: string;
+  fecha: string;
+  hora: string;
+  fecha_hora?: string;
+  motivo: string;
+  status: string;
+  duracion_minutos?: number;
+}
+
+interface MedicalNote {
+  id: string;
+  created_at: string;
+  diagnostico: string;
+  tratamiento: string;
+  title?: string;
+  note_type?: string;
+  content?: string;
+}
+
+interface Prescription {
+  id: string;
+  created_at: string;
+  medicamento: string;
+  dosis: string;
+  diagnostico?: string;
+  status?: string;
+}
+
 interface PatientData {
   id: string;
   nombre_completo: string;
@@ -58,9 +87,9 @@ export default function PatientDetailPage() {
   const [loading, setLoading] = useState(true);
   const [patient, setPatient] = useState<PatientData | null>(null);
   const [relation, setRelation] = useState<DoctorPatientRelation | null>(null);
-  const [appointments, setAppointments] = useState<any[]>([]);
-  const [medicalNotes, setMedicalNotes] = useState<any[]>([]);
-  const [prescriptions, setPrescriptions] = useState<any[]>([]);
+  const [appointments, setAppointments] = useState<Appointment[]>([]);
+  const [medicalNotes, setMedicalNotes] = useState<MedicalNote[]>([]);
+  const [prescriptions, setPrescriptions] = useState<Prescription[]>([]);
 
   useEffect(() => {
     loadPatientData();
@@ -426,10 +455,10 @@ export default function PatientDetailPage() {
                           </div>
                           <div>
                             <p className="font-medium">
-                              {format(new Date(apt.fecha_hora), "dd 'de' MMMM, yyyy", { locale: es })}
+                              {apt.fecha_hora ? format(new Date(apt.fecha_hora), "dd 'de' MMMM, yyyy", { locale: es }) : 'Fecha no disponible'}
                             </p>
                             <p className="text-sm text-gray-600">
-                              {format(new Date(apt.fecha_hora), "HH:mm")} • {apt.duracion_minutos} min
+                              {apt.fecha_hora ? format(new Date(apt.fecha_hora), "HH:mm") : 'N/A'} • {apt.duracion_minutos || 0} min
                             </p>
                             {apt.motivo && (
                               <p className="text-sm text-gray-500 mt-1">{apt.motivo}</p>

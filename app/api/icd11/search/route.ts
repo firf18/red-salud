@@ -38,7 +38,7 @@ export async function GET(request: NextRequest) {
         }));
         usedFallback = true;
       }
-    } catch (apiError) {
+    } catch {
       // Si la API falla, usar base de datos local
       console.log("API de ICD-11 no disponible, usando base de datos local");
       const localResults = searchLocalICD11(query);

@@ -9,13 +9,8 @@ export async function POST(request: Request) {
       userId,
       nombre_completo,
       telefono,
-      mpps,
-      especialidad,
-      universidad,
       anos_experiencia,
       bio,
-      subespecialidades,
-      certificaciones,
       idiomas,
     } = body;
 

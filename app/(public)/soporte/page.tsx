@@ -5,7 +5,6 @@ import { motion, AnimatePresence } from "framer-motion";
 import {
   Search,
   MessageCircle,
-  Book,
   FileText,
   Phone,
   Mail,
@@ -14,8 +13,6 @@ import {
   CreditCard,
   Calendar,
   Users,
-  Settings,
-  HelpCircle,
   ChevronRight,
   ArrowRight,
   Sparkles,
@@ -24,11 +21,9 @@ import {
   ExternalLink,
   Headphones,
   Zap,
-  Globe,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import Link from "next/link";
 import { ROUTES, CONTACT_INFO } from "@/lib/constants";
@@ -740,3 +735,4 @@ export default function SoportePage() {
     </div>
   );
 }
+

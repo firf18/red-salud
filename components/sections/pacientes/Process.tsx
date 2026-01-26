@@ -1,16 +1,22 @@
 'use client';
 
 import { motion } from 'framer-motion';
-import { UserPlus, Search, CalendarCheck, Video } from 'lucide-react';
+import { UserPlus, Search, CalendarCheck, Video, LucideIcon } from 'lucide-react';
 
-const iconMap: Record<string, any> = {
+const iconMap: Record<string, LucideIcon> = {
   UserPlus, 
   Search, 
   CalendarCheck, 
   Video
 };
 
-const defaultSteps = [
+interface ProcessStep {
+  icon: LucideIcon;
+  title: string;
+  description: string;
+}
+
+const defaultSteps: ProcessStep[] = [
   {
     icon: UserPlus,
     title: "Crea tu Cuenta",
@@ -33,7 +39,7 @@ const defaultSteps = [
   }
 ];
 
-export function Process({ data }: { data?: any[] }) {
+export function Process({ data }: { data?: ProcessStep[] }) {
   const stepsToDisplay = data && data.length > 0 ? data : defaultSteps;
 
   return (

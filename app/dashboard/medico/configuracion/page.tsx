@@ -100,17 +100,11 @@ export default function ConfiguracionMedicoPage() {
   const searchParams = useSearchParams();
   const router = useRouter();
 
-  const [activeTab, setActiveTab] = useState<TabType>((searchParams.get("tab") as TabType) || "perfil");
-
-  useEffect(() => {
-    const tabFromUrl = searchParams.get("tab") as TabType;
-    if (tabFromUrl && TABS.some(t => t.id === tabFromUrl)) {
-      setActiveTab(tabFromUrl);
-    }
-  }, [searchParams]);
+  // Obtener el tab activo directamente de la URL sin estado duplicado
+  const tabFromUrl = searchParams.get("tab") as TabType;
+  const activeTab = (tabFromUrl && TABS.some(t => t.id === tabFromUrl)) ? tabFromUrl : "perfil";
 
   const handleTabChange = (tabId: TabType) => {
-    setActiveTab(tabId);
     const newUrl = tabId === "perfil"
       ? "/dashboard/medico/configuracion"
       : `/dashboard/medico/configuracion?tab=${tabId}`;

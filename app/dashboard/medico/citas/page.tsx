@@ -7,15 +7,14 @@ import { VerificationGuard } from "@/components/dashboard/medico/features/verifi
 import { CalendarMain } from "@/components/dashboard/medico/calendar/calendar-main";
 import { PatientSummaryModal } from "@/components/dashboard/medico/calendar/patient-summary-modal";
 import type { CalendarAppointment } from "@/components/dashboard/medico/calendar/types";
-import { startOfMonth, endOfMonth, addMonths, addWeeks, subWeeks, isSameDay, format, addDays, subDays, subMonths } from "date-fns";
-import { es } from "date-fns/locale";
+import { startOfMonth, endOfMonth, addMonths, addWeeks, subWeeks, isSameDay } from "date-fns";
 import { Toast, type ToastType } from "@/components/ui/toast";
 import type { RealtimeChannel } from "@supabase/supabase-js";
 import { useDragAndDrop } from "@/hooks/use-drag-drop";
 import { useKeyboardShortcuts, DEFAULT_SHORTCUTS } from "@/hooks/use-keyboard-shortcuts";
 import { Button } from "@/components/ui/button";
-import { ChevronLeft, ChevronRight, Plus, Calendar as CalendarIcon, MessageCircle, HelpCircle } from "lucide-react";
-import { CalendarViewSelector, type CalendarView } from "@/components/dashboard/medico/calendar/calendar-view-selector";
+import { MessageCircle, HelpCircle } from "lucide-react";
+import type { CalendarView } from "@/components/dashboard/medico/calendar/calendar-view-selector";
 import { SessionTimer } from "@/components/auth";
 
 
@@ -57,10 +56,6 @@ export default function DoctorCitasPage() {
   const handleCloseModal = () => {
     setModalOpen(false);
     setSelectedAppointment(null);
-  };
-
-  const handleViewChange = (newView: CalendarView) => {
-    setView(newView);
   };
 
   const handleTimeSlotClick = (date: Date, hour?: number) => {

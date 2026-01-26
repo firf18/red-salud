@@ -55,11 +55,13 @@ export async function signUp(data: SignUpData) {
       user: authData.user,
       session: authData.session,
     };
-  } catch (error: any) {
+  } catch (error) {
     console.error("Error en signUp:", error);
 
+    const errorMessage = error instanceof Error ? error.message : String(error);
+
     // Detectar errores de red
-    if (error.message?.includes("fetch") || error.message?.includes("network")) {
+    if (errorMessage?.includes("fetch") || errorMessage?.includes("network")) {
       return {
         success: false,
         error: "Error de conexión. Verifica tu internet e intenta de nuevo.",
@@ -102,11 +104,13 @@ export async function signIn(data: LoginFormData) {
       user: authData.user,
       session: authData.session,
     };
-  } catch (error: any) {
+  } catch (error) {
     console.error("Error en signIn:", error);
 
+    const errorMessage = error instanceof Error ? error.message : String(error);
+
     // Detectar errores de red
-    if (error.message?.includes("fetch") || error.message?.includes("network")) {
+    if (errorMessage?.includes("fetch") || errorMessage?.includes("network")) {
       return {
         success: false,
         error: "Error de conexión. Verifica tu internet e intenta de nuevo.",

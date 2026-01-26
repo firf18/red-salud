@@ -44,15 +44,15 @@ export default function SecretariasPage() {
       if (error) throw error;
 
       setSecretaries(data || []);
-    } catch (err: any) {
+    } catch (err) {
       console.error("Error loading secretaries:", err);
-      setError(err.message);
+      setError(err instanceof Error ? err.message : "Error desconocido");
     } finally {
       setLoading(false);
     }
   };
 
-  const handleInviteSecretary = async (inviteForm: any) => {
+  const handleInviteSecretary = async (inviteForm: { email: string; password: string; nombre_completo: string }) => {
     setError(null);
     setSuccess(null);
     setLoading(true);
@@ -100,9 +100,9 @@ export default function SecretariasPage() {
       setSuccess("Secretaria invitada exitosamente");
       setShowInviteDialog(false);
       loadSecretaries();
-    } catch (err: any) {
+    } catch (err) {
       console.error("Error inviting secretary:", err);
-      setError(err.message || "Error al invitar secretaria");
+      setError(err instanceof Error ? err.message : "Error al invitar secretaria");
     } finally {
       setLoading(false);
     }
@@ -125,9 +125,9 @@ export default function SecretariasPage() {
       setSuccess("Permisos actualizados exitosamente");
       setShowPermissionsDialog(false);
       loadSecretaries();
-    } catch (err: any) {
+    } catch (err) {
       console.error("Error updating permissions:", err);
-      setError(err.message);
+      setError(err instanceof Error ? err.message : "Error desconocido");
     } finally {
       setLoading(false);
     }
@@ -146,9 +146,9 @@ export default function SecretariasPage() {
 
       setSuccess("Secretaria eliminada exitosamente");
       loadSecretaries();
-    } catch (err: any) {
+    } catch (err) {
       console.error("Error deleting secretary:", err);
-      setError(err.message);
+      setError(err instanceof Error ? err.message : "Error desconocido");
     }
   };
 

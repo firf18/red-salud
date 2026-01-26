@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { validateICD11Code, searchICD11ByCode } from "@/lib/services/icd-api-service";
+import { searchICD11ByCode } from "@/lib/services/icd-api-service";
 
 export async function GET(request: NextRequest) {
   try {

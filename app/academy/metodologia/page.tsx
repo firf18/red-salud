@@ -12,11 +12,8 @@ import {
     Brain,
     Target,
     TrendingUp,
-    BarChart3,
-    Zap,
     Repeat,
     BookOpen,
-    CheckCircle2,
     ArrowRight,
     FlaskConical,
     Lightbulb,
@@ -406,3 +403,4 @@ export default function MetodologiaPage() {
         </div>
     );
 }
+

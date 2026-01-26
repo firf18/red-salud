@@ -18,15 +18,17 @@ export function TourTriggerButton() {
   // Detectar tour disponible para la ruta actual
   const availableTour = getTourForRoute(pathname);
 
-  if (isTourActive || !availableTour) return null;
-
   useEffect(() => {
+    if (!availableTour) return;
+    
     const handleStart = () => {
       if (availableTour) startTour(availableTour.id);
     };
     document.addEventListener('start-tour', handleStart);
     return () => document.removeEventListener('start-tour', handleStart);
   }, [availableTour, startTour]);
+
+  if (isTourActive || !availableTour) return null;
 
   const handleClick = () => {
     startTour(availableTour.id);

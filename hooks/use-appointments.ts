@@ -21,7 +21,7 @@ import type {
 export function usePatientAppointments(patientId: string | undefined) {
   const [appointments, setAppointments] = useState<Appointment[]>([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<any>(null);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     if (!patientId) return;
@@ -32,7 +32,7 @@ export function usePatientAppointments(patientId: string | undefined) {
       if (result.success) {
         setAppointments(result.data);
       } else {
-        setError(result.error);
+        setError(String(result.error) || 'Error loading appointments');
       }
       setLoading(false);
     };
@@ -43,7 +43,7 @@ export function usePatientAppointments(patientId: string | undefined) {
   const refreshAppointments = async () => {
     if (!patientId) return;
     const result = await getPatientAppointments(patientId);
-    if (result.success) {
+    if (result.success && result.data) {
       setAppointments(result.data);
     }
   };
@@ -55,7 +55,7 @@ export function usePatientAppointments(patientId: string | undefined) {
 export function useDoctorAppointments(doctorId: string | undefined) {
   const [appointments, setAppointments] = useState<Appointment[]>([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<any>(null);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     if (!doctorId) return;
@@ -66,7 +66,7 @@ export function useDoctorAppointments(doctorId: string | undefined) {
       if (result.success) {
         setAppointments(result.data);
       } else {
-        setError(result.error);
+        setError(String(result.error) || 'Error loading appointments');
       }
       setLoading(false);
     };
@@ -77,7 +77,7 @@ export function useDoctorAppointments(doctorId: string | undefined) {
   const refreshAppointments = async () => {
     if (!doctorId) return;
     const result = await getDoctorAppointments(doctorId);
-    if (result.success) {
+    if (result.success && result.data) {
       setAppointments(result.data);
     }
   };
@@ -169,7 +169,8 @@ export function useAvailableTimeSlots(
 
   useEffect(() => {
     if (!doctorId || !date) {
-      setTimeSlots([]);
+      // Solo limpiar si ya hay datos
+      setTimeSlots(prev => prev.length > 0 ? [] : prev);
       return;
     }
 
@@ -191,7 +192,7 @@ export function useAvailableTimeSlots(
 // Hook para crear cita
 export function useCreateAppointment() {
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<any>(null);
+  const [error, setError] = useState<string | null>(null);
 
   const create = async (
     patientId: string,
@@ -202,7 +203,7 @@ export function useCreateAppointment() {
     const result = await createAppointment(patientId, appointmentData);
     setLoading(false);
     if (!result.success) {
-      setError(result.error);
+      setError(String(result.error));
     }
     return result;
   };
@@ -213,7 +214,7 @@ export function useCreateAppointment() {
 // Hook para cancelar cita
 export function useCancelAppointment() {
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<any>(null);
+  const [error, setError] = useState<string | null>(null);
 
   const cancel = async (
     appointmentId: string,
@@ -225,10 +226,11 @@ export function useCancelAppointment() {
     const result = await cancelAppointment(appointmentId, userId, reason);
     setLoading(false);
     if (!result.success) {
-      setError(result.error);
+      setError(String(result.error));
     }
     return result;
   };
 
   return { cancel, loading, error };
 }
+

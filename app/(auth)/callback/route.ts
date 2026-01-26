@@ -42,7 +42,7 @@ export async function GET(request: Request) {
     );
     
     // Intercambiar código por sesión
-    const { data: sessionData } = await supabase.auth.exchangeCodeForSession(code);
+    await supabase.auth.exchangeCodeForSession(code);
     
     // Obtener el usuario autenticado
     const { data: { user } } = await supabase.auth.getUser();

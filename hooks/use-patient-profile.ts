@@ -35,7 +35,7 @@ export function usePatientProfile(userId: string | undefined) {
   const [privacySettings, setPrivacySettings] = useState<PrivacySettings | null>(null);
   const [notificationSettings, setNotificationSettings] = useState<NotificationSettings | null>(null);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<any>(null);
+  const [error, setError] = useState<string | null>(null);
 
   // Cargar datos iniciales
   useEffect(() => {
@@ -56,7 +56,7 @@ export function usePatientProfile(userId: string | undefined) {
         setPrivacySettings(privacyData.data || null);
         setNotificationSettings(notifData.data || null);
       } catch (err) {
-        setError(err);
+        setError('Error loading profile data');
       } finally {
         setLoading(false);
       }

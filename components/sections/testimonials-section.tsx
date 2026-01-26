@@ -73,7 +73,7 @@ export function TestimonialsSection() {
 
               {/* Quote */}
               <p className="text-gray-700 dark:text-gray-300 mb-6 flex-grow leading-relaxed italic">
-                "{testimonial.comment}"
+                &ldquo;{testimonial.comment}&rdquo;
               </p>
 
               {/* User info */}

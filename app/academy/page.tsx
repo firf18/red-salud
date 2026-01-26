@@ -9,18 +9,15 @@
 import { Metadata } from 'next';
 import Link from 'next/link';
 import {
-    GraduationCap,
     Brain,
     Target,
     TrendingUp,
     Award,
-    Users,
     BookOpen,
     ArrowRight,
     CheckCircle2,
     Sparkles,
     BarChart3,
-    Clock,
     FlaskConical,
     Stethoscope,
     Heart,
@@ -209,7 +206,7 @@ export default function AcademyPage() {
                     </div>
 
                     <div className="grid md:grid-cols-2 gap-6">
-                        {METHODOLOGIES.map((method, index) => (
+                        {METHODOLOGIES.map((method) => (
                             <Card
                                 key={method.title}
                                 className="bg-white/[0.03] border-white/5 hover:bg-white/[0.06] hover:border-white/10 transition-all group"
@@ -468,3 +465,4 @@ export default function AcademyPage() {
         </div>
     );
 }
+

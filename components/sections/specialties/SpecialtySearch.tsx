@@ -47,6 +47,14 @@ export function SpecialtySearch({
     const inputRef = useRef<HTMLInputElement>(null);
     const listRef = useRef<HTMLUListElement>(null);
 
+    const handleCollapse = useCallback(() => {
+        setIsExpanded(false);
+        setQuery("");
+        setResults([]);
+        setGhostText("");
+        onClear();
+    }, [onClear]);
+
     // Cerrar al hacer clic fuera
     useEffect(() => {
         const handleClickOutside = (event: MouseEvent) => {
@@ -59,7 +67,7 @@ export function SpecialtySearch({
         };
         document.addEventListener("mousedown", handleClickOutside);
         return () => document.removeEventListener("mousedown", handleClickOutside);
-    }, []);
+    }, [handleCollapse]);
 
     // Filtrar resultados y generar Ghost Text
     useEffect(() => {
@@ -133,14 +141,6 @@ export function SpecialtySearch({
             setTimeout(() => inputRef.current?.focus(), 150);
         }
     }, [isExpanded]);
-
-    const handleCollapse = () => {
-        setIsExpanded(false);
-        setQuery("");
-        setResults([]);
-        setGhostText("");
-        onClear();
-    };
 
     const getRowIndex = useCallback(
         (id: string): 1 | 2 => {
@@ -340,7 +340,7 @@ export function SpecialtySearch({
                                 ) : query ? (
                                     <div className="p-8 text-center text-muted-foreground flex flex-col items-center justify-center h-48">
                                         <Search className="w-8 h-8 mb-3 opacity-20" />
-                                        <p>No hay resultados de "{query}"</p>
+                                        <p>No hay resultados de &ldquo;{query}&rdquo;</p>
                                     </div>
                                 ) : (
                                     <div className="p-4">

@@ -29,11 +29,9 @@ function NuevaCitaContent() {
     checkingConflict,
     conflictingAppointments,
     patients,
-    loadingPatients,
     isInitialLoad,
     checkTimeConflicts,
     submitAppointment,
-    clearError,
     getMinDate,
     getMinTime,
     isTimeValid,
@@ -104,6 +102,8 @@ function NuevaCitaContent() {
   }, [motivo]);
 
   // Guardar formulario en localStorage cuando cambia
+  // Guardar formulario en localStorage cuando cambia
+  // eslint-disable-next-line react-hooks/incompatible-library
   useEffect(() => {
     const subscription = watch((data) => {
       saveFormToLocalStorage(data);
@@ -120,7 +120,7 @@ function NuevaCitaContent() {
   );
 
   // Enviar formulario
-  const onSubmit = async (data: AppointmentFormValues) => {
+  const onSubmit = async (_data: AppointmentFormValues) => {
     // Mostrar modal de confirmación
     setShowConfirmation(true);
   };
@@ -132,9 +132,10 @@ function NuevaCitaContent() {
     setShowConfirmation(false);
   }, [getValues, submitAppointment]);
 
+  const pacienteId = watch("paciente_id");
   const selectedPatient = useMemo(
-    () => patients.find((p) => p.id === watch("paciente_id")),
-    [watch("paciente_id"), patients]
+    () => patients.find((p) => p.id === pacienteId),
+    [pacienteId, patients]
   );
 
   return (
@@ -160,7 +161,7 @@ function NuevaCitaContent() {
               <button
                 type="button"
                 onClick={() => setAdvancedMode(!advancedMode)}
-                data-tour="advanced-toggle"
+                _data-tour="advanced-toggle"
                 className={`px-3 py-1.5 text-sm font-medium rounded-md transition-colors ${advancedMode
                     ? "bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 hover:bg-blue-200 dark:hover:bg-blue-900/40"
                     : "bg-muted text-muted-foreground hover:bg-muted/80"
@@ -207,7 +208,7 @@ function NuevaCitaContent() {
                 <Button
                   type="submit"
                   disabled={loading || !watch("paciente_id")}
-                  data-tour="submit-button"
+                  _data-tour="submit-button"
                 >
                   <Plus className="h-4 w-4 mr-2" />
                   {loading ? "Creando..." : "Crear Cita"}
@@ -244,3 +245,4 @@ export default function NuevaCitaPage() {
     </Suspense>
   );
 }
+

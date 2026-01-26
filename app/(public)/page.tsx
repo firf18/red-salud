@@ -5,8 +5,6 @@ import { FeaturesSection } from "@/components/sections/features-section";
 import { ImpactSection } from "@/components/sections/impact-section";
 import { TechnologySection } from "@/components/sections/technology-section";
 import { FAQSection } from "@/components/sections/faq-section";
-import { Button } from "@/components/ui/button";
-import { AUTH_ROUTES } from "@/lib/constants";
 import { FeaturedDoctors } from "@/components/sections/featured-doctors";
 import { CTASection } from "@/components/sections/cta-section";
 

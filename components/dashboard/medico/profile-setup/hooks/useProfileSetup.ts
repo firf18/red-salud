@@ -99,11 +99,11 @@ export function useProfileSetup() {
           setSpecialtyId(match.id);
         }
       }
-    } catch (err: any) {
+    } catch (err) {
       setVerificationResult({
         success: false,
         verified: false,
-        error: err?.message || "Error al verificar con SACS",
+        error: err instanceof Error ? err.message : "Error al verificar con SACS",
         message: "No se pudo conectar con el servicio de verificación. Por favor intenta más tarde.",
       });
     } finally {

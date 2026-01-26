@@ -12,7 +12,6 @@ import { notFound } from 'next/navigation';
 import {
     BookOpen,
     Clock,
-    Users,
     Award,
     ChevronRight,
     CheckCircle2,

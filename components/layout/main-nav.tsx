@@ -20,8 +20,6 @@ import {
     FlaskConical,
     Pill,
     UserCog,
-    Ambulance,
-    ShieldCheck,
     GraduationCap
 } from "lucide-react";
 
@@ -259,7 +257,7 @@ const ListItem = React.forwardRef<
         <li>
             <NavigationMenuLink asChild>
                 <Link
-                    ref={ref as any}
+                    ref={ref as React.Ref<HTMLAnchorElement>}
                     href={href || "#"}
                     className={cn(
                         "block select-none space-y-1 rounded-lg p-3 leading-none no-underline outline-none transition-colors hover:bg-primary/5 hover:text-primary focus:bg-primary/5 focus:text-primary",

@@ -55,3 +55,36 @@ informe-*.json
 /mobile/.expo
 /mobile/.expo/*
 /mobile/.turbo
+
+# IDE and AI assistant folders
+.claude/
+.cursor/
+.kiro/
+.trae/
+.agent/
+
+# Documentation and reports (temporary)
+*_CORRECCION*.md
+*_RESOLUCION*.md
+*_REPARACIONES*.md
+CHECKLIST_*.md
+ERRORES_*.md
+ESLINT_*.md
+ESTRATEGIA_*.md
+GUIA_*.md
+INDICE_*.md
+PLAN_*.md
+PROGRESO_*.md
+REFERENCIA_*.md
+RESUMEN_*.md
+TAURI_*.md
+RED_SALUD_MOBILE_*.md
+
+# Lint and error reports
+eslint-*.json
+eslint-*.txt
+lint-*.txt
+ts-errors*.txt
+
+# Test files
+nul

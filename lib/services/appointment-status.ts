@@ -83,9 +83,9 @@ export async function changeAppointmentStatus(
     }
 
     return data as { success: boolean; error?: string; old_status?: string; new_status?: string };
-  } catch (err: any) {
+  } catch (err) {
     console.error("Exception changing appointment status:", err);
-    return { success: false, error: err.message };
+    return { success: false, error: err instanceof Error ? err.message : "Error desconocido" };
   }
 }
 
@@ -105,7 +105,7 @@ export async function getTodayAppointments(doctorId: string, date?: Date) {
     }
 
     return { data, error: null };
-  } catch (err: any) {
+  } catch (err) {
     console.error("Exception getting today appointments:", err);
     return { data: null, error: err };
   }
@@ -121,7 +121,7 @@ export async function autoUpdateAppointmentStatus() {
     }
 
     return { success: true, data };
-  } catch (err: any) {
+  } catch (err) {
     console.error("Exception auto-updating appointments:", err);
     return { success: false, error: err };
   }
@@ -147,7 +147,7 @@ export async function getAppointmentStatusHistory(appointmentId: string) {
     }
 
     return { data, error: null };
-  } catch (err: any) {
+  } catch (err) {
     console.error("Exception getting status history:", err);
     return { data: null, error: err };
   }
@@ -205,7 +205,7 @@ export async function getAppointmentStats(doctorId: string, startDate?: Date, en
         tasaCancelacion: parseFloat(tasaCancelacion),
       },
     };
-  } catch (err: any) {
+  } catch (err) {
     console.error("Exception getting appointment stats:", err);
     return null;
   }

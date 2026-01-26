@@ -70,8 +70,8 @@ export class BCVService {
             }
             return [];
 
-        } catch (error: any) {
-            console.error('❌ External BCV Service failed:', error.message);
+        } catch (error) {
+            console.error('❌ External BCV Service failed:', error instanceof Error ? error.message : 'Error desconocido');
             // Don't throw, just return empty so we fall back to DB
             return [];
         }

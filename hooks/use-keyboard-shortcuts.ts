@@ -32,8 +32,7 @@ export function getStoredShortcuts() {
 export function saveShortcut(action: string, key: string) {
   if (typeof window === 'undefined') return;
   const current = getStoredShortcuts();
-  // @ts-ignore
-  current[action] = { ...current[action], key };
+  current[action as keyof typeof current] = { ...current[action as keyof typeof current], key };
   localStorage.setItem(STORAGE_KEY, JSON.stringify(current));
   // Disparar evento para actualizar otros componentes
   window.dispatchEvent(new Event('shortcuts-updated'));
@@ -50,35 +49,21 @@ export function useKeyboardShortcuts(handlers: { key?: string; handler: () => vo
     const isAlt = event.altKey;
 
     // Obtener shortcuts actualizados
-    // @ts-ignore
-    const storedShortcuts = Object.values(getStoredShortcuts()) as { key: string; description: string; ctrl?: boolean; shift?: boolean }[];
+    const storedShortcuts = Object.values(getStoredShortcuts()) as Array<{ key: string; description: string; ctrl?: boolean; shift?: boolean }>;
 
     for (const handler of handlers) {
       let effectiveKey = handler.key;
-      let effectiveCtrl = false; // Default assumptions if not in handler
-      let effectiveShift = false;
 
       // Attempt to find dynamic override by description
       if (handler.description) {
         const match = storedShortcuts.find(s => s.description === handler.description);
         if (match) {
           effectiveKey = match.key;
-          effectiveCtrl = !!match.ctrl;
-          effectiveShift = !!match.shift;
         }
       }
 
       // Check match
       const keyMatch = effectiveKey?.toLowerCase() === pressedKey;
-      // For this simple implementation, we only check modifiers if they are explicitly required in the stored/default config
-      // But to be safe, we should match exactly.
-
-      // Note: The loop below assumes the handler object passed in might NOT have ctrl/shift properties if it came from a simplified list,
-      // OR it comes from DEFAULT_SHORTCUTS values which DO have them.
-      // Let's assume strict matching.
-
-      // If the handler definition didn't specify modifiers, we assume false.
-      // However, we need to know if the *stored* one requires them.
 
       // Simplified match for the single-key customization requested:
       if (keyMatch && !isCtrl && !isShift && !isAlt) {

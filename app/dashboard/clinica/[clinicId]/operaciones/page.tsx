@@ -15,7 +15,6 @@ import { Bed, DoorOpen, Activity, Users } from 'lucide-react';
 
 export default function ClinicOperationsPage() {
   const params = useParams();
-  const clinicId = params?.clinicId as string;
   const { selectedLocationIds } = useClinicScope();
 
   const {
@@ -177,7 +176,7 @@ export default function ClinicOperationsPage() {
           <CardContent>
             {activeShifts && activeShifts.length > 0 ? (
               <div className="space-y-2">
-                {activeShifts.map((shift: any) => (
+                {activeShifts.map((shift: { id: string; staff?: { raw_user_meta_data?: { full_name?: string }; email?: string }; staff_role?: string; start_time?: string; end_time?: string }) => (
                   <div
                     key={shift.id}
                     className="flex items-center justify-between p-2 border rounded"

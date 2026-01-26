@@ -39,7 +39,7 @@ import type {
 export function usePatientSessions(patientId: string | undefined) {
   const [sessions, setSessions] = useState<TelemedicineSession[]>([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<any>(null);
+  const [error, setError] = useState<string | null>(null);
 
   const loadSessions = useCallback(async () => {
     if (!patientId) return;
@@ -48,13 +48,13 @@ export function usePatientSessions(patientId: string | undefined) {
     if (result.success) {
       setSessions(result.data);
     } else {
-      setError(result.error);
+      setError(String(result.error) || 'Error loading patient sessions');
     }
     setLoading(false);
   }, [patientId]);
 
   useEffect(() => {
-    loadSessions();
+    void loadSessions();
   }, [loadSessions]);
 
   return { sessions, loading, error, refreshSessions: loadSessions };
@@ -64,7 +64,7 @@ export function usePatientSessions(patientId: string | undefined) {
 export function useDoctorSessions(doctorId: string | undefined) {
   const [sessions, setSessions] = useState<TelemedicineSession[]>([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<any>(null);
+  const [error, setError] = useState<string | null>(null);
 
   const loadSessions = useCallback(async () => {
     if (!doctorId) return;
@@ -73,13 +73,13 @@ export function useDoctorSessions(doctorId: string | undefined) {
     if (result.success) {
       setSessions(result.data);
     } else {
-      setError(result.error);
+      setError(String(result.error) || 'Error loading doctor sessions');
     }
     setLoading(false);
   }, [doctorId]);
 
   useEffect(() => {
-    loadSessions();
+    void loadSessions();
   }, [loadSessions]);
 
   return { sessions, loading, error, refreshSessions: loadSessions };
@@ -89,7 +89,7 @@ export function useDoctorSessions(doctorId: string | undefined) {
 export function useSession(sessionId: string | undefined) {
   const [session, setSession] = useState<TelemedicineSession | null>(null);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<any>(null);
+  const [error, setError] = useState<string | null>(null);
 
   const loadSession = useCallback(async () => {
     if (!sessionId) return;
@@ -98,13 +98,13 @@ export function useSession(sessionId: string | undefined) {
     if (result.success) {
       setSession(result.data);
     } else {
-      setError(result.error);
+      setError(String(result.error) || 'Error loading session');
     }
     setLoading(false);
   }, [sessionId]);
 
   useEffect(() => {
-    loadSession();
+    void loadSession();
   }, [loadSession]);
 
   return { session, loading, error, refreshSession: loadSession };
@@ -113,7 +113,7 @@ export function useSession(sessionId: string | undefined) {
 // Hook para crear sesión
 export function useCreateSession() {
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<any>(null);
+  const [error, setError] = useState<string | null>(null);
 
   const create = async (patientId: string, sessionData: CreateSessionData) => {
     setLoading(true);
@@ -121,7 +121,7 @@ export function useCreateSession() {
     const result = await createTelemedicineSession(patientId, sessionData);
     setLoading(false);
     if (!result.success) {
-      setError(result.error);
+      setError(String(result.error) || 'Error creating session');
     }
     return result;
   };
@@ -132,7 +132,7 @@ export function useCreateSession() {
 // Hook para gestionar sesión activa
 export function useActiveSession(sessionId: string | undefined) {
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<any>(null);
+  const [error, setError] = useState<string | null>(null);
 
   const start = async () => {
     if (!sessionId) return { success: false, error: "No session ID" };
@@ -141,7 +141,7 @@ export function useActiveSession(sessionId: string | undefined) {
     const result = await startSession(sessionId);
     setLoading(false);
     if (!result.success) {
-      setError(result.error);
+      setError(String(result.error) || 'Error starting session');
     }
     return result;
   };
@@ -153,7 +153,7 @@ export function useActiveSession(sessionId: string | undefined) {
     const result = await endSession(sessionId, notes);
     setLoading(false);
     if (!result.success) {
-      setError(result.error);
+      setError(String(result.error) || 'Error ending session');
     }
     return result;
   };
@@ -165,7 +165,7 @@ export function useActiveSession(sessionId: string | undefined) {
     const result = await updateSession(sessionId, updates);
     setLoading(false);
     if (!result.success) {
-      setError(result.error);
+      setError(String(result.error) || 'Error updating session');
     }
     return result;
   };
@@ -177,7 +177,7 @@ export function useActiveSession(sessionId: string | undefined) {
 export function useSessionParticipants(sessionId: string | undefined) {
   const [participants, setParticipants] = useState<TelemedicineParticipant[]>([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<any>(null);
+  const [error, setError] = useState<string | null>(null);
 
   const loadParticipants = useCallback(async () => {
     if (!sessionId) return;
@@ -186,13 +186,13 @@ export function useSessionParticipants(sessionId: string | undefined) {
     if (result.success) {
       setParticipants(result.data);
     } else {
-      setError(result.error);
+      setError(String(result.error) || 'Error loading participants');
     }
     setLoading(false);
   }, [sessionId]);
 
   useEffect(() => {
-    loadParticipants();
+    void loadParticipants();
   }, [loadParticipants]);
 
   const join = async (userId: string, joinData: JoinSessionData) => {
@@ -218,7 +218,7 @@ export function useSessionParticipants(sessionId: string | undefined) {
 export function useSessionChat(sessionId: string | undefined) {
   const [messages, setMessages] = useState<TelemedicineChatMessage[]>([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<any>(null);
+  const [error, setError] = useState<string | null>(null);
 
   const loadMessages = useCallback(async () => {
     if (!sessionId) return;
@@ -227,13 +227,13 @@ export function useSessionChat(sessionId: string | undefined) {
     if (result.success) {
       setMessages(result.data);
     } else {
-      setError(result.error);
+      setError(String(result.error) || 'Error loading messages');
     }
     setLoading(false);
   }, [sessionId]);
 
   useEffect(() => {
-    loadMessages();
+    void loadMessages();
   }, [loadMessages]);
 
   const send = async (senderId: string, messageData: SendMessageData) => {
@@ -260,7 +260,7 @@ export function useSessionChat(sessionId: string | undefined) {
 export function usePatientPrescriptions(patientId: string | undefined) {
   const [prescriptions, setPrescriptions] = useState<TelemedicinePrescription[]>([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<any>(null);
+  const [error, setError] = useState<string | null>(null);
 
   const loadPrescriptions = useCallback(async () => {
     if (!patientId) return;
@@ -269,13 +269,13 @@ export function usePatientPrescriptions(patientId: string | undefined) {
     if (result.success) {
       setPrescriptions(result.data);
     } else {
-      setError(result.error);
+      setError(String(result.error) || 'Error loading prescriptions');
     }
     setLoading(false);
   }, [patientId]);
 
   useEffect(() => {
-    loadPrescriptions();
+    void loadPrescriptions();
   }, [loadPrescriptions]);
 
   return { prescriptions, loading, error, refreshPrescriptions: loadPrescriptions };
@@ -284,7 +284,7 @@ export function usePatientPrescriptions(patientId: string | undefined) {
 // Hook para crear receta
 export function useCreatePrescription() {
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<any>(null);
+  const [error, setError] = useState<string | null>(null);
 
   const create = async (
     doctorId: string,
@@ -296,7 +296,7 @@ export function useCreatePrescription() {
     const result = await createPrescription(doctorId, patientId, prescriptionData);
     setLoading(false);
     if (!result.success) {
-      setError(result.error);
+      setError(String(result.error) || 'Error creating prescription');
     }
     return result;
   };
@@ -307,7 +307,7 @@ export function useCreatePrescription() {
 // Hook para sala de espera (paciente)
 export function useWaitingRoom() {
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<any>(null);
+  const [error, setError] = useState<string | null>(null);
 
   const enter = async (
     patientId: string,
@@ -320,7 +320,7 @@ export function useWaitingRoom() {
     const result = await enterWaitingRoom(patientId, sessionId, reasonForVisit, priority);
     setLoading(false);
     if (!result.success) {
-      setError(result.error);
+      setError(String(result.error) || 'Error entering waiting room');
     }
     return result;
   };
@@ -332,7 +332,7 @@ export function useWaitingRoom() {
 export function useDoctorWaitingRoom(doctorId: string | undefined) {
   const [waitingPatients, setWaitingPatients] = useState<WaitingRoomEntry[]>([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<any>(null);
+  const [error, setError] = useState<string | null>(null);
 
   const loadWaitingPatients = useCallback(async () => {
     if (!doctorId) return;
@@ -341,13 +341,13 @@ export function useDoctorWaitingRoom(doctorId: string | undefined) {
     if (result.success) {
       setWaitingPatients(result.data);
     } else {
-      setError(result.error);
+      setError(String(result.error) || 'Error loading waiting patients');
     }
     setLoading(false);
   }, [doctorId]);
 
   useEffect(() => {
-    loadWaitingPatients();
+    void loadWaitingPatients();
   }, [loadWaitingPatients]);
 
   const admit = async (waitingRoomId: string) => {
@@ -365,7 +365,7 @@ export function useDoctorWaitingRoom(doctorId: string | undefined) {
 export function useSessionStats(patientId: string | undefined) {
   const [stats, setStats] = useState<SessionStats | null>(null);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<any>(null);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     if (!patientId) return;
@@ -376,7 +376,7 @@ export function useSessionStats(patientId: string | undefined) {
       if (result.success) {
         setStats(result.data);
       } else {
-        setError(result.error);
+        setError(String(result.error) || 'Error loading stats');
       }
       setLoading(false);
     };
@@ -386,3 +386,4 @@ export function useSessionStats(patientId: string | undefined) {
 
   return { stats, loading, error };
 }
+

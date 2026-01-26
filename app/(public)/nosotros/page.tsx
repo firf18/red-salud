@@ -1,23 +1,9 @@
 "use client";
 
-import { motion, useScroll, useTransform } from "framer-motion";
+import { motion } from "framer-motion";
 import {
-  Heart,
-  Shield,
-  Zap,
-  Target,
-  ArrowRight,
-  MapPin,
-  Clock,
-  Sparkles,
-  Users,
-  BrainCircuit,
-  Rocket,
-  MessageCircle,
-  Mail,
   ArrowDown
 } from "lucide-react";
-import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { fadeInUp, staggerContainer } from "@/lib/animations";
@@ -51,9 +37,8 @@ const GRID = {
 };
 
 export default function NosotrosPage() {
-  const { scrollY } = useScroll();
-  const y1 = useTransform(scrollY, [0, 500], [0, 200]);
-  const y2 = useTransform(scrollY, [0, 500], [0, -150]);
+  // scrollY no se usa, se puede eliminar
+  // const { scrollY } = useScroll();
 
   return (
     <div className="min-h-screen bg-background text-foreground overflow-x-hidden selection:bg-primary/20">
@@ -147,3 +132,4 @@ export default function NosotrosPage() {
     </div>
   );
 }
+

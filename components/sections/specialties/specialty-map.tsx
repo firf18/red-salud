@@ -52,23 +52,35 @@ const generateMockData = (total: number) => {
 };
 
 export function SpecialtyMap({ specialtyName, doctorCount, distribution }: SpecialtyMapProps) {
-    const [data, setData] = useState<Record<string, number>>({});
-    const [mounted, setMounted] = useState(false);
     const [hoveredState, setHoveredState] = useState<{ name: string; count: number } | null>(null);
+
+    // Calcular data inicial sin setState en useEffect
+    const initialData = React.useMemo(() => {
+        if (distribution && Object.keys(distribution).length > 0) {
+            return distribution;
+        } else if (doctorCount > 0) {
+            return generateMockData(doctorCount);
+        }
+        return {};
+    }, [distribution, doctorCount]);
+
+    const [data, setData] = useState<Record<string, number>>(initialData);
+    const [mounted, setMounted] = useState(false);
 
     useEffect(() => {
         setMounted(true);
+    }, []);
+
+    // Actualizar data cuando cambien las props
+    useEffect(() => {
         if (distribution && Object.keys(distribution).length > 0) {
             setData(distribution);
+        } else if (doctorCount > 0) {
+            setData(generateMockData(doctorCount));
         } else {
-            // Generate distribution safely if count > 0, else 0
-            if (doctorCount > 0) {
-                setData(generateMockData(doctorCount));
-            } else {
-                setData({});
-            }
+            setData({});
         }
-    }, [doctorCount, distribution]);
+    }, [distribution, doctorCount]);
 
     const colorScale = useMemo(() => {
         const values = Object.values(data).filter(v => v > 0);
@@ -126,9 +138,9 @@ export function SpecialtyMap({ specialtyName, doctorCount, distribution }: Speci
                 >
                     <ZoomableGroup zoom={1} maxZoom={3}>
                         <Geographies geography={GEO_URL}>
-                            {({ geographies }: { geographies: any[] }) =>
-                                geographies.map((geo: any) => {
-                                    const stateName = geo.properties.NAME_1 || geo.properties.name;
+                            {({ geographies }) =>
+                                (geographies as Array<{ rsmKey: string; properties: { NAME_1?: string; name?: string }; [key: string]: unknown }>).map((geo) => {
+                                    const stateName = geo.properties.NAME_1 || geo.properties.name || '';
                                     const count = data[stateName] || 0;
                                     const isHovered = hoveredState?.name === stateName;
 

@@ -4,8 +4,6 @@ import { useState } from "react";
 import { motion } from "framer-motion";
 import {
   Video,
-  Calendar,
-  Clock,
   User,
   Mail,
   Phone,
@@ -20,7 +18,6 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Card } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
 

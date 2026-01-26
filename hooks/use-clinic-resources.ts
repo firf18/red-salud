@@ -80,10 +80,10 @@ export function useClinicAreas(locationId: string, floor?: number) {
             if (error) throw error;
 
             // Calcular contadores
-            return (data || []).map((area: any) => ({
+            return (data || []).map((area: { resources?: Array<{ status?: string }> }) => ({
                 ...area,
                 resource_count: area.resources?.length || 0,
-                occupied_count: area.resources?.filter((r: any) => r.status === 'occupied').length || 0,
+                occupied_count: area.resources?.filter((r) => r.status === 'occupied').length || 0,
             })) as AreaWithResources[];
         },
         enabled: !!locationId,

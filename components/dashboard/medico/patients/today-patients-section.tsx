@@ -40,9 +40,9 @@ async function changeAppointmentStatus(
     }
 
     return data as { success: boolean; error?: string };
-  } catch (err: any) {
+  } catch (err) {
     console.error("Exception changing appointment status:", err);
-    return { success: false, error: err.message };
+    return { success: false, error: err instanceof Error ? err.message : "Error desconocido" };
   }
 }
 
@@ -62,7 +62,7 @@ async function getTodayAppointments(doctorId: string, date?: Date) {
     }
 
     return { data, error: null };
-  } catch (err: any) {
+  } catch (err) {
     console.error("Exception getting today appointments:", err);
     return { data: null, error: err };
   }
@@ -137,7 +137,7 @@ export function TodayPatientsSection({ doctorId }: TodayPatientsSectionProps) {
       if (error) throw error;
       setAppointments(data || []);
       setError(null);
-    } catch (err: any) {
+    } catch (err) {
       console.error("Error loading today appointments:", err);
       setError("Error al cargar las citas del día");
     } finally {
@@ -167,9 +167,9 @@ export function TodayPatientsSection({ doctorId }: TodayPatientsSectionProps) {
       });
 
       router.push(`/dashboard/medico/pacientes/consulta?${params.toString()}`);
-    } catch (err: any) {
+    } catch (err) {
       console.error("Error starting consultation:", err);
-      alert(err.message || "Error al iniciar la consulta");
+      alert(err instanceof Error ? err.message : "Error al iniciar la consulta");
     } finally {
       setActionLoading(null);
     }
@@ -189,9 +189,9 @@ export function TodayPatientsSection({ doctorId }: TodayPatientsSectionProps) {
       }
 
       await loadTodayAppointments();
-    } catch (err: any) {
+    } catch (err) {
       console.error("Error marking arrival:", err);
-      alert(err.message || "Error al marcar la llegada");
+      alert(err instanceof Error ? err.message : "Error al marcar la llegada");
     } finally {
       setActionLoading(null);
     }

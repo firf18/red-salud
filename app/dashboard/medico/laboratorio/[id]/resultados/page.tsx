@@ -15,6 +15,22 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
 
+interface LabOrder {
+    id: string;
+    numero_orden?: string;
+    tests: Array<{
+        id: string;
+        test_type_id: string;
+        test_type: {
+            id: string;
+            nombre: string;
+        };
+    }>;
+    paciente?: {
+        nombre_completo?: string;
+    };
+}
+
 interface ResultValue {
     parametro: string;
     valor: string;
@@ -37,7 +53,7 @@ export default function UploadLabResultsPage() {
 
     const [loading, setLoading] = useState(true);
     const [submitting, setSubmitting] = useState(false);
-    const [order, setOrder] = useState<any>(null);
+    const [order, setOrder] = useState<LabOrder | null>(null);
     const [results, setResults] = useState<TestResult[]>([]);
 
     useEffect(() => {
@@ -48,9 +64,9 @@ export default function UploadLabResultsPage() {
         setLoading(true);
         const result = await getLabOrderDetails(orderId);
         if (result.success && result.data) {
-            setOrder(result.data);
+            setOrder(result.data as LabOrder);
             // Initialize results state based on ordered tests
-            const initialResults = (result.data.tests || []).map((test: any) => ({
+            const initialResults = (result.data.tests || []).map((test) => ({
                 test_type_id: test.test_type_id,
                 test_name: test.test_type?.nombre || "Examen",
                 observaciones: "",
@@ -64,7 +80,7 @@ export default function UploadLabResultsPage() {
         setLoading(false);
     };
 
-    const handleValueChange = (testIndex: number, valueIndex: number, field: keyof ResultValue, value: any) => {
+    const handleValueChange = (testIndex: number, valueIndex: number, field: keyof ResultValue, value: string | boolean) => {
         const newResults = [...results];
         newResults[testIndex].values[valueIndex] = {
             ...newResults[testIndex].values[valueIndex],
@@ -114,7 +130,7 @@ export default function UploadLabResultsPage() {
             } else {
                 throw new Error((result.error as Error)?.message || "Error al guardar resultados");
             }
-        } catch (error: any) {
+        } catch (error) {
             console.error("Error saving results:", error);
             toast.error("Error al guardar los resultados");
         } finally {

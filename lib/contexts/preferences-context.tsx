@@ -115,8 +115,8 @@ const defaultPreferences: UserPreferences = {
 const PreferencesContext = createContext<PreferencesContextType | undefined>(undefined);
 
 // Helper functions to convert between camelCase and snake_case
-function toSnakeCase(obj: Partial<UserPreferences>): Record<string, any> {
-  const result: Record<string, any> = {};
+function toSnakeCase(obj: Partial<UserPreferences>): Record<string, unknown> {
+  const result: Record<string, unknown> = {};
   for (const [key, value] of Object.entries(obj)) {
     const snakeKey = key.replace(/[A-Z]/g, letter => `_${letter.toLowerCase()}`);
     result[snakeKey] = value;
@@ -124,8 +124,8 @@ function toSnakeCase(obj: Partial<UserPreferences>): Record<string, any> {
   return result;
 }
 
-function toCamelCase(obj: Record<string, any>): Partial<UserPreferences> {
-  const result: Record<string, any> = {};
+function toCamelCase(obj: Record<string, unknown>): Partial<UserPreferences> {
+  const result: Record<string, unknown> = {};
   for (const [key, value] of Object.entries(obj)) {
     const camelKey = key.replace(/_([a-z])/g, (_, letter) => letter.toUpperCase());
     result[camelKey] = value;

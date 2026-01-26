@@ -11,7 +11,6 @@ import Link from 'next/link';
 import {
     BookOpen,
     Search,
-    Filter,
     ChevronRight,
     GraduationCap,
     Clock,

@@ -73,9 +73,9 @@ export function useAIAnalysis({
       } else {
         throw new Error(data.error);
       }
-    } catch (error: any) {
+    } catch (error) {
       console.error("Error analyzing note:", error);
-      alert(`Error al analizar: ${error.message || "Intenta de nuevo"}`);
+      alert(`Error al analizar: ${error instanceof Error ? error.message : "Intenta de nuevo"}`);
     } finally {
       setIsAnalyzing(false);
     }

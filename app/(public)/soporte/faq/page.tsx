@@ -11,8 +11,6 @@ import {
   CreditCard,
   Shield,
   Users,
-  Settings,
-  Pill,
   FileText,
   MessageCircle,
 } from "lucide-react";

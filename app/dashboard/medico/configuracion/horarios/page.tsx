@@ -47,6 +47,7 @@ export default function HorariosConfigPage() {
 
   useEffect(() => {
     loadData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const loadData = async () => {
@@ -155,9 +156,9 @@ export default function HorariosConfigPage() {
 
       setSuccess(true);
       setTimeout(() => setSuccess(false), 3000);
-    } catch (err: any) {
+    } catch (err) {
       console.error("Error saving schedules:", err);
-      setError(err.message || "Error al guardar los horarios");
+      setError(err instanceof Error ? err.message : "Error al guardar los horarios");
     } finally {
       setSaving(false);
     }

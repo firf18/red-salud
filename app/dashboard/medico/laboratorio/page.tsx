@@ -17,10 +17,23 @@ import {
     SelectValue,
 } from "@/components/ui/select";
 
+interface LabOrder {
+    id: string;
+    patient_id: string;
+    status: string;
+    created_at: string;
+    prioridad?: string;
+    numero_orden?: string;
+    paciente?: {
+        nombre_completo: string;
+    };
+    tests?: Array<Record<string, unknown>>;
+}
+
 export default function DoctorLaboratorioPage() {
     const router = useRouter();
     const [loading, setLoading] = useState(true);
-    const [orders, setOrders] = useState<any[]>([]);
+    const [orders, setOrders] = useState<LabOrder[]>([]);
     const [searchTerm, setSearchTerm] = useState("");
     const [statusFilter, setStatusFilter] = useState<string>("all");
 

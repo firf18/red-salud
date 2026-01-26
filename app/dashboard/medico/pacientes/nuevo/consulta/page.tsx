@@ -34,14 +34,14 @@ export default function ConsultaPage() {
     }
   }, [paciente, router]);
 
-  const handleRegistrationSuccess = (patientId: string, patientData: any) => {
+  const handleRegistrationSuccess = (patientId: string, patientData: Record<string, unknown>) => {
     // Actualizar el estado del paciente con los datos reales de la BD
     setPaciente({
       ...paciente,
       id: patientId,
       ...patientData,
       // Asegurar que usamos el formato correcto para MedicalWorkspace
-      edad: patientData.fecha_nacimiento ? calculateAge(patientData.fecha_nacimiento) : null,
+      edad: patientData.fecha_nacimiento && typeof patientData.fecha_nacimiento === 'string' ? calculateAge(patientData.fecha_nacimiento) : null,
     });
     setShowRegistration(false);
   };

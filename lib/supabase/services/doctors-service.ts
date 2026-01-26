@@ -29,9 +29,9 @@ export async function getSpecialties() {
     }
 
     return { success: true, data: data as MedicalSpecialty[] };
-  } catch (err: any) {
+  } catch (err) {
     console.error('Exception fetching specialties:', err);
-    return { success: false, error: err.message || 'Error desconocido' };
+    return { success: false, error: err instanceof Error ? err.message : 'Error desconocido' };
   }
 }
 
@@ -131,9 +131,9 @@ export async function getDoctorProfile(userId: string) {
     } as DoctorProfile;
 
     return { success: true, data: doctorProfile };
-  } catch (err: any) {
+  } catch (err) {
     console.error('Exception fetching doctor profile:', err);
-    return { success: false, error: err.message || 'Error desconocido' };
+    return { success: false, error: err instanceof Error ? err.message : 'Error desconocido' };
   }
 }
 
@@ -421,7 +421,7 @@ export async function getDoctorStats(doctorId: string) {
         totalReviews: profileData?.total_reviews || 0,
       },
     };
-  } catch (error: any) {
+  } catch (error) {
     console.error('Error in getDoctorStats:', error);
     // Retornar datos por defecto en lugar de error
     return {

@@ -58,9 +58,10 @@ export function useLaboratory(patientId: string, filters?: LabOrderFilters) {
     }
   }, [patientId]);
 
+  // Cargar datos cuando cambien las dependencias
   useEffect(() => {
-    loadOrders();
-    loadStats();
+    void loadOrders();
+    void loadStats();
   }, [loadOrders, loadStats]);
 
   return {
@@ -110,8 +111,8 @@ export function useLabOrder(orderId: string) {
   }, [orderId]);
 
   useEffect(() => {
-    loadOrder();
-    loadStatusHistory();
+    void loadOrder();
+    void loadStatusHistory();
   }, [loadOrder, loadStatusHistory]);
 
   return {

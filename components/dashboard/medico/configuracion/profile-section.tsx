@@ -195,9 +195,9 @@ export function ProfileSection({ className }: ProfileSectionProps) {
 
       // Limpiar mensaje después de 3 segundos
       setTimeout(() => setSaveMessage(null), 3000);
-    } catch (error: any) {
+    } catch (error) {
       console.error("[ProfileSection] Error saving profile:", error);
-      setSaveMessage({ type: "error", text: error.message || "Error al guardar" });
+      setSaveMessage({ type: "error", text: error instanceof Error ? error.message : "Error al guardar" });
     } finally {
       setSaving(false);
     }

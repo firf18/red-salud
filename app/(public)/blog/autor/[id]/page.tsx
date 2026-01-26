@@ -13,7 +13,7 @@ import { Progress } from "@/components/ui/progress";
 import { fadeInUp, staggerContainer } from "@/lib/animations";
 import {
   ArrowLeft, CheckCircle, Award, BookOpen, MessageCircle,
-  ThumbsUp, Eye, Users, Calendar, MapPin, Shield, Star,
+  ThumbsUp, Eye, Users, Calendar, MapPin, Star,
   TrendingUp, Flame
 } from "lucide-react";
 import { 

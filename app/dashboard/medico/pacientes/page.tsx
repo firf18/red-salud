@@ -48,7 +48,7 @@ export default function DoctorPatientsPage() {
   const [actionLoading, setActionLoading] = useState<string | null>(null);
   const [avgConsultationTime, setAvgConsultationTime] = useState<number>(0);
   const [showMetricsModal, setShowMetricsModal] = useState(false);
-  const [metricsData, setMetricsData] = useState<any>(null);
+  const [metricsData, setMetricsData] = useState<Record<string, unknown> | null>(null);
 
   const handleView = (p: RegisteredPatient | OfflinePatient) => {
     const isRegistered = "patient" in p;
@@ -127,8 +127,8 @@ export default function DoctorPatientsPage() {
           by_motivo: byMotivo,
         });
       }
-    } catch (err: any) {
-      console.error("Error loading average time:", err?.message || "Unknown error");
+    } catch (err) {
+      console.error("Error loading average time:", err instanceof Error ? err.message : "Unknown error");
     }
   };
 
@@ -208,9 +208,9 @@ export default function DoctorPatientsPage() {
       });
 
       router.push(`/dashboard/medico/pacientes/consulta?${params.toString()}`);
-    } catch (err: any) {
+    } catch (err) {
       console.error("Error completo:", err);
-      alert(err.message || "Error al iniciar la consulta");
+      alert(err instanceof Error ? err.message : "Error al iniciar la consulta");
       setActionLoading(null);
     }
   };

@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import {
   searchMedicationsCatalog,
   getPatientPrescriptions,
@@ -52,7 +52,7 @@ export function useSearchMedications() {
 export function usePatientPrescriptions(patientId: string | undefined) {
   const [prescriptions, setPrescriptions] = useState<Prescription[]>([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<any>(null);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     if (!patientId) return;
@@ -63,7 +63,7 @@ export function usePatientPrescriptions(patientId: string | undefined) {
       if (result.success) {
         setPrescriptions(result.data);
       } else {
-        setError(result.error);
+        setError(String(result.error) || 'Error loading prescriptions');
       }
       setLoading(false);
     };
@@ -74,7 +74,7 @@ export function usePatientPrescriptions(patientId: string | undefined) {
   const refreshPrescriptions = async () => {
     if (!patientId) return;
     const result = await getPatientPrescriptions(patientId);
-    if (result.success) {
+    if (result.success && result.data) {
       setPrescriptions(result.data);
     }
   };
@@ -86,7 +86,7 @@ export function usePatientPrescriptions(patientId: string | undefined) {
 export function usePrescription(prescriptionId: string | undefined) {
   const [prescription, setPrescription] = useState<Prescription | null>(null);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<any>(null);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     if (!prescriptionId) return;
@@ -97,7 +97,7 @@ export function usePrescription(prescriptionId: string | undefined) {
       if (result.success) {
         setPrescription(result.data);
       } else {
-        setError(result.error);
+        setError(String(result.error) || 'Error loading prescription');
       }
       setLoading(false);
     };
@@ -112,7 +112,7 @@ export function usePrescription(prescriptionId: string | undefined) {
 export function usePatientReminders(patientId: string | undefined) {
   const [reminders, setReminders] = useState<MedicationReminder[]>([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<any>(null);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     if (!patientId) return;
@@ -123,7 +123,7 @@ export function usePatientReminders(patientId: string | undefined) {
       if (result.success) {
         setReminders(result.data);
       } else {
-        setError(result.error);
+        setError(String(result.error) || 'Error loading reminders');
       }
       setLoading(false);
     };
@@ -134,7 +134,7 @@ export function usePatientReminders(patientId: string | undefined) {
   const refreshReminders = async () => {
     if (!patientId) return;
     const result = await getPatientReminders(patientId);
-    if (result.success) {
+    if (result.success && result.data) {
       setReminders(result.data);
     }
   };
@@ -146,23 +146,23 @@ export function usePatientReminders(patientId: string | undefined) {
 export function useTodayIntakeLog(patientId: string | undefined) {
   const [intakeLog, setIntakeLog] = useState<MedicationIntakeLog[]>([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<any>(null);
+  const [error, setError] = useState<string | null>(null);
 
-  const loadIntakeLog = async () => {
+  const loadIntakeLog = useCallback(async () => {
     if (!patientId) return;
     setLoading(true);
     const result = await getTodayIntakeLog(patientId);
     if (result.success) {
       setIntakeLog(result.data);
     } else {
-      setError(result.error);
+      setError(String(result.error) || 'Error loading intake log');
     }
     setLoading(false);
-  };
+  }, [patientId]);
 
   useEffect(() => {
-    loadIntakeLog();
-  }, [patientId]);
+    void loadIntakeLog();
+  }, [loadIntakeLog]);
 
   const recordIntake = async (intakeId: string, status: 'tomado' | 'omitido', notes?: string) => {
     const result = await recordMedicationIntake(intakeId, status, notes);
@@ -179,7 +179,7 @@ export function useTodayIntakeLog(patientId: string | undefined) {
 export function useAdherenceStats(patientId: string | undefined, days: number = 30) {
   const [stats, setStats] = useState<AdherenceStats | null>(null);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<any>(null);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     if (!patientId) return;
@@ -190,7 +190,7 @@ export function useAdherenceStats(patientId: string | undefined, days: number = 
       if (result.success) {
         setStats(result.data);
       } else {
-        setError(result.error);
+        setError(String(result.error) || 'Error loading stats');
       }
       setLoading(false);
     };
@@ -205,23 +205,23 @@ export function useAdherenceStats(patientId: string | undefined, days: number = 
 export function useActiveMedicationsSummary(patientId: string | undefined) {
   const [summary, setSummary] = useState<ActiveMedicationsSummary | null>(null);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<any>(null);
+  const [error, setError] = useState<string | null>(null);
 
-  const loadSummary = async () => {
+  const loadSummary = useCallback(async () => {
     if (!patientId) return;
     setLoading(true);
     const result = await getActiveMedicationsSummary(patientId);
     if (result.success) {
       setSummary(result.data);
     } else {
-      setError(result.error);
+      setError(String(result.error) || 'Error loading summary');
     }
     setLoading(false);
-  };
+  }, [patientId]);
 
   useEffect(() => {
-    loadSummary();
-  }, [patientId]);
+    void loadSummary();
+  }, [loadSummary]);
 
   return { summary, loading, error, refreshSummary: loadSummary };
 }
@@ -229,7 +229,7 @@ export function useActiveMedicationsSummary(patientId: string | undefined) {
 // Hook para crear recordatorio
 export function useCreateReminder() {
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<any>(null);
+  const [error, setError] = useState<string | null>(null);
 
   const create = async (reminderData: CreateReminderData) => {
     setLoading(true);
@@ -237,7 +237,7 @@ export function useCreateReminder() {
     const result = await createReminder(reminderData);
     setLoading(false);
     if (!result.success) {
-      setError(result.error);
+      setError(String(result.error));
     }
     return result;
   };
@@ -248,7 +248,7 @@ export function useCreateReminder() {
 // Hook para actualizar recordatorio
 export function useUpdateReminder() {
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<any>(null);
+  const [error, setError] = useState<string | null>(null);
 
   const update = async (reminderId: string, updates: Partial<MedicationReminder>) => {
     setLoading(true);
@@ -256,7 +256,7 @@ export function useUpdateReminder() {
     const result = await updateReminder(reminderId, updates);
     setLoading(false);
     if (!result.success) {
-      setError(result.error);
+      setError(String(result.error));
     }
     return result;
   };
@@ -267,10 +267,11 @@ export function useUpdateReminder() {
     const result = await deactivateReminder(reminderId);
     setLoading(false);
     if (!result.success) {
-      setError(result.error);
+      setError(String(result.error));
     }
     return result;
   };
 
   return { update, deactivate, loading, error };
 }
+

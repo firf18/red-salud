@@ -62,31 +62,52 @@ export function usePatientHealthMetrics(
 ) {
   const [metrics, setMetrics] = useState<HealthMetric[]>([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<any>(null);
+  const [error, setError] = useState<string | null>(null);
 
-  const loadMetrics = async () => {
+  useEffect(() => {
+    if (!patientId) return;
+    
+    let cancelled = false;
+    
+    const loadMetrics = async () => {
+      setLoading(true);
+      const result = await getPatientHealthMetrics(patientId, filters);
+      if (!cancelled) {
+        if (result.success) {
+          setMetrics(result.data);
+        } else {
+          setError(String(result.error) || 'Error loading metrics');
+        }
+        setLoading(false);
+      }
+    };
+
+    loadMetrics();
+    
+    return () => {
+      cancelled = true;
+    };
+  }, [patientId, filters?.metricTypeId, filters?.startDate, filters?.endDate, filters?.limit]);
+
+  const refreshMetrics = async () => {
     if (!patientId) return;
     setLoading(true);
     const result = await getPatientHealthMetrics(patientId, filters);
-    if (result.success) {
+    if (result.success && result.data) {
       setMetrics(result.data);
     } else {
-      setError(result.error);
+      setError(String(result.error) || 'Error loading metrics');
     }
     setLoading(false);
   };
 
-  useEffect(() => {
-    loadMetrics();
-  }, [patientId, filters?.metricTypeId, filters?.startDate, filters?.endDate]);
-
-  return { metrics, loading, error, refreshMetrics: loadMetrics };
+  return { metrics, loading, error, refreshMetrics };
 }
 
 // Hook para crear métrica
 export function useCreateHealthMetric() {
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<any>(null);
+  const [error, setError] = useState<string | null>(null);
 
   const create = async (metricData: CreateHealthMetricData) => {
     setLoading(true);
@@ -94,7 +115,7 @@ export function useCreateHealthMetric() {
     const result = await createHealthMetric(metricData);
     setLoading(false);
     if (!result.success) {
-      setError(result.error);
+      setError(String(result.error) || 'Error creating metric');
     }
     return result;
   };
@@ -161,27 +182,46 @@ export function usePatientHealthGoals(patientId: string | undefined, status?: st
   const [goals, setGoals] = useState<HealthGoal[]>([]);
   const [loading, setLoading] = useState(true);
 
-  const loadGoals = async () => {
+  useEffect(() => {
+    if (!patientId) return;
+    
+    let cancelled = false;
+    
+    const loadGoals = async () => {
+      setLoading(true);
+      const result = await getPatientHealthGoals(patientId, status);
+      if (!cancelled) {
+        if (result.success) {
+          setGoals(result.data);
+        }
+        setLoading(false);
+      }
+    };
+
+    loadGoals();
+    
+    return () => {
+      cancelled = true;
+    };
+  }, [patientId, status]);
+
+  const refreshGoals = async () => {
     if (!patientId) return;
     setLoading(true);
     const result = await getPatientHealthGoals(patientId, status);
-    if (result.success) {
+    if (result.success && result.data) {
       setGoals(result.data);
     }
     setLoading(false);
   };
 
-  useEffect(() => {
-    loadGoals();
-  }, [patientId, status]);
-
-  return { goals, loading, refreshGoals: loadGoals };
+  return { goals, loading, refreshGoals };
 }
 
 // Hook para crear meta
 export function useCreateHealthGoal() {
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<any>(null);
+  const [error, setError] = useState<string | null>(null);
 
   const create = async (goalData: CreateHealthGoalData) => {
     setLoading(true);
@@ -189,7 +229,7 @@ export function useCreateHealthGoal() {
     const result = await createHealthGoal(goalData);
     setLoading(false);
     if (!result.success) {
-      setError(result.error);
+      setError(String(result.error) || 'Error creating goal');
     }
     return result;
   };
@@ -225,21 +265,40 @@ export function usePatientMeasurementReminders(patientId: string | undefined) {
   const [reminders, setReminders] = useState<MeasurementReminder[]>([]);
   const [loading, setLoading] = useState(true);
 
-  const loadReminders = async () => {
+  useEffect(() => {
+    if (!patientId) return;
+    
+    let cancelled = false;
+    
+    const loadReminders = async () => {
+      setLoading(true);
+      const result = await getPatientMeasurementReminders(patientId);
+      if (!cancelled) {
+        if (result.success) {
+          setReminders(result.data);
+        }
+        setLoading(false);
+      }
+    };
+
+    loadReminders();
+    
+    return () => {
+      cancelled = true;
+    };
+  }, [patientId]);
+
+  const refreshReminders = async () => {
     if (!patientId) return;
     setLoading(true);
     const result = await getPatientMeasurementReminders(patientId);
-    if (result.success) {
+    if (result.success && result.data) {
       setReminders(result.data);
     }
     setLoading(false);
   };
 
-  useEffect(() => {
-    loadReminders();
-  }, [patientId]);
-
-  return { reminders, loading, refreshReminders: loadReminders };
+  return { reminders, loading, refreshReminders };
 }
 
 // Hook para dashboard summary
@@ -247,19 +306,39 @@ export function useHealthDashboardSummary(patientId: string | undefined) {
   const [summary, setSummary] = useState<HealthDashboardSummary | null>(null);
   const [loading, setLoading] = useState(true);
 
-  const loadSummary = async () => {
+  useEffect(() => {
+    if (!patientId) return;
+    
+    let cancelled = false;
+    
+    const loadSummary = async () => {
+      setLoading(true);
+      const result = await getHealthDashboardSummary(patientId);
+      if (!cancelled) {
+        if (result.success) {
+          setSummary(result.data);
+        }
+        setLoading(false);
+      }
+    };
+
+    loadSummary();
+    
+    return () => {
+      cancelled = true;
+    };
+  }, [patientId]);
+
+  const refreshSummary = async () => {
     if (!patientId) return;
     setLoading(true);
     const result = await getHealthDashboardSummary(patientId);
-    if (result.success) {
+    if (result.success && result.data) {
       setSummary(result.data);
     }
     setLoading(false);
   };
 
-  useEffect(() => {
-    loadSummary();
-  }, [patientId]);
-
-  return { summary, loading, refreshSummary: loadSummary };
+  return { summary, loading, refreshSummary };
 }
+

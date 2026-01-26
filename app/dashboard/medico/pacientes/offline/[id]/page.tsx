@@ -76,9 +76,9 @@ export default function OfflinePatientDetailPage() {
 
       if (error) throw error;
       setPatient(data);
-    } catch (err: any) {
+    } catch (err) {
       console.error("Error loading patient:", err);
-      setError(err.message);
+      setError(err instanceof Error ? err.message : "Error desconocido");
     } finally {
       setLoading(false);
     }

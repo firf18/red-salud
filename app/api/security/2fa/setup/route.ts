@@ -3,7 +3,7 @@ import { NextResponse } from "next/server";
 import * as speakeasy from "speakeasy";
 import * as QRCode from "qrcode";
 
-export async function POST(request: Request) {
+export async function POST() {
   try {
     const supabase = await createClient();
 
@@ -61,3 +61,4 @@ export async function POST(request: Request) {
     );
   }
 }
+

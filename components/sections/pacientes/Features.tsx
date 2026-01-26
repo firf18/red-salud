@@ -1,10 +1,19 @@
 'use client';
 
 import { motion } from 'framer-motion';
-import { FileDigit, MessageSquare, Shield } from 'lucide-react';
-import Image from 'next/image';
+import { FileDigit, MessageSquare, Shield, LucideIcon } from 'lucide-react';
 
-const features = [
+interface Feature {
+  title: string;
+  description: string;
+  icon: LucideIcon;
+  image?: string;
+  color: string;
+  bgColor: string;
+  benefits?: string[];
+}
+
+const features: Feature[] = [
   {
     title: "Expediente Médico Universal",
     description: "Olvídate de cargar carpetas con exámenes. Tu historial médico viaja contigo, accesible de forma segura desde cualquier dispositivo cuando lo necesites.",
@@ -31,7 +40,7 @@ const features = [
   }
 ];
 
-export function Features({ data }: { data?: any[] }) {
+export function Features({ data }: { data?: Feature[] }) {
   // Use data from props if available, otherwise use default features but we need to map icons
   // Since icons are components, we need a way to map string names to components if data comes from DB
   // For now, let's assume the order matches or use the default features as structure and override content

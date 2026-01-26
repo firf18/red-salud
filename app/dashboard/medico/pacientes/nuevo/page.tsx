@@ -149,7 +149,7 @@ export default function NuevoPacientePage() {
         .eq("doctor_id", user.id)
         .eq("cedula", formData.cedula)
         .maybeSingle();
-      const payload: any = {
+      const payload: Record<string, unknown> = {
         doctor_id: user.id,
         cedula: formData.cedula,
         nombre_completo: formData.nombre_completo,
@@ -176,7 +176,7 @@ export default function NuevoPacientePage() {
   useEffect(() => {
     const ready = formData.cedula.trim().length >= 6 && !!formData.nombre_completo.trim();
     if (!ready || currentStep !== 1) return;
-    let interval: any;
+    let interval: NodeJS.Timeout;
     saveDraft();
     interval = setInterval(saveDraft, 30000);
     return () => clearInterval(interval);
@@ -273,9 +273,9 @@ export default function NuevoPacientePage() {
       });
 
       router.push(`/dashboard/medico/pacientes/offline/${offlinePatient.id}`);
-    } catch (err: any) {
+    } catch (err) {
       console.error("Error creating patient:", err);
-      setError(err.message || "Error al registrar el paciente");
+      setError(err instanceof Error ? err.message : "Error al registrar el paciente");
     } finally {
       setLoading(false);
     }
@@ -340,7 +340,7 @@ export default function NuevoPacientePage() {
               {/* Main Form */}
               <div>
                 <PatientPrimaryInfo
-                  formData={formData as any}
+                  formData={formData}
                   setFormData={(data) => setFormData(data)}
                   edad={edad}
                   cedulaFound={cedulaFound}

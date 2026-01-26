@@ -18,7 +18,6 @@ export default function InternationalPatientsPage() {
   const clinicId = params?.clinicId as string;
 
   const {
-    patients,
     activePatients,
     pendingArrivals,
     pendingDocs,
@@ -111,7 +110,7 @@ export default function InternationalPatientsPage() {
             <CardContent>
               {activePatients && activePatients.length > 0 ? (
                 <div className="space-y-2">
-                  {activePatients.map((patient: any) => (
+                  {activePatients.map((patient: { id: string; patient?: { raw_user_meta_data?: { full_name?: string }; email?: string }; origin_country?: string; preferred_language?: string; status?: string }) => (
                     <div
                       key={patient.id}
                       className="flex items-center justify-between p-3 border rounded-lg"
@@ -149,7 +148,7 @@ export default function InternationalPatientsPage() {
             <CardContent>
               {pendingArrivals && pendingArrivals.length > 0 ? (
                 <div className="space-y-2">
-                  {pendingArrivals.map((patient: any) => (
+                  {pendingArrivals.map((patient: { id: string; patient?: { raw_user_meta_data?: { full_name?: string }; email?: string }; origin_country?: string; preferred_language?: string; status?: string; expected_arrival_date?: string; estimated_arrival_date?: string }) => (
                     <div
                       key={patient.id}
                       className="flex items-center justify-between p-3 border rounded-lg"
@@ -193,7 +192,7 @@ export default function InternationalPatientsPage() {
             <CardContent>
               {pendingDocs && pendingDocs.length > 0 ? (
                 <div className="space-y-2">
-                  {pendingDocs.map((doc: any) => (
+                  {pendingDocs.map((doc: { id: string; patient?: { raw_user_meta_data?: { full_name?: string }; email?: string }; document_type?: string; uploaded_at?: string; document_name?: string; international_patient?: { patient?: { raw_user_meta_data?: { full_name?: string }; email?: string } } }) => (
                     <div
                       key={doc.id}
                       className="flex items-center justify-between p-3 border rounded-lg"

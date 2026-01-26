@@ -1,14 +1,56 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { useRouter, useParams } from "next/navigation";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { FlaskConical, ArrowLeft, Calendar, User, FileText, CheckCircle, Clock, AlertTriangle } from "lucide-react";
+import { FlaskConical, ArrowLeft, FileText, AlertTriangle, Loader2, User } from "lucide-react";
 import { VerificationGuard } from "@/components/dashboard/medico/features/verification-guard";
 import { getLabOrderDetails } from "@/lib/supabase/services/laboratory-service";
-import { Loader2 } from "lucide-react";
+
+interface LabTest {
+    id: string;
+    test_type: {
+        nombre: string;
+        categoria: string;
+    };
+    status: string;
+}
+
+interface LabResult {
+    id: string;
+    test_type: {
+        nombre: string;
+    };
+    fecha_resultado: string;
+    observaciones?: string;
+    values?: Array<{
+        parametro: string;
+        valor: string;
+        unidad: string;
+        rango_referencia: string;
+        es_anormal?: boolean;
+    }>;
+}
+
+interface LabOrder {
+    id: string;
+    patient_id: string;
+    doctor_id: string;
+    status: string;
+    created_at: string;
+    numero_orden?: string;
+    prioridad?: string;
+    fecha_orden?: string;
+    instrucciones_paciente?: string;
+    paciente?: {
+        email?: string;
+        nombre_completo?: string;
+    };
+    tests: LabTest[];
+    results?: LabResult[];
+}
 
 export default function LabOrderDetailsPage() {
     const router = useRouter();
@@ -16,20 +58,20 @@ export default function LabOrderDetailsPage() {
     const orderId = params.id as string;
 
     const [loading, setLoading] = useState(true);
-    const [order, setOrder] = useState<any>(null);
+    const [order, setOrder] = useState<LabOrder | null>(null);
 
-    useEffect(() => {
-        loadOrder();
-    }, [orderId]);
-
-    const loadOrder = async () => {
+    const loadOrder = useCallback(async () => {
         setLoading(true);
         const result = await getLabOrderDetails(orderId);
         if (result.success && result.data) {
-            setOrder(result.data);
+            setOrder(result.data as unknown as LabOrder);
         }
         setLoading(false);
-    };
+    }, [orderId]);
+
+    useEffect(() => {
+        loadOrder();
+    }, [loadOrder]);
 
     if (loading) {
         return (
@@ -100,7 +142,7 @@ export default function LabOrderDetailsPage() {
                             </CardHeader>
                             <CardContent>
                                 <div className="space-y-4">
-                                    {order.tests.map((test: any) => (
+                                    {order.tests.map((test) => (
                                         <div key={test.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
                                             <div>
                                                 <p className="font-medium">{test.test_type.nombre}</p>
@@ -125,7 +167,7 @@ export default function LabOrderDetailsPage() {
                                     </CardTitle>
                                 </CardHeader>
                                 <CardContent className="space-y-6">
-                                    {order.results.map((result: any) => (
+                                    {order.results.map((result) => (
                                         <div key={result.id} className="border rounded-lg p-4 space-y-4">
                                             <div className="flex justify-between items-start">
                                                 <h3 className="font-semibold text-lg">{result.test_type.nombre}</h3>
@@ -136,7 +178,7 @@ export default function LabOrderDetailsPage() {
 
                                             {result.values && result.values.length > 0 && (
                                                 <div className="grid gap-2">
-                                                    {result.values.map((val: any, idx: number) => (
+                                                    {result.values.map((val, idx: number) => (
                                                         <div key={idx} className={`flex justify-between items-center p-2 rounded ${val.es_anormal ? 'bg-red-50' : 'bg-gray-50'}`}>
                                                             <span className="font-medium">{val.parametro}</span>
                                                             <div className="text-right">
@@ -184,14 +226,14 @@ export default function LabOrderDetailsPage() {
                                         order.prioridad === 'urgente' ? 'text-orange-600 border-orange-600' :
                                             order.prioridad === 'stat' ? 'text-red-600 border-red-600' : ''
                                     }>
-                                        {order.prioridad.toUpperCase()}
+                                        {order.prioridad?.toUpperCase() || 'NORMAL'}
                                     </Badge>
                                 </div>
 
                                 <div className="flex items-center justify-between">
                                     <span className="text-gray-600">Fecha</span>
                                     <span className="font-medium">
-                                        {new Date(order.fecha_orden).toLocaleDateString()}
+                                        {order.fecha_orden ? new Date(order.fecha_orden).toLocaleDateString() : 'N/A'}
                                     </span>
                                 </div>
 

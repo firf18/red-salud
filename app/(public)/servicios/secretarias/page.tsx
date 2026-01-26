@@ -10,7 +10,6 @@ import {
   CheckCircle2,
   Star,
   UserCheck,
-  Video,
   Settings,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";

@@ -74,14 +74,16 @@ const translations: Record<Language, Record<string, string>> = {
 };
 
 export function LanguageProvider({ children }: { children: React.ReactNode }) {
-  const [language, setLanguageState] = useState<Language>("es");
-
-  useEffect(() => {
-    const stored = localStorage.getItem("language") as Language;
-    if (stored && ["es", "en", "pt"].includes(stored)) {
-      setLanguageState(stored);
+  // Inicializar con valor de localStorage si existe
+  const [language, setLanguageState] = useState<Language>(() => {
+    if (typeof window !== 'undefined') {
+      const stored = localStorage.getItem("language") as Language;
+      if (stored && ["es", "en", "pt"].includes(stored)) {
+        return stored;
+      }
     }
-  }, []);
+    return "es";
+  });
 
   const setLanguage = (lang: Language) => {
     setLanguageState(lang);

@@ -43,7 +43,7 @@ export default function ConsultaPage() {
 
         const allPatients: PatientOption[] = [
           ...(registeredResult.data?.map((rp) => {
-            const patient = rp.patient as any; 
+            const patient = rp.patient as { id: string; nombre_completo: string; email: string; cedula?: string } | { id: string; nombre_completo: string; email: string; cedula?: string }[];
             const patientData = Array.isArray(patient) ? patient[0] : patient;
             return {
               id: patientData.id,

@@ -10,18 +10,27 @@ import { VerificationGuard } from "@/components/dashboard/medico/features/verifi
 export default function DoctorEstadisticasPage() {
   const router = useRouter();
   const [loading, setLoading] = useState(true);
-  const [stats, setStats] = useState<any>({
+  const [stats, setStats] = useState<{
+    total_patients: number;
+    total_consultations: number;
+    consultations_this_month: number;
+    consultations_today: number;
+    average_rating: number;
+    revenue_this_month: number;
+    completed_appointments?: number;
+    pending_appointments?: number;
+    cancelled_appointments?: number;
+  }>({
     total_patients: 0,
     total_consultations: 0,
     consultations_this_month: 0,
     consultations_today: 0,
     average_rating: 0,
     revenue_this_month: 0,
+    completed_appointments: 0,
+    pending_appointments: 0,
+    cancelled_appointments: 0,
   });
-
-  useEffect(() => {
-    loadData();
-  }, []);
 
   const loadData = async () => {
     try {
@@ -37,6 +46,10 @@ export default function DoctorEstadisticasPage() {
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    loadData();
+  }, []);
 
   const loadStats = async (doctorId: string) => {
     const { data, error } = await supabase

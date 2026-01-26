@@ -5,7 +5,15 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Star, Quote, ChevronLeft, ChevronRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
-const testimonials = [
+interface Testimonial {
+  content: string;
+  author?: string;
+  name?: string;
+  role: string;
+  rating: number;
+}
+
+const testimonials: Testimonial[] = [
   {
     content: "Increíble poder tener a mi médico en el bolsillo. La videoconsulta fue muy fluida y me enviaron la receta al instante.",
     author: "María González",
@@ -26,7 +34,7 @@ const testimonials = [
   }
 ];
 
-export function Testimonials({ data }: { data?: any[] }) {
+export function Testimonials({ data }: { data?: Testimonial[] }) {
   const testimonialsToDisplay = data && data.length > 0 ? data : testimonials;
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isAutoPlaying, setIsAutoPlaying] = useState(true);
@@ -102,7 +110,7 @@ export function Testimonials({ data }: { data?: any[] }) {
                  </div>
                  
                  <p className="text-xl text-slate-700 dark:text-slate-300 mb-8 italic leading-relaxed flex-grow">
-                   "{currentTestimonial.content}"
+                   &ldquo;{currentTestimonial.content}&rdquo;
                  </p>
                  
                  <div className="flex items-center gap-4 mt-auto">

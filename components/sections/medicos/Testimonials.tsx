@@ -40,7 +40,7 @@ export function Testimonials({ data }: TestimonialsProps) {
                 ))}
               </div>
               <p className="text-gray-700 dark:text-gray-300 mb-6 leading-relaxed italic">
-                "{testimonial.content}"
+                &ldquo;{testimonial.content}&rdquo;
               </p>
               <div className="flex items-center gap-3">
                 <div className="bg-blue-100 dark:bg-blue-900 w-12 h-12 rounded-full flex items-center justify-center">

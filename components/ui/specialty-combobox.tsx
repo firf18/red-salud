@@ -233,7 +233,7 @@ export function SpecialtyCombobox({
             {/* Mensaje cuando no hay resultados */}
             {isOpen && filteredSpecialties.length === 0 && searchValue && (
                 <div className="absolute z-50 mt-1 w-full rounded-md bg-white dark:bg-gray-900 border dark:border-gray-700 shadow-lg p-3 text-sm text-gray-500 dark:text-gray-400">
-                    No se encontraron especialidades para "{searchValue}"
+                    No se encontraron especialidades para &ldquo;{searchValue}&rdquo;
                 </div>
             )}
         </div>

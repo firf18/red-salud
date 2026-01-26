@@ -25,11 +25,10 @@ import { PreferencesTab } from "./tabs/preferences-tab";
 import { PrivacyTab } from "./tabs/privacy-tab";
 import { ActivityTab } from "./tabs/activity-tab";
 import { BillingTab } from "./tabs/billing-tab";
-import { useProfileForm } from "./hooks/use-profile-form";
 import { useAvatarUpload } from "./hooks/use-avatar-upload";
 import { useThemeColor } from "@/hooks/use-theme-color";
 import { Toast, type ToastType } from "@/components/ui/toast";
-import type { UserProfileModalProps, TabType, TabConfig } from "./types";
+import type { UserProfileModalProps, TabType, TabConfig, FormData } from "./types";
 
 const TABS: TabConfig[] = [
   { id: "profile", label: "Mi Perfil", icon: User },
@@ -100,7 +99,7 @@ export function UserProfileModal({
     }
   });
 
-  const handleSave = async (dataOverride?: any) => {
+  const handleSave = async (dataOverride?: FormData) => {
     if (!userId) {
       showNotification("Error: Usuario no identificado", "error");
       return { success: false, error: "Usuario no identificado" };

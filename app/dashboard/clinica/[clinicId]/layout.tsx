@@ -5,7 +5,7 @@
 'use client';
 
 import { useEffect } from 'react';
-import { useParams, useRouter } from 'next/navigation';
+import { useParams } from 'next/navigation';
 import { ClinicScopeProvider, useClinicScope } from '@/components/dashboard/clinica/clinic-scope-provider';
 import { useClinicOverview } from '@/hooks/use-clinic-overview';
 

@@ -170,9 +170,9 @@ export default function NuevoPacienteSimplePage() {
       } else {
         router.push(`/dashboard/medico/pacientes/offline/${offlinePatient.id}`);
       }
-    } catch (err: any) {
+    } catch (err) {
       console.error("Error creating patient:", err);
-      setGeneralError(err.message || "Error al registrar el paciente");
+      setGeneralError(err instanceof Error ? err.message : "Error al registrar el paciente");
     } finally {
       setLoading(false);
     }

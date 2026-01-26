@@ -32,6 +32,7 @@ import type {
   CreateClaimInput,
   RegisterPaymentInput,
   RCMClaimItem,
+  ClaimSummary,
 } from '@/lib/types/clinic.types';
 
 export function useClinicRCM(clinicId?: string, locationIds?: string[]) {
@@ -100,7 +101,7 @@ export function useClinicRCM(clinicId?: string, locationIds?: string[]) {
 
   // Mutation: Actualizar claim
   const updateClaimMutation = useMutation({
-    mutationFn: ({ claimId, updates }: { claimId: string; updates: any }) =>
+    mutationFn: ({ claimId, updates }: { claimId: string; updates: Partial<ClaimSummary> }) =>
       updateClaim(claimId, updates),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['claims'] });

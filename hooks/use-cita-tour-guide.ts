@@ -42,7 +42,6 @@ Tutorial de Nueva Cita:
 
     try {
       // Intentar cargar Shepherd dinámicamente
-      // @ts-ignore - shepherd.js types might be tricky with dynamic import
       const { default: Shepherd } = await import("shepherd.js");
 
       // Crear instancia del tour

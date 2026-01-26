@@ -10,12 +10,32 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { MessageSquare, Send, Search } from "lucide-react";
 import { VerificationGuard } from "@/components/dashboard/medico/features/verification-guard";
 
+interface Conversation {
+  id: string;
+  patient_id: string;
+  doctor_id: string;
+  last_message_at?: string;
+  subject?: string;
+  patient?: {
+    nombre_completo: string;
+    avatar_url?: string;
+  };
+}
+
+interface Message {
+  id: string;
+  conversation_id: string;
+  sender_id: string;
+  content: string;
+  created_at: string;
+}
+
 export default function DoctorMensajeriaPage() {
   const router = useRouter();
   const [loading, setLoading] = useState(true);
-  const [conversations, setConversations] = useState<any[]>([]);
-  const [selectedConversation, setSelectedConversation] = useState<any>(null);
-  const [messages, setMessages] = useState<any[]>([]);
+  const [conversations, setConversations] = useState<Conversation[]>([]);
+  const [selectedConversation, setSelectedConversation] = useState<Conversation | null>(null);
+  const [messages, setMessages] = useState<Message[]>([]);
   const [newMessage, setNewMessage] = useState("");
   const [userId, setUserId] = useState<string | null>(null);
 

@@ -19,7 +19,7 @@ import {
 } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
-  ArrowLeft, Save, Eye, Send, Image, X, Plus,
+  ArrowLeft, Save, Eye, Send, X, Plus,
   BookOpen, Shield, AlertCircle, CheckCircle
 } from "lucide-react";
 import { createPost, getCategories } from "@/lib/api/blog";

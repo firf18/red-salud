@@ -49,7 +49,7 @@ export function useSecretaryPermissions() {
       }
 
       // Mapear los médicos disponibles
-      const doctors = relations.map((rel: any) => ({
+      const doctors = relations.map((rel: { doctor_id: string; doctor_name: string; doctor_email: string; permissions: SecretaryPermissions; status: string }) => ({
         id: rel.doctor_id,
         name: rel.doctor_name,
         email: rel.doctor_email,
@@ -72,9 +72,9 @@ export function useSecretaryPermissions() {
         permissions: selectedDoctor.permissions,
       });
 
-    } catch (err: any) {
+    } catch (err) {
       console.error("Error loading secretary context:", err);
-      setError(err.message);
+      setError(err instanceof Error ? err.message : 'Error loading secretary context');
     } finally {
       setLoading(false);
     }

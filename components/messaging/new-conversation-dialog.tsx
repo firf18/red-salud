@@ -27,7 +27,7 @@ import type { CreateConversationData } from "@/lib/supabase/types/messaging";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 interface NewConversationDialogProps {
-  onCreateConversation: (data: CreateConversationData) => Promise<any>;
+  onCreateConversation: (data: CreateConversationData) => Promise<{ success: boolean; error?: string; data?: unknown }>;
 }
 
 export function NewConversationDialog({

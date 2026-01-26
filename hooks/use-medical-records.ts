@@ -19,7 +19,7 @@ export function usePatientMedicalRecords(
 ) {
   const [records, setRecords] = useState<MedicalRecord[]>([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<any>(null);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     if (!patientId) return;
@@ -30,7 +30,7 @@ export function usePatientMedicalRecords(
       if (result.success) {
         setRecords(result.data);
       } else {
-        setError(result.error);
+        setError(String(result.error) || 'Error loading records');
       }
       setLoading(false);
     };
@@ -41,7 +41,7 @@ export function usePatientMedicalRecords(
   const refreshRecords = async () => {
     if (!patientId) return;
     const result = await getPatientMedicalRecords(patientId, filters);
-    if (result.success) {
+    if (result.success && result.data) {
       setRecords(result.data);
     }
   };
@@ -53,7 +53,7 @@ export function usePatientMedicalRecords(
 export function useMedicalRecord(recordId: string | undefined) {
   const [record, setRecord] = useState<MedicalRecord | null>(null);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<any>(null);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     if (!recordId) return;
@@ -64,7 +64,7 @@ export function useMedicalRecord(recordId: string | undefined) {
       if (result.success) {
         setRecord(result.data);
       } else {
-        setError(result.error);
+        setError(String(result.error) || 'Error loading record');
       }
       setLoading(false);
     };
@@ -79,7 +79,7 @@ export function useMedicalRecord(recordId: string | undefined) {
 export function useMedicalHistorySummary(patientId: string | undefined) {
   const [summary, setSummary] = useState<MedicalHistorySummary | null>(null);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<any>(null);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     if (!patientId) return;
@@ -90,7 +90,7 @@ export function useMedicalHistorySummary(patientId: string | undefined) {
       if (result.success) {
         setSummary(result.data);
       } else {
-        setError(result.error);
+        setError(String(result.error) || 'Error loading summary');
       }
       setLoading(false);
     };
@@ -101,7 +101,7 @@ export function useMedicalHistorySummary(patientId: string | undefined) {
   const refreshSummary = async () => {
     if (!patientId) return;
     const result = await getMedicalHistorySummary(patientId);
-    if (result.success) {
+    if (result.success && result.data) {
       setSummary(result.data);
     }
   };
@@ -113,7 +113,7 @@ export function useMedicalHistorySummary(patientId: string | undefined) {
 export function useSearchMedicalRecords(patientId: string | undefined) {
   const [results, setResults] = useState<MedicalRecord[]>([]);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<any>(null);
+  const [error, setError] = useState<string | null>(null);
 
   const search = async (searchTerm: string) => {
     if (!patientId || !searchTerm) {
@@ -126,7 +126,7 @@ export function useSearchMedicalRecords(patientId: string | undefined) {
     if (result.success) {
       setResults(result.data);
     } else {
-      setError(result.error);
+      setError(String(result.error) || 'Error searching records');
     }
     setLoading(false);
   };
@@ -143,7 +143,7 @@ export function useSearchMedicalRecords(patientId: string | undefined) {
 export function useMedicalRecordByAppointment(appointmentId: string | undefined) {
   const [record, setRecord] = useState<MedicalRecord | null>(null);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<any>(null);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     if (!appointmentId) return;
@@ -154,7 +154,7 @@ export function useMedicalRecordByAppointment(appointmentId: string | undefined)
       if (result.success) {
         setRecord(result.data);
       } else {
-        setError(result.error);
+        setError(String(result.error) || 'Error loading record');
       }
       setLoading(false);
     };
@@ -164,3 +164,5 @@ export function useMedicalRecordByAppointment(appointmentId: string | undefined)
 
   return { record, loading, error };
 }
+
+

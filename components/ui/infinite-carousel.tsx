@@ -20,11 +20,7 @@ export const InfiniteCarousel = ({
   const scrollerRef = useRef<HTMLDivElement>(null);
   const [start, setStart] = useState(false);
 
-  useEffect(() => {
-    addAnimation();
-  }, []);
-
-  function addAnimation() {
+  const addAnimation = React.useCallback(() => {
     if (containerRef.current && scrollerRef.current) {
       const scrollerContent = Array.from(scrollerRef.current.children);
 
@@ -45,7 +41,11 @@ export const InfiniteCarousel = ({
       getSpeed();
       setStart(true);
     }
-  }
+  }, [items.length]);
+
+  useEffect(() => {
+    addAnimation();
+  }, [addAnimation]);
 
   const getDirection = () => {
     if (containerRef.current) {

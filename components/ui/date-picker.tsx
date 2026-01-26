@@ -57,13 +57,16 @@ export function DatePicker({
     return `${year}-${month}-${day}`;
   };
 
-  const [displayValue, setDisplayValue] = useState(formatToDisplay(value));
+  // Usar useMemo para evitar setState en useEffect
+  const displayValue = formatToDisplay(value);
+  const [localDisplayValue, setLocalDisplayValue] = useState(displayValue);
   const [error, setError] = useState("");
 
   const selectedDate = value ? new Date(value + "T00:00:00") : null;
 
+  // Sincronizar cuando cambia el valor externo
   useEffect(() => {
-    setDisplayValue(formatToDisplay(value));
+    setLocalDisplayValue(formatToDisplay(value));
   }, [value]);
 
   useEffect(() => {
@@ -99,7 +102,7 @@ export function DatePicker({
       }
     }
     
-    setDisplayValue(formatted);
+    setLocalDisplayValue(formatted);
     setError("");
     
     // Si tiene 10 caracteres (DD/MM/YYYY), validar y convertir
@@ -217,7 +220,7 @@ export function DatePicker({
 
   const handleClear = () => {
     onChange("");
-    setDisplayValue("");
+    setLocalDisplayValue("");
     setIsOpen(false);
     setViewMode("days");
     setError("");
@@ -260,7 +263,7 @@ export function DatePicker({
         <input
           ref={inputRef}
           type="text"
-          value={displayValue}
+          value={localDisplayValue}
           onChange={handleInputChange}
           onBlur={handleInputBlur}
           disabled={disabled}

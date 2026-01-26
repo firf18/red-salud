@@ -77,7 +77,7 @@ export async function GET() {
     );
 
     const serviciosPorEstado = Object.entries(stateCounts)
-      .filter(([_, counts]) => counts.total > 0)
+      .filter(([, counts]) => counts.total > 0)
       .map(([estado, counts]) => ({
         estado,
         codigo: estado.substring(0, 2).toUpperCase(), // Código dummy
@@ -110,3 +110,4 @@ export async function GET() {
     );
   }
 }
+

@@ -54,19 +54,19 @@ export function useMessaging(userId: string) {
   }, [userId]);
 
   useEffect(() => {
-    loadConversations();
-    loadUnreadCount();
+    void loadConversations();
+    void loadUnreadCount();
   }, [loadConversations, loadUnreadCount]);
 
   const createNewConversation = async (data: CreateConversationData) => {
     const result = await createConversation(userId, data);
 
-    if (result.success) {
+    if (result.success && result.data) {
       await loadConversations();
-      return result.data;
+      return { success: true, data: result.data };
     } else {
       setError("Error al crear conversación");
-      throw result.error;
+      return { success: false, error: result.error ? String(result.error) : "Error desconocido" };
     }
   };
 
@@ -145,8 +145,8 @@ export function useConversation(conversationId: string, userId: string) {
   }, [conversationId, userId]);
 
   useEffect(() => {
-    loadConversation();
-    loadMessages();
+    void loadConversation();
+    void loadMessages();
   }, [loadConversation, loadMessages]);
 
   // Suscribirse a nuevos mensajes en tiempo real

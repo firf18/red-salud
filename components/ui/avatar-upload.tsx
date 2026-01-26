@@ -173,9 +173,9 @@ export function AvatarUpload({
             }
             setPreviewUrl(null);
 
-        } catch (err: any) {
+        } catch (err) {
             console.error("Error uploading avatar:", err);
-            setError(err.message || "Error al subir la imagen");
+            setError(err instanceof Error ? err.message : "Error al subir la imagen");
             setPreviewUrl(null);
         } finally {
             setUploading(false);

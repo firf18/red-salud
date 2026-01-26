@@ -63,21 +63,9 @@ export function LocationPicker({
     });
 
     /**
-     * Maneja el click en el mapa para colocar marcador
-     */
-    const handleMapClick = useCallback((e: google.maps.MapMouseEvent) => {
-        if (e.latLng) {
-            const lat = e.latLng.lat();
-            const lng = e.latLng.lng();
-            setMarker({ lat, lng });
-            reverseGeocode(lat, lng);
-        }
-    }, []);
-
-    /**
      * Reverse geocoding: convierte coordenadas a dirección
      */
-    const reverseGeocode = async (lat: number, lng: number) => {
+    const reverseGeocode = useCallback(async (lat: number, lng: number) => {
         try {
             const geocoder = new google.maps.Geocoder();
             const result = await geocoder.geocode({
@@ -117,7 +105,19 @@ export function LocationPicker({
         } catch (error) {
             console.error("[LocationPicker] Reverse geocoding error:", error);
         }
-    };
+    }, [onLocationSelect]);
+
+    /**
+     * Maneja el click en el mapa para colocar marcador
+     */
+    const handleMapClick = useCallback((e: google.maps.MapMouseEvent) => {
+        if (e.latLng) {
+            const lat = e.latLng.lat();
+            const lng = e.latLng.lng();
+            setMarker({ lat, lng });
+            reverseGeocode(lat, lng);
+        }
+    }, [reverseGeocode]);
 
     /**
      * Obtiene ubicación actual del dispositivo

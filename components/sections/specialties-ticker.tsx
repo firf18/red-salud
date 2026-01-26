@@ -13,7 +13,7 @@
 
 "use client";
 
-import { useEffect, useState, useRef, useCallback } from "react";
+import React, { useEffect, useState, useRef, useCallback } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import {
@@ -337,7 +337,8 @@ interface SpecialtyCardProps {
  * Tarjeta individual de especialidad.
  */
 function SpecialtyCard({ item, isHighlighted = false }: SpecialtyCardProps) {
-  const Icon = getIconForSpecialty(item.name);
+  // Memoizar el icono para evitar recrearlo en cada render
+  const Icon = React.useMemo(() => getIconForSpecialty(item.name), [item.name]);
   const isLocked = item.doctorCount === 0;
 
   return (
