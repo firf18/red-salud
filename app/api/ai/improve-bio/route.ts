@@ -8,11 +8,13 @@
 import { NextRequest, NextResponse } from "next/server";
 import OpenAI from "openai";
 
-/** Cliente OpenAI configurado para OpenRouter */
-const openai = new OpenAI({
-  baseURL: process.env.OPENROUTER_BASE_URL || "https://openrouter.ai/api/v1",
-  apiKey: process.env.OPENROUTER_API_KEY,
-});
+/** Función para obtener el cliente OpenAI configurado para OpenRouter */
+const getOpenAIClient = () => {
+  return new OpenAI({
+    baseURL: process.env.OPENROUTER_BASE_URL || "https://openrouter.ai/api/v1",
+    apiKey: process.env.OPENROUTER_API_KEY || "dummy-key-for-build",
+  });
+};
 
 /**
  * POST /api/ai/improve-bio
@@ -64,7 +66,16 @@ Biografía original:
 
 Devuelve SOLO la biografía mejorada, sin explicaciones ni comentarios adicionales.`;
 
+    // Verificar que la API key esté configurada
+    if (!process.env.OPENROUTER_API_KEY) {
+      return NextResponse.json(
+        { error: "Servicio de IA no configurado" },
+        { status: 503 },
+      );
+    }
+
     // Llamar a la API de OpenRouter
+    const openai = getOpenAIClient();
     const completion = await openai.chat.completions.create({
       model: "google/gemini-2.0-flash-exp:free",
       messages: [

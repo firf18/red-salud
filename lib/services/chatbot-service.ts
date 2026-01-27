@@ -10,11 +10,13 @@ const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PU
 const supabase = createClient(supabaseUrl, supabaseKey);
 
 // Initialize OpenAI client for OpenRouter
-const openai = new OpenAI({
-    baseURL: process.env.OPENROUTER_BASE_URL || "https://openrouter.ai/api/v1",
-    apiKey: process.env.OPENROUTER_API_KEY,
-    dangerouslyAllowBrowser: true // Determine if this is needed based on usage (server vs client)
-});
+const getOpenAIClient = () => {
+    return new OpenAI({
+        baseURL: process.env.OPENROUTER_BASE_URL || "https://openrouter.ai/api/v1",
+        apiKey: process.env.OPENROUTER_API_KEY || "dummy-key-for-build",
+        dangerouslyAllowBrowser: true // Determine if this is needed based on usage (server vs client)
+    });
+};
 
 export interface ChatMessage {
     role: "user" | "assistant" | "system";
@@ -205,6 +207,7 @@ INFORMACIÓN CRÍTICA DE RESPALDO:
     ];
 
     // 4. Call OpenRouter API
+    const openai = getOpenAIClient();
     const response = await openai.chat.completions.create({
         model: "google/gemini-2.0-flash-exp:free", // Free model
         messages: messages as any,
