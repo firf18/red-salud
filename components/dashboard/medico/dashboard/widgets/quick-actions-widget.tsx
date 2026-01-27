@@ -44,10 +44,10 @@ const quickActions: QuickAction[] = [
         description: "Lista de pacientes",
     },
     {
-        id: "recetas",
-        label: "Recetas",
+        id: "Recipe",
+        label: "Recipe",
         icon: <FileText className="h-4 w-4" />,
-        href: "/dashboard/medico/recetas",
+        href: "/dashboard/medico/Recipe",
         color: "from-orange-500 to-orange-600",
         description: "Prescripciones",
     },

@@ -63,10 +63,10 @@ export default function DoctorRecetasPage() {
     <VerificationGuard>
       <div className="container mx-auto px-4 py-8 space-y-6">
         <div className="flex items-center justify-between">
-          <h1 className="text-3xl font-bold text-gray-900">Recetas Médicas</h1>
-        <Button onClick={() => router.push("/dashboard/medico/recetas/nueva")}>
+          <h1 className="text-3xl font-bold text-gray-900">Recipes Médicas</h1>
+        <Button onClick={() => router.push("/dashboard/medico/recipes/nueva")}>
           <Plus className="h-4 w-4 mr-2" />
-          Nueva Receta
+          Nueva Recipe
         </Button>
       </div>
 
@@ -105,14 +105,14 @@ export default function DoctorRecetasPage() {
             <div className="text-center">
               <FileText className="h-12 w-12 text-gray-400 mx-auto mb-4" />
               <h3 className="text-lg font-semibold text-gray-900 mb-2">
-                No hay recetas registradas
+                No hay recipes registradas
               </h3>
               <p className="text-gray-600 mb-4">
-                Las recetas que emitas aparecerán aquí
+                Las recipes que emitas aparecerán aquí
               </p>
-              <Button onClick={() => router.push("/dashboard/medico/recetas/nueva")}>
+              <Button onClick={() => router.push("/dashboard/medico/recipes/nueva")}>
                 <Plus className="h-4 w-4 mr-2" />
-                Crear Primera Receta
+                Crear Primera Recipe
               </Button>
             </div>
           </CardContent>

@@ -5,7 +5,7 @@ export default function DashboardFarmaciaPage() {
         <div className="text-6xl mb-4">💊</div>
         <h1 className="text-4xl font-bold text-gray-900 mb-4">Dashboard de Farmacia</h1>
         <p className="text-gray-600 max-w-md">
-          Este dashboard está en construcción. Aquí podrás gestionar recetas y medicamentos.
+          Este dashboard está en construcción. Aquí podrás gestionar recipe y medicamentos.
         </p>
       </div>
     </div>

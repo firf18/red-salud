@@ -56,7 +56,7 @@ export function PatientQuickActions({
         break;
       case "prescription":
         if (!isOffline) {
-          router.push(`/dashboard/medico/recetas/nueva?patient=${patientId}`);
+          router.push(`/dashboard/medico/recipes/nueva?patient=${patientId}`);
         }
         break;
       case "consultation":
@@ -118,7 +118,7 @@ export function PatientQuickActions({
               </DropdownMenuItem>
               <DropdownMenuItem onClick={() => handleAction("prescription")}>
                 <Pill className="h-4 w-4 mr-2" />
-                Crear Receta
+                Crear Recipe
               </DropdownMenuItem>
               <DropdownMenuItem onClick={() => handleAction("consultation")}>
                 <Stethoscope className="h-4 w-4 mr-2" />

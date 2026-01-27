@@ -4,18 +4,13 @@ import { useEffect, useState, useRef } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { supabase } from "@/lib/supabase/client";
 import { VerificationGuard } from "@/components/dashboard/medico/features/verification-guard";
-import { CalendarMain } from "@/components/dashboard/medico/calendar/calendar-main";
+import { UnifiedCalendar } from "@/components/dashboard/medico/calendar/unified-calendar";
 import { PatientSummaryModal } from "@/components/dashboard/medico/calendar/patient-summary-modal";
 import type { CalendarAppointment } from "@/components/dashboard/medico/calendar/types";
-import { startOfMonth, endOfMonth, addMonths, addWeeks, subWeeks, isSameDay } from "date-fns";
+import { startOfMonth, endOfMonth, addMonths, isSameDay } from "date-fns";
 import { Toast, type ToastType } from "@/components/ui/toast";
 import type { RealtimeChannel } from "@supabase/supabase-js";
-import { useDragAndDrop } from "@/hooks/use-drag-drop";
 import { useKeyboardShortcuts, DEFAULT_SHORTCUTS } from "@/hooks/use-keyboard-shortcuts";
-import { Button } from "@/components/ui/button";
-import { MessageCircle, HelpCircle } from "lucide-react";
-import type { CalendarView } from "@/components/dashboard/medico/calendar/calendar-view-selector";
-import { SessionTimer } from "@/components/auth";
 
 
 export default function DoctorCitasPage() {
@@ -24,8 +19,6 @@ export default function DoctorCitasPage() {
   const [appointments, setAppointments] = useState<CalendarAppointment[]>([]);
   const [selectedAppointment, setSelectedAppointment] = useState<CalendarAppointment | null>(null);
   const [modalOpen, setModalOpen] = useState(false);
-  const [currentDate, setCurrentDate] = useState(new Date());
-  const [view, setView] = useState<'day' | 'week' | 'month' | 'list'>('week');
   const [toast, setToast] = useState<{ message: string; type: ToastType; isVisible: boolean }>({
     message: "",
     type: "info",
@@ -33,11 +26,6 @@ export default function DoctorCitasPage() {
   });
   const channelRef = useRef<RealtimeChannel | null>(null);
   const doctorIdRef = useRef<string | null>(null);
-
-  // Leer parámetros de URL para navegación desde widget
-  const searchParams = useSearchParams();
-  const urlDate = searchParams.get('date');
-  const urlView = searchParams.get('view');
 
   const showToast = (message: string, type: ToastType = "info") => {
     setToast({ message, type, isVisible: true });
@@ -120,17 +108,6 @@ export default function DoctorCitasPage() {
     router.push(`/dashboard/medico/telemedicina/${appointment.id}`);
   };
 
-  // Drag & Drop
-  const { dragState, handleDragStart, handleDragOver, handleDragEnd, handleDragCancel } = useDragAndDrop(
-    (updatedAppointment) => {
-      setAppointments(prev =>
-        prev.map(apt => apt.id === updatedAppointment.id ? updatedAppointment : apt)
-      );
-      showToast('Cita reprogramada exitosamente', 'success');
-    },
-    (error) => showToast(error, 'error')
-  );
-
   // Keyboard Shortcuts
   useKeyboardShortcuts([
     {
@@ -138,65 +115,7 @@ export default function DoctorCitasPage() {
       handler: handleNewAppointment,
       description: DEFAULT_SHORTCUTS.NEW_APPOINTMENT.description,
     },
-    {
-      key: DEFAULT_SHORTCUTS.TODAY.key,
-      handler: () => setCurrentDate(new Date()),
-      description: DEFAULT_SHORTCUTS.TODAY.description,
-    },
-    {
-      key: DEFAULT_SHORTCUTS.NEXT_WEEK.key,
-      handler: () => setCurrentDate(prev => addWeeks(prev, 1)),
-      description: DEFAULT_SHORTCUTS.NEXT_WEEK.description,
-    },
-    {
-      key: DEFAULT_SHORTCUTS.PREV_WEEK.key,
-      handler: () => setCurrentDate(prev => subWeeks(prev, 1)),
-      description: DEFAULT_SHORTCUTS.PREV_WEEK.description,
-    },
-    {
-      key: DEFAULT_SHORTCUTS.DAY_VIEW.key,
-      handler: () => setView('day'),
-      description: DEFAULT_SHORTCUTS.DAY_VIEW.description,
-    },
-    {
-      key: DEFAULT_SHORTCUTS.WEEK_VIEW.key,
-      handler: () => setView('week'),
-      description: DEFAULT_SHORTCUTS.WEEK_VIEW.description,
-    },
-    {
-      key: DEFAULT_SHORTCUTS.MONTH_VIEW.key,
-      handler: () => setView('month'),
-      description: DEFAULT_SHORTCUTS.MONTH_VIEW.description,
-    },
-    {
-      key: DEFAULT_SHORTCUTS.LIST_VIEW.key,
-      handler: () => setView('list'),
-      description: DEFAULT_SHORTCUTS.LIST_VIEW.description,
-    },
   ]);
-
-  // Efecto para establecer fecha y vista desde URL
-  useEffect(() => {
-    // Si hay fecha en la URL, establecerla
-    if (urlDate) {
-      // IMPORTANTE: Parsear la fecha manualmente para evitar problemas de timezone
-      // new Date("YYYY-MM-DD") interpreta como UTC, causando desfase de 1 día
-      const dateParts = urlDate.split('-');
-      if (dateParts.length === 3) {
-        const year = parseInt(dateParts[0], 10);
-        const month = parseInt(dateParts[1], 10) - 1; // Los meses son 0-indexed
-        const day = parseInt(dateParts[2], 10);
-        const parsedDate = new Date(year, month, day);
-        if (!isNaN(parsedDate.getTime())) {
-          setCurrentDate(parsedDate);
-        }
-      }
-    }
-    // Si hay vista en la URL, establecerla
-    if (urlView && ['day', 'week', 'month', 'list'].includes(urlView)) {
-      setView(urlView as 'day' | 'week' | 'month' | 'list');
-    }
-  }, [urlDate, urlView]);
 
   useEffect(() => {
     loadData();
@@ -394,60 +313,10 @@ export default function DoctorCitasPage() {
 
   return (
     <VerificationGuard>
-      <div className="flex flex-col h-screen overflow-hidden" data-tour="calendar-section">
-        {/* Header - Fixed */}
-        <div className="flex-shrink-0 px-4 py-6 sm:px-6 border-b border-border bg-card shadow-sm">
-          <div className="flex items-center justify-between">
-            <div>
-              <div className="flex items-center gap-3">
-                <h1 className="text-3xl font-bold text-foreground">Agenda</h1>
-                {!loading && (
-                  <span
-                    className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-green-100 text-green-700 text-xs font-medium"
-                    data-tour="realtime-indicator"
-                  >
-                    <span className="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse"></span>
-                    En vivo
-                  </span>
-                )}
-              </div>
-              <p className="text-muted-foreground mt-1">
-                Gestiona tus citas y disponibilidad • Actualizaciones en tiempo real
-              </p>
-            </div>
-            <div className="flex items-center gap-4">
-              {/* Integrated Tools - Timer, Chat & Tour */}
-              <div className="flex items-center gap-2">
-                <div className="flex items-center gap-2 border-l border-border pl-3">
-                  <SessionTimer showWarning={true} />
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="text-muted-foreground hover:text-primary"
-                    data-tour="chatbot-button"
-                    onClick={() => document.dispatchEvent(new Event('toggle-chat'))}
-                    title="Abrir Chatbot"
-                  >
-                    <MessageCircle className="h-5 w-5" />
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="text-muted-foreground hover:text-secondary"
-                    onClick={() => document.dispatchEvent(new Event('start-tour'))}
-                    title="Iniciar Tour"
-                  >
-                    <HelpCircle className="h-5 w-5" />
-                  </Button>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Calendar - Flexible height */}
-        <div className="flex-1 min-h-0 px-4 py-6 sm:px-6" data-tour="calendar-grid">
-          <CalendarMain
+      <div className="flex flex-col h-full overflow-hidden p-4">
+        {/* Calendario unificado - ocupa todo el espacio disponible */}
+        <div className="flex-1 min-h-0 rounded-lg border border-border overflow-hidden bg-card shadow-sm">
+          <UnifiedCalendar
             appointments={appointments}
             onNewAppointment={handleNewAppointment}
             onAppointmentClick={handleAppointmentClick}
@@ -455,18 +324,10 @@ export default function DoctorCitasPage() {
             onMessage={handleMessage}
             onStartVideo={handleStartVideo}
             loading={loading}
-            currentDate={currentDate}
-            view={view}
-            onDateChange={setCurrentDate}
-            onViewChange={setView}
-            dragState={dragState}
-            onDragStart={handleDragStart}
-            onDragOver={handleDragOver}
-            onDragEnd={handleDragEnd}
-            onDragCancel={handleDragCancel}
           />
         </div>
 
+        {/* Modal de resumen del paciente */}
         <PatientSummaryModal
           appointment={selectedAppointment}
           open={modalOpen}
@@ -475,13 +336,14 @@ export default function DoctorCitasPage() {
           onStartVideo={handleStartVideo}
         />
 
+        {/* Toast notifications */}
         <Toast
           message={toast.message}
           type={toast.type}
           isVisible={toast.isVisible}
           onClose={() => setToast((prev) => ({ ...prev, isVisible: false }))}
         />
-      </div >
-    </VerificationGuard >
+      </div>
+    </VerificationGuard>
   );
 }

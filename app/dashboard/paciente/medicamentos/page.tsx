@@ -176,8 +176,8 @@ export default function MedicamentosPage() {
           <TabsTrigger value="recordatorios">
             Recordatorios ({reminders.length})
           </TabsTrigger>
-          <TabsTrigger value="recetas">
-            Recetas ({activePrescriptions.length})
+          <TabsTrigger value="recipe">
+            recipe ({activePrescriptions.length})
           </TabsTrigger>
           <TabsTrigger value="estadisticas">Estadísticas</TabsTrigger>
         </TabsList>
@@ -317,8 +317,8 @@ export default function MedicamentosPage() {
           )}
         </TabsContent>
 
-        {/* Recetas */}
-        <TabsContent value="recetas" className="space-y-4">
+        {/* recipe */}
+        <TabsContent value="recipe" className="space-y-4">
           {prescriptions.length > 0 ? (
             prescriptions.map((prescription) => (
               <Card key={prescription.id}>
@@ -331,7 +331,7 @@ export default function MedicamentosPage() {
                       <div className="flex-1">
                         <div className="flex items-center gap-2 mb-2">
                           <h3 className="font-semibold">
-                            Receta del {new Date(prescription.fecha_prescripcion).toLocaleDateString("es-ES")}
+                            recipe del {new Date(prescription.fecha_prescripcion).toLocaleDateString("es-ES")}
                           </h3>
                           <Badge
                             variant={
@@ -363,7 +363,7 @@ export default function MedicamentosPage() {
                         </div>
                       </div>
                     </div>
-                    <Link href={`/dashboard/paciente/medicamentos/recetas/${prescription.id}`}>
+                    <Link href={`/dashboard/paciente/medicamentos/recipe/${prescription.id}`}>
                       <Button variant="outline" size="sm">
                         Ver Detalles
                       </Button>
@@ -376,9 +376,9 @@ export default function MedicamentosPage() {
             <Card>
               <CardContent className="pt-6 text-center py-12">
                 <FileText className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
-                <h3 className="font-semibold mb-2">No tienes recetas médicas</h3>
+                <h3 className="font-semibold mb-2">No tienes recipe médicas</h3>
                 <p className="text-muted-foreground">
-                  Tus recetas aparecerán aquí después de tus consultas
+                  Tus recipe aparecerán aquí después de tus consultas
                 </p>
               </CardContent>
             </Card>

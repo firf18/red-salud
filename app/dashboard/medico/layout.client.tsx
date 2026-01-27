@@ -6,6 +6,7 @@ import { supabase } from "@/lib/supabase/client";
 import { DashboardLayoutClient } from "@/components/dashboard/layout/dashboard-layout-client";
 import { AppProviders } from "@/components/providers/app-providers";
 import { TourGuideProvider } from "@/components/dashboard/tour-guide/tour-guide-provider";
+import { SidebarProvider } from "@/lib/contexts/sidebar-context";
 
 export function MedicoLayoutClient({ children }: { children: React.ReactNode }) {
   const router = useRouter();
@@ -69,16 +70,18 @@ export function MedicoLayoutClient({ children }: { children: React.ReactNode }) 
 
   return (
     <AppProviders>
-      <TourGuideProvider>
-        <DashboardLayoutClient
-          userName={profile?.nombre_completo || user.email?.split("@")[0]}
-          userEmail={user.email}
-          userRole="medico"
-          userId={user.id}
-        >
-          {children}
-        </DashboardLayoutClient>
-      </TourGuideProvider>
+      <SidebarProvider>
+        <TourGuideProvider>
+          <DashboardLayoutClient
+            userName={profile?.nombre_completo || user.email?.split("@")[0]}
+            userEmail={user.email}
+            userRole="medico"
+            userId={user.id}
+          >
+            {children}
+          </DashboardLayoutClient>
+        </TourGuideProvider>
+      </SidebarProvider>
     </AppProviders>
   );
 }

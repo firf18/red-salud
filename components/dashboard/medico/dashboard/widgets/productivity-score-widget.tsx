@@ -121,7 +121,8 @@ export function ProductivityScoreWidget({ doctorId }: ProductivityScoreWidgetPro
       });
 
     } catch (err) {
-      console.error("Error loading productivity metrics:", err);
+      const errorMessage = err instanceof Error ? err.message : String(err);
+      console.error("Error loading productivity metrics:", errorMessage);
       setError("Error al cargar métricas de productividad");
     } finally {
       setLoading(false);

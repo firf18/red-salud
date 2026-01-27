@@ -172,10 +172,10 @@ export default function DoctorDashboardPage() {
           animate="animate"
           className="space-y-6"
         >
-          {/* Header Section */}
+          {/* Header Section - Solo en móvil, en desktop está en el layout */}
           <motion.div
             variants={fadeInUp}
-            className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4"
+            className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 md:hidden"
             data-tour="dashboard-header"
           >
             <div className="space-y-1">
@@ -205,20 +205,6 @@ export default function DoctorDashboardPage() {
                     />
                   </>
                 )}
-
-                {/* Alternative: Opción B: Modal (comentado, activar si prefieres esta opción) */}
-                {/*
-                {currentOffice && (
-                  <>
-                    <span className="text-border">•</span>
-                    <OfficeQuickSelectorModal
-                      currentOffice={currentOffice}
-                      offices={allOffices}
-                      onChange={updateCurrentOffice}
-                    />
-                  </>
-                )}
-                */}
 
                 <span className="text-border">•</span>
                 <span className="text-sm">

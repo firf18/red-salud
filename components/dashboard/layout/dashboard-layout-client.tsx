@@ -8,17 +8,24 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname, useSearchParams } from "next/navigation";
 import { Menu, Bell } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { PATIENT_MODULE_CONFIG } from "@/lib/constants";
 import { signOut } from "@/lib/supabase/auth";
 import { UserProfileModal } from "../profile";
-import { DiditSidebar } from "./didit-sidebar";
-import { DiditMobileSidebar } from "./didit-mobile-sidebar";
+import { DashboardSidebar } from "./dashboard-sidebar";
+import { DashboardMobileSidebar } from "./dashboard-mobile-sidebar";
+import { DashboardMobileHeader } from "./dashboard-mobile-header";
+import { DashboardHeader } from "./dashboard-header";
+import { SidebarAwareContent } from "./sidebar-aware-content";
 import { useSessionSetup, useSessionValidation } from "@/hooks/auth";
 import { SessionTimer } from "@/components/auth";
 import { ChatWidget } from "@/components/chatbot/chat-widget";
+import { useDoctorProfile } from "@/hooks/use-doctor-profile";
+import { useTourGuide } from "@/components/dashboard/tour-guide/tour-guide-provider";
+import { CONFIGURACION_MEGA_MENU } from "@/components/dashboard/medico/configuracion/configuracion-mega-menu-config";
+import { ESTADISTICAS_MEGA_MENU } from "@/components/dashboard/medico/estadisticas/estadisticas-mega-menu-config";
 
 interface DashboardLayoutClientProps {
   children: React.ReactNode;
@@ -38,12 +45,52 @@ export function DashboardLayoutClient({
   secretaryPermissions,
 }: DashboardLayoutClientProps) {
   const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
   const [profileModalOpen, setProfileModalOpen] = useState(false);
 
   // Configurar y validar sesión automáticamente
   useSessionSetup();
   useSessionValidation();
+
+  // Detectar si estamos en la página de configuración, estadísticas o citas y configurar mega menú
+  const isConfiguracionPage = pathname?.includes("/configuracion");
+  const isEstadisticasPage = pathname?.includes("/estadisticas");
+  const isCitasPage = pathname?.includes("/citas");
+  const activeTab = (searchParams?.get("tab") as string) || (isConfiguracionPage ? "perfil" : "resumen");
+
+  const megaMenuConfig = isConfiguracionPage
+    ? {
+        sections: CONFIGURACION_MEGA_MENU,
+        activeItem: activeTab,
+        onItemClick: (itemId: string) => {
+          const newUrl =
+            itemId === "perfil"
+              ? "/dashboard/medico/configuracion"
+              : `/dashboard/medico/configuracion?tab=${itemId}`;
+          router.push(newUrl, { scroll: false });
+        },
+      }
+    : isEstadisticasPage
+    ? {
+        sections: ESTADISTICAS_MEGA_MENU,
+        activeItem: activeTab,
+        onItemClick: (itemId: string) => {
+          const newUrl =
+            itemId === "resumen"
+              ? "/dashboard/medico/estadisticas"
+              : `/dashboard/medico/estadisticas?tab=${itemId}`;
+          router.push(newUrl, { scroll: false });
+        },
+      }
+    : undefined;
+
+  // Hooks para médicos
+  const { profile: doctorProfile } = useDoctorProfile(
+    userRole === "medico" ? userId : undefined
+  );
+  const { startTour } = useTourGuide();
 
   /**
    * Maneja el clic en el perfil del usuario.
@@ -73,32 +120,26 @@ export function DashboardLayoutClient({
   };
 
   // Configurar menú según el rol
+  const dashboardRoute = userRole === "secretaria"
+    ? "/dashboard/secretaria"
+    : userRole === "medico"
+      ? "/dashboard/medico"
+      : "/dashboard/paciente";
+
   const menuGroups = userRole === "secretaria"
     ? [
       {
         label: "Principal",
         items: [
-          { key: "dashboard", label: "Dashboard", icon: "LayoutDashboard", route: "/dashboard/secretaria" },
           ...(secretaryPermissions?.can_view_agenda ? [
             { key: "agenda", label: "Agenda", icon: "Calendar", route: "/dashboard/secretaria/agenda" }
           ] : []),
           ...(secretaryPermissions?.can_view_patients ? [
             { key: "pacientes", label: "Pacientes", icon: "User", route: "/dashboard/secretaria/pacientes" }
           ] : []),
-        ],
-      },
-      {
-        label: "Comunicación",
-        items: [
           ...(secretaryPermissions?.can_send_messages ? [
             { key: "mensajes", label: "Mensajes", icon: "MessageSquare", route: "/dashboard/secretaria/mensajes" }
           ] : []),
-        ],
-      },
-      {
-        label: "Configuración",
-        items: [
-          { key: "perfil", label: "Mi Perfil", icon: "User", route: "/dashboard/secretaria/perfil" },
         ],
       },
     ].filter(group => group.items.length > 0)
@@ -107,25 +148,13 @@ export function DashboardLayoutClient({
         {
           label: "Principal",
           items: [
-            { key: "dashboard", label: "Dashboard", icon: "LayoutDashboard", route: "/dashboard/medico" },
             { key: "citas", label: "Agenda", icon: "Calendar", route: "/dashboard/medico/citas" },
             { key: "consulta", label: "Consulta", icon: "Stethoscope", route: "/dashboard/medico/consulta" },
             { key: "pacientes", label: "Pacientes", icon: "User", route: "/dashboard/medico/pacientes" },
-          ],
-        },
-        {
-          label: "Servicios",
-          items: [
             { key: "mensajeria", label: "Mensajes", icon: "MessageSquare", route: "/dashboard/medico/mensajeria" },
             { key: "telemedicina", label: "Telemedicina", icon: "Video", route: "/dashboard/medico/telemedicina" },
-            { key: "recetas", label: "Recetas", icon: "Pill", route: "/dashboard/medico/recetas" },
-          ],
-        },
-        {
-          label: "Otros",
-          items: [
+            { key: "recipes", label: "Recipes", icon: "Pill", route: "/dashboard/medico/recipes" },
             { key: "estadisticas", label: "Estadísticas", icon: "Activity", route: "/dashboard/medico/estadisticas" },
-            { key: "configuracion", label: "Configuración", icon: "Settings", route: "/dashboard/medico/configuracion" },
           ],
         },
       ]
@@ -133,37 +162,11 @@ export function DashboardLayoutClient({
         {
           label: "Principal",
           items: Object.entries(PATIENT_MODULE_CONFIG)
-            .slice(0, 3)
+            .filter(([key]) => key !== "configuracion") // Excluir configuración del menú
             .map(([key, config]) => ({
               key,
               ...config,
             })),
-        },
-        {
-          label: "Servicios",
-          items: Object.entries(PATIENT_MODULE_CONFIG)
-            .slice(3, 7)
-            .map(([key, config]) => ({
-              key,
-              ...config,
-            })),
-        },
-        {
-          label: "Otros",
-          items: [
-            ...Object.entries(PATIENT_MODULE_CONFIG)
-              .slice(7)
-              .map(([key, config]) => ({
-                key,
-                ...config,
-              })),
-            {
-              key: "configuracion",
-              label: "Configuración",
-              icon: "Settings",
-              route: "/dashboard/paciente/configuracion"
-            },
-          ],
         },
       ];
 
@@ -174,59 +177,59 @@ export function DashboardLayoutClient({
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Mobile Header */}
-      <header className="md:hidden fixed top-0 left-0 right-0 h-16 bg-background border-b border-border z-30">
-        <div className="h-full px-4 flex items-center justify-between">
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={() => setMobileSidebarOpen(true)}
-          >
-            <Menu className="h-6 w-6" />
-          </Button>
+      {/* Mobile Header - Estilo Supabase */}
+      <DashboardMobileHeader
+        dashboardRoute={dashboardRoute}
+        onMenuClick={() => setMobileSidebarOpen(true)}
+        onSearchClick={() => {
+          // TODO: Implementar búsqueda
+          console.log("Search clicked");
+        }}
+      />
 
-          <div className="flex items-center gap-2">
-            <div className="bg-gradient-to-br from-blue-600 to-teal-600 text-white px-2 py-1 rounded font-bold text-sm">
-              RS
-            </div>
-            <span className="font-bold text-lg">Red-Salud</span>
-          </div>
-
-          <div className="flex items-center gap-2">
-            <SessionTimer className="hidden sm:flex" />
-            <Button variant="ghost" size="icon">
-              <Bell className="h-5 w-5" />
-            </Button>
-          </div>
-        </div>
-      </header>
+      {/* Desktop Header - Solo para médicos - Full Width */}
+      {userRole === "medico" && (
+        <DashboardHeader
+          userName={userName}
+          userEmail={userEmail}
+          doctorProfile={doctorProfile}
+          onTourClick={() => startTour("dashboard-overview")}
+          onChatClick={() => {
+            document.dispatchEvent(new CustomEvent("toggle-chat"));
+          }}
+          megaMenu={megaMenuConfig}
+          className="hidden md:flex"
+        />
+      )}
 
       {/* Layout con Sidebar y Contenido */}
-      <div className="flex min-h-screen">
-        {/* Desktop Sidebar - Estilo Didit */}
-        <DiditSidebar
+      <div className="flex" style={{ minHeight: userRole === "medico" ? "calc(100vh - 48px)" : "100vh" }}>
+        {/* Desktop Sidebar */}
+        <DashboardSidebar
           userName={userName}
           userEmail={userEmail}
           menuGroups={menuGroups}
+          dashboardRoute={dashboardRoute}
           onProfileClick={handleProfileClick}
           onLogout={handleLogout}
         />
 
-        {/* Mobile Sidebar - Estilo Didit */}
-        <DiditMobileSidebar
+        {/* Mobile Sidebar */}
+        <DashboardMobileSidebar
           isOpen={mobileSidebarOpen}
           onClose={() => setMobileSidebarOpen(false)}
           userName={userName}
           userEmail={userEmail}
           menuGroups={menuGroups}
+          dashboardRoute={dashboardRoute}
           onProfileClick={handleMobileProfileClick}
           onLogout={handleLogout}
         />
 
-        {/* Main Content */}
-        <main className="flex-1 min-h-screen">
-          <div className="pt-16 md:pt-0">{children}</div>
-        </main>
+        {/* Main Content - Con ajuste dinámico para sidebar */}
+        <SidebarAwareContent userRole={userRole}>
+          {children}
+        </SidebarAwareContent>
       </div>
 
       {/* User Profile Modal - Solo para pacientes y secretarias */}

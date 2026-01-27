@@ -9,7 +9,7 @@
 "use client";
 
 import React, { useState, useRef, useEffect, useMemo } from "react";
-import { Search, X, Check, Loader2, Stethoscope, ChevronDown } from "lucide-react";
+import { Search, X, Check, Loader2, Stethoscope, ChevronDown, Lock } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
@@ -33,6 +33,8 @@ interface SpecialtyMultiSelectProps {
     className?: string;
     /** Si está deshabilitado */
     disabled?: boolean;
+    /** Si es de solo lectura (muestra badges sin poder eliminar) */
+    readOnly?: boolean;
 }
 
 export function SpecialtyMultiSelect({
@@ -42,6 +44,7 @@ export function SpecialtyMultiSelect({
     placeholder = "Buscar especialidades...",
     className,
     disabled = false,
+    readOnly = false,
 }: SpecialtyMultiSelectProps) {
     const [query, setQuery] = useState("");
     const [items, setItems] = useState<Specialty[]>([]);
@@ -195,12 +198,16 @@ export function SpecialtyMultiSelect({
             <div
                 className={cn(
                     "flex flex-wrap items-center gap-2 p-2 min-h-[44px] rounded-xl border border-input bg-background/50 backdrop-blur-sm ring-offset-background transition-all duration-300",
-                    "focus-within:ring-2 focus-within:ring-primary/20 focus-within:border-primary",
-                    disabled && "opacity-50 cursor-not-allowed bg-muted"
+                    !readOnly && "focus-within:ring-2 focus-within:ring-primary/20 focus-within:border-primary",
+                    (disabled || readOnly) && "opacity-50 cursor-not-allowed bg-muted"
                 )}
-                onClick={() => !disabled && inputRef.current?.focus()}
+                onClick={() => !disabled && !readOnly && inputRef.current?.focus()}
             >
-                <Search className="h-4 w-4 text-muted-foreground ml-1" />
+                {readOnly ? (
+                    <Lock className="h-4 w-4 text-green-600 dark:text-green-400 ml-1" />
+                ) : (
+                    <Search className="h-4 w-4 text-muted-foreground ml-1" />
+                )}
 
                 {/* Chips de seleccionados */}
                 <AnimatePresence mode="popLayout">
@@ -215,59 +222,68 @@ export function SpecialtyMultiSelect({
                         >
                             <Badge
                                 variant="secondary"
-                                className="pl-2 pr-1 py-1 h-7 text-sm font-medium bg-primary/10 text-primary hover:bg-primary/20 border border-primary/20 flex items-center gap-1 cursor-default"
+                                className={cn(
+                                    "py-1 h-7 text-sm font-medium flex items-center gap-1",
+                                    readOnly
+                                        ? "pl-2 pr-2 bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400 border border-green-200 dark:border-green-800 cursor-default"
+                                        : "pl-2 pr-1 bg-primary/10 text-primary hover:bg-primary/20 border border-primary/20 cursor-default"
+                                )}
                             >
                                 {item}
-                                <button
-                                    type="button"
-                                    onClick={(e) => {
-                                        e.stopPropagation();
-                                        handleRemove(item);
-                                    }}
-                                    className="rounded-full p-0.5 hover:bg-primary/20 transition-colors"
-                                >
-                                    <X className="h-3 w-3" />
-                                </button>
+                                {!readOnly && (
+                                    <button
+                                        type="button"
+                                        onClick={(e) => {
+                                            e.stopPropagation();
+                                            handleRemove(item);
+                                        }}
+                                        className="rounded-full p-0.5 hover:bg-primary/20 transition-colors"
+                                    >
+                                        <X className="h-3 w-3" />
+                                    </button>
+                                )}
                             </Badge>
                         </motion.div>
                     ))}
                 </AnimatePresence>
 
                 {/* Input con Ghost Text Overlay */}
-                <div className="flex-1 min-w-[200px] relative h-7">
-                    {/* Ghost Text */}
-                    {ghostText && query && ghostText.toLowerCase().startsWith(query.toLowerCase()) && (
-                        <div className="absolute inset-0 flex items-center pointer-events-none select-none text-sm font-normal">
-                            <span className="opacity-0 whitespace-pre">{query}</span>
-                            <span className="text-muted-foreground/40 whitespace-pre">{ghostText.slice(query.length)}</span>
-                        </div>
-                    )}
+                {!readOnly && (
+                    <div className="flex-1 min-w-[200px] relative h-7">
+                        {/* Ghost Text */}
+                        {ghostText && query && ghostText.toLowerCase().startsWith(query.toLowerCase()) && (
+                            <div className="absolute inset-0 flex items-center pointer-events-none select-none text-sm font-normal">
+                                <span className="opacity-0 whitespace-pre">{query}</span>
+                                <span className="text-muted-foreground/40 whitespace-pre">{ghostText.slice(query.length)}</span>
+                            </div>
+                        )}
 
-                    <input
-                        ref={inputRef}
-                        type="text"
-                        value={query}
-                        onChange={(e) => {
-                            setQuery(e.target.value);
-                            setIsOpen(true);
-                        }}
-                        onFocus={() => query && setIsOpen(true)}
-                        onKeyDown={handleKeyDown}
-                        disabled={disabled}
-                        placeholder={selected.length === 0 ? placeholder : ""}
-                        className="w-full bg-transparent border-none outline-none text-sm text-foreground placeholder:text-muted-foreground h-full relative z-10"
-                        autoComplete="off"
-                        autoCapitalize="off"
-                        spellCheck={false}
-                    />
-                </div>
+                        <input
+                            ref={inputRef}
+                            type="text"
+                            value={query}
+                            onChange={(e) => {
+                                setQuery(e.target.value);
+                                setIsOpen(true);
+                            }}
+                            onFocus={() => query && setIsOpen(true)}
+                            onKeyDown={handleKeyDown}
+                            disabled={disabled}
+                            placeholder={selected.length === 0 ? placeholder : ""}
+                            className="w-full bg-transparent border-none outline-none text-sm text-foreground placeholder:text-muted-foreground h-full relative z-10"
+                            autoComplete="off"
+                            autoCapitalize="off"
+                            spellCheck={false}
+                        />
+                    </div>
+                )}
 
-                {loading && <Loader2 className="h-4 w-4 animate-spin text-muted-foreground mr-2" />}
+                {loading && !readOnly && <Loader2 className="h-4 w-4 animate-spin text-muted-foreground mr-2" />}
             </div>
 
             {/* Dropdown de resultados */}
             <AnimatePresence>
-                {isOpen && query && filteredItems.length > 0 && !disabled && (
+                {isOpen && query && filteredItems.length > 0 && !disabled && !readOnly && (
                     <motion.div
                         initial={{ opacity: 0, y: 5, scale: 0.98 }}
                         animate={{ opacity: 1, y: 0, scale: 1 }}

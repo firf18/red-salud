@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Pill, Save, ArrowLeft, Loader2, Plus, Trash2 } from "lucide-react";
+import { Pill, Save, ArrowLeft, Loader2, Plus, Trash2, FileText, Sparkles, Camera, Zap } from "lucide-react";
 import { VerificationGuard } from "@/components/dashboard/medico/features/verification-guard";
 import { PatientSelector } from "@/components/citas/nueva/patient-selector";
 import { usePatientsList } from "@/components/dashboard/medico/patients/hooks/usePatientsList";
@@ -27,6 +27,10 @@ export default function NewPrescriptionPage() {
     const router = useRouter();
     const [userId, setUserId] = useState<string | null>(null);
     const { state: patientsState } = usePatientsList(userId);
+
+    // Estado para el selector de métodos
+    const [showMethodSelector, setShowMethodSelector] = useState(true);
+    const [selectedMethod, setSelectedMethod] = useState<string | null>(null);
 
     const [selectedPatientId, setSelectedPatientId] = useState<string>("");
     const [diagnosis, setDiagnosis] = useState("");
@@ -47,6 +51,34 @@ export default function NewPrescriptionPage() {
         };
         init();
     }, [router]);
+
+    const handleSelectMethod = (method: string) => {
+        setSelectedMethod(method);
+        setShowMethodSelector(false);
+
+        // Manejar cada método
+        switch (method) {
+            case 'template':
+                // Navegar a selección de template
+                router.push('/dashboard/medico/recipes/nueva/template');
+                break;
+            case 'personalizada':
+                // Continuar con la recipe personalizada (quedarse en esta página)
+                break;
+            case 'escanear':
+                // Navegar a escaneo
+                router.push('/dashboard/medico/recipes/nueva/escanear');
+                break;
+            case 'rapida':
+                // Recipe rápida sin template
+                break;
+        }
+    };
+
+    const handleBackToSelector = () => {
+        setShowMethodSelector(true);
+        setSelectedMethod(null);
+    };
 
     const handleAddMedication = () => {
         setMedications([...medications, { medicamento: "", dosis: "", frecuencia: "", duracion: "", instrucciones: "" }]);
@@ -85,14 +117,14 @@ export default function NewPrescriptionPage() {
             });
 
             if (result.success) {
-                toast.success("Receta creada exitosamente");
-                router.push("/dashboard/medico/recetas");
+                toast.success("Recipe creada exitosamente");
+                router.push("/dashboard/medico/recipes");
             } else {
                 throw new Error((result.error as Error)?.message || "Error al crear la receta");
             }
         } catch (error: any) {
             console.error("Error creating prescription:", error);
-            toast.error("Error al crear la receta");
+            toast.error("Error al crear la recipe");
         } finally {
             setSubmitting(false);
         }
@@ -118,15 +150,114 @@ export default function NewPrescriptionPage() {
         <VerificationGuard>
             <div className="container mx-auto px-4 py-8 space-y-6">
                 <div className="flex items-center gap-4">
-                    <Button variant="ghost" onClick={() => router.back()}>
+                    <Button variant="ghost" onClick={showMethodSelector ? () => router.back() : handleBackToSelector}>
                         <ArrowLeft className="h-4 w-4 mr-2" />
-                        Volver
+                        {showMethodSelector ? 'Volver' : 'Cambiar Método'}
                     </Button>
                     <div>
-                        <h1 className="text-3xl font-bold text-gray-900">Nueva Receta Médica</h1>
-                        <p className="text-gray-600 mt-1">Emite una nueva receta para tus pacientes</p>
+                        <h1 className="text-3xl font-bold text-gray-900">Nueva Recipe Médica</h1>
+                        <p className="text-gray-600 mt-1">
+                            {showMethodSelector ? 'Selecciona el método para crear la recipe' : 'Emite una nueva recipe para tus pacientes'}
+                        </p>
                     </div>
                 </div>
+
+                {/* Selector de Métodos */}
+                {showMethodSelector && (
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mt-8">
+                        {/* Template del Sistema */}
+                        <Card
+                            className="cursor-pointer hover:shadow-lg transition-all border-2 hover:border-blue-500 group"
+                            onClick={() => handleSelectMethod('template')}
+                        >
+                            <CardHeader className="text-center pb-4">
+                                <div className="mx-auto w-16 h-16 bg-gradient-to-br from-blue-500 to-blue-600 rounded-full flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                                    <Sparkles className="h-8 w-8 text-white" />
+                                </div>
+                                <CardTitle className="text-xl">Template del Sistema</CardTitle>
+                            </CardHeader>
+                            <CardContent className="text-center">
+                                <p className="text-sm text-gray-600 mb-4">
+                                    Usa un formato predeterminado profesional con logo Esculapio
+                                </p>
+                                <div className="flex flex-wrap gap-1 justify-center">
+                                    <span className="text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded">General</span>
+                                    <span className="text-xs bg-green-100 text-green-700 px-2 py-1 rounded">Pediatria</span>
+                                    <span className="text-xs bg-purple-100 text-purple-700 px-2 py-1 rounded">Cardiología</span>
+                                </div>
+                            </CardContent>
+                        </Card>
+
+                        {/* Template Personalizado */}
+                        <Card
+                            className="cursor-pointer hover:shadow-lg transition-all border-2 hover:border-purple-500 group"
+                            onClick={() => handleSelectMethod('personalizada')}
+                        >
+                            <CardHeader className="text-center pb-4">
+                                <div className="mx-auto w-16 h-16 bg-gradient-to-br from-purple-500 to-purple-600 rounded-full flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                                    <FileText className="h-8 w-8 text-white" />
+                                </div>
+                                <CardTitle className="text-xl">Personalizada</CardTitle>
+                            </CardHeader>
+                            <CardContent className="text-center">
+                                <p className="text-sm text-gray-600 mb-4">
+                                    Crea tu propio formato o edita uno existente con el editor visual
+                                </p>
+                                <div className="flex flex-wrap gap-1 justify-center">
+                                    <span className="text-xs bg-purple-100 text-purple-700 px-2 py-1 rounded">Editor WYSIWYG</span>
+                                    <span className="text-xs bg-pink-100 text-pink-700 px-2 py-1 rounded">Drag & Drop</span>
+                                </div>
+                            </CardContent>
+                        </Card>
+
+                        {/* Escanear Recipe */}
+                        <Card
+                            className="cursor-pointer hover:shadow-lg transition-all border-2 hover:border-green-500 group"
+                            onClick={() => handleSelectMethod('escanear')}
+                        >
+                            <CardHeader className="text-center pb-4">
+                                <div className="mx-auto w-16 h-16 bg-gradient-to-br from-green-500 to-green-600 rounded-full flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                                    <Camera className="h-8 w-8 text-white" />
+                                </div>
+                                <CardTitle className="text-xl">Escanear Recipe</CardTitle>
+                            </CardHeader>
+                            <CardContent className="text-center">
+                                <p className="text-sm text-gray-600 mb-4">
+                                    Escanea una recipe física y el sistema extraerá los datos con OCR
+                                </p>
+                                <div className="flex flex-wrap gap-1 justify-center">
+                                    <span className="text-xs bg-green-100 text-green-700 px-2 py-1 rounded">Cámara</span>
+                                    <span className="text-xs bg-teal-100 text-teal-700 px-2 py-1 rounded">OCR</span>
+                                </div>
+                            </CardContent>
+                        </Card>
+
+                        {/* Recipe Rápida */}
+                        <Card
+                            className="cursor-pointer hover:shadow-lg transition-all border-2 hover:border-amber-500 group"
+                            onClick={() => handleSelectMethod('rapida')}
+                        >
+                            <CardHeader className="text-center pb-4">
+                                <div className="mx-auto w-16 h-16 bg-gradient-to-br from-amber-500 to-amber-600 rounded-full flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                                    <Zap className="h-8 w-8 text-white" />
+                                </div>
+                                <CardTitle className="text-xl">Recipe Rápida</CardTitle>
+                            </CardHeader>
+                            <CardContent className="text-center">
+                                <p className="text-sm text-gray-600 mb-4">
+                                    Crea una recipe rápidamente sin template, solo lo esencial
+                                </p>
+                                <div className="flex flex-wrap gap-1 justify-center">
+                                    <span className="text-xs bg-amber-100 text-amber-700 px-2 py-1 rounded">Rápido</span>
+                                    <span className="text-xs bg-orange-100 text-orange-700 px-2 py-1 rounded">Simple</span>
+                                </div>
+                            </CardContent>
+                        </Card>
+                    </div>
+                )}
+
+                {/* Formulario de Receta (solo se muestra si NO está en el selector) */}
+                {!showMethodSelector && (
 
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                     <div className="lg:col-span-2 space-y-6">
@@ -256,6 +387,7 @@ export default function NewPrescriptionPage() {
                         </Card>
                     </div>
                 </div>
+                )}
             </div>
         </VerificationGuard>
     );

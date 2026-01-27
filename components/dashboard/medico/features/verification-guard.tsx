@@ -160,7 +160,7 @@ export function VerificationGuard({ children }: VerificationGuardProps) {
                     </li>
                     <li className="flex items-start gap-2">
                       <span className="text-blue-600 mt-0.5">✓</span>
-                      <span>Emisión de recetas y órdenes médicas digitales</span>
+                      <span>Emisión de Recipe y órdenes médicas digitales</span>
                     </li>
                   </ul>
                 </div>
