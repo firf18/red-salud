@@ -32,12 +32,12 @@ export function DayTimeline({
   const slots = useMemo(() => {
     const slotsArray = [];
     const baseDate = parse(date, "yyyy-MM-dd", new Date());
-    
+
     for (let hour = workingHours.start; hour < workingHours.end; hour++) {
       for (let minute = 0; minute < 60; minute += 15) {
         const timeString = `${hour.toString().padStart(2, "0")}:${minute.toString().padStart(2, "0")}`;
         const slotDate = parse(`${date} ${timeString}`, "yyyy-MM-dd HH:mm", new Date());
-        
+
         slotsArray.push({
           time: timeString,
           date: slotDate,
@@ -52,7 +52,7 @@ export function DayTimeline({
     // Verificar si es parte de la selección actual
     const selectionStart = parse(`${date} ${selectedTime}`, "yyyy-MM-dd HH:mm", new Date());
     const selectionEnd = addMinutes(selectionStart, duration);
-    
+
     // El slot actual
     const slotEnd = addMinutes(slotTime, 15);
 
@@ -60,7 +60,7 @@ export function DayTimeline({
     const conflict = conflictingAppointments.find(apt => {
       const aptStart = new Date(apt.fecha_hora);
       const aptEnd = addMinutes(aptStart, apt.duracion_minutos);
-      
+
       // Intersección simple
       return (
         (slotTime >= aptStart && slotTime < aptEnd) ||
@@ -81,59 +81,59 @@ export function DayTimeline({
   };
 
   return (
-    <div className="w-full space-y-2">
-      <div className="flex justify-between text-xs text-muted-foreground px-1">
+    <div className="w-full space-y-1.5">
+      <div className="flex justify-between text-[10px] text-muted-foreground px-0.5">
         <span>{workingHours.start}:00</span>
         <span>{Math.floor((workingHours.end + workingHours.start) / 2)}:00</span>
         <span>{workingHours.end}:00</span>
       </div>
-      
-      <div className="h-6 w-full flex rounded-md overflow-hidden border border-gray-200 bg-gray-50 relative">
+
+      <div className="h-5 w-full flex rounded overflow-hidden border border-border/50 bg-muted/20 dark:bg-muted/10 relative">
         <TooltipProvider delayDuration={0}>
-            {slots.map((slot, index) => {
+          {slots.map((slot, index) => {
             const status = getSlotStatus(slot.date);
-            let bgColor = "bg-transparent hover:bg-gray-200";
+            let bgColor = "bg-transparent hover:bg-muted/40 dark:hover:bg-muted/30";
             let cursor = "cursor-pointer";
-            
+
             if (status === "busy") {
-                bgColor = "bg-red-400/80 hover:bg-red-500";
-                cursor = "cursor-not-allowed";
+              bgColor = "bg-red-400/70 dark:bg-red-500/60 hover:bg-red-500/80";
+              cursor = "cursor-not-allowed";
             } else if (status === "selected") {
-                bgColor = "bg-blue-500 hover:bg-blue-600";
+              bgColor = "bg-primary/80 hover:bg-primary";
             }
 
             return (
-                <Tooltip key={slot.time}>
+              <Tooltip key={slot.time}>
                 <TooltipTrigger asChild>
-                    <div
-                    className={`flex-1 h-full transition-colors border-r border-gray-100 last:border-0 ${bgColor} ${cursor}`}
+                  <div
+                    className={`flex-1 h-full transition-colors border-r border-border/20 last:border-0 ${bgColor} ${cursor}`}
                     onClick={() => status !== "busy" && onTimeSelect?.(slot.time)}
-                    />
+                  />
                 </TooltipTrigger>
-                <TooltipContent side="bottom" className="text-xs">
-                    <p>{slot.time}</p>
-                    {status === "busy" && <p className="text-red-500 font-semibold">Ocupado</p>}
-                    {status === "selected" && <p className="text-blue-500 font-semibold">Seleccionado</p>}
-                    {status === "free" && <p className="text-green-500">Disponible</p>}
+                <TooltipContent side="bottom" className="text-xs py-1 px-2">
+                  <p className="font-medium">{slot.time}</p>
+                  {status === "busy" && <p className="text-red-400 text-[10px]">Ocupado</p>}
+                  {status === "selected" && <p className="text-primary text-[10px]">Seleccionado</p>}
+                  {status === "free" && <p className="text-emerald-500 text-[10px]">Disponible</p>}
                 </TooltipContent>
-                </Tooltip>
+              </Tooltip>
             );
-            })}
+          })}
         </TooltipProvider>
       </div>
-      
-      <div className="flex gap-4 text-xs justify-center">
+
+      <div className="flex gap-3 text-[10px] justify-center">
         <div className="flex items-center gap-1">
-            <div className="w-3 h-3 bg-gray-100 border border-gray-200 rounded-sm"></div>
-            <span className="text-muted-foreground">Libre</span>
+          <div className="w-2.5 h-2.5 bg-muted/30 border border-border/50 rounded-sm"></div>
+          <span className="text-muted-foreground">Libre</span>
         </div>
         <div className="flex items-center gap-1">
-            <div className="w-3 h-3 bg-blue-500 rounded-sm"></div>
-            <span className="text-muted-foreground">Selección</span>
+          <div className="w-2.5 h-2.5 bg-primary/80 rounded-sm"></div>
+          <span className="text-muted-foreground">Selección</span>
         </div>
         <div className="flex items-center gap-1">
-            <div className="w-3 h-3 bg-red-400 rounded-sm"></div>
-            <span className="text-muted-foreground">Ocupado</span>
+          <div className="w-2.5 h-2.5 bg-red-400/70 rounded-sm"></div>
+          <span className="text-muted-foreground">Ocupado</span>
         </div>
       </div>
     </div>

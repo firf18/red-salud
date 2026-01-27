@@ -200,15 +200,15 @@ export function useAppointmentForm(): AppointmentFormHookReturn {
             `)
             .eq("medico_id", user.id)
             .neq("status", "cancelada") as unknown as {
-            data: Array<{
-              id: string;
-              fecha_hora: string;
-              duracion_minutos: number;
-              motivo: string;
-              paciente: { nombre_completo: string } | null;
-              offline_patient: { nombre_completo: string } | null;
-            }> | null;
-          };
+              data: Array<{
+                id: string;
+                fecha_hora: string;
+                duracion_minutos: number;
+                motivo: string;
+                paciente: { nombre_completo: string } | null;
+                offline_patient: { nombre_completo: string } | null;
+              }> | null;
+            };
 
           // Detectar solapamientos
           const conflicts = (appointments || []).filter((apt) => {
@@ -354,6 +354,15 @@ export function useAppointmentForm(): AppointmentFormHookReturn {
           color: colors[data.tipo_cita] || colors.presencial,
           price: data.precio ? parseFloat(data.precio) : null,
           meeting_url: meetingUrl,
+          // New fields
+          metodo_pago: data.metodo_pago || "pendiente",
+          enviar_recordatorio: data.enviar_recordatorio ?? true,
+          // Clinical fields (advanced mode)
+          diagnostico_preliminar: data.diagnostico_preliminar || null,
+          antecedentes_relevantes: data.antecedentes_relevantes || null,
+          medicamentos_actuales: data.medicamentos_actuales || null,
+          alergias: data.alergias || null,
+          notas_clinicas: data.notas_clinicas || null,
         };
 
         if (isOfflinePatient) {

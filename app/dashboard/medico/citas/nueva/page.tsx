@@ -48,7 +48,7 @@ function NuevaCitaContent() {
   const savedFormData = useMemo(() => loadFormFromLocalStorage(), [loadFormFromLocalStorage]);
 
   // Estado local
-  const [advancedMode, setAdvancedMode] = useState(false);
+  const advancedMode = searchParams.get("modo") === "clinico";
   const [showConfirmation, setShowConfirmation] = useState(false);
 
   // Inicializar formulario con datos guardados o parámetros URL
@@ -140,45 +140,23 @@ function NuevaCitaContent() {
 
   return (
     <VerificationGuard>
-      <div className="min-h-screen bg-background px-4 sm:px-6 py-6">
-        {/* Header */}
-        <div className="mb-8 w-full">
+      <div className="h-[calc(100vh-3rem)] bg-background px-4 sm:px-6 py-4 overflow-auto">
+        <div className="w-full">
+          {/* Back Button - Inline */}
           <button
             type="button"
             onClick={() => router.back()}
-            className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors mb-4"
+            className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors mb-3 group"
           >
-            <ArrowLeft className="h-4 w-4" />
-            <span>Volver</span>
+            <ArrowLeft className="h-4 w-4 group-hover:-translate-x-0.5 transition-transform" />
+            <span>Volver a citas</span>
           </button>
-          <div className="flex items-center justify-between">
-            <div className="page-title flex-1">
-              <h1 className="text-3xl font-bold text-foreground">Nueva Cita</h1>
-              <p className="text-muted-foreground mt-1">Crea una cita con pacientes registrados u offline</p>
-            </div>
-            <div className="flex items-center gap-2">
-              <TourButton tourType="nueva-cita" />
-              <button
-                type="button"
-                onClick={() => setAdvancedMode(!advancedMode)}
-                _data-tour="advanced-toggle"
-                className={`px-3 py-1.5 text-sm font-medium rounded-md transition-colors ${advancedMode
-                    ? "bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 hover:bg-blue-200 dark:hover:bg-blue-900/40"
-                    : "bg-muted text-muted-foreground hover:bg-muted/80"
-                  }`}
-              >
-                {advancedMode ? "Modo Simple" : "Modo Avanzado"}
-              </button>
-            </div>
-          </div>
-        </div>
 
-        <div className="w-full">
           <FormProvider {...form}>
-            <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+            <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
               {/* Formulario compacto */}
               <div className="bg-card rounded-lg shadow-sm border border-border">
-                <div className="p-6">
+                <div className="p-4">
                   <CompactAppointmentForm
                     getMinDate={getMinDate}
                     getMinTime={getMinTime}
@@ -195,8 +173,8 @@ function NuevaCitaContent() {
                 </div>
               </div>
 
-              {/* Acciones */}
-              <div className="flex gap-3 justify-end">
+              {/* Acciones - Fixed al fondo */}
+              <div className="flex gap-3 justify-end sticky bottom-0 bg-background py-3 -mx-4 px-4 sm:-mx-6 sm:px-6 border-t border-border">
                 <Button
                   type="button"
                   variant="outline"

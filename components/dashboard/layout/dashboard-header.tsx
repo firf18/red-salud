@@ -19,6 +19,7 @@ import { cn } from "@/lib/utils";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
 import { Button } from "@/components/ui/button";
 import { DashboardMegaMenu } from "./dashboard-mega-menu";
+import { ClinicModeToggle } from "./clinic-mode-toggle";
 import { MegaMenuSection } from "@/components/dashboard/medico/configuracion/configuracion-mega-menu-config";
 import {
   DropdownMenu,
@@ -67,7 +68,7 @@ export function DashboardHeader({
 }: DashboardHeaderProps) {
   const pathname = usePathname();
   const isCitasPage = pathname?.includes("/citas");
-  
+
   const [offices, setOffices] = useState<Office[]>([]);
   const [selectedOffice, setSelectedOffice] = useState<Office | null>(null);
   const [showAllOffices, setShowAllOffices] = useState(true);
@@ -134,8 +135,8 @@ export function DashboardHeader({
     setSelectedOffice(office);
     setShowAllOffices(office === null);
     // Emitir evento para que el calendario se actualice
-    window.dispatchEvent(new CustomEvent("office-changed", { 
-      detail: { officeId: office?.id || null } 
+    window.dispatchEvent(new CustomEvent("office-changed", {
+      detail: { officeId: office?.id || null }
     }));
   };
 
@@ -277,6 +278,11 @@ export function DashboardHeader({
 
         {/* Right Section - Actions */}
         <div className="flex items-center gap-x-2 flex-shrink-0">
+          {/* Modo Clínico Toggle (Solo en /citas/nueva) */}
+          {pathname?.includes("/citas/nueva") && (
+            <ClinicModeToggle />
+          )}
+
           {/* Chat Button */}
           <Button
             variant="ghost"

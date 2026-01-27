@@ -16,6 +16,8 @@ import { useKeyboardShortcuts, DEFAULT_SHORTCUTS } from "@/hooks/use-keyboard-sh
 import { Suspense } from "react";
 import { Loader2 } from "lucide-react";
 
+import { CalendarFilters } from "@/components/dashboard/medico/calendar/calendar-filters";
+
 function CitasContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -23,6 +25,10 @@ function CitasContent() {
   const [appointments, setAppointments] = useState<CalendarAppointment[]>([]);
   const [selectedAppointment, setSelectedAppointment] = useState<CalendarAppointment | null>(null);
   const [modalOpen, setModalOpen] = useState(false);
+  // Filters
+  const [selectedStatuses, setSelectedStatuses] = useState<string[]>([]);
+  const [selectedTypes, setSelectedTypes] = useState<string[]>([]);
+
   const [toast, setToast] = useState<{ message: string; type: ToastType; isVisible: boolean }>({
     message: "",
     type: "info",
@@ -315,13 +321,29 @@ function CitasContent() {
     }
   };
 
+  const filteredAppointments = appointments.filter((apt) => {
+    if (selectedStatuses.length > 0 && !selectedStatuses.includes(apt.status)) return false;
+    if (selectedTypes.length > 0 && !selectedTypes.includes(apt.tipo_cita)) return false;
+    return true;
+  });
+
   return (
     <VerificationGuard>
-      <div className="flex flex-col h-full overflow-hidden p-4">
+      <div className="flex flex-col h-[calc(100vh-48px)] overflow-hidden p-4 space-y-4">
+        {/* Filters */}
+        <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between flex-shrink-0">
+          <CalendarFilters
+            selectedStatuses={selectedStatuses}
+            onStatusChange={setSelectedStatuses}
+            selectedTypes={selectedTypes}
+            onTypeChange={setSelectedTypes}
+          />
+        </div>
+
         {/* Calendario unificado - ocupa todo el espacio disponible */}
         <div className="flex-1 min-h-0 rounded-lg border border-border overflow-hidden bg-card shadow-sm">
           <UnifiedCalendar
-            appointments={appointments}
+            appointments={filteredAppointments}
             onNewAppointment={handleNewAppointment}
             onAppointmentClick={handleAppointmentClick}
             onTimeSlotClick={handleTimeSlotClick}
