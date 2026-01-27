@@ -16,7 +16,9 @@ import { PatientPrimaryInfo } from "./_components/patient-primary-info";
 import { validateEmailFormat, validatePhoneFormat } from "./_utils/validation";
 import { enforceVzlaPhone, validateVzlaPhone } from "./_utils/phone";
 
-export default function NuevoPacientePage() {
+import { Suspense } from "react";
+
+function NuevoPacienteContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const fromCita = searchParams.get("from") === "cita";
@@ -389,5 +391,19 @@ export default function NuevoPacientePage() {
         </div>
       ) : null}
     </VerificationGuard>
+  );
+}
+
+export default function NuevoPacientePage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="flex items-center justify-center min-h-screen">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary" />
+        </div>
+      }
+    >
+      <NuevoPacienteContent />
+    </Suspense>
   );
 }

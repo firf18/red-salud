@@ -15,11 +15,13 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { VerificationGuard } from "@/components/dashboard/medico/features/verification-guard";
 import { validateCedulaWithCNE, isValidVenezuelanCedula, calculateAge } from "@/lib/services/cedula-validation";
 
-export default function NuevoPacienteSimplePage() {
+import { Suspense } from "react";
+
+function NuevoPacienteSimpleContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const fromCita = searchParams.get("from") === "cita";
-  
+
   const [loading, setLoading] = useState(false);
   const [generalError, setGeneralError] = useState<string | null>(null);
   const [validatingCedula, setValidatingCedula] = useState(false);
@@ -63,14 +65,14 @@ export default function NuevoPacienteSimplePage() {
   useEffect(() => {
     const validateCedulaDebounced = async () => {
       const cleanCedula = cedulaValue?.trim();
-      
+
       if (cleanCedula && cleanCedula.length >= 6 && isValidVenezuelanCedula(cleanCedula)) {
         setValidatingCedula(true);
         setCedulaFound(false);
-        
+
         try {
           const result = await validateCedulaWithCNE(cleanCedula);
-          
+
           if (result.found && result.nombre_completo) {
             setCedulaFound(true);
             setValue("nombre_completo", result.nombre_completo, { shouldValidate: true });
@@ -340,7 +342,7 @@ export default function NuevoPacienteSimplePage() {
                       className={`h-12 text-lg ${errors.email ? "border-red-500" : ""}`}
                       {...register("email")}
                     />
-                     {errors.email && (
+                    {errors.email && (
                       <p className="text-sm text-red-500">{errors.email.message}</p>
                     )}
                   </div>
@@ -391,5 +393,19 @@ export default function NuevoPacienteSimplePage() {
         </div>
       </div>
     </VerificationGuard>
+  );
+}
+
+export default function NuevoPacienteSimplePage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="flex items-center justify-center min-h-screen">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary" />
+        </div>
+      }
+    >
+      <NuevoPacienteSimpleContent />
+    </Suspense>
   );
 }

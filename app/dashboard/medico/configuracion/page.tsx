@@ -89,7 +89,9 @@ const TABS: TabConfig[] = [
   { id: "facturacion", label: "Facturación", icon: CreditCard, description: "Pagos", category: "cuenta" },
 ];
 
-export default function ConfiguracionMedicoPage() {
+import { Suspense } from "react";
+
+function ConfiguracionContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
 
@@ -164,5 +166,19 @@ export default function ConfiguracionMedicoPage() {
         </div>
       )}
     </VerificationGuard>
+  );
+}
+
+export default function ConfiguracionMedicoPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="flex items-center justify-center min-h-screen">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary" />
+        </div>
+      }
+    >
+      <ConfiguracionContent />
+    </Suspense>
   );
 }

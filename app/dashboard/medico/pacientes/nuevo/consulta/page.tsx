@@ -8,7 +8,9 @@ import { MedicalWorkspace } from "@/components/dashboard/medico/medical-workspac
 import { QuickRegistrationModal } from "@/components/dashboard/medico/pacientes/quick-registration-modal";
 import { buildPacienteFromParams } from "../_utils/consulta";
 
-export default function ConsultaPage() {
+import { Suspense } from "react";
+
+function ConsultaContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   // Inicialmente construimos desde params, pero podemos actualizarlo tras el registro rápido
@@ -65,7 +67,7 @@ export default function ConsultaPage() {
         router.push("/login/medico");
         return;
       }
-      
+
       const notasConDiagnosticos = notasMedicas + (diagnosticos.length > 0 ? `\n\nDiagnósticos:\n${diagnosticos.join("\n")}` : "");
 
       // Si ya tenemos ID (registrado vía modal), actualizamos
@@ -73,13 +75,13 @@ export default function ConsultaPage() {
         const { error: updateError } = await supabase
           .from("offline_patients")
           .update({
-             alergias: alergias.length > 0 ? alergias : null,
-             condiciones_cronicas: condicionesCronicas.length > 0 ? condicionesCronicas : null,
-             medicamentos_actuales: medicamentosActuales.length > 0 ? medicamentosActuales : null,
-             notas_medico: notasConDiagnosticos || null,
+            alergias: alergias.length > 0 ? alergias : null,
+            condiciones_cronicas: condicionesCronicas.length > 0 ? condicionesCronicas : null,
+            medicamentos_actuales: medicamentosActuales.length > 0 ? medicamentosActuales : null,
+            notas_medico: notasConDiagnosticos || null,
           })
           .eq("id", paciente.id);
-          
+
         if (updateError) throw updateError;
         router.push(`/dashboard/medico/pacientes/offline/${paciente.id}`);
       } else {
@@ -129,8 +131,8 @@ export default function ConsultaPage() {
         onBack={() => router.push("/dashboard/medico/pacientes/nuevo")}
         loading={loading}
       />
-      
-      <QuickRegistrationModal 
+
+      <QuickRegistrationModal
         open={showRegistration}
         onOpenChange={setShowRegistration}
         cedula={paciente.cedula || ""}
@@ -138,5 +140,19 @@ export default function ConsultaPage() {
         onSuccess={handleRegistrationSuccess}
       />
     </VerificationGuard>
+  );
+}
+
+export default function ConsultaPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="flex items-center justify-center min-h-screen">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary" />
+        </div>
+      }
+    >
+      <ConsultaContent />
+    </Suspense>
   );
 }

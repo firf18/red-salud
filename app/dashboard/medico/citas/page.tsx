@@ -13,8 +13,12 @@ import type { RealtimeChannel } from "@supabase/supabase-js";
 import { useKeyboardShortcuts, DEFAULT_SHORTCUTS } from "@/hooks/use-keyboard-shortcuts";
 
 
-export default function DoctorCitasPage() {
+import { Suspense } from "react";
+import { Loader2 } from "lucide-react";
+
+function CitasContent() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [loading, setLoading] = useState(true);
   const [appointments, setAppointments] = useState<CalendarAppointment[]>([]);
   const [selectedAppointment, setSelectedAppointment] = useState<CalendarAppointment | null>(null);
@@ -345,5 +349,19 @@ export default function DoctorCitasPage() {
         />
       </div>
     </VerificationGuard>
+  );
+}
+
+export default function DoctorCitasPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="flex items-center justify-center min-h-screen">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary" />
+        </div>
+      }
+    >
+      <CitasContent />
+    </Suspense>
   );
 }

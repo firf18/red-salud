@@ -62,18 +62,18 @@ export function DashboardLayoutClient({
 
   const megaMenuConfig = isConfiguracionPage
     ? {
-        sections: CONFIGURACION_MEGA_MENU,
-        activeItem: activeTab,
-        onItemClick: (itemId: string) => {
-          const newUrl =
-            itemId === "perfil"
-              ? "/dashboard/medico/configuracion"
-              : `/dashboard/medico/configuracion?tab=${itemId}`;
-          router.push(newUrl, { scroll: false });
-        },
-      }
+      sections: CONFIGURACION_MEGA_MENU,
+      activeItem: activeTab,
+      onItemClick: (itemId: string) => {
+        const newUrl =
+          itemId === "perfil"
+            ? "/dashboard/medico/configuracion"
+            : `/dashboard/medico/configuracion?tab=${itemId}`;
+        router.push(newUrl, { scroll: false });
+      },
+    }
     : isEstadisticasPage
-    ? {
+      ? {
         sections: ESTADISTICAS_MEGA_MENU,
         activeItem: activeTab,
         onItemClick: (itemId: string) => {
@@ -84,7 +84,7 @@ export function DashboardLayoutClient({
           router.push(newUrl, { scroll: false });
         },
       }
-    : undefined;
+      : undefined;
 
   // Hooks para médicos
   const { profile: doctorProfile } = useDoctorProfile(
@@ -153,7 +153,7 @@ export function DashboardLayoutClient({
             { key: "pacientes", label: "Pacientes", icon: "User", route: "/dashboard/medico/pacientes" },
             { key: "mensajeria", label: "Mensajes", icon: "MessageSquare", route: "/dashboard/medico/mensajeria" },
             { key: "telemedicina", label: "Telemedicina", icon: "Video", route: "/dashboard/medico/telemedicina" },
-            { key: "recipes", label: "Recipes", icon: "Pill", route: "/dashboard/medico/recipes" },
+            { key: "recipes", label: "Recipes", icon: "Pill", route: "/dashboard/medico/recetas" },
             { key: "estadisticas", label: "Estadísticas", icon: "Activity", route: "/dashboard/medico/estadisticas" },
           ],
         },

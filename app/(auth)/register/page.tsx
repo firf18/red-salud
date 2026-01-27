@@ -125,30 +125,61 @@ export default function RegisterPage() {
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6 mb-8">
           {roleObjects.map((role) => {
             const Icon = iconMap[role.icon];
+            const isMedico = role.id === 'medico';
 
             return (
-              <Link key={role.id} href={`/register/${role.id}`} className="block h-full group">
-                <Card className="h-full p-6 transition-all duration-300 hover:shadow-xl hover:-translate-y-1 hover:border-primary/50 bg-card/50 backdrop-blur-sm border-muted/40">
-                  <div className="flex flex-col items-center text-center space-y-4">
-                    {/* Icono */}
-                    <div className="p-4 rounded-2xl bg-primary/5 group-hover:bg-primary/10 transition-colors text-primary ring-1 ring-primary/20 group-hover:ring-primary/40">
-                      {Icon && (
-                        <Icon className="w-8 h-8 transition-transform duration-300 group-hover:scale-110" />
-                      )}
-                    </div>
+              <div key={role.id} className={`relative block h-full group ${!isMedico ? 'opacity-60 cursor-not-allowed' : ''}`}>
+                {isMedico ? (
+                  <Link href={`/register/${role.id}`} className="block h-full w-full">
+                    <Card className="h-full p-6 transition-all duration-300 hover:shadow-xl hover:-translate-y-1 hover:border-primary/50 bg-card/50 backdrop-blur-sm border-muted/40 relative overflow-hidden">
+                      <div className="flex flex-col items-center text-center space-y-4">
+                        {/* Icono */}
+                        <div className="p-4 rounded-2xl bg-primary/5 group-hover:bg-primary/10 transition-colors text-primary ring-1 ring-primary/20 group-hover:ring-primary/40">
+                          {Icon && (
+                            <Icon className="w-8 h-8 transition-transform duration-300 group-hover:scale-110" />
+                          )}
+                        </div>
 
-                    {/* Contenido */}
-                    <div className="space-y-2">
-                      <h3 className="font-semibold text-lg text-foreground group-hover:text-primary transition-colors">
-                        {role.name}
-                      </h3>
-                      <p className="text-sm text-muted-foreground leading-snug">
-                        {role.description}
-                      </p>
+                        {/* Contenido */}
+                        <div className="space-y-2">
+                          <h3 className="font-semibold text-lg text-foreground group-hover:text-primary transition-colors">
+                            {role.name}
+                          </h3>
+                          <p className="text-sm text-muted-foreground leading-snug">
+                            {role.description}
+                          </p>
+                        </div>
+                      </div>
+                    </Card>
+                  </Link>
+                ) : (
+                  <Card className="h-full p-6 bg-card/30 border-muted/20 relative overflow-hidden">
+                    <div className="absolute top-3 right-3 z-10">
+                      <span className="inline-flex items-center rounded-full border border-yellow-500/30 bg-yellow-500/10 px-2.5 py-0.5 text-xs font-semibold text-yellow-600 dark:text-yellow-500">
+                        Próximamente
+                      </span>
                     </div>
-                  </div>
-                </Card>
-              </Link>
+                    <div className="flex flex-col items-center text-center space-y-4 filter grayscale-[0.8]">
+                      {/* Icono */}
+                      <div className="p-4 rounded-2xl bg-muted/20 text-muted-foreground">
+                        {Icon && (
+                          <Icon className="w-8 h-8" />
+                        )}
+                      </div>
+
+                      {/* Contenido */}
+                      <div className="space-y-2">
+                        <h3 className="font-semibold text-lg text-muted-foreground">
+                          {role.name}
+                        </h3>
+                        <p className="text-sm text-muted-foreground/60 leading-snug">
+                          {role.description}
+                        </p>
+                      </div>
+                    </div>
+                  </Card>
+                )}
+              </div>
             );
           })}
         </div>

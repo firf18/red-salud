@@ -16,14 +16,14 @@ import { VerificationGuard } from "@/components/dashboard/medico/features/verifi
 import { Card, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
-import { 
-  BarChart3, 
-  Users, 
-  Activity, 
-  DollarSign, 
-  Clock, 
-  FlaskConical, 
-  TrendingUp, 
+import {
+  BarChart3,
+  Users,
+  Activity,
+  DollarSign,
+  Clock,
+  FlaskConical,
+  TrendingUp,
   AlertTriangle,
   Download,
   RefreshCw
@@ -43,14 +43,14 @@ import { BrotesTab } from "@/components/dashboard/medico/estadisticas/tabs/brote
 // TIPOS
 // ============================================================================
 
-type TabType = 
-  | "resumen" 
-  | "pacientes" 
-  | "enfermedades" 
-  | "finanzas" 
-  | "patrones" 
-  | "laboratorio" 
-  | "eficiencia" 
+type TabType =
+  | "resumen"
+  | "pacientes"
+  | "enfermedades"
+  | "finanzas"
+  | "patrones"
+  | "laboratorio"
+  | "eficiencia"
   | "brotes";
 
 interface TabConfig {
@@ -75,7 +75,8 @@ const TABS: TabConfig[] = [
 // COMPONENTE PRINCIPAL
 // ============================================================================
 
-function EstadisticasContent() {
+
+function EstadisticasInner() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [doctorId, setDoctorId] = useState<string | null>(null);
@@ -193,6 +194,14 @@ function EstadisticasContent() {
         </Suspense>
       </motion.div>
     </div>
+  );
+}
+
+function EstadisticasContent() {
+  return (
+    <Suspense fallback={<LoadingSkeleton />}>
+      <EstadisticasInner />
+    </Suspense>
   );
 }
 
