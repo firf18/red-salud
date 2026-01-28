@@ -9,33 +9,33 @@
 */
 
 :root {
-  --radius: 0.625rem;
+  --radius: 0.75rem;
 
-  /* Fondo: Blanco cálido con toque lavanda - suave para la vista */
-  --background: 240 20% 99%;
+  /* Fondo: Cyan muy claro - higiene y calma */
+  --background: 180 100% 98%;
 
-  /* Texto principal: Azul pizarra profundo - excelente legibilidad */
-  --foreground: 222 35% 18%;
+  /* Texto principal: Cyan oscuro profundo - confianza y legibilidad */
+  --foreground: 194 61% 24%;
 
-  /* Cards: Blanco puro con sutil calidez */
+  /* Cards: Blanco con sutil tinte cyan */
   --card: 0 0% 100%;
-  --card-foreground: 222 35% 18%;
+  --card-foreground: 194 61% 24%;
 
   /* Popovers */
   --popover: 0 0% 100%;
-  --popover-foreground: 222 35% 18%;
+  --popover-foreground: 194 61% 24%;
 
-  /* Primary: Índigo médico - sofisticado y confiable */
-  --primary: 243 75% 59%;
+  /* Primary: Cyan Profesional (#0891B2) */
+  --primary: 192 91% 36%;
   --primary-foreground: 0 0% 100%;
 
-  /* Secondary: Esmeralda vibrante - salud y vitalidad */
-  --secondary: 162 72% 42%;
-  --secondary-foreground: 0 0% 100%;
+  /* Secondary: Cyan Vibrante (#22D3EE) - acentos de tecnología */
+  --secondary: 188 86% 53%;
+  --secondary-foreground: 194 61% 24%;
 
-  /* Muted: Gris lavanda suave */
-  --muted: 240 15% 95%;
-  --muted-foreground: 222 15% 45%;
+  /* Muted: Slate azulado suave */
+  --muted: 200 20% 95%;
+  --muted-foreground: 200 15% 45%;
 
   /* Accent: Coral suave - calidez humana */
   --accent: 12 80% 95%;
@@ -85,31 +85,31 @@
   Elegante, no agresivo, con excelente contraste
 */
 .dark {
-  /* Fondo: Azul medianoche profundo - más oscuro para mejor contraste */
-  --background: 230 25% 6%;
+  /* Fondo: Azul profundo casi negro */
+  --background: 195 70% 8%;
 
-  /* Texto: Blanco cálido - reduce fatiga visual */
-  --foreground: 220 20% 95%;
+  /* Texto: Blanco cyan - fresco y claro */
+  --foreground: 180 100% 96%;
 
-  /* Cards: Elevación sutil con azul - más claros para destacarse */
-  --card: 230 25% 15%;
-  --card-foreground: 220 20% 95%;
+  /* Cards: Elevación sutil con tono cyan oscuro */
+  --card: 195 50% 12%;
+  --card-foreground: 180 100% 96%;
 
   /* Popovers */
-  --popover: 230 25% 15%;
-  --popover-foreground: 220 20% 95%;
+  --popover: 195 50% 12%;
+  --popover-foreground: 180 100% 96%;
 
-  /* Primary: Índigo luminoso - destaca sin agredir */
-  --primary: 243 80% 70%;
-  --primary-foreground: 230 25% 9%;
+  /* Primary: Cyan luminoso (#22D3EE) */
+  --primary: 188 86% 53%;
+  --primary-foreground: 195 70% 8%;
 
-  /* Secondary: Esmeralda brillante */
-  --secondary: 162 65% 50%;
-  --secondary-foreground: 230 25% 9%;
+  /* Secondary: Teal suave */
+  --secondary: 170 60% 45%;
+  --secondary-foreground: 180 100% 96%;
 
-  /* Muted: Gris azulado oscuro - más visible */
-  --muted: 230 20% 22%;
-  --muted-foreground: 220 15% 65%;
+  /* Muted: Gris azulado oscuro */
+  --muted: 200 40% 15%;
+  --muted-foreground: 200 20% 65%;
 
   /* Accent: Coral cálido */
   --accent: 230 20% 22%;

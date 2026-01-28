@@ -132,7 +132,7 @@ function RegisterFormContent({ role, roleLabel }: RegisterFormProps) {
         </Link>
 
         <Link href={ROUTES.HOME} className="cursor-pointer">
-          <span className="font-semibold text-lg text-teal-400 hover:text-teal-300 transition-colors">
+          <span className="font-semibold text-lg text-primary hover:text-primary/80 transition-colors">
             {APP_NAME}
           </span>
         </Link>
@@ -155,8 +155,8 @@ function RegisterFormContent({ role, roleLabel }: RegisterFormProps) {
                 >
                   {/* Logo & Title */}
                   <div className="text-center mb-6">
-                    <div className="inline-flex items-center justify-center w-14 h-14 rounded-xl bg-gradient-to-br from-teal-500/20 to-cyan-500/20 border border-teal-500/30 mb-4">
-                      <Stethoscope className="w-7 h-7 text-teal-400" />
+                    <div className="inline-flex items-center justify-center w-14 h-14 rounded-xl bg-gradient-to-br from-primary/20 to-cyan-500/20 border border-primary/30 mb-4">
+                      <Stethoscope className="w-7 h-7 text-primary" />
                     </div>
                     <h1 className="text-xl sm:text-2xl font-semibold text-white mb-1">
                       Registro de {roleLabel}
@@ -220,7 +220,7 @@ function RegisterFormContent({ role, roleLabel }: RegisterFormProps) {
                   {/* Already have account */}
                   <p className="mt-6 text-center text-sm text-neutral-500">
                     ¿Ya tienes cuenta?{" "}
-                    <Link href="/login" className="text-teal-400 hover:text-teal-300 font-medium cursor-pointer">
+                    <Link href="/login" className="text-primary hover:text-primary/80 font-medium cursor-pointer">
                       Inicia sesión
                     </Link>
                   </p>
@@ -279,7 +279,7 @@ function RegisterFormContent({ role, roleLabel }: RegisterFormProps) {
                           type="text"
                           placeholder="Dr. Juan Pérez"
                           autoComplete="name"
-                          className="pl-10 h-11 bg-neutral-900 border-neutral-800 text-white placeholder:text-neutral-600 focus:border-teal-500 focus:ring-1 focus:ring-teal-500/20 rounded-xl"
+                          className="pl-10 h-11 bg-neutral-900 border-neutral-800 text-white placeholder:text-neutral-600 focus:border-primary focus:ring-1 focus:ring-primary/20 rounded-xl"
                           {...register("fullName")}
                           disabled={isSubmitting}
                         />
@@ -302,7 +302,7 @@ function RegisterFormContent({ role, roleLabel }: RegisterFormProps) {
                           inputMode="email"
                           autoComplete="email"
                           placeholder="tu@email.com"
-                          className="pl-10 h-11 bg-neutral-900 border-neutral-800 text-white placeholder:text-neutral-600 focus:border-teal-500 focus:ring-1 focus:ring-teal-500/20 rounded-xl"
+                          className="pl-10 h-11 bg-neutral-900 border-neutral-800 text-white placeholder:text-neutral-600 focus:border-primary focus:ring-1 focus:ring-primary/20 rounded-xl"
                           {...register("email")}
                           disabled={isSubmitting}
                         />
@@ -324,7 +324,7 @@ function RegisterFormContent({ role, roleLabel }: RegisterFormProps) {
                           type={showPassword ? "text" : "password"}
                           placeholder="••••••••"
                           autoComplete="new-password"
-                          className="pl-10 pr-10 h-11 bg-neutral-900 border-neutral-800 text-white placeholder:text-neutral-600 focus:border-teal-500 focus:ring-1 focus:ring-teal-500/20 rounded-xl"
+                          className="pl-10 pr-10 h-11 bg-neutral-900 border-neutral-800 text-white placeholder:text-neutral-600 focus:border-primary focus:ring-1 focus:ring-primary/20 rounded-xl"
                           {...register("password")}
                           disabled={isSubmitting}
                         />
@@ -355,7 +355,7 @@ function RegisterFormContent({ role, roleLabel }: RegisterFormProps) {
                           type={showPassword ? "text" : "password"}
                           placeholder="••••••••"
                           autoComplete="new-password"
-                          className="pl-10 h-11 bg-neutral-900 border-neutral-800 text-white placeholder:text-neutral-600 focus:border-teal-500 focus:ring-1 focus:ring-teal-500/20 rounded-xl"
+                          className="pl-10 h-11 bg-neutral-900 border-neutral-800 text-white placeholder:text-neutral-600 focus:border-primary focus:ring-1 focus:ring-primary/20 rounded-xl"
                           {...register("confirmPassword")}
                           disabled={isSubmitting}
                         />
@@ -368,7 +368,7 @@ function RegisterFormContent({ role, roleLabel }: RegisterFormProps) {
                     <Button
                       type="submit"
                       disabled={isSubmitting}
-                      className="w-full h-11 bg-teal-500 hover:bg-teal-600 text-white font-medium rounded-xl shadow-lg shadow-teal-500/20 mt-2 cursor-pointer"
+                      className="w-full h-11 bg-primary hover:bg-primary/90 text-primary-foreground font-medium rounded-xl shadow-lg shadow-primary/20 mt-2 cursor-pointer"
                     >
                       {isLoading ? (
                         <>
@@ -420,7 +420,7 @@ export function RegisterFormV2(props: RegisterFormProps) {
   return (
     <Suspense fallback={
       <div className="h-dvh h-screen bg-[#0f0f0f] flex items-center justify-center">
-        <Loader2 className="h-8 w-8 animate-spin text-teal-500" />
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
       </div>
     }>
       <RegisterFormContent {...props} />

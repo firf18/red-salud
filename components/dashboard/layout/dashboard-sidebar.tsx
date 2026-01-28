@@ -86,7 +86,7 @@ export function DashboardSidebar({
       {/* Sidebar Content - Fixed Position debajo del header */}
       <div
         className={cn(
-          "fixed left-0 flex flex-col bg-sidebar border-r border-sidebar-border transition-all duration-200 ease-out",
+          "fixed left-0 flex flex-col glass border-r border-sidebar-border/50 transition-all duration-200 ease-out",
           isExpanded ? "w-64" : "w-12",
           // Posicionar debajo del header (48px de altura)
           "top-12 h-[calc(100vh-48px)]",
@@ -157,7 +157,7 @@ export function DashboardSidebar({
                         {isExpanded && <span>Red-Salud</span>}
                       </button>
                     </Link>
-                    
+
                     {/* Tooltip para logo cuando está colapsado */}
                     {!isExpanded && (
                       <div className="absolute left-full top-1/2 -translate-y-1/2 ml-2 px-2 py-1 bg-popover text-popover-foreground text-xs rounded-md shadow-md border opacity-0 pointer-events-none group-hover/menu-item:opacity-100 transition-opacity duration-200 whitespace-nowrap z-50">
@@ -205,7 +205,7 @@ export function DashboardSidebar({
                             {isExpanded && <span>{item.label}</span>}
                           </button>
                         </Link>
-                        
+
                         {/* Tooltip para sidebar colapsado */}
                         {!isExpanded && (
                           <div className="absolute left-full top-1/2 -translate-y-1/2 ml-2 px-2 py-1 bg-popover text-popover-foreground text-xs rounded-md shadow-md border opacity-0 pointer-events-none group-hover/menu-item:opacity-100 transition-opacity duration-200 whitespace-nowrap z-50">

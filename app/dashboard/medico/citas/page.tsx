@@ -11,6 +11,7 @@ import { startOfMonth, endOfMonth, addMonths, isSameDay } from "date-fns";
 import { Toast, type ToastType } from "@/components/ui/toast";
 import type { RealtimeChannel } from "@supabase/supabase-js";
 import { useKeyboardShortcuts, DEFAULT_SHORTCUTS } from "@/hooks/use-keyboard-shortcuts";
+import { tauriApiService } from "@/lib/services/tauri-api-service";
 
 
 import { Suspense } from "react";
@@ -156,75 +157,93 @@ function CitasContent() {
     }
   };
 
+  // ... inside CitasContent
+
+  // Imports needed (ensure these are available at top of file if not already)
+  // import { tauriApiService } from "@/lib/services/tauri-api-service";
+
+  // New loadAppointments implementation
   const loadAppointments = async (doctorId: string) => {
     // Cargar citas del mes actual y siguiente
     const startDate = startOfMonth(new Date());
     const endDate = endOfMonth(addMonths(new Date(), 1));
+    const cacheKey = `calendar_appointments_${doctorId}`;
 
-    const { data, error } = await supabase
-      .from("appointments")
-      .select(`
-        id,
-        paciente_id,
-        offline_patient_id,
-        fecha_hora,
-        duracion_minutos,
-        motivo,
-        status,
-        tipo_cita,
-        color,
-        notas_internas,
-        paciente:profiles!appointments_paciente_id_fkey(
-          nombre_completo,
-          telefono,
-          email,
-          avatar_url
-        ),
-        offline_patient:offline_patients!appointments_offline_patient_id_fkey(
-          nombre_completo,
-          telefono,
-          email
-        )
-      `)
-      .eq("medico_id", doctorId)
-      .gte("fecha_hora", startDate.toISOString())
-      .lte("fecha_hora", endDate.toISOString())
-      .order("fecha_hora", { ascending: true });
+    try {
+      // 1. Intentar cargar caché offline primero para mostrar datos inmediatos
+      const cachedData = await tauriApiService.getOfflineData<CalendarAppointment[]>(cacheKey);
+      if (cachedData) {
+        setAppointments(cachedData);
+        console.log("Loaded appointments from offline cache");
+      }
 
-    if (error) {
-      console.error("Error loading appointments:", error);
-      return;
-    }
+      // 2. Obtener sesión para token
+      const { data: { session } } = await supabase.auth.getSession();
+      const token = session?.access_token;
 
-    if (data) {
-      const formattedAppointments: CalendarAppointment[] = data.map((apt: Record<string, unknown>) => {
-        // Determinar si es paciente registrado u offline
-        const isOfflinePatient = !apt.paciente_id && apt.offline_patient_id;
-        const patientData = isOfflinePatient ? apt.offline_patient : apt.paciente;
+      if (!token) {
+        console.warn("No auth token available for sync");
+        return;
+      }
 
-        return {
-          id: apt.id as string,
-          paciente_id: apt.paciente_id as string | null,
-          offline_patient_id: apt.offline_patient_id as string | null,
-          paciente_nombre: (patientData as Record<string, unknown> & { nombre_completo?: string })?.nombre_completo || "Paciente",
-          paciente_telefono: (patientData as Record<string, unknown> & { telefono?: string })?.telefono || null,
-          paciente_email: (patientData as Record<string, unknown> & { email?: string })?.email || null,
-          paciente_avatar: isOfflinePatient ? null : ((patientData as Record<string, unknown> & { avatar_url?: string })?.avatar_url || null),
-          fecha_hora: apt.fecha_hora as string,
-          fecha_hora_fin: new Date(
-            new Date(apt.fecha_hora as string).getTime() + ((apt.duracion_minutos as number) || 30) * 60000
-          ).toISOString(),
-          duracion_minutos: (apt.duracion_minutos as number) || 30,
-          motivo: (apt.motivo as string) || "Sin motivo",
-          status: (apt.status as "pendiente" | "confirmada" | "en_espera" | "en_consulta" | "completada" | "no_asistio" | "cancelada" | "rechazada") || "pendiente",
-          tipo_cita: (apt.tipo_cita as "presencial" | "telemedicina" | "urgencia" | "seguimiento" | "primera_vez") || "presencial",
-          color: (apt.color as string) || "#3B82F6",
-          notas_internas: (apt.notas_internas as string) || null,
-        };
+      // 3. Consulta REST a Supabase a través del proxy de Tauri
+      // Construimos la URL manual para PostgREST
+      const selectQuery = "id,paciente_id,offline_patient_id,fecha_hora,duracion_minutos,motivo,status,tipo_cita,color,notas_internas,paciente:profiles!appointments_paciente_id_fkey(nombre_completo,telefono,email,avatar_url),offline_patient:offline_patients!appointments_offline_patient_id_fkey(nombre_completo,telefono,email)";
+
+      const queryParams = new URLSearchParams({
+        select: selectQuery,
+        medico_id: `eq.${doctorId}`,
+        fecha_hora: `gte.${startDate.toISOString()}`,
+        // fecha_hora lte param needs special handling if duplicated, but URLSearchParams handles standard params
       });
+      // Append second fecha_hora param manually or combine logic? PostgREST allows multiple filters.
+      // Simpler to append string
+      const queryString = `${queryParams.toString()}&fecha_hora=lte.${endDate.toISOString()}&order=fecha_hora.asc`;
 
-      console.log(`Loaded ${formattedAppointments.length} appointments (${data.filter((a: Record<string, unknown>) => a.offline_patient_id).length} offline patients)`);
-      setAppointments(formattedAppointments);
+      const data = await tauriApiService.supabaseGet<any[]>(
+        `/rest/v1/appointments?${queryString}`,
+        token
+      );
+
+      if (data) {
+        const formattedAppointments: CalendarAppointment[] = data.map((apt: any) => {
+          // Determinar si es paciente registrado u offline
+          const isOfflinePatient = !apt.paciente_id && apt.offline_patient_id;
+          const patientData = isOfflinePatient ? apt.offline_patient : apt.paciente;
+
+          return {
+            id: apt.id,
+            paciente_id: apt.paciente_id,
+            offline_patient_id: apt.offline_patient_id,
+            paciente_nombre: patientData?.nombre_completo || "Paciente",
+            paciente_telefono: patientData?.telefono || null,
+            paciente_email: patientData?.email || null,
+            paciente_avatar: isOfflinePatient ? null : patientData?.avatar_url || null,
+            fecha_hora: apt.fecha_hora,
+            fecha_hora_fin: new Date(
+              new Date(apt.fecha_hora).getTime() + (apt.duracion_minutos || 30) * 60000
+            ).toISOString(),
+            duracion_minutos: apt.duracion_minutos || 30,
+            motivo: apt.motivo || "Sin motivo",
+            status: apt.status || "pendiente",
+            tipo_cita: apt.tipo_cita || "presencial",
+            color: apt.color || "#3B82F6",
+            notas_internas: apt.notas_internas || null,
+          };
+        });
+
+        console.log(`Synced ${formattedAppointments.length} appointments from server`);
+        setAppointments(formattedAppointments);
+
+        // Guardar en caché actualizado
+        await tauriApiService.saveOfflineData(cacheKey, formattedAppointments);
+      }
+    } catch (error) {
+      console.error("Error syncing appointments:", error);
+      // Si falla la red, ya mostramos el caché si existía
+      if (!appointments.length) {
+        showToast("Error de conexión. Mostrando datos offline si están disponibles.", "error");
+      }
     }
   };
 
@@ -249,14 +268,12 @@ function CitasContent() {
           console.log('Realtime update:', payload);
 
           if (payload.eventType === 'INSERT') {
-            // Nueva cita creada
             const newAppointment = await formatAppointment(payload.new);
             if (newAppointment) {
               setAppointments(prev => [...prev, newAppointment]);
               showToast('Nueva cita agregada', 'success');
             }
           } else if (payload.eventType === 'UPDATE') {
-            // Cita actualizada
             const updatedAppointment = await formatAppointment(payload.new);
             if (updatedAppointment) {
               setAppointments(prev =>
@@ -265,7 +282,6 @@ function CitasContent() {
               showToast('Cita actualizada', 'info');
             }
           } else if (payload.eventType === 'DELETE') {
-            // Cita eliminada
             setAppointments(prev => prev.filter(apt => apt.id !== payload.old.id));
             showToast('Cita eliminada', 'info');
           }
@@ -278,7 +294,6 @@ function CitasContent() {
 
   const formatAppointment = async (aptData: Record<string, unknown>): Promise<CalendarAppointment | null> => {
     try {
-      // Determinar si es paciente registrado u offline
       const isOfflinePatient = !aptData.paciente_id && aptData.offline_patient_id;
 
       let patientData = null;
@@ -307,11 +322,13 @@ function CitasContent() {
         paciente_email: patientData?.email,
         paciente_avatar: isOfflinePatient ? null : (patientData as Record<string, unknown> & { avatar_url?: string })?.avatar_url || null,
         fecha_hora: aptData.fecha_hora as string,
-        fecha_hora_fin: aptData.fecha_hora_fin as string,
-        duracion_minutos: aptData.duracion_minutos as number,
+        fecha_hora_fin: new Date(
+          new Date(aptData.fecha_hora as string).getTime() + ((aptData.duracion_minutos as number) || 30) * 60000
+        ).toISOString(),
+        duracion_minutos: aptData.duracion_minutos as number || 30,
         motivo: aptData.motivo as string,
-        status: aptData.status as "pendiente" | "confirmada" | "completada" | "cancelada",
-        tipo_cita: aptData.tipo_cita as "presencial" | "telemedicina" | "urgencia" | "seguimiento" | "primera_vez",
+        status: aptData.status as CalendarAppointment['status'],
+        tipo_cita: aptData.tipo_cita as CalendarAppointment['tipo_cita'],
         color: aptData.color as string,
         notas_internas: aptData.notas_internas as string | null,
       };
@@ -327,21 +344,24 @@ function CitasContent() {
     return true;
   });
 
+  // Updated JSX with Glassmorphism
   return (
     <VerificationGuard>
       <div className="flex flex-col h-[calc(100vh-48px)] overflow-hidden p-4 space-y-4">
         {/* Filters */}
         <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between flex-shrink-0">
-          <CalendarFilters
-            selectedStatuses={selectedStatuses}
-            onStatusChange={setSelectedStatuses}
-            selectedTypes={selectedTypes}
-            onTypeChange={setSelectedTypes}
-          />
+          <div className="glass px-4 py-2 rounded-lg">
+            <CalendarFilters
+              selectedStatuses={selectedStatuses}
+              onStatusChange={setSelectedStatuses}
+              selectedTypes={selectedTypes}
+              onTypeChange={setSelectedTypes}
+            />
+          </div>
         </div>
 
         {/* Calendario unificado - ocupa todo el espacio disponible */}
-        <div className="flex-1 min-h-0 rounded-lg border border-border overflow-hidden bg-card shadow-sm">
+        <div className="flex-1 min-h-0 rounded-xl overflow-hidden shadow-glow border border-white/20 glass-card">
           <UnifiedCalendar
             appointments={filteredAppointments}
             onNewAppointment={handleNewAppointment}
