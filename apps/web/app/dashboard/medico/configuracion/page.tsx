@@ -26,6 +26,7 @@ import {
   MapPin,
 } from "lucide-react";
 import { VerificationGuard } from "@/components/dashboard/medico/features/verification-guard";
+import { RecipeSettingsSection } from "@/components/dashboard/medico/configuracion/recipe-settings-section";
 import { ProfileSection } from "@/components/dashboard/medico/configuracion/profile-section";
 import { ProfileSectionV2 } from "@/components/dashboard/medico/configuracion/profile-section-v2";
 import { InfoProfesionalSection } from "@/components/dashboard/medico/configuracion/info-profesional-section";
@@ -48,6 +49,7 @@ type TabType =
   | "perfil"
   | "info-profesional"
   | "documentos"
+  | "recetas"
   | "consultorios"
   | "horarios"
   | "secretarias"
@@ -77,6 +79,7 @@ const TABS: TabConfig[] = [
   { id: "perfil", label: "Perfil Básico", icon: User, description: "Datos personales", category: "perfil" },
   { id: "info-profesional", label: "Info. Profesional", icon: Briefcase, description: "Bio y certificados", category: "perfil" },
   { id: "documentos", label: "Documentos", icon: FileText, description: "Verificación", category: "perfil" },
+  { id: "recetas", label: "Recetas", icon: FileText, description: "Plantillas", category: "perfil" },
   { id: "consultorios", label: "Consultorios", icon: MapPin, description: "Ubicaciones", category: "consultorio" },
   { id: "horarios", label: "Horarios", icon: Clock, description: "Atención", category: "consultorio" },
   { id: "secretarias", label: "Secretarias", icon: Users, description: "Equipo", category: "consultorio" },
@@ -111,6 +114,7 @@ function ConfiguracionContent() {
       case "perfil": return <ProfileSectionV2 />;
       case "info-profesional": return <InfoProfesionalSection />;
       case "documentos": return <DocumentsSection />;
+      case "recetas": return <RecipeSettingsSection />;
       case "consultorios": return <OfficesSection />;
       case "horarios": return <ScheduleSection />;
       case "secretarias": return <SecretariesSection />;

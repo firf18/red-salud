@@ -6,6 +6,7 @@ export {
   searchMedicationsCatalog,
   getMedicationById,
   getPatientPrescriptions,
+  getDoctorPrescriptions,
   getPrescription,
   getPatientReminders,
   getTodayIntakeLog,
@@ -22,3 +23,13 @@ export {
   deactivateReminder,
   recordMedicationIntake,
 } from "./medications.mutations";
+
+// Export template queries
+export {
+  getDoctorTemplates,
+  getTemplate,
+  createTemplate,
+  updateTemplate,
+  useTemplate,
+  deleteTemplate,
+} from "./templates.queries";

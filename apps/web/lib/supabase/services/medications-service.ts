@@ -7,6 +7,7 @@ import {
   searchMedicationsCatalog as _searchMedicationsCatalog,
   getMedicationById as _getMedicationById,
   getPatientPrescriptions as _getPatientPrescriptions,
+  getDoctorPrescriptions as _getDoctorPrescriptions,
   getPrescription as _getPrescription,
   getPatientReminders as _getPatientReminders,
   getTodayIntakeLog as _getTodayIntakeLog,

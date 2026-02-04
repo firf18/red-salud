@@ -1,20 +1,23 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { supabase } from "@/lib/supabase/client";
 import { Button } from "@red-salud/ui";
-import { Input } from "@red-salud/ui";
-import { Label } from "@red-salud/ui";
-import { ArrowLeft, UserPlus, AlertCircle, CheckCircle, Loader2, Sparkles, Calendar } from "lucide-react";
+import {
+  ArrowLeft,
+  UserPlus,
+  AlertCircle,
+  Stethoscope,
+  Sparkles,
+  Save
+} from "lucide-react";
 import { Alert, AlertDescription } from "@red-salud/ui";
 import { VerificationGuard } from "@/components/dashboard/medico/features/verification-guard";
 import { validateCedulaWithCNE, isValidVenezuelanCedula, calculateAge } from "@/lib/services/cedula-validation";
-import { Badge } from "@red-salud/ui";
-import { MedicalWorkspace } from "@/components/dashboard/medico/medical-workspace";
 import { PatientPrimaryInfo } from "./_components/patient-primary-info";
 import { validateEmailFormat, validatePhoneFormat } from "./_utils/validation";
-import { enforceVzlaPhone, validateVzlaPhone } from "./_utils/phone";
+import { enforceVzlaPhone } from "./_utils/phone";
 
 import { Suspense } from "react";
 
@@ -29,9 +32,6 @@ function NuevoPacienteContent() {
   const [validatingCedula, setValidatingCedula] = useState(false);
   const [cedulaFound, setCedulaFound] = useState(false);
 
-  // Si viene de cita, mostrar mensaje y no redirigir automáticamente
-  // El usuario ya está en la página correcta
-
   type PatientFormData = {
     cedula: string;
     nombre_completo: string;
@@ -40,6 +40,7 @@ function NuevoPacienteContent() {
     telefono: string;
     email: string;
     direccion: string;
+    office_id?: string | undefined;
   };
 
   const [formData, setFormData] = useState<PatientFormData>({
@@ -50,6 +51,7 @@ function NuevoPacienteContent() {
     telefono: "",
     email: "",
     direccion: "",
+    office_id: typeof window !== 'undefined' ? localStorage.getItem('selectedOfficeId') || undefined : undefined,
   });
   const [edad, setEdad] = useState<number | null>(null);
 
@@ -126,11 +128,10 @@ function NuevoPacienteContent() {
     return () => clearTimeout(debounce);
   }, [formData.cedula]);
 
-
-
   useEffect(() => {
     setEmailError(validateEmailFormat(formData.email));
   }, [formData.email]);
+
   useEffect(() => {
     setTelefonoError(validatePhoneFormat(formData.telefono));
   }, [formData.telefono]);
@@ -138,7 +139,6 @@ function NuevoPacienteContent() {
   useEffect(() => {
     const { formatted } = enforceVzlaPhone(formData.telefono);
     if (formatted !== formData.telefono) setFormData((prev) => ({ ...prev, telefono: formatted }));
-    // Removed immediate validation to prevent error on load
   }, []);
 
   const saveDraft = useCallback(async () => {
@@ -165,6 +165,7 @@ function NuevoPacienteContent() {
         medicamentos_actuales: medicamentosActuales.length > 0 ? medicamentosActuales : null,
         notas_medico: (notasMedicas || observaciones) ? `${notasMedicas}${observaciones ? `\n\nObservaciones:\n${observaciones}` : ""}` : null,
         status: "draft",
+        location_id: formData.office_id || null,
       };
       if (existing?.id) {
         await supabase.from("offline_patients").update(payload).eq("id", existing.id);
@@ -260,6 +261,7 @@ function NuevoPacienteContent() {
           medicamentos_actuales: medicamentosActuales.length > 0 ? medicamentosActuales : null,
           notas_medico: notasConDiagnosticos || null,
           status: "offline",
+          location_id: formData.office_id || null,
         })
         .select()
         .single();
@@ -282,108 +284,89 @@ function NuevoPacienteContent() {
     }
   };
 
+  const canProceed = formData.cedula.trim().length >= 6 && formData.nombre_completo.trim().length >= 2;
+
   return (
     <VerificationGuard>
       {currentStep === 1 ? (
-        <div className="min-h-screen w-full bg-gradient-to-br from-blue-50 via-white to-purple-50">
-          {/* Header */}
-          <div className="bg-white/80 backdrop-blur-sm border-b sticky top-0 z-10">
-            <div className="w-full px-6 py-4">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-4">
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => router.back()}
-                    className="hover:bg-gray-100"
-                  >
-                    <ArrowLeft className="h-4 w-4 mr-2" />
-                    Volver
-                  </Button>
-                  <div className="h-6 w-px bg-gray-300" />
-                  <div className="flex items-center gap-3">
-                    <div className="h-12 w-12 rounded-xl bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center shadow-lg">
-                      <UserPlus className="h-6 w-6 text-white" />
-                    </div>
-                    <div>
-                      <h1 className="text-xl font-bold text-gray-900">Nuevo Paciente</h1>
-                      <p className="text-sm text-gray-600">Complete la información básica del paciente</p>
-                    </div>
-                  </div>
-                </div>
-                <div className="flex items-center gap-3">
-                  <div className="flex items-center gap-2">
-                    <div className="flex items-center gap-1">
-                      <div className="h-2 w-2 rounded-full bg-blue-600"></div>
-                      <span className="text-xs font-medium text-gray-700">Paso 1</span>
-                    </div>
-                    <div className="h-px w-8 bg-gray-300"></div>
-                    <div className="flex items-center gap-1">
-                      <div className="h-2 w-2 rounded-full bg-gray-300"></div>
-                      <span className="text-xs text-gray-400">Paso 2</span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
+        <div className="min-h-screen w-full bg-gradient-to-br from-slate-50 via-white to-blue-50/30 dark:from-slate-950 dark:via-slate-900 dark:to-slate-950">
+          {/* Content */}
+          {/* Header simplificado y orgánico - Botón pegado a la izquierda */}
+          <div className="w-full px-4 py-6 pb-0">
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              onClick={() => router.back()}
+              className="text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white hover:bg-transparent pl-0 transition-colors"
+            >
+              <ArrowLeft className="h-4 w-4 mr-2" />
+              Volver
+            </Button>
           </div>
 
           {/* Content */}
-          <div className="w-full px-6 py-8">
+          <div className="w-full px-6 py-6 max-w-5xl mx-auto space-y-6">
+
             {error && (
-              <Alert variant="destructive" className="mb-6 animate-in slide-in-from-top-2">
+              <Alert variant="destructive" className="mb-6 animate-in slide-in-from-top-2 border-red-200 dark:border-red-900 bg-red-50 dark:bg-red-950/50">
                 <AlertCircle className="h-4 w-4" />
                 <AlertDescription>{error}</AlertDescription>
               </Alert>
             )}
 
-            <div className="grid grid-cols-1 gap-6">
-              {/* Main Form */}
-              <div>
-                <PatientPrimaryInfo
-                  formData={formData}
-                  setFormData={(data) => setFormData(data)}
-                  edad={edad}
-                  cedulaFound={cedulaFound}
-                  validatingCedula={validatingCedula}
-                  alergias={alergias}
-                  setAlergias={setAlergias}
-                  notasMedicas={notasMedicas}
-                  setNotasMedicas={setNotasMedicas}
-                  observaciones={observaciones}
-                  setObservaciones={setObservaciones}
-                  emailError={emailError}
-                  telefonoError={telefonoError}
-                  ageError={ageError}
-                  dateMin={new Date(new Date().setFullYear(new Date().getFullYear() - 150)).toISOString().split("T")[0]}
-                  dateMax={new Date().toISOString().split("T")[0]}
-                  enforcePhonePrefix={(v) => {
-                    const { formatted, error } = enforceVzlaPhone(v);
-                    setFormData({ ...formData, telefono: formatted });
-                    setTelefonoError(error);
-                  }}
-                />
-              </div>
-            </div>
-            {/* Actions (desktop estático, móvil/tables fijo) */}
-            <div className="fixed bottom-6 right-6 z-50 flex items-center gap-3 lg:static lg:mt-10 lg:w-full lg:justify-end">
-              <Button
-                type="button"
-                onClick={handleNextStep}
-                className="h-11 px-5 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white shadow-lg transition-colors"
-                disabled={!formData.cedula || !formData.nombre_completo}
-                aria-label="Continuar al diagnóstico"
-              >
-                Continuar al Diagnóstico
-              </Button>
+            {/* Form */}
+            <PatientPrimaryInfo
+              formData={formData}
+              setFormData={(data) => setFormData(data)}
+              edad={edad}
+              cedulaFound={cedulaFound}
+              validatingCedula={validatingCedula}
+              alergias={alergias}
+              setAlergias={setAlergias}
+              notasMedicas={notasMedicas}
+              setNotasMedicas={setNotasMedicas}
+              observaciones={observaciones}
+              setObservaciones={setObservaciones}
+              emailError={emailError}
+              telefonoError={telefonoError}
+              ageError={ageError}
+              dateMin={new Date(new Date().setFullYear(new Date().getFullYear() - 150)).toISOString().split("T")[0]}
+              dateMax={new Date().toISOString().split("T")[0]}
+              enforcePhonePrefix={(v) => {
+                const { formatted, error } = enforceVzlaPhone(v);
+                setFormData({ ...formData, telefono: formatted });
+                setTelefonoError(error);
+              }}
+            />
+
+            {/* Actions */}
+            <div className="mt-8 flex flex-col sm:flex-row items-center justify-end gap-3">
+              {draftSavedOnce && (
+                <div className="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400 mr-auto">
+                  <Save className="h-4 w-4 text-emerald-500" />
+                  <span>Borrador guardado automáticamente</span>
+                </div>
+              )}
+
               <Button
                 type="button"
                 variant="outline"
                 onClick={() => router.back()}
-                className="h-11 px-5 transition-colors"
-                aria-label="Cancelar"
+                className="w-full sm:w-auto h-11 px-6 border-gray-200 dark:border-slate-700 hover:bg-gray-50 dark:hover:bg-slate-800"
               >
                 Cancelar
+              </Button>
+
+              <Button
+                type="button"
+                onClick={handleNextStep}
+                disabled={!canProceed}
+                className="group w-full sm:w-auto relative overflow-hidden h-11 px-6 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white shadow-lg shadow-blue-500/25 transition-all duration-300 hover:shadow-xl hover:shadow-blue-500/30 disabled:opacity-50 disabled:cursor-not-allowed disabled:shadow-none"
+              >
+                <span className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/20 to-white/0 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700" />
+                <Stethoscope className="h-4 w-4 mr-2" />
+                Continuar al Diagnóstico
               </Button>
             </div>
           </div>
@@ -397,8 +380,11 @@ export default function NuevoPacientePage() {
   return (
     <Suspense
       fallback={
-        <div className="flex items-center justify-center min-h-screen">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary" />
+        <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-slate-50 via-white to-blue-50/30 dark:from-slate-950 dark:via-slate-900 dark:to-slate-950">
+          <div className="relative">
+            <div className="absolute inset-0 bg-gradient-to-br from-blue-400/30 to-purple-400/30 rounded-full blur-xl animate-pulse" />
+            <div className="relative animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600" />
+          </div>
         </div>
       }
     >

@@ -8,7 +8,17 @@
         "build": "pnpm --filter red-salud-web build",
         "start": "pnpm --filter red-salud-web start",
         "web:dev": "pnpm --filter red-salud-web dev",
+        "tauri:dev": "pnpm --filter @red-salud/farmacia-desktop tauri:dev",
+        "tauri:farmacia:dev": "pnpm --filter @red-salud/farmacia-desktop tauri:dev",
         "tauri:medico:dev": "pnpm --filter red-salud-desktop-medico tauri dev",
         "lint": "pnpm --filter red-salud-web lint"
+    },
+    "dependencies": {
+        "html2canvas": "^1.4.1",
+        "jspdf": "^4.0.0",
+        "qrcode": "^1.5.4"
+    },
+    "devDependencies": {
+        "@types/qrcode": "^1.5.6"
     }
 }

@@ -1,26 +1,34 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { Button } from "@red-salud/ui";
 import { Input } from "@red-salud/ui";
 import { Label } from "@red-salud/ui";
 import { Badge } from "@red-salud/ui";
-import { 
-  Shield, 
-  Key, 
-  Smartphone, 
-  Lock, 
+import {
+  Shield,
+  Key,
+  Smartphone,
+  Lock,
   CheckCircle2,
   AlertTriangle,
-  Loader2
+  Loader2,
+  LogOut,
+  Trash2,
+  AlertCircle
 } from "lucide-react";
 import { supabase } from "@/lib/supabase/client";
 
 export function SecuritySection() {
+  const router = useRouter();
   const [changingPassword, setChangingPassword] = useState(false);
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  const [loggingOut, setLoggingOut] = useState(false);
+  const [deletingAccount, setDeletingAccount] = useState(false);
+  const [showDeleteConfirmation, setShowDeleteConfirmation] = useState(false);
 
   const handleChangePassword = async () => {
     if (!newPassword || !confirmPassword) {
@@ -55,6 +63,42 @@ export function SecuritySection() {
       alert("Error al cambiar la contraseña");
     } finally {
       setChangingPassword(false);
+    }
+  };
+
+  const handleLogout = async () => {
+    setLoggingOut(true);
+    try {
+      await supabase.auth.signOut();
+      router.push("/login");
+    } catch (error) {
+      console.error("Error logging out:", error);
+      alert("Error al cerrar sesión");
+    } finally {
+      setLoggingOut(false);
+    }
+  };
+
+  const handleDeleteAccount = async () => {
+    if (!showDeleteConfirmation) {
+      setShowDeleteConfirmation(true);
+      return;
+    }
+
+    setDeletingAccount(true);
+    try {
+      const { error } = await supabase.rpc('delete_user_account');
+
+      if (error) throw error;
+
+      alert("Cuenta eliminada correctamente");
+      router.push("/");
+    } catch (error) {
+      console.error("Error deleting account:", error);
+      alert("Error al eliminar la cuenta. Por favor contacta al soporte.");
+    } finally {
+      setDeletingAccount(false);
+      setShowDeleteConfirmation(false);
     }
   };
 
@@ -201,6 +245,92 @@ export function SecuritySection() {
               <li>• Revisa regularmente tu actividad de cuenta</li>
             </ul>
           </div>
+        </div>
+      </div>
+
+      {/* Account Actions */}
+      <div className="border border-red-200 rounded-lg p-6 bg-red-50/50">
+        <div className="flex items-center gap-3 mb-4">
+          <div className="p-2 bg-red-100 rounded-lg">
+            <AlertCircle className="h-5 w-5 text-red-600" />
+          </div>
+          <div>
+            <h3 className="font-semibold text-gray-900">Acciones de Cuenta</h3>
+            <p className="text-sm text-gray-600">
+              Gestiona tu sesión y cuenta
+            </p>
+          </div>
+        </div>
+
+        <div className="space-y-3">
+          <Button
+            onClick={handleLogout}
+            disabled={loggingOut}
+            variant="outline"
+            className="w-full"
+          >
+            {loggingOut ? (
+              <>
+                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                Cerrando sesión...
+              </>
+            ) : (
+              <>
+                <LogOut className="h-4 w-4 mr-2" />
+                Cerrar Sesión
+              </>
+            )}
+          </Button>
+
+          {!showDeleteConfirmation ? (
+            <Button
+              onClick={() => setShowDeleteConfirmation(true)}
+              disabled={deletingAccount}
+              variant="destructive"
+              className="w-full"
+            >
+              <Trash2 className="h-4 w-4 mr-2" />
+              Eliminar Cuenta
+            </Button>
+          ) : (
+            <div className="space-y-3">
+              <div className="bg-red-100 border border-red-300 rounded-lg p-4">
+                <p className="text-sm font-semibold text-red-900 mb-2">
+                  ⚠️ ¿Estás seguro de eliminar tu cuenta?
+                </p>
+                <p className="text-xs text-red-800">
+                  Esta acción es irreversible. Se eliminarán todos tus datos, historial médico y configuraciones.
+                </p>
+              </div>
+              <div className="flex gap-2">
+                <Button
+                  onClick={() => setShowDeleteConfirmation(false)}
+                  variant="outline"
+                  className="flex-1"
+                >
+                  Cancelar
+                </Button>
+                <Button
+                  onClick={handleDeleteAccount}
+                  disabled={deletingAccount}
+                  variant="destructive"
+                  className="flex-1"
+                >
+                  {deletingAccount ? (
+                    <>
+                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                      Eliminando...
+                    </>
+                  ) : (
+                    <>
+                      <Trash2 className="h-4 w-4 mr-2" />
+                      Confirmar Eliminación
+                    </>
+                  )}
+                </Button>
+              </div>
+            </div>
+          )}
         </div>
       </div>
     </div>

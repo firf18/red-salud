@@ -16,7 +16,7 @@ import { StructuredTemplateMarketplace } from "./templates/structured-template-m
 import { useAutocomplete } from "./workspace/use-autocomplete";
 import { useHistorial } from "./workspace/use-historial";
 import { useAIAnalysis } from "./workspace/use-ai-analysis";
-import { ScrollArea } from "@red-salud/ui";
+
 
 interface MedicalWorkspaceProps {
   paciente: {
@@ -35,7 +35,7 @@ interface MedicalWorkspaceProps {
   setNotasMedicas: (value: string) => void;
   diagnosticos: string[];
   setDiagnosticos: (value: string[]) => void;
-  onSave: () => void;
+  onSave: (freeNotesContent?: string, structuredContent?: string) => void;
   onBack: () => void;
   loading: boolean;
 }
@@ -58,14 +58,17 @@ export function MedicalWorkspace({
   const [showHistorial, setShowHistorial] = useState(true);
   const [showStructuredMarketplace, setShowStructuredMarketplace] = useState(false);
   const [selectedStructuredTemplate, setSelectedStructuredTemplate] = useState<StructuredTemplate | null>(null);
-  const [freeNotesContent, setFreeNotesContent] = useState(notasMedicas);
+  const [freeNotesContent, setFreeNotesContent] = useState(notasMedicas || "");
   const [structuredNotesContent, setStructuredNotesContent] = useState("");
+  const [isTemplateGenerated, setIsTemplateGenerated] = useState(false);
 
   // Custom hooks
   const autocomplete = useAutocomplete({ notasMedicas: freeNotesContent });
   const historial = useHistorial(paciente.cedula);
-  const aiAnalysis = useAIAnalysis({
-    notasMedicas,
+  
+  // Análisis de IA separado para cada editor
+  const aiAnalysisFreeNotes = useAIAnalysis({
+    notasMedicas: freeNotesContent,
     paciente,
     alergias,
     condicionesCronicas,
@@ -73,39 +76,56 @@ export function MedicalWorkspace({
     diagnosticos,
     setDiagnosticos,
   });
+  
+  const aiAnalysisStructured = useAIAnalysis({
+    notasMedicas: structuredNotesContent,
+    paciente,
+    alergias,
+    condicionesCronicas,
+    medicamentosActuales,
+    diagnosticos,
+    setDiagnosticos,
+  });
+  
+  // Usar el análisis de IA correspondiente a la pestaña activa
+  const currentAIAnalysis = activeTab === "notas" ? aiAnalysisFreeNotes : aiAnalysisStructured;
 
 
 
 
 
+  // Sincronizar con el estado externo solo cuando sea necesario
   useEffect(() => {
-    if (activeTab === "notas" && freeNotesContent !== notasMedicas) {
-      setFreeNotesContent(notasMedicas);
+    if (activeTab === "notas") {
+      setNotasMedicas(freeNotesContent);
+    } else if (activeTab === "estructurado") {
+      setNotasMedicas(structuredNotesContent);
     }
-  }, [activeTab, notasMedicas]);
+  }, [activeTab, freeNotesContent, structuredNotesContent, setNotasMedicas]);
+
+  // Eliminado: useEffect que copiaba contenido entre editores
 
   const handleFreeNotesChange = (value: string) => {
     setFreeNotesContent(value);
-    if (activeTab === "notas") {
-      setNotasMedicas(value);
-    }
+    setIsTemplateGenerated(false);
+    // Eliminada la conexión con notasMedicas - ahora es completamente independiente
   };
 
   const handleStructuredNotesChange = (value: string) => {
     setStructuredNotesContent(value);
-    if (activeTab === "estructurado") {
-      setNotasMedicas(value);
-    }
+    setIsTemplateGenerated(true);
+    // Eliminada la conexión con notasMedicas - ahora es completamente independiente
   };
 
   const handleTabChange = (value: string) => {
-    if (value === "notas") {
-      setNotasMedicas(freeNotesContent);
-    }
-    if (value === "estructurado") {
-      setNotasMedicas(structuredNotesContent);
-    }
+    // Eliminada toda la lógica de copiado entre editores
+    // Ahora solo cambia la pestaña activa sin modificar contenido
     setActiveTab(value);
+  };
+
+  const handleSave = () => {
+    // Guardar ambos contenidos por separado
+    onSave(freeNotesContent, structuredNotesContent);
   };
 
   const handlePrint = () => {
@@ -113,47 +133,45 @@ export function MedicalWorkspace({
   };
 
   return (
-    <div className="h-screen w-full flex flex-col bg-gray-50 overflow-hidden">
+    <div className="h-[calc(100vh-3rem)] w-full flex flex-col bg-gray-50 overflow-hidden">
       <WorkspaceHeader
         paciente={paciente}
         loading={loading}
         onBack={onBack}
-        onSave={onSave}
+        onSave={handleSave}
         onPrint={handlePrint}
       />
 
       <div className="flex-1 flex min-h-0">
-        <div className="flex-1 flex flex-col min-w-0 bg-white">
-          <Tabs value={activeTab} onValueChange={handleTabChange} className="flex-1 flex flex-col">
+        <div className="flex-1 flex flex-col min-h-0 min-w-0 bg-white">
+          <Tabs value={activeTab} onValueChange={handleTabChange} className="flex-1 flex flex-col min-h-0">
             <TabsHeader
               activeTab={activeTab}
               selectedStructuredTemplate={selectedStructuredTemplate}
-              notasMedicas={notasMedicas}
-              isAnalyzing={aiAnalysis.isAnalyzing}
+              notasMedicas={activeTab === "notas" ? freeNotesContent : structuredNotesContent}
+              isAnalyzing={currentAIAnalysis.isAnalyzing}
               onShowStructuredMarketplace={() => setShowStructuredMarketplace(true)}
-              onAnalyzeWithAI={aiAnalysis.handleAnalyzeWithAI}
+              onAnalyzeWithAI={currentAIAnalysis.handleAnalyzeWithAI}
             />
 
             {activeTab === "estructurado" && (
-              <TabsContent value="estructurado" className="flex-1 m-0 flex flex-col overflow-hidden">
-                <div className="flex-1 flex overflow-hidden">
-                  <ScrollArea className="flex-1 bg-white">
-                    <StructuredTemplateEditor
-                      template={selectedStructuredTemplate}
-                      onChange={handleStructuredNotesChange}
-                      paciente={paciente}
-                      medications={medicamentosActuales}
-                      onMedicationsChange={setMedicamentosActuales}
-                    />
-                  </ScrollArea>
-
-                  {aiAnalysis.showRecommendations && aiAnalysis.aiAnalysis && (
-                    <AIRecommendationsPanel
-                      aiAnalysis={aiAnalysis.aiAnalysis}
-                      onClose={() => aiAnalysis.setShowRecommendations(false)}
-                    />
-                  )}
+              <TabsContent value="estructurado" className="flex-1 m-0 flex flex-col min-h-0 overflow-hidden">
+                <div className="flex-1 bg-white overflow-y-auto">
+                  <StructuredTemplateEditor
+                    template={selectedStructuredTemplate}
+                    onChange={handleStructuredNotesChange}
+                    paciente={paciente}
+                    medications={medicamentosActuales}
+                    onMedicationsChange={setMedicamentosActuales}
+                  />
                 </div>
+
+                {currentAIAnalysis.showRecommendations && currentAIAnalysis.aiAnalysis && (
+                  <AIRecommendationsPanel
+                    aiAnalysis={currentAIAnalysis.aiAnalysis}
+                    onClose={() => currentAIAnalysis.setShowRecommendations(false)}
+                  />
+                )}
               </TabsContent>
             )}
 
@@ -166,10 +184,10 @@ export function MedicalWorkspace({
                     autocomplete={autocomplete}
                   />
 
-                  {aiAnalysis.showRecommendations && aiAnalysis.aiAnalysis && (
+                  {currentAIAnalysis.showRecommendations && currentAIAnalysis.aiAnalysis && (
                     <AIRecommendationsPanel
-                      aiAnalysis={aiAnalysis.aiAnalysis}
-                      onClose={() => aiAnalysis.setShowRecommendations(false)}
+                      aiAnalysis={currentAIAnalysis.aiAnalysis}
+                      onClose={() => currentAIAnalysis.setShowRecommendations(false)}
                     />
                   )}
                 </div>
@@ -217,6 +235,6 @@ export function MedicalWorkspace({
           setShowStructuredMarketplace(false);
         }}
       />
-    </div>
+    </div >
   );
 }

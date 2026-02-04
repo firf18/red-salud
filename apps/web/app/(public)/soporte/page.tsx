@@ -316,9 +316,15 @@ function ContactCard({ option }: { option: (typeof contactOptions)[0] }) {
   );
 }
 
-function ArticleCard({ article }: { article: (typeof popularArticles)[0] }) {
+function ArticleCard({ article }: { article: KBSearchResult | (typeof popularArticles)[0] }) {
+  const isKBSearchResult = 'metadata' in article;
+  const title = isKBSearchResult ? article.metadata.title : article.title;
+  const category = isKBSearchResult ? article.category : article.category;
+  const readTime = isKBSearchResult ? (article.metadata.readTime || "2 min") : article.readTime;
+  const href = isKBSearchResult ? article.metadata.url : article.href;
+
   return (
-    <Link href={article.href}>
+    <Link href={href}>
       <motion.div
         whileHover={{ x: 4 }}
         className="flex items-center justify-between p-4 rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 hover:border-teal-500 dark:hover:border-teal-500 transition-all group"
@@ -329,12 +335,12 @@ function ArticleCard({ article }: { article: (typeof popularArticles)[0] }) {
           </div>
           <div>
             <h4 className="font-medium text-zinc-900 dark:text-white group-hover:text-teal-600 dark:group-hover:text-teal-400 transition-colors">
-              {article.title}
+              {title}
             </h4>
             <div className="flex items-center gap-2 text-xs text-zinc-500 dark:text-zinc-400 mt-1">
-              <span>{article.category}</span>
+              <span className="capitalize">{category}</span>
               <span>•</span>
-              <span>{article.readTime} lectura</span>
+              <span>{readTime} lectura</span>
             </div>
           </div>
         </div>
@@ -347,6 +353,46 @@ function ArticleCard({ article }: { article: (typeof popularArticles)[0] }) {
 export default function SoportePage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [expandedFaq, setExpandedFaq] = useState<number | null>(null);
+  const [searchResults, setSearchResults] = useState<KBSearchResult[]>([]);
+  const [isSearching, setIsSearching] = useState(false);
+  const [popularArticles, setPopularArticles] = useState<KBSearchResult[]>([]);
+
+  // Fetch initial popular articles
+  useEffect(() => {
+    const fetchArticles = async () => {
+      const result = await supportService.getPopularArticles(6);
+      if (result.success && result.data) {
+        setPopularArticles(result.data);
+      } else if (result.error) {
+        toast.error("Error al cargar artículos populares", {
+          description: result.error,
+        });
+      }
+    };
+    fetchArticles();
+  }, []);
+
+  // Use debounce for search
+  useEffect(() => {
+    const timer = setTimeout(async () => {
+      if (searchQuery.trim().length > 2) {
+        setIsSearching(true);
+        const result = await supportService.searchKnowledgeBase(searchQuery);
+        if (result.success && result.data) {
+          setSearchResults(result.data);
+        } else if (result.error) {
+          toast.error("Error en la búsqueda", {
+            description: result.error,
+          });
+        }
+        setIsSearching(false);
+      } else {
+        setSearchResults([]);
+      }
+    }, 500);
+
+    return () => clearTimeout(timer);
+  }, [searchQuery]);
 
   const filteredCategories = useMemo(() => {
     if (!searchQuery.trim()) return helpCategories;
@@ -358,15 +404,10 @@ export default function SoportePage() {
     );
   }, [searchQuery]);
 
-  const filteredArticles = useMemo(() => {
-    if (!searchQuery.trim()) return popularArticles;
-    const query = searchQuery.toLowerCase();
-    return popularArticles.filter(
-      (article) =>
-        article.title.toLowerCase().includes(query) ||
-        article.category.toLowerCase().includes(query),
-    );
-  }, [searchQuery]);
+  const displayArticles = useMemo(() => {
+    if (searchResults.length > 0) return searchResults;
+    return popularArticles;
+  }, [searchResults, popularArticles]);
 
   return (
     <div className="min-h-screen bg-white dark:bg-zinc-950">
@@ -402,7 +443,10 @@ export default function SoportePage() {
             className="relative max-w-2xl mx-auto"
           >
             <div className="relative">
-              <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-zinc-400" />
+              <Search className={cn(
+                "absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-zinc-400",
+                isSearching && "animate-pulse text-teal-500"
+              )} />
               <Input
                 type="text"
                 placeholder="Buscar artículos, guías, preguntas frecuentes..."
@@ -418,8 +462,7 @@ export default function SoportePage() {
                 className="absolute top-full left-0 right-0 mt-2 p-2 bg-white dark:bg-zinc-900 rounded-xl border border-zinc-200 dark:border-zinc-800 shadow-xl z-20"
               >
                 <p className="text-sm text-zinc-500 dark:text-zinc-400 px-3 py-2">
-                  {filteredArticles.length + filteredCategories.length}{" "}
-                  resultados para &quot;{searchQuery}&quot;
+                  {isSearching ? "Buscando..." : `${searchResults.length + filteredCategories.length} resultados para "${searchQuery}"`}
                 </p>
               </motion.div>
             )}
@@ -511,7 +554,7 @@ export default function SoportePage() {
           </motion.div>
 
           <div className="space-y-3">
-            {filteredArticles.map((article, i) => (
+            {displayArticles.map((article, i) => (
               <motion.div
                 key={i}
                 initial={{ opacity: 0, x: -20 }}
@@ -522,6 +565,9 @@ export default function SoportePage() {
                 <ArticleCard article={article} />
               </motion.div>
             ))}
+            {displayArticles.length === 0 && !isSearching && (
+              <p className="text-center py-10 text-zinc-500">No se encontraron artículos.</p>
+            )}
           </div>
 
           <div className="mt-6 text-center sm:hidden">

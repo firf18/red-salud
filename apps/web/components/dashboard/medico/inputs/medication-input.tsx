@@ -1,10 +1,12 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useRef, useCallback } from "react";
 import { Input } from "@red-salud/ui";
 import { Button } from "@red-salud/ui";
 import { Badge } from "@red-salud/ui";
-import { X, Plus, Pill, Clock, Droplet } from "lucide-react";
+import { X, Plus, Pill, Clock, Droplet, Search, Loader2 } from "lucide-react";
+import { useMedicationSearch } from "@/hooks/use-medication-search";
+import { MedicationFull, CATEGORIAS_MEDICAMENTOS } from "@/lib/data/medications";
 
 interface Medication {
   id: string;
@@ -13,65 +15,6 @@ interface Medication {
   frequency: string;
   duration: string;
 }
-
-interface MedicationSuggestion {
-  name: string;
-  commonDoses: string[];
-  commonFrequencies: string[];
-}
-
-const COMMON_MEDICATIONS: MedicationSuggestion[] = [
-  {
-    name: "Paracetamol",
-    commonDoses: ["500mg", "1g"],
-    commonFrequencies: ["cada 8 horas", "cada 6 horas"],
-  },
-  {
-    name: "Ibuprofeno",
-    commonDoses: ["400mg", "600mg"],
-    commonFrequencies: ["cada 8 horas", "cada 12 horas"],
-  },
-  {
-    name: "Amoxicilina",
-    commonDoses: ["500mg", "875mg"],
-    commonFrequencies: ["cada 8 horas", "cada 12 horas"],
-  },
-  {
-    name: "Omeprazol",
-    commonDoses: ["20mg", "40mg"],
-    commonFrequencies: ["cada 24 horas", "cada 12 horas"],
-  },
-  {
-    name: "Losartán",
-    commonDoses: ["50mg", "100mg"],
-    commonFrequencies: ["cada 24 horas"],
-  },
-  {
-    name: "Metformina",
-    commonDoses: ["500mg", "850mg", "1000mg"],
-    commonFrequencies: ["cada 12 horas", "cada 8 horas"],
-  },
-  {
-    name: "Atorvastatina",
-    commonDoses: ["10mg", "20mg", "40mg"],
-    commonFrequencies: ["cada 24 horas"],
-  },
-  {
-    name: "Enalapril",
-    commonDoses: ["5mg", "10mg", "20mg"],
-    commonFrequencies: ["cada 12 horas", "cada 24 horas"],
-  },
-  {
-    name: "Salbutamol",
-    commonDoses: ["100mcg", "2 puff"],
-    commonFrequencies: ["cada 6 horas", "SOS"],
-  },
-  {
-    name: "Loratadina",
-    commonDoses: ["10mg"],
-    commonFrequencies: ["cada 24 horas"],
-  },
-];
 
 interface MedicationInputProps {
   medications: string[];
@@ -85,27 +28,35 @@ export function MedicationInput({ medications, onChange }: MedicationInputProps)
     frequency: "",
     duration: "",
   });
-  // const [suggestions, setSuggestions] = useState<MedicationSuggestion[]>([]); // Derived now
   const [showSuggestions, setShowSuggestions] = useState(false);
-  const [selectedSuggestion, setSelectedSuggestion] = useState<MedicationSuggestion | null>(null);
+  const [selectedMedication, setSelectedMedicationState] = useState<MedicationFull | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+  const doseRef = useRef<HTMLInputElement>(null);
 
-  const suggestions = (currentMed.name && currentMed.name.length > 1)
-    ? COMMON_MEDICATIONS.filter((med) =>
-      med.name.toLowerCase().includes(currentMed.name!.toLowerCase())
-    )
-    : [];
+  // Usar el hook de búsqueda optimizado
+  const {
+    query,
+    setQuery,
+    results,
+    isSearching,
+    totalMedications,
+  } = useMedicationSearch({ maxResults: 15 });
 
-  const handleSelectMedication = (med: MedicationSuggestion) => {
-    setCurrentMed({
-      ...currentMed,
-      name: med.name,
-    });
-    setSelectedSuggestion(med);
+  // Manejar selección de medicamento
+  const handleSelectMedication = useCallback((med: MedicationFull) => {
+    setCurrentMed(prev => ({
+      ...prev,
+      name: med.nombre,
+    }));
+    setSelectedMedicationState(med);
     setShowSuggestions(false);
-  };
+    setQuery(med.nombre);
+    // Focus al campo de dosis
+    setTimeout(() => doseRef.current?.focus(), 50);
+  }, [setQuery]);
 
-  const handleAddMedication = () => {
+  // Agregar medicamento
+  const handleAddMedication = useCallback(() => {
     if (!currentMed.name || !currentMed.dose || !currentMed.frequency) {
       return;
     }
@@ -122,27 +73,55 @@ export function MedicationInput({ medications, onChange }: MedicationInputProps)
       frequency: "",
       duration: "",
     });
-    setSelectedSuggestion(null);
+    setSelectedMedicationState(null);
+    setQuery("");
     inputRef.current?.focus();
-  };
+  }, [currentMed, medications, onChange, setQuery]);
 
-  const handleRemoveMedication = (index: number) => {
+  // Remover medicamento
+  const handleRemoveMedication = useCallback((index: number) => {
     onChange(medications.filter((_, i) => i !== index));
-  };
+  }, [medications, onChange]);
 
-  const handleKeyPress = (e: React.KeyboardEvent, field: string) => {
+  // Manejar teclas
+  const handleKeyPress = useCallback((e: React.KeyboardEvent, field: string) => {
     if (e.key === "Enter") {
       e.preventDefault();
-      if (field === "name" && showSuggestions && suggestions.length > 0) {
-        const firstSuggestion = suggestions[0];
-        if (firstSuggestion) {
-          handleSelectMedication(firstSuggestion);
+      if (field === "name" && showSuggestions && results.length > 0) {
+        const firstResult = results[0];
+        if (firstResult) {
+          handleSelectMedication(firstResult);
         }
       } else if (field === "duration" || (field === "frequency" && !currentMed.duration)) {
         handleAddMedication();
       }
     }
+  }, [showSuggestions, results, currentMed.duration, handleSelectMedication, handleAddMedication]);
+
+  // Manejar cambio de nombre
+  const handleNameChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    const val = e.target.value;
+    setCurrentMed(prev => ({ ...prev, name: val }));
+    setQuery(val);
+    setShowSuggestions(val.length > 1);
+    if (val.length < 2) {
+      setSelectedMedicationState(null);
+    }
+  }, [setQuery]);
+
+  // Obtener nombre de categoría
+  const getCategoryLabel = (categoria: string): string => {
+    const cat = CATEGORIAS_MEDICAMENTOS.find(c => c.id === categoria);
+    return cat?.nombre ?? categoria;
   };
+
+  // Agrupar resultados por categoría
+  const groupedResults = results.reduce<Record<string, MedicationFull[]>>((acc, med) => {
+    const cat = med.categoria;
+    if (!acc[cat]) acc[cat] = [];
+    acc[cat].push(med);
+    return acc;
+  }, {});
 
   return (
     <div className="space-y-4">
@@ -177,6 +156,9 @@ export function MedicationInput({ medications, onChange }: MedicationInputProps)
         <p className="text-sm font-semibold text-gray-700 flex items-center gap-2">
           <Plus className="h-4 w-4" />
           Agregar Medicamento
+          <span className="text-xs font-normal text-gray-400 ml-auto">
+            {totalMedications} medicamentos disponibles
+          </span>
         </p>
 
         {/* Nombre del medicamento */}
@@ -184,42 +166,66 @@ export function MedicationInput({ medications, onChange }: MedicationInputProps)
           <Input
             ref={inputRef}
             value={currentMed.name || ""}
-            onChange={(e) => {
-              const val = e.target.value;
-              setCurrentMed({ ...currentMed, name: val });
-              setShowSuggestions(val.length > 1);
-            }}
+            onChange={handleNameChange}
             onKeyPress={(e) => handleKeyPress(e, "name")}
-            placeholder="Nombre del medicamento..."
+            onFocus={() => query.length > 1 && setShowSuggestions(true)}
+            onBlur={() => setTimeout(() => setShowSuggestions(false), 200)}
+            placeholder="Buscar medicamento..."
             className="pr-10"
           />
-          <Pill className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+          {isSearching ? (
+            <Loader2 className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400 animate-spin" />
+          ) : (
+            <Search className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+          )}
 
-          {/* Sugerencias */}
-          {showSuggestions && (
-            <div className="absolute top-full left-0 right-0 mt-1 bg-white border rounded-lg shadow-lg z-20 max-h-48 overflow-y-auto">
-              {suggestions.map((med, index) => (
-                <button
-                  key={index}
-                  onClick={() => handleSelectMedication(med)}
-                  className="w-full text-left px-4 py-2 hover:bg-blue-50 flex items-center gap-2 text-sm"
-                >
-                  <Pill className="h-4 w-4 text-blue-600" />
-                  <span className="font-medium">{med.name}</span>
-                  <Badge variant="secondary" className="text-xs ml-auto">
-                    {med.commonDoses[0]}
-                  </Badge>
-                </button>
+          {/* Sugerencias agrupadas por categoría */}
+          {showSuggestions && results.length > 0 && (
+            <div className="absolute top-full left-0 right-0 mt-1 bg-white border rounded-lg shadow-lg z-20 max-h-64 overflow-y-auto">
+              {Object.entries(groupedResults).map(([categoria, meds]) => (
+                <div key={categoria}>
+                  <div className="px-3 py-1.5 bg-gray-50 border-b text-xs font-semibold text-gray-500 uppercase tracking-wide">
+                    {getCategoryLabel(categoria)}
+                  </div>
+                  {meds.map((med) => (
+                    <button
+                      key={med.id}
+                      onClick={() => handleSelectMedication(med)}
+                      className="w-full text-left px-4 py-2.5 hover:bg-blue-50 flex items-center gap-2 text-sm border-b border-gray-100 last:border-b-0"
+                    >
+                      <Pill className="h-4 w-4 text-blue-600 flex-shrink-0" />
+                      <div className="flex-1 min-w-0">
+                        <span className="font-medium block">{med.nombre}</span>
+                        {med.nombreComercial.length > 0 && (
+                          <span className="text-xs text-gray-500 truncate block">
+                            {med.nombreComercial.slice(0, 3).join(", ")}
+                          </span>
+                        )}
+                      </div>
+                      <Badge variant="secondary" className="text-xs flex-shrink-0">
+                        {med.dosisComunes[0]}
+                      </Badge>
+                    </button>
+                  ))}
+                </div>
               ))}
+            </div>
+          )}
+
+          {/* Sin resultados */}
+          {showSuggestions && query.length > 2 && results.length === 0 && !isSearching && (
+            <div className="absolute top-full left-0 right-0 mt-1 bg-white border rounded-lg shadow-lg z-20 p-4 text-center text-sm text-gray-500">
+              No se encontraron medicamentos para "{query}"
             </div>
           )}
         </div>
 
-        {/* Dosis */}
+        {/* Dosis, Frecuencia, Duración */}
         {currentMed.name && (
           <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
             <div className="relative">
               <Input
+                ref={doseRef}
                 value={currentMed.dose || ""}
                 onChange={(e) => setCurrentMed({ ...currentMed, dose: e.target.value })}
                 onKeyPress={(e) => handleKeyPress(e, "dose")}
@@ -229,9 +235,9 @@ export function MedicationInput({ medications, onChange }: MedicationInputProps)
               <Droplet className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
 
               {/* Sugerencias de dosis */}
-              {selectedSuggestion && (
+              {selectedMedication && (
                 <div className="flex flex-wrap gap-1 mt-1">
-                  {selectedSuggestion.commonDoses.map((dose, i) => (
+                  {selectedMedication.dosisComunes.map((dose, i) => (
                     <Badge
                       key={i}
                       variant="outline"
@@ -257,9 +263,9 @@ export function MedicationInput({ medications, onChange }: MedicationInputProps)
               <Clock className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
 
               {/* Sugerencias de frecuencia */}
-              {selectedSuggestion && (
+              {selectedMedication && (
                 <div className="flex flex-wrap gap-1 mt-1">
-                  {selectedSuggestion.commonFrequencies.map((freq, i) => (
+                  {selectedMedication.frecuenciasComunes.map((freq, i) => (
                     <Badge
                       key={i}
                       variant="outline"

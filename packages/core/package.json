@@ -9,10 +9,12 @@
     ".": "./src/index.ts",
     "./utils": "./src/utils/index.ts",
     "./hooks": "./src/hooks/index.ts",
-    "./validations": "./src/validations/index.ts"
+    "./validations": "./src/validations/index.ts",
+    "./pharmacy": "./src/pharmacy/index.ts"
   },
   "sideEffects": false,
   "dependencies": {
+    "@red-salud/types": "workspace:*",
     "clsx": "^2.1.1",
     "date-fns": "^4.1.0",
     "tailwind-merge": "^3.4.0",

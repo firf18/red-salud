@@ -19,32 +19,35 @@ export function ConsultationActionButton({ patientId, patientType, className }: 
   const [actionLoading, setActionLoading] = useState(false);
   const [activeAppointment, setActiveAppointment] = useState<{ id: string; status: string } | null>(null);
 
-  useEffect(() => {
-    checkActiveConsultation();
-  }, [checkActiveConsultation]);
-
   const checkActiveConsultation = useCallback(async () => {
     try {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return;
 
-      const query = supabase
+      let query = supabase
         .from("appointments")
         .select("id, status")
         .eq("medico_id", user.id)
-        .not("status", "in", '("completada","cancelada","completed","cancelled")'); // Excluir finalizadas
+        // Filtro de seguridad: Solo considerar citas de las últimas 24h hasta el final del día de hoy
+        // Esto evita que citas futuras (ej: 2026) o muy antiguas secuestren el botón
+        .gte("fecha_hora", new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString())
+        .lte("fecha_hora", new Date(new Date().setHours(23, 59, 59, 999)).toISOString())
+        .not("status", "in", '("completada","cancelada")'); // Excluir finalizadas (usar solo valores válidos del enum)
 
       if (patientType === "registered") {
-        query.eq("paciente_id", patientId);
+        query = query.eq("paciente_id", patientId);
       } else {
-        query.eq("offline_patient_id", patientId);
+        query = query.eq("offline_patient_id", patientId);
       }
 
-      // Ordenar por fecha para obtener la más reciente si hay múltiples (aunque no debería)
-      const { data, error } = await query.order("fecha_hora", { ascending: false }).limit(1).single();
+      // Ordenar por fecha para obtener la más reciente si hay múltiples
+      const { data, error } = await query
+        .order("fecha_hora", { ascending: false })
+        .limit(1)
+        .maybeSingle();
 
-      if (error && error.code !== "PGRST116") { // Ignorar error si no encuentra registros
-        console.error("Error checking active consultation:", error);
+      if (error) {
+        console.error("Error checking active consultation:", JSON.stringify(error));
       }
 
       if (data) {
@@ -58,6 +61,10 @@ export function ConsultationActionButton({ patientId, patientType, className }: 
       setLoading(false);
     }
   }, [patientId, patientType]);
+
+  useEffect(() => {
+    checkActiveConsultation();
+  }, [checkActiveConsultation]);
 
   const handleStartOrResume = async () => {
     setActionLoading(true);

@@ -110,7 +110,6 @@ export async function getMedicalSpecialties(onlyWithDoctors: boolean = false) {
 
     return { success: true, data };
   } catch (error) {
-    console.error("❌ Error fetching specialties:", error);
     return { success: false, error, data: [] };
   }
 }

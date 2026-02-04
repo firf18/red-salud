@@ -51,7 +51,11 @@ export function ActiveConsultationsWidget() {
         `,
           )
           .eq("medico_id", user.id)
-          .not("medical_record_id", "is", null)
+          // Mostrar citas de las últimas 24 horas y del futuro inmediato (próximas 2 horas solamente)
+          // O mejor: Solo mostrar las que están "en_consulta" O las de "hoy" que están pendientes
+          // Simplificación: Filtramos por rango de fecha: Ayer (-24h) hasta Final del día de hoy
+          .gte("fecha_hora", new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString())
+          .lte("fecha_hora", new Date(new Date().setHours(23, 59, 59, 999)).toISOString())
           .not("status", "in", '("completada","cancelada","no_asistio")')
           .order("fecha_hora", { ascending: false });
 
@@ -76,15 +80,15 @@ export function ActiveConsultationsWidget() {
       const [patientsRes, offlineRes] = await Promise.all([
         patientIds.length > 0
           ? supabase
-              .from("profiles")
-              .select("id, nombre_completo, cedula")
-              .in("id", patientIds)
+            .from("profiles")
+            .select("id, nombre_completo, cedula")
+            .in("id", patientIds)
           : Promise.resolve({ data: [], error: null }),
         offlineIds.length > 0
           ? supabase
-              .from("offline_patients")
-              .select("id, nombre_completo, cedula")
-              .in("id", offlineIds)
+            .from("offline_patients")
+            .select("id, nombre_completo, cedula")
+            .in("id", offlineIds)
           : Promise.resolve({ data: [], error: null }),
       ]);
 
@@ -118,11 +122,11 @@ export function ActiveConsultationsWidget() {
   if (!loading && consultations.length === 0) return null;
 
   return (
-    <div className="mb-6 animate-in fade-in slide-in-from-top-4 duration-500">
+    <div className="animate-in fade-in slide-in-from-top-4 duration-500 bg-green-50/50 dark:bg-green-900/5 border border-green-100 dark:border-green-900/30 rounded-xl p-4">
       <div className="flex items-center justify-between mb-3">
         <div className="flex items-center gap-2">
           <div className="h-2 w-2 rounded-full bg-green-500 animate-pulse" />
-          <h3 className="font-semibold text-lg text-green-700 dark:text-green-400">
+          <h3 className="font-semibold text-sm uppercase tracking-wide text-green-700 dark:text-green-400">
             Consulta en Progreso
           </h3>
         </div>
@@ -130,13 +134,13 @@ export function ActiveConsultationsWidget() {
           variant="ghost"
           size="sm"
           onClick={fetchActiveConsultations}
-          className="h-8 w-8 p-0"
+          className="h-6 w-6 p-0 hover:bg-green-100 dark:hover:bg-green-900/30"
           disabled={loading}
         >
-          <RefreshCw className={`h-4 w-4 ${loading ? "animate-spin" : ""}`} />
+          <RefreshCw className={`h-3 w-3 ${loading ? "animate-spin" : ""}`} />
         </Button>
       </div>
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+      <div className="grid gap-3 md:grid-cols-2">
         {consultations.map((consultation) => {
           const patientName =
             consultation.paciente?.nombre_completo ||
@@ -149,53 +153,40 @@ export function ActiveConsultationsWidget() {
           return (
             <Card
               key={consultation.id}
-              className="border-green-200 dark:border-green-900 bg-green-50/50 dark:bg-green-900/10 shadow-sm hover:shadow-md transition-all"
+              className="border-green-200 dark:border-green-800 bg-white dark:bg-card shadow-sm hover:shadow-md transition-all cursor-pointer group"
+              onClick={() =>
+                router.push(
+                  `/dashboard/medico/pacientes/consulta?appointment_id=${consultation.id}&paciente_id=${consultation.paciente ? consultation.paciente.id : consultation.offline_patient?.id}`,
+                )
+              }
             >
-              <CardContent className="p-4">
-                <div className="flex justify-between items-start mb-2">
-                  <div>
-                    <h4
-                      className="font-bold text-foreground truncate max-w-[200px]"
-                      title={patientName}
-                    >
-                      {patientName}
-                    </h4>
-                    {patientCedula && (
-                      <p className="text-xs text-muted-foreground">
-                        V-{patientCedula}
-                      </p>
-                    )}
-                  </div>
-                  <Badge
-                    variant="outline"
-                    className="bg-green-100 text-green-700 border-green-200"
+              <CardContent className="p-3 flex items-center justify-between gap-3">
+                <div className="min-w-0">
+                  <h4
+                    className="font-bold text-foreground truncate text-sm"
+                    title={patientName}
                   >
-                    En curso
-                  </Badge>
+                    {patientName}
+                  </h4>
+                  <div className="flex items-center gap-2 text-xs text-muted-foreground mt-1">
+                    {patientCedula && <span>V-{patientCedula}</span>}
+                    <span>•</span>
+                    <div className="flex items-center gap-1">
+                      <CalendarClock className="h-3 w-3" />
+                      <span>
+                        {format(
+                          new Date(consultation.fecha_hora),
+                          "h:mm a",
+                          { locale: es },
+                        )}
+                      </span>
+                    </div>
+                  </div>
                 </div>
 
-                <div className="flex items-center gap-2 text-sm text-muted-foreground mb-4">
-                  <CalendarClock className="h-3.5 w-3.5" />
-                  <span>
-                    {format(
-                      new Date(consultation.fecha_hora),
-                      "d MMM, h:mm a",
-                      { locale: es },
-                    )}
-                  </span>
+                <div className="h-8 w-8 rounded-full bg-green-100 dark:bg-green-900/30 flex items-center justify-center text-green-600 dark:text-green-400 group-hover:scale-110 transition-transform">
+                  <Play className="h-4 w-4 fill-current ml-0.5" />
                 </div>
-
-                <Button
-                  className="w-full bg-green-600 hover:bg-green-700 text-white shadow-sm"
-                  onClick={() =>
-                    router.push(
-                      `/dashboard/medico/pacientes/consulta?appointment_id=${consultation.id}&paciente_id=${consultation.paciente ? consultation.paciente.id : consultation.offline_patient?.id}`,
-                    )
-                  } // Ajustar lógica de ID
-                >
-                  <Play className="h-3.5 w-3.5 mr-2 fill-current" />
-                  Continuar Consulta
-                </Button>
               </CardContent>
             </Card>
           );

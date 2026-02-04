@@ -3,11 +3,19 @@
 export interface StructuredTemplateField {
   id: string;
   label: string;
-  type: 'textarea' | 'input' | 'vitals' | 'medications' | 'select' | 'checkbox';
+  type: 'textarea' | 'input' | 'vitals' | 'medications' | 'select' | 'checkbox' | 'radio' | 'header' | 'info' | 'date' | 'number';
   placeholder?: string;
   required?: boolean;
   rows?: number;
-  options?: string[]; // Para select
+  options?: string[]; // Para select, radio, checkbox
+  defaultValue?: string;
+  width?: 'full' | 'half' | 'third';      // Control de layout
+  validation?: {
+    min?: number;
+    max?: number;
+    pattern?: string;
+  };
+  helpText?: string; // Tooltip o texto de ayuda
 }
 
 export interface StructuredTemplate {

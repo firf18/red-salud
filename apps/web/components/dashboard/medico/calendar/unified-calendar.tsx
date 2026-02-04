@@ -294,7 +294,7 @@ export function UnifiedCalendar({
     return (
       <div className="h-full flex flex-col">
         {/* Header Days */}
-        <div className="grid grid-cols-7 border-b border-border">
+        <div className="grid grid-cols-7 border-b border-border z-10 relative bg-background">
           {["Lun", "Mar", "Mié", "Jue", "Vie", "Sáb", "Dom"].map(day => (
             <div key={day} className="bg-muted/30 p-2 text-center text-xs font-semibold text-muted-foreground uppercase tracking-wide">
               {day}
@@ -302,16 +302,24 @@ export function UnifiedCalendar({
           ))}
         </div>
 
-        <div className="grid grid-cols-7 grid-rows-5 flex-1 bg-border gap-px overflow-y-auto">
+        <div
+          className="grid grid-cols-7 grid-rows-5 flex-1 bg-border gap-px overflow-y-auto"
+          style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+        >
+          <style>{`.month-grid::-webkit-scrollbar { display: none; }`}</style>
           {calendarDays.map(day => {
             const dayAppointments = getAppointmentsForDate(day);
             const isCurrentMonth = isSameMonth(day, currentDate);
+            const appointmentCount = dayAppointments.length;
+
+            // Get unique colors for indicators
+            const uniqueColors = [...new Set(dayAppointments.map(apt => apt.color))].slice(0, 4);
 
             return (
               <div
                 key={day.toISOString()}
                 className={cn(
-                  "bg-card min-h-[80px] p-1.5 cursor-pointer hover:bg-muted/30 transition-colors relative flex flex-col",
+                  "bg-card min-h-[80px] p-1.5 cursor-pointer hover:bg-muted/30 transition-colors relative flex flex-col overflow-hidden",
                   !isCurrentMonth && "bg-muted/10 text-muted-foreground"
                 )}
                 onClick={() => {
@@ -319,25 +327,39 @@ export function UnifiedCalendar({
                   setViewMode("day");
                 }}
               >
-                <div className={cn(
-                  "text-xs font-medium mb-1 ml-1 w-6 h-6 flex items-center justify-center rounded-full",
-                  isToday(day) ? "bg-primary text-primary-foreground" : ""
-                )}>
-                  {format(day, "d")}
+                <div className="flex items-center justify-between p-1">
+                  <div className={cn(
+                    "text-xs font-medium w-6 h-6 flex items-center justify-center rounded-full",
+                    isToday(day) ? "bg-primary text-primary-foreground" : "text-muted-foreground"
+                  )}>
+                    {format(day, "d")}
+                  </div>
                 </div>
 
-                <div className="flex-1 space-y-1 overflow-hidden">
-                  {dayAppointments.slice(0, 3).map(apt => (
-                    <div key={apt.id} className="text-[10px] truncate px-1 rounded-sm border-l-2 pl-1 bg-muted/40" style={{ borderLeftColor: apt.color }}>
-                      {format(parseISO(apt.fecha_hora), 'HH:mm')} {apt.paciente_nombre}
+                {/* Appointment list logic */}
+                <div className="flex flex-col gap-1 mt-1 w-full px-1">
+                  {dayAppointments.slice(0, 4).map((apt, i) => (
+                    <div
+                      key={apt.id || i}
+                      className="text-[10px] px-1.5 py-0.5 rounded truncate font-medium border-l-2 bg-opacity-10 bg-muted hover:brightness-95 transition-all"
+                      style={{
+                        borderLeftColor: apt.color,
+                        backgroundColor: apt.color + '15',
+                        color: '#374151'
+                      }}
+                      title={apt.paciente_nombre}
+                    >
+                      {apt.paciente_nombre}
                     </div>
                   ))}
-                  {dayAppointments.length > 3 && (
-                    <div className="text-[10px] text-muted-foreground pl-1">
-                      + {dayAppointments.length - 3} más
+                  {dayAppointments.length > 4 && (
+                    <div className="text-[10px] font-medium text-muted-foreground pl-1.5">
+                      +{dayAppointments.length - 4} más
                     </div>
                   )}
                 </div>
+
+                {/* Empty state spacer to keep grid alignment if needed, or just let flex grow handled by parent */}
               </div>
             );
           })}

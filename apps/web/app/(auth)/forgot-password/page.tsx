@@ -6,7 +6,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
-import { Mail, ArrowLeft, CheckCircle2, Loader2 } from "lucide-react";
+import { Mail, ArrowLeft, CheckCircle2, Loader2, Pill } from "lucide-react";
 import { Button } from "@red-salud/ui";
 import { Input } from "@red-salud/ui";
 import { Label } from "@red-salud/ui";
@@ -109,12 +109,15 @@ export default function ForgotPasswordPage() {
   }
 
   return (
-    <div className="h-screen bg-background flex items-center justify-center px-4 relative overflow-hidden">
-      {/* Background decorativo minimalista */}
-      <div className="absolute inset-0 -z-10 overflow-hidden">
-        <div className="absolute top-0 left-1/4 w-96 h-96 bg-primary/5 rounded-full blur-3xl" />
-        <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-secondary/5 rounded-full blur-3xl" />
-      </div>
+    <div className="h-screen w-screen overflow-hidden bg-[#F8FAFC] flex items-center justify-center p-4 relative">
+      {/* Botón de regreso estilizado */}
+      <Link
+        href="/login"
+        className="absolute top-8 left-8 flex items-center gap-2 text-slate-500 hover:text-blue-600 transition-colors group px-4 py-2 rounded-xl bg-white shadow-sm border border-slate-100"
+      >
+        <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
+        <span className="text-xs sm:text-sm font-bold">Volver</span>
+      </Link>
 
       <motion.div
         initial={{ opacity: 0, scale: 0.95 }}
@@ -122,21 +125,15 @@ export default function ForgotPasswordPage() {
         transition={{ duration: 0.3 }}
         className="w-full max-w-md"
       >
-        {/* Botón de regreso minimalista */}
-        <Link
-          href="/login"
-          className="inline-flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors mb-8 group"
-        >
-          <ArrowLeft className="h-4 w-4 group-hover:-translate-x-1 transition-transform" />
-          <span className="text-sm font-medium">Volver al login</span>
-        </Link>
-
-        {/* Título centrado y minimalista */}
-        <div className="text-center mb-8 space-y-2">
-          <h1 className="text-3xl sm:text-4xl font-bold text-foreground tracking-tight">
+        {/* Título e Icono estilo Registro */}
+        <div className="text-center mb-8 space-y-3">
+          <div className="inline-flex p-3 bg-blue-500/10 rounded-2xl mb-2 border border-blue-500/20">
+            <Pill className="w-8 h-8 text-blue-600" />
+          </div>
+          <h1 className="text-3xl font-black tracking-tight text-slate-900">
             ¿Olvidaste tu contraseña?
           </h1>
-          <p className="text-muted-foreground text-sm">
+          <p className="text-slate-500 text-sm">
             No te preocupes, te enviaremos instrucciones para restablecerla
           </p>
         </div>
@@ -183,9 +180,8 @@ export default function ForgotPasswordPage() {
 
               <Button
                 type="submit"
-                size="lg"
-                className="w-full h-11 shadow-lg shadow-primary/20 hover:shadow-primary/30 transition-all"
                 disabled={isLoading}
+                className="w-full h-14 rounded-2xl bg-blue-600 hover:bg-blue-700 text-white font-black text-lg shadow-xl shadow-blue-500/30 transition-all active:scale-[0.98] group mt-2"
               >
                 {isLoading ? (
                   <>
@@ -193,7 +189,10 @@ export default function ForgotPasswordPage() {
                     Enviando...
                   </>
                 ) : (
-                  "Enviar Instrucciones"
+                  <div className="flex items-center justify-center gap-3">
+                    <span>Enviar Instrucciones</span>
+                    <CheckCircle2 className="w-6 h-6 group-hover:scale-110 transition-transform" />
+                  </div>
                 )}
               </Button>
             </form>

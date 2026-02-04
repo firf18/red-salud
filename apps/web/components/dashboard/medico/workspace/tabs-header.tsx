@@ -1,5 +1,7 @@
 "use client";
 
+import { useState } from "react";
+
 import { Button } from "@red-salud/ui";
 import { Badge } from "@red-salud/ui";
 import { TabsList, TabsTrigger } from "@red-salud/ui";
@@ -23,6 +25,8 @@ export function TabsHeader({
   onShowStructuredMarketplace,
   onAnalyzeWithAI,
 }: TabsHeaderProps) {
+  const [isHovered, setIsHovered] = useState(false);
+
   return (
     <div className="flex-shrink-0 px-6 py-3 border-b flex items-center justify-between">
       <div className="flex items-center gap-3">
@@ -58,25 +62,33 @@ export function TabsHeader({
         )}
       </div>
 
-      <Button
-        variant="default"
-        size="sm"
-        onClick={onAnalyzeWithAI}
-        disabled={isAnalyzing || !notasMedicas.trim()}
-        className="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700"
+      <div
+        onMouseEnter={() => setIsHovered(true)}
+        onMouseLeave={() => setIsHovered(false)}
+        className="inline-block"
       >
-        {isAnalyzing ? (
-          <>
-            <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-            Analizando...
-          </>
-        ) : (
-          <>
-            <Brain className="h-4 w-4 mr-2" />
-            IA RED-SALUD
-          </>
-        )}
-      </Button>
+        <Button
+          variant="default"
+          size="sm"
+          onClick={onAnalyzeWithAI}
+          disabled={true}
+          className="bg-gradient-to-r from-purple-600/50 to-blue-600/50 cursor-not-allowed w-[140px] transition-all duration-200"
+        >
+          {isAnalyzing ? (
+            <>
+              <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+              Analizando...
+            </>
+          ) : isHovered ? (
+            "Próximamente"
+          ) : (
+            <>
+              <Brain className="h-4 w-4 mr-2" />
+              IA RED-SALUD
+            </>
+          )}
+        </Button>
+      </div>
     </div>
   );
 }

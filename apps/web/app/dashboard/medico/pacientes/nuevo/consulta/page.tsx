@@ -25,16 +25,11 @@ function ConsultaContent() {
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    // Si no hay ID (es un paciente nuevo desde params) y tenemos datos básicos, mostrar modal
-    // Verificamos si ya estamos "registrados" en el estado local (paciente.id)
-    if ((!paciente.id && paciente.cedula && paciente.nombre_completo) && !showRegistration) {
-      // Verificar si realmente no existe (doble check opcional, pero aquí asumimos que el flujo anterior ya buscó)
-      // Mostramos el modal para completar datos
-      setShowRegistration(true);
-    } else if (!paciente.cedula || !paciente.nombre_completo) {
+    // Solo redirigir si faltan datos esenciales
+    if (!paciente.cedula || !paciente.nombre_completo) {
       router.replace("/dashboard/medico/pacientes/nuevo");
     }
-  }, [paciente, router, showRegistration]);
+  }, [paciente, router]);
 
   const handleRegistrationSuccess = (patientId: string, patientData: Record<string, unknown>) => {
     // Actualizar el estado del paciente con los datos reales de la BD

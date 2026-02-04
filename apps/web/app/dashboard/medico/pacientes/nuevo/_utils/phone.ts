@@ -13,7 +13,9 @@ export function formatVzlaPhone(input: string) {
 }
 
 export function validateVzlaPhone(formatted: string) {
-  return /^\+58\s\d{3}\s\d{3}\s\d{4}$/.test(formatted) ? null : "Formato de teléfono inválido";
+  // Allow empty fields - don't show error for empty input
+  if (!formatted || formatted === "+58") return null;
+  return /^\+58\s\d{3}\s\d{3}\s\d{4}$/.test(formatted) ? null : "Formato: +58 412 1234567";
 }
 
 export function enforceVzlaPhone(value: string) {

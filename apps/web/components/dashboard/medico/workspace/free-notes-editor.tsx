@@ -30,9 +30,17 @@ export function FreeNotesEditor({
       </div>
 
       <div className="flex-shrink-0 px-6 py-2 bg-gray-50 border-t flex items-center justify-between">
-        <p className="text-xs text-gray-500">
-          {notasMedicas.length} caracteres • {notasMedicas.split('\n').length} líneas
-        </p>
+        <div className="flex items-center gap-4">
+          <p className="text-xs text-gray-500">
+            {notasMedicas.length} caracteres • {notasMedicas.split('\n').length} líneas
+          </p>
+          <button
+            onClick={() => setNotasMedicas("")}
+            className="text-xs text-red-600 hover:text-red-700 font-medium flex items-center gap-1 transition-colors"
+          >
+            Limpiar Nota
+          </button>
+        </div>
         <span className="text-xs text-gray-500">Tab para autocompletar</span>
       </div>
     </div>

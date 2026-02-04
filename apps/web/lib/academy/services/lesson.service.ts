@@ -48,8 +48,8 @@ export const AcademyLessonService = {
             .order('order_index', { ascending: true });
 
         if (error) {
-            console.error('[AcademyLessonService] Error fetching specialties:', error);
-            throw new Error('Error al cargar especialidades');
+            // Silenciar error si la tabla no existe - no es crítico
+            return [];
         }
 
         return (data || []).map(mapSpecialtyFromDb);

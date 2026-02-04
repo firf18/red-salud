@@ -35,6 +35,7 @@ export * from "./select";
 export * from "./separator";
 export * from "./sheet";
 export * from "./skeleton";
+export * from "./slider";
 export * from "./specialty-combobox";
 export * from "./specialty-multi-select";
 export * from "./state-city-selector";
@@ -43,7 +44,7 @@ export * from "./table";
 export * from "./tabs";
 export * from "./textarea";
 export * from "./theme-toggle";
-
+export * from "./time-picker";
 export * from "./timezone-select";
 export * from "./toast";
 export * from "./toggle";

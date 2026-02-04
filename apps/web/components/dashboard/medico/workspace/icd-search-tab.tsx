@@ -4,7 +4,7 @@ import { useState, useEffect, useCallback } from "react";
 import { Button } from "@red-salud/ui";
 import { Input } from "@red-salud/ui";
 import { Badge } from "@red-salud/ui";
-import { Search, Loader2, X, Plus, AlertCircle, Sparkles, Clock, TrendingUp, Heart, Brain, Stethoscope, Activity } from "lucide-react";
+import { Search, Loader2, X, Plus, AlertCircle, Clock, TrendingUp, Heart, Brain, Stethoscope, Activity, Bone, Baby, Eye, Ear, Droplet, Bug } from "lucide-react";
 import { ScrollArea } from "@red-salud/ui";
 import { cn } from "@red-salud/core/utils";
 
@@ -55,6 +55,60 @@ const COMMON_CATEGORIES = [
     icon: Brain,
     color: "bg-indigo-100 text-indigo-700 hover:bg-indigo-200",
     searches: ["migraña", "cefalea", "epilepsia", "vértigo", "mareo"]
+  },
+  {
+    name: "Musculoesquelético",
+    icon: Bone,
+    color: "bg-orange-100 text-orange-700 hover:bg-orange-200",
+    searches: ["artritis", "fractura", "dolor lumbar", "osteoporosis", "esguince"]
+  },
+  {
+    name: "Dermatológico",
+    icon: Eye,
+    color: "bg-pink-100 text-pink-700 hover:bg-pink-200",
+    searches: ["eczema", "psoriasis", "acné", "dermatitis", "urticaria"]
+  },
+  {
+    name: "Psiquiátrico",
+    icon: Brain,
+    color: "bg-teal-100 text-teal-700 hover:bg-teal-200",
+    searches: ["depresión", "ansiedad", "insomnio", "estrés", "trastorno bipolar"]
+  },
+  {
+    name: "Ginecológico",
+    icon: Baby,
+    color: "bg-rose-100 text-rose-700 hover:bg-rose-200",
+    searches: ["embarazo", "menstruación", "menopausia", "infección urinaria", "infertilidad"]
+  },
+  {
+    name: "Pediátrico",
+    icon: Baby,
+    color: "bg-cyan-100 text-cyan-700 hover:bg-cyan-200",
+    searches: ["fiebre", "bronquiolitis", "varicela", "deshidratación", "alergia"]
+  },
+  {
+    name: "Oftalmológico",
+    icon: Eye,
+    color: "bg-emerald-100 text-emerald-700 hover:bg-emerald-200",
+    searches: ["conjuntivitis", "glaucoma", "catarata", "vista borrosa", "ojo seco"]
+  },
+  {
+    name: "Otorrinolaringológico",
+    icon: Ear,
+    color: "bg-violet-100 text-violet-700 hover:bg-violet-200",
+    searches: ["otitis", "sinusitis", "amigdalitis", "ronquera", "pérdida auditiva"]
+  },
+  {
+    name: "Renal/Urológico",
+    icon: Droplet,
+    color: "bg-sky-100 text-sky-700 hover:bg-sky-200",
+    searches: ["insuficiencia renal", "cálculos renales", "infección urinaria", "retención", "proteinuria"]
+  },
+  {
+    name: "Infeccioso",
+    icon: Bug,
+    color: "bg-amber-100 text-amber-700 hover:bg-amber-200",
+    searches: ["infección", "fiebre", "sepsis", "virus", "bacteria"]
   }
 ];
 
@@ -67,8 +121,6 @@ export function ICDSearchTab({
   const [icdSearchQuery, setIcdSearchQuery] = useState("");
   const [icdResults, setIcdResults] = useState<ICDResult[]>([]);
   const [isSearchingICD, setIsSearchingICD] = useState(false);
-  const [aiSuggestions, setAiSuggestions] = useState<ICDResult[]>([]);
-  const [isLoadingAI, setIsLoadingAI] = useState(false);
   const [recentSearches, setRecentSearches] = useState<string[]>([]);
   const [apiError, setApiError] = useState<string | null>(null);
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
@@ -120,8 +172,13 @@ export function ICDSearchTab({
       const data = await response.json();
 
       if (data.success && data.data) {
-        setIcdResults(data.data.slice(0, 15));
+        setIcdResults(data.data);
         saveRecentSearch(searchQuery);
+        if (data.source === "local_fallback") {
+          setApiError("Usando base de datos local (API oficial no disponible)");
+        } else {
+          setApiError(null); // Limpiar error si la API funciona
+        }
       } else {
         setIcdResults([]);
         setApiError(data.message || "No se encontraron resultados");
@@ -129,46 +186,9 @@ export function ICDSearchTab({
     } catch (error) {
       console.error("Error searching ICD-11:", error);
       setIcdResults([]);
-      setApiError("Error de conexión. Verifica tu configuración de ICD-11 API.");
+      setApiError("Error de conexión. Se usará el respaldo local.");
     } finally {
       setIsSearchingICD(false);
-    }
-  };
-
-  // Obtener sugerencias de IA basadas en las notas
-  const handleAISuggestions = async () => {
-    if (!notasMedicas.trim()) {
-      alert("Escribe algunas notas médicas primero para obtener sugerencias de IA");
-      return;
-    }
-
-    setIsLoadingAI(true);
-    try {
-      const response = await fetch("/api/gemini/suggest-icd11", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ text: notasMedicas }),
-      });
-
-      const data = await response.json();
-
-      if (data.success && data.suggestions) {
-        // Buscar cada sugerencia en ICD-11
-        const suggestions: ICDResult[] = [];
-        for (const suggestion of data.suggestions.slice(0, 5)) {
-          const searchResponse = await fetch(`/api/icd11/search?q=${encodeURIComponent(suggestion.descripcion)}`);
-          const searchData = await searchResponse.json();
-          if (searchData.success && searchData.data && searchData.data.length > 0) {
-            suggestions.push(searchData.data[0]);
-          }
-        }
-        setAiSuggestions(suggestions);
-      }
-    } catch (error) {
-      console.error("Error getting AI suggestions:", error);
-      alert("Error al obtener sugerencias de IA");
-    } finally {
-      setIsLoadingAI(false);
     }
   };
 
@@ -193,22 +213,21 @@ export function ICDSearchTab({
                   handleSearchICD();
                 }
               }}
-              className="pl-10"
+              className="pl-10 pr-10"
             />
-          </div>
-          <Button
-            onClick={handleAISuggestions}
-            disabled={isLoadingAI || !notasMedicas.trim()}
-            variant="outline"
-            className="gap-2"
-          >
-            {isLoadingAI ? (
-              <Loader2 className="h-4 w-4 animate-spin" />
-            ) : (
-              <Sparkles className="h-4 w-4" />
+            {icdSearchQuery && (
+              <button
+                onClick={() => {
+                  setIcdSearchQuery("");
+                  setIcdResults([]);
+                  setSelectedCategory(null);
+                }}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+              >
+                <X className="h-4 w-4" />
+              </button>
             )}
-            IA
-          </Button>
+          </div>
         </div>
 
         {/* Búsquedas recientes */}
@@ -234,8 +253,8 @@ export function ICDSearchTab({
           <div className="flex items-center gap-2 p-3 bg-yellow-50 border border-yellow-200 rounded-lg text-sm text-yellow-800">
             <AlertCircle className="h-4 w-4 flex-shrink-0" />
             <div className="flex-1">
-              <p className="font-medium">Usando base de datos local</p>
-              <p className="text-xs mt-1">La API de ICD-11 no está disponible. Mostrando diagnósticos comunes de la base de datos local.</p>
+              <p className="font-medium">Base de datos local</p>
+              <p className="text-xs mt-1">API oficial de ICD-11 no disponible. Mostrando resultados locales.</p>
             </div>
           </div>
         )}
@@ -273,45 +292,13 @@ export function ICDSearchTab({
             </div>
           )}
 
-          {/* Sugerencias de IA */}
-          {aiSuggestions.length > 0 && (
-            <div className="space-y-3">
-              <h3 className="text-sm font-semibold text-gray-900 flex items-center gap-2">
-                <Sparkles className="h-4 w-4 text-purple-600" />
-                Sugerencias de IA
-              </h3>
-              <div className="space-y-2">
-                {aiSuggestions.map((result, index) => (
-                  <div
-                    key={index}
-                    className="p-4 border rounded-lg hover:bg-purple-50 cursor-pointer flex items-start justify-between transition-colors border-purple-200 bg-purple-50/50"
-                    onClick={() => onAddDiagnostico(result.code, result.title)}
-                  >
-                    <div className="flex-1">
-                      <div className="flex items-center gap-2">
-                        <Badge variant="outline" className="text-xs bg-white">
-                          {result.code}
-                        </Badge>
-                        <h3 className="font-medium text-sm">{result.title}</h3>
-                      </div>
-                      {result.definition && (
-                        <p className="text-xs text-gray-600 mt-1 line-clamp-2">{result.definition}</p>
-                      )}
-                    </div>
-                    <Button size="sm" variant="ghost" className="flex-shrink-0">
-                      <Plus className="h-4 w-4" />
-                    </Button>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
+
 
           {/* Categorías comunes */}
           {!icdSearchQuery && !isSearchingICD && icdResults.length === 0 && (
             <div className="space-y-3">
               <h3 className="text-sm font-semibold text-gray-900">Categorías Comunes</h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
                 {COMMON_CATEGORIES.map((category) => (
                   <div
                     key={category.name}

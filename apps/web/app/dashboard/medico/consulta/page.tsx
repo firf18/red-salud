@@ -9,6 +9,7 @@ import { Loader2, Stethoscope } from "lucide-react";
 import { ActiveConsultationsWidget } from "@/components/dashboard/medico/consulta/widgets/active-consultations";
 import { TodaysAppointmentsWidget } from "@/components/dashboard/medico/consulta/widgets/todays-appointments";
 import { RecentPatientsWidget } from "@/components/dashboard/medico/consulta/widgets/recent-patients";
+import { FastStatsWidget } from "@/components/dashboard/medico/consulta/widgets/fast-stats-widget";
 
 export default function ConsultaPage() {
   const router = useRouter();
@@ -75,9 +76,9 @@ export default function ConsultaPage() {
 
   const handlePatientFound = (patient: PatientOption) => {
     if (patient.type === "registered") {
-        router.push(`/dashboard/medico/pacientes/consulta?paciente_id=${patient.id}`);
+      router.push(`/dashboard/medico/pacientes/consulta?paciente_id=${patient.id}`);
     } else {
-        router.push(`/dashboard/medico/pacientes/offline/${patient.id}`);
+      router.push(`/dashboard/medico/pacientes/offline/${patient.id}`);
     }
   };
 
@@ -89,51 +90,67 @@ export default function ConsultaPage() {
   };
 
   return (
-    <div className="container max-w-4xl mx-auto py-8 px-4">
-      <div className="flex items-center gap-3 mb-8">
-        <div className="h-12 w-12 bg-primary/10 rounded-full flex items-center justify-center text-primary">
-          <Stethoscope className="h-6 w-6" />
+    <div className="h-[calc(100vh-4rem)] p-4 md:p-6 overflow-hidden flex flex-col gap-4">
+      {/* Header Compacto */}
+      <div className="flex items-center justify-between shrink-0">
+        <div className="flex items-center gap-3">
+          <div className="h-10 w-10 bg-primary/10 rounded-xl flex items-center justify-center text-primary shadow-sm border border-primary/20">
+            <Stethoscope className="h-5 w-5" />
+          </div>
+          <div>
+            <h1 className="text-xl font-bold tracking-tight">Panel de Consulta</h1>
+            <p className="text-xs text-muted-foreground">Gestión rápida de pacientes</p>
+          </div>
         </div>
-        <div>
-          <h1 className="text-2xl font-bold tracking-tight">Consulta</h1>
-          <p className="text-muted-foreground">Panel de atención médica</p>
-        </div>
+
+        {/* Aquí podría ir un reloj o timer en el futuro */}
       </div>
 
-      {/* Widget de Consultas Activas (Prioridad Alta) */}
-      <ActiveConsultationsWidget />
+      <div className="grid grid-cols-1 md:grid-cols-12 gap-4 h-full min-h-0">
+        {/* Columna Principal - Izquierda (7 cols) */}
+        <div className="md:col-span-8 flex flex-col gap-4 h-full min-h-0">
+          {/* 1. Widget de Consultas Activas (Si existe, empuja lo demás) */}
+          <div className="shrink-0">
+            <ActiveConsultationsWidget />
+          </div>
 
-      <div className="grid gap-6 md:grid-cols-12">
-        {/* Columna Principal (Buscador + Citas) - 8 columnas */}
-        <div className="md:col-span-8 space-y-6">
-            <Card className="border-2 shadow-sm">
-                <CardHeader>
-                <CardTitle>Iniciar Nueva Atención</CardTitle>
-                <CardDescription>
-                    Busque por cédula para atender a un paciente (Registrado o CNE)
-                </CardDescription>
-                </CardHeader>
-                <CardContent>
-                {loading ? (
-                    <div className="flex justify-center py-8">
-                    <Loader2 className="h-8 w-8 animate-spin text-primary" />
-                    </div>
-                ) : (
-                    <ConsultationPatientSearch 
-                    patients={patients}
-                    onPatientFound={handlePatientFound}
-                    onCnePatientFound={handleCnePatientFound}
-                    />
-                )}
-                </CardContent>
-            </Card>
+          {/* 2. Centro de Comando (Búsqueda) - Hero Section */}
+          <Card className="border-2 shadow-sm shrink-0 bg-gradient-to-br from-card to-secondary/5">
+            <CardHeader className="pb-2">
+              <CardTitle className="text-lg">Nueva Atención</CardTitle>
+              <CardDescription>
+                Ingrese la cédula del paciente para comenzar
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <ConsultationPatientSearch
+                patients={patients}
+                onPatientFound={handlePatientFound}
+                onCnePatientFound={handleCnePatientFound}
+              />
+            </CardContent>
+          </Card>
 
-            <TodaysAppointmentsWidget />
+          {/* 3. Stats Rápidos */}
+          <div className="h-24 shrink-0">
+            <FastStatsWidget />
+          </div>
+
+          {/* Espacio flexible si queremos agregar más cosas abajo o dejar aire */}
+          <div className="flex-1 min-h-0" />
         </div>
 
-        {/* Columna Lateral (Pacientes Recientes) - 4 columnas */}
-        <div className="md:col-span-4 space-y-6">
-             <RecentPatientsWidget />
+        {/* Columna Lateral - Derecha (5 cols) */}
+        <div className="md:col-span-4 flex flex-col gap-4 h-full min-h-0">
+          {/* Agenda del Día (50% altura) */}
+          <div className="flex-1 min-h-0 basis-1/2">
+            <TodaysAppointmentsWidget />
+          </div>
+
+          {/* Pacientes Recientes (50% altura) */}
+          <div className="flex-1 min-h-0 basis-1/2">
+            <RecentPatientsWidget />
+          </div>
         </div>
       </div>
     </div>

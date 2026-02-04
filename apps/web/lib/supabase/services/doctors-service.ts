@@ -24,13 +24,13 @@ export async function getSpecialties() {
       .order('name');
 
     if (error) {
-      console.error('Error fetching specialties:', error);
+      // Silenciar error si la tabla no existe - no es crítico
       return { success: false, error: error.message };
     }
 
     return { success: true, data: data as MedicalSpecialty[] };
   } catch (err) {
-    console.error('Exception fetching specialties:', err);
+    // Silenciar error - specialties no es crítico para el funcionamiento
     return { success: false, error: err instanceof Error ? err.message : 'Error desconocido' };
   }
 }

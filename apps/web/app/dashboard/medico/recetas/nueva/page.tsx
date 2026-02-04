@@ -8,20 +8,15 @@ import { Button } from "@red-salud/ui";
 import { Label } from "@red-salud/ui";
 import { Input } from "@red-salud/ui";
 import { Textarea } from "@red-salud/ui";
-import { Pill, Save, ArrowLeft, Loader2, Plus, Trash2, FileText, Sparkles, Camera, Zap } from "lucide-react";
+import { Pill, Save, ArrowLeft, Loader2, Plus, FileText, Sparkles, Camera, Zap } from "lucide-react";
 import { VerificationGuard } from "@/components/dashboard/medico/features/verification-guard";
-import { PatientSelector } from "@/components/citas/nueva/patient-selector";
+import { PatientSelector } from "@/components/dashboard/recetas/patient-selector";
 import { usePatientsList } from "@/components/dashboard/medico/patients/hooks/usePatientsList";
 import { createPrescription } from "@/lib/supabase/services/medications-service";
+import { MedicationInput, RecipePreview, type MedicationItemData } from "@/components/dashboard/recetas";
 import { toast } from "sonner";
 
-interface MedicationItem {
-    medicamento: string;
-    dosis: string;
-    frecuencia: string;
-    duracion: string;
-    instrucciones: string;
-}
+// Use the enhanced MedicationItemData type from components
 
 export default function NewPrescriptionPage() {
     const router = useRouter();
@@ -35,8 +30,16 @@ export default function NewPrescriptionPage() {
     const [selectedPatientId, setSelectedPatientId] = useState<string>("");
     const [diagnosis, setDiagnosis] = useState("");
     const [notes, setNotes] = useState("");
-    const [medications, setMedications] = useState<MedicationItem[]>([
-        { medicamento: "", dosis: "", frecuencia: "", duracion: "", instrucciones: "" }
+    const [medications, setMedications] = useState<MedicationItemData[]>([
+        {
+            medicamento: "",
+            presentacion: "",
+            dosis: "",
+            frecuencia: "",
+            duracion: "",
+            viaAdministracion: "Oral",
+            instrucciones: ""
+        }
     ]);
     const [submitting, setSubmitting] = useState(false);
 
@@ -59,18 +62,20 @@ export default function NewPrescriptionPage() {
         // Manejar cada método
         switch (method) {
             case 'template':
-                // Navegar a selección de template
-                router.push('/dashboard/medico/recipes/nueva/template');
+                // Proceed to recipe creation using the configured template
+                toast.success("Usando plantilla configurada");
                 break;
             case 'personalizada':
-                // Continuar con la recipe personalizada (quedarse en esta página)
+                // Continuar con la receta personalizada (quedarse en esta página)
                 break;
             case 'escanear':
-                // Navegar a escaneo
-                router.push('/dashboard/medico/recipes/nueva/escanear');
+                // TODO: Navegar a escaneo (funcionalidad futura)
+                toast.info("La funcionalidad de escaneo estará disponible pronto");
+                setShowMethodSelector(true);
+                setSelectedMethod(null);
                 break;
             case 'rapida':
-                // Recipe rápida sin template
+                // Receta rápida sin template
                 break;
         }
     };
@@ -81,16 +86,24 @@ export default function NewPrescriptionPage() {
     };
 
     const handleAddMedication = () => {
-        setMedications([...medications, { medicamento: "", dosis: "", frecuencia: "", duracion: "", instrucciones: "" }]);
+        setMedications([...medications, {
+            medicamento: "",
+            presentacion: "",
+            dosis: "",
+            frecuencia: "",
+            duracion: "",
+            viaAdministracion: "Oral",
+            instrucciones: ""
+        }]);
     };
 
     const handleRemoveMedication = (index: number) => {
         setMedications(medications.filter((_, i) => i !== index));
     };
 
-    const handleMedicationChange = (index: number, field: keyof MedicationItem, value: string) => {
+    const handleMedicationChange = (index: number, field: keyof MedicationItemData, value: string) => {
         const newMedications = [...medications];
-        newMedications[index][field] = value;
+        newMedications[index] = { ...newMedications[index], [field]: value };
         setMedications(newMedications);
     };
 
@@ -108,17 +121,19 @@ export default function NewPrescriptionPage() {
                 diagnostico: diagnosis,
                 notas: notes,
                 medications: medications.map(m => ({
+                    medication_id: m.medicationId,
                     nombre_medicamento: m.medicamento,
                     dosis: m.dosis,
                     frecuencia: m.frecuencia,
+                    via_administracion: m.viaAdministracion,
                     duracion_dias: m.duracion ? parseInt(m.duracion) || undefined : undefined,
                     instrucciones_especiales: m.instrucciones || undefined,
                 }))
             });
 
             if (result.success) {
-                toast.success("Recipe creada exitosamente");
-                router.push("/dashboard/medico/recipes");
+                toast.success("Receta creada exitosamente");
+                router.push("/dashboard/medico/recetas");
             } else {
                 throw new Error((result.error as Error)?.message || "Error al crear la receta");
             }
@@ -280,68 +295,21 @@ export default function NewPrescriptionPage() {
                                         Agregar Medicamento
                                     </Button>
                                 </CardHeader>
-                                <CardContent className="space-y-6">
+                                <CardContent className="space-y-4">
                                     {medications.map((medication, index) => (
-                                        <div key={index} className="p-4 border rounded-lg bg-gray-50 relative">
-                                            {medications.length > 1 && (
-                                                <Button
-                                                    variant="ghost"
-                                                    size="icon"
-                                                    className="absolute top-2 right-2 text-red-500 hover:text-red-700 hover:bg-red-50"
-                                                    onClick={() => handleRemoveMedication(index)}
-                                                >
-                                                    <Trash2 className="h-4 w-4" />
-                                                </Button>
-                                            )}
-                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                                <div className="space-y-2">
-                                                    <Label>Medicamento <span className="text-red-500">*</span></Label>
-                                                    <Input
-                                                        placeholder="Nombre del medicamento"
-                                                        value={medication.medicamento}
-                                                        onChange={(e) => handleMedicationChange(index, "medicamento", e.target.value)}
-                                                    />
-                                                </div>
-                                                <div className="space-y-2">
-                                                    <Label>Dosis</Label>
-                                                    <Input
-                                                        placeholder="Ej: 500mg"
-                                                        value={medication.dosis}
-                                                        onChange={(e) => handleMedicationChange(index, "dosis", e.target.value)}
-                                                    />
-                                                </div>
-                                                <div className="space-y-2">
-                                                    <Label>Frecuencia</Label>
-                                                    <Input
-                                                        placeholder="Ej: Cada 8 horas"
-                                                        value={medication.frecuencia}
-                                                        onChange={(e) => handleMedicationChange(index, "frecuencia", e.target.value)}
-                                                    />
-                                                </div>
-                                                <div className="space-y-2">
-                                                    <Label>Duración</Label>
-                                                    <Input
-                                                        placeholder="Ej: 7 días"
-                                                        value={medication.duracion}
-                                                        onChange={(e) => handleMedicationChange(index, "duracion", e.target.value)}
-                                                    />
-                                                </div>
-                                                <div className="col-span-1 md:col-span-2 space-y-2">
-                                                    <Label>Instrucciones Adicionales</Label>
-                                                    <Input
-                                                        placeholder="Ej: Tomar con alimentos"
-                                                        value={medication.instrucciones}
-                                                        onChange={(e) => handleMedicationChange(index, "instrucciones", e.target.value)}
-                                                    />
-                                                </div>
-                                            </div>
-                                        </div>
+                                        <MedicationInput
+                                            key={index}
+                                            index={index}
+                                            data={medication}
+                                            onChange={handleMedicationChange}
+                                            onRemove={handleRemoveMedication}
+                                            canRemove={medications.length > 1}
+                                        />
                                     ))}
                                 </CardContent>
                             </Card>
-                        </div>
 
-                        <div className="space-y-6">
+                            {/* Diagnosis and Notes Card */}
                             <Card>
                                 <CardHeader>
                                     <CardTitle className="text-lg">Detalles de la Receta</CardTitle>
@@ -386,6 +354,19 @@ export default function NewPrescriptionPage() {
                                     </Button>
                                 </CardContent>
                             </Card>
+                        </div>
+
+                        {/* Preview Column */}
+                        <div className="space-y-6">
+                            <RecipePreview
+                                patient={selectedPatientId ? {
+                                    nombre: allPatients.find(p => p.id === selectedPatientId)?.nombre_completo || '',
+                                    cedula: allPatients.find(p => p.id === selectedPatientId && 'cedula' in p)?.cedula as string | undefined,
+                                } : null}
+                                medications={medications}
+                                diagnosis={diagnosis}
+                                notes={notes}
+                            />
                         </div>
                     </div>
                 )}

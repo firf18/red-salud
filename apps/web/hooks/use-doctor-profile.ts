@@ -41,7 +41,8 @@ export function useDoctorProfile(userId?: string) {
         setSpecialties(result.data);
       }
     } catch (err) {
-      console.error('Error loading specialties:', err);
+      // Silenciar error de specialties - no es crítico para el funcionamiento
+      // La tabla specialties puede no existir aún
     }
   }, []);
 
@@ -62,10 +63,10 @@ export function useDoctorProfile(userId?: string) {
   useEffect(() => {
     if (userId) {
       void loadProfile();
-      void loadSpecialties();
       void loadStats();
+      // No cargar specialties - la tabla puede no existir
     }
-  }, [userId, loadProfile, loadSpecialties, loadStats]);
+  }, [userId, loadProfile, loadStats]);
 
   const updateProfile = async (updates: Partial<DoctorProfile>) => {
     if (!userId) return { success: false, error: 'No user ID' };

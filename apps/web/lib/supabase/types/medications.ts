@@ -42,6 +42,15 @@ export interface Prescription {
     id: string;
     nombre_completo: string;
     especialidad?: string;
+    avatar_url?: string;
+  };
+  paciente?: {
+    id: string;
+    nombre_completo: string;
+    cedula?: string;
+    avatar_url?: string;
+    fecha_nacimiento?: string;
+    genero?: string;
   };
   medications?: PrescriptionMedication[];
 }
@@ -161,4 +170,26 @@ export interface ActiveMedicationsSummary {
     frecuencia: string;
     proxima_toma: string;
   }>;
+}
+
+// Template para recetas frecuentes
+export interface PrescriptionTemplate {
+  id: string;
+  medico_id: string;
+  nombre: string;
+  descripcion?: string;
+  diagnostico?: string;
+  instrucciones_generales?: string;
+  medicamentos: Array<{
+    nombre_medicamento: string;
+    dosis: string;
+    frecuencia: string;
+    duracion_dias?: number;
+    via_administracion?: string;
+    instrucciones_especiales?: string;
+  }>;
+  uso_count: number;
+  ultima_uso?: string;
+  created_at: string;
+  updated_at: string;
 }

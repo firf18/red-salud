@@ -22,6 +22,17 @@ export function usePatientsList(doctorId: string | null) {
   const [todayAppointments, setTodayAppointments] = useState<number>(0);
   const [newPatientsThisMonth, setNewPatientsThisMonth] = useState<number>(0);
 
+  const [selectedOfficeId, setSelectedOfficeId] = useState<string | null>(null);
+  const [officePatientIds, setOfficePatientIds] = useState<Set<string> | null>(null);
+  const [officeAppointmentIds, setOfficeAppointmentIds] = useState<Set<string> | null>(null);
+
+  // Pagination
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10); // Recomendamos 10 por página
+  const [totalPages, setTotalPages] = useState(1);
+  const [totalResults, setTotalResults] = useState(0);
+  const [paginatedPatients, setPaginatedPatients] = useState<(RegisteredPatient | OfflinePatient)[]>([]);
+
   const loadTodayAppointments = useCallback(async (id: string) => {
     const today = startOfDay(new Date()).toISOString();
     const { data, error } = await supabase
@@ -121,7 +132,13 @@ export function usePatientsList(doctorId: string | null) {
         (filterLastVisit === "medium" && monthsSinceLastVisit >= 1 && monthsSinceLastVisit <= 6) ||
         (filterLastVisit === "long" && monthsSinceLastVisit > 6);
 
-      return matchesSearch && matchesGender && matchesAge && matchesLastVisit;
+      const matchesOffice = !officePatientIds ||
+        ("patient" in p
+          ? officePatientIds.has((p as RegisteredPatient).patient.id)
+          : officePatientIds.has((p as OfflinePatient).id)
+        );
+
+      return matchesSearch && matchesGender && matchesAge && matchesLastVisit && matchesOffice;
     });
 
     if (sortBy === "recent") {
@@ -154,13 +171,90 @@ export function usePatientsList(doctorId: string | null) {
       });
     }
 
+    setTotalResults(filtered.length);
+    const calculatedTotalPages = Math.ceil(filtered.length / pageSize);
+    setTotalPages(calculatedTotalPages || 1);
+
+    // Reset to page 1 if current page is out of bounds
+    if (currentPage > calculatedTotalPages && calculatedTotalPages > 0) {
+      setCurrentPage(1);
+    }
+
     setFilteredPatients(filtered);
-  }, [allPatients, searchQuery, filterGender, filterAgeRange, filterLastVisit, sortBy]);
+  }, [allPatients, searchQuery, filterGender, filterAgeRange, filterLastVisit, sortBy, pageSize, currentPage, officePatientIds]);
+
+  // Listen for office changes
+  useEffect(() => {
+    // Check initial state from localStorage if available
+    const storedOfficeId = localStorage.getItem('selectedOfficeId');
+    if (storedOfficeId) setSelectedOfficeId(storedOfficeId);
+
+    const handleOfficeChange = (event: Event) => {
+      const customEvent = event as CustomEvent;
+      setSelectedOfficeId(customEvent.detail.officeId);
+    };
+
+    window.addEventListener("office-changed", handleOfficeChange);
+    return () => {
+      window.removeEventListener("office-changed", handleOfficeChange);
+    };
+  }, []);
+
+  // Fetch patients AND appointment IDs associated with selected office
+  useEffect(() => {
+    if (!selectedOfficeId || !doctorId) {
+      setOfficePatientIds(null);
+      setOfficeAppointmentIds(null);
+      return;
+    }
+
+    const fetchOfficeData = async () => {
+      // Get appointments in this office with this doctor to find associated patients and appointment IDs
+      const { data } = await supabase
+        .from('appointments')
+        .select('id, paciente_id, offline_patient_id')
+        .eq('location_id', selectedOfficeId)
+        .eq('medico_id', doctorId);
+
+      if (data) {
+        const patientIds = new Set<string>();
+        const appointmentIds = new Set<string>();
+        data.forEach(apt => {
+          appointmentIds.add(apt.id);
+          if (apt.paciente_id) patientIds.add(apt.paciente_id);
+          if (apt.offline_patient_id) patientIds.add(apt.offline_patient_id);
+        });
+        setOfficePatientIds(patientIds);
+        setOfficeAppointmentIds(appointmentIds);
+      } else {
+        setOfficePatientIds(new Set());
+        setOfficeAppointmentIds(new Set());
+      }
+    };
+
+    fetchOfficeData();
+  }, [selectedOfficeId, doctorId]);
+
+  useEffect(() => {
+    const startIndex = (currentPage - 1) * pageSize;
+    const endIndex = startIndex + pageSize;
+    setPaginatedPatients(filteredPatients.slice(startIndex, endIndex));
+  }, [filteredPatients, currentPage, pageSize]);
+
+  // Reset page to 1 when search or filters change
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchQuery, filterGender, filterAgeRange, filterLastVisit, sortBy]);
 
   useEffect(() => {
     if (!doctorId) return;
     loadData(doctorId);
   }, [doctorId, loadData]);
+
+  // Ajustar tamaño de página según el modo de vista
+  useEffect(() => {
+    setPageSize(viewMode === "grid" ? 12 : 10);
+  }, [viewMode]);
 
   useEffect(() => {
     const combined = [
@@ -169,7 +263,7 @@ export function usePatientsList(doctorId: string | null) {
     ];
     setAllPatients(combined);
 
-    // Calculate new patients this month
+    // Calculate new patients this month (overall, not filtered)
     const now = new Date();
     const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
     const newCount = combined.filter(p => {
@@ -200,6 +294,14 @@ export function usePatientsList(doctorId: string | null) {
       viewMode,
       todayAppointments,
       newPatientsThisMonth,
+      currentPage,
+      pageSize,
+      totalPages,
+      totalResults,
+      paginatedPatients,
+      selectedOfficeId,
+      officePatientIds,
+      officeAppointmentIds,
     },
     actions: {
       setSearchQuery,
@@ -208,6 +310,8 @@ export function usePatientsList(doctorId: string | null) {
       setFilterLastVisit,
       setSortBy,
       setViewMode,
+      setCurrentPage,
+      setPageSize,
     },
   };
 }

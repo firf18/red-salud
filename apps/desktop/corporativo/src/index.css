@@ -1,0 +1,84 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@300;400;500;600;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+    --primary: #3b82f6;
+    --primary-glow: rgba(59, 130, 246, 0.5);
+    --bg-deep: #000000;
+    --surface-dark: #050505;
+    --accent: #10b981;
+}
+
+@layer base {
+    body {
+        @apply bg-black text-slate-300 font-sans antialiased overflow-hidden select-none;
+    }
+
+    h1,
+    h2,
+    h3,
+    h4 {
+        @apply font-outfit text-white tracking-tight;
+    }
+}
+
+@layer components {
+    .glass-panel {
+        @apply backdrop-blur-md bg-slate-900/40 border border-white/[0.05] shadow-2xl;
+    }
+
+    .cyber-card {
+        @apply relative overflow-hidden rounded-3xl border border-white/[0.05] bg-slate-900/20 backdrop-blur-sm transition-all duration-500 hover:border-blue-500/30;
+    }
+
+    .cyber-glow {
+        @apply shadow-[0_0_20px_rgba(59, 130, 246, 0.15)];
+    }
+
+    .military-button {
+        @apply relative px-6 py-3 bg-blue-600/90 text-white rounded-xl font-bold uppercase tracking-widest text-[10px] transition-all duration-300 hover:bg-blue-500 hover:shadow-[0_0_20px_rgba(59, 130, 246, 0.4)] active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed overflow-hidden;
+    }
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+    width: 4px;
+    height: 4px;
+}
+
+::-webkit-scrollbar-track {
+    @apply bg-transparent;
+}
+
+::-webkit-scrollbar-thumb {
+    @apply bg-blue-600/20 rounded-full hover:bg-blue-600/40 transition-colors;
+}
+
+/* Animations */
+@keyframes pulse-slow {
+
+    0%,
+    100% {
+        opacity: 0.3;
+    }
+
+    50% {
+        opacity: 0.6;
+    }
+}
+
+.animate-pulse-slow {
+    animation: pulse-slow 4s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+/* Tauri specific */
+.drag-region {
+    -webkit-app-region: drag;
+}
+
+.no-drag {
+    -webkit-app-region: no-drag;
+}

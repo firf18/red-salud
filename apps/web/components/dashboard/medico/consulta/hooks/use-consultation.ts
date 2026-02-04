@@ -149,12 +149,51 @@ export function useConsultation(appointmentId: string | null, pacienteId: string
         loadData();
     }, [appointmentId, pacienteId, loadData]);
 
-    // Autoguardado
+    // Iniciar consulta automáticamente al cargar si está en estado inicial
+    useEffect(() => {
+        if (loading || !appointment || !appointmentId) return;
+
+        const startConsultationStatus = async () => {
+            // Solo si la cita está en un estado previo a la consulta
+            const initialStatuses = ['pendiente', 'confirmada', 'en_espera', 'confirmed'];
+            if (initialStatuses.includes(appointment.status)) {
+                try {
+                    const { data: { user } } = await supabase.auth.getUser();
+                    if (!user) return;
+
+                    await supabase.rpc("change_appointment_status", {
+                        p_appointment_id: appointmentId,
+                        p_new_status: "en_consulta",
+                        p_user_id: user.id,
+                        p_reason: "Inicio automático de atención"
+                    });
+
+                    // Actualizar el estado local para reflejar el cambio
+                    setAppointment(prev => prev ? { ...prev, status: "en_consulta" } : null);
+
+                    // Log de actividad
+                    await supabase.from("user_activity_log").insert({
+                        user_id: user.id,
+                        activity_type: "consultation_started",
+                        description: `Consulta iniciada automáticamente para la cita ${appointmentId}`,
+                        status: "success",
+                    });
+                } catch (err) {
+                    console.error("Error starting consultation status:", err);
+                }
+            }
+        };
+
+        startConsultationStatus();
+    }, [loading, appointment, appointmentId]);
+
+    // Autoguardado con Debounce (3 segundos)
     useEffect(() => {
         if (!appointment || !patient || loading) return;
 
-        const autoSave = async () => {
-            if (!notasMedicas && diagnosticos.length === 0 && !tratamiento) return;
+        const timer = setTimeout(async () => {
+            // Solo evitar autoguardado si NO hay contenido Y aún no se ha creado el registro médico
+            if (!notasMedicas && diagnosticos.length === 0 && !tratamiento && !appointment.medical_record_id) return;
 
             setAutoSaving(true);
             try {
@@ -162,7 +201,8 @@ export function useConsultation(appointmentId: string | null, pacienteId: string
                 if (!user) return;
 
                 const medicalRecordData = {
-                    paciente_id: appointment.paciente_id || appointment.offline_patient_id,
+                    paciente_id: appointment.paciente_id || null,
+                    offline_patient_id: appointment.offline_patient_id || null,
                     medico_id: user.id,
                     appointment_id: appointment.id,
                     diagnostico: diagnosticos.join(", "),
@@ -202,10 +242,9 @@ export function useConsultation(appointmentId: string | null, pacienteId: string
             } finally {
                 setAutoSaving(false);
             }
-        };
+        }, 3000);
 
-        const interval = setInterval(autoSave, 30000);
-        return () => clearInterval(interval);
+        return () => clearTimeout(timer);
     }, [appointment, patient, notasMedicas, diagnosticos, tratamiento, observaciones, medicamentosActuales, loading]);
 
     const saveConsultation = async () => {
@@ -221,7 +260,8 @@ export function useConsultation(appointmentId: string | null, pacienteId: string
 
             // 1. Crear o actualizar medical_record
             const medicalRecordData = {
-                paciente_id: appointment.paciente_id || appointment.offline_patient_id,
+                paciente_id: appointment.paciente_id || null,
+                offline_patient_id: appointment.offline_patient_id || null,
                 medico_id: user.id,
                 appointment_id: appointment.id,
                 diagnostico: diagnosticos.join(", "),
@@ -247,13 +287,41 @@ export function useConsultation(appointmentId: string | null, pacienteId: string
                     .select()
                     .single();
 
-                if (insertError) throw insertError;
-                medicalRecordId = newRecord.id;
+                if (insertError) {
+                    // Si el error es por duplicado (código 23505) o mensaje de duplicado
+                    if (insertError.code === '23505' || insertError.message?.includes('duplicate')) {
+                        console.log("Conflicto detectado, recuperando registro existente...");
+                        const { data: existingRecord } = await supabase
+                            .from("medical_records")
+                            .select("id")
+                            .eq("appointment_id", appointment.id)
+                            .single();
 
-                await supabase
-                    .from("appointments")
-                    .update({ medical_record_id: medicalRecordId })
-                    .eq("id", appointment.id);
+                        if (existingRecord) {
+                            medicalRecordId = existingRecord.id;
+                            // Actualizar el registro existente
+                            const { error: updateError } = await supabase
+                                .from("medical_records")
+                                .update(medicalRecordData)
+                                .eq("id", medicalRecordId);
+
+                            if (updateError) throw updateError;
+                        } else {
+                            throw insertError;
+                        }
+                    } else {
+                        throw insertError;
+                    }
+                } else {
+                    medicalRecordId = newRecord.id;
+                }
+
+                if (medicalRecordId) {
+                    await supabase
+                        .from("appointments")
+                        .update({ medical_record_id: medicalRecordId })
+                        .eq("id", appointment.id);
+                }
             }
 
             // 2. Actualizar datos del paciente
@@ -320,7 +388,11 @@ export function useConsultation(appointmentId: string | null, pacienteId: string
             }
         } catch (err: any) {
             console.error("Error saving consultation:", err);
-            alert(err.message || "Error al guardar la consulta");
+            // Intenta extraer más información del error si es un objeto vacío
+            if (typeof err === 'object' && Object.keys(err).length === 0) {
+                console.error("Empty error object details:", JSON.stringify(err, Object.getOwnPropertyNames(err)));
+            }
+            alert(err.message || JSON.stringify(err) || "Error al guardar la consulta");
         } finally {
             setSaving(false);
         }

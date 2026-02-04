@@ -1,6 +1,6 @@
 "use client";
 
-
+import React from "react";
 import { useFormContext } from "react-hook-form";
 import { Clock, DollarSign, AlertTriangle, CalendarIcon } from "lucide-react";
 import {
@@ -59,6 +59,8 @@ interface AppointmentFormProps {
     schedules?: Schedule[];
     offices?: Office[];
     selectedOfficeId?: string | null;
+    /** Especialidad del médico para sugerencias inteligentes */
+    doctorSpecialty?: string;
 }
 
 export function AppointmentForm({
@@ -70,6 +72,7 @@ export function AppointmentForm({
     schedules = [],
     offices = [],
     selectedOfficeId,
+    doctorSpecialty = 'Medicina Interna',
 }: AppointmentFormProps) {
     const form = useFormContext();
     const { watch, setValue } = form;
@@ -85,10 +88,36 @@ export function AppointmentForm({
         ? currentMotivoValue.substring(lastCommaIndex + 1).trim()
         : currentMotivoValue.trim();
 
+    // Use smart suggestions from specialty data
+    const { searchAllReasons, getTopReasons } = require('@/lib/data/specialty-reasons-data');
+
+    // Get specialty-aware suggestions
+    const smartSuggestions = React.useMemo(() => {
+        if (searchTerm.length >= 2) {
+            return searchAllReasons(searchTerm, doctorSpecialty)
+                .filter((s: any) => !currentMotivoValue.includes(s.reason))
+                .slice(0, 8);
+        }
+        return [];
+    }, [searchTerm, doctorSpecialty, currentMotivoValue]);
+
+    // Get initial suggestions for empty state (specialty-specific)
+    const initialSuggestions = React.useMemo(() => {
+        return getTopReasons(doctorSpecialty, 6);
+    }, [doctorSpecialty]);
+
+    // Legacy filtered suggestions (fallback)
     const filteredSuggestions = motivoSuggestions.filter(suggestion =>
         suggestion.toLowerCase().includes(searchTerm.toLowerCase()) &&
         !currentMotivoValue.includes(suggestion) // Exclude already added ones
     ).slice(0, 5); // Limit to top 5
+
+    // Combine smart + legacy suggestions
+    const allSuggestions = React.useMemo(() => {
+        const smartReasons = smartSuggestions.map((s: any) => s.reason || s);
+        const combined = [...new Set([...smartReasons, ...filteredSuggestions])];
+        return combined.slice(0, 8);
+    }, [smartSuggestions, filteredSuggestions]);
 
     const handleAddSuggestion = (suggestion: string) => {
         let newValue = "";
@@ -180,9 +209,9 @@ export function AppointmentForm({
                 </CardHeader>
                 <CardContent className="space-y-6">
                     {/* Scheduler Section: Compact & United */}
-                    <div className="flex flex-col gap-6 lg:gap-8 items-start">
+                    <div className="flex flex-col lg:flex-row gap-6 lg:gap-8 items-start">
                         {/* Left Column: Calendar */}
-                        <div className="w-full lg:w-auto mx-auto lg:mx-0 shrink-0 flex justify-center">
+                        <div className="w-full lg:w-auto shrink-0 flex flex-col items-center">
                             <FormField
                                 control={form.control}
                                 name="fecha"
@@ -441,13 +470,13 @@ export function AppointmentForm({
                                         </FormControl>
 
                                         {/* Smart Suggestions */}
-                                        {filteredSuggestions.length > 0 && searchTerm.length > 0 && (
+                                        {allSuggestions.length > 0 && searchTerm.length >= 2 && (
                                             <div className="absolute z-50 w-full mt-2 bg-popover/95 backdrop-blur-md rounded-xl border border-border/50 shadow-2xl p-2 animate-in fade-in slide-in-from-top-2 max-h-[200px] overflow-y-auto">
                                                 <p className="text-[10px] uppercase tracking-wider font-semibold text-muted-foreground px-2 py-1.5 mb-1">
-                                                    Sugerencias
+                                                    🩺 Sugerencias para {doctorSpecialty}
                                                 </p>
                                                 <div className="flex flex-wrap gap-1.5">
-                                                    {filteredSuggestions.map((suggestion) => (
+                                                    {allSuggestions.map((suggestion) => (
                                                         <button
                                                             key={suggestion}
                                                             type="button"
@@ -461,12 +490,14 @@ export function AppointmentForm({
                                             </div>
                                         )}
 
-                                        {/* Static Common Suggestions (When empty) */}
+                                        {/* Specialty-aware Initial Suggestions (When empty) */}
                                         {searchTerm.length === 0 && (
                                             <div className="mt-2">
-                                                <p className="text-[10px] text-muted-foreground mb-1.5 ml-1">Frecuentes:</p>
+                                                <p className="text-[10px] text-muted-foreground mb-1.5 ml-1">
+                                                    📌 Comunes en {doctorSpecialty}:
+                                                </p>
                                                 <div className="flex flex-wrap gap-2">
-                                                    {motivoSuggestions.slice(0, 4).map(s => (
+                                                    {initialSuggestions.slice(0, 6).map((s: string) => (
                                                         <button
                                                             key={s}
                                                             type="button"

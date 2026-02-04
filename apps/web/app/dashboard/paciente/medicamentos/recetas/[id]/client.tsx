@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter, useParams } from "next/navigation";
+import { differenceInYears } from "date-fns";
 import { supabase } from "@/lib/supabase/client";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -20,6 +21,10 @@ import {
   AlertCircle,
 } from "lucide-react";
 import Link from "next/link";
+import { getDoctorSettings } from "@/lib/supabase/services/settings";
+import type { DoctorSettings } from "@/lib/supabase/types/settings";
+import { PrescriptionPDF } from "@/components/dashboard/medico/recetas/prescription-pdf";
+import { usePdfGeneration } from "@/hooks/use-pdf-generation";
 
 export default function DetalleRecetaPage() {
   const [userId, setUserId] = useState<string | null>(null);
@@ -29,6 +34,52 @@ export default function DetalleRecetaPage() {
   const prescriptionId = params.id as string;
 
   const { prescription, loading: prescriptionLoading } = usePrescription(prescriptionId);
+  const [doctorSettings, setDoctorSettings] = useState<DoctorSettings | null>(null);
+  const { generatePdf, isGenerating } = usePdfGeneration();
+
+  useEffect(() => {
+    async function loadDoctorSettings() {
+      if (prescription?.medico_id) {
+        // Since getDoctorSettings requires a user ID, and here we have the doctor's profile ID (medico_id)
+        // We are assuming medico_id in prescription IS the auth user id of the doctor.
+        // If they are different (profile vs auth), we might need to adjust.
+        // Usually in Supabase schema, profiles.id === auth.users.id.
+        const result = await getDoctorSettings(prescription.medico_id);
+        if (result.success && result.data) {
+          setDoctorSettings(result.data);
+        } else if (prescription.medico) {
+          // Fallback if no specific settings found: use profile data
+          setDoctorSettings({
+            id: "temp",
+            doctor_id: prescription.medico_id,
+            nombre_completo: prescription.medico.nombre_completo,
+            especialidad: prescription.medico.especialidad || "",
+            cedula_profesional: "",
+            clinica_nombre: "Consultorio Médico", // Default
+            consultorio_direccion: "",
+            telefono: "",
+            email: "",
+            logo_enabled: false,
+            firma_digital_enabled: false,
+            frame_color: "#0da9f7",
+            created_at: new Date().toISOString(),
+            updated_at: new Date().toISOString()
+          });
+        }
+      }
+    }
+    loadDoctorSettings();
+  }, [prescription?.medico_id, prescription?.medico]); // Add prescription.medico to deps
+
+  const handleDownloadPdf = async () => {
+    const success = await generatePdf("prescription-pdf-content", {
+      fileName: `Receta-${prescription?.folio || "sin-folio"}.pdf`
+    });
+    if (!success) {
+      // toast.error("Error al generar PDF"); // If we had toast here
+      console.error("Failed to generate PDF");
+    }
+  };
 
   useEffect(() => {
     const checkUser = async () => {
@@ -118,9 +169,9 @@ export default function DetalleRecetaPage() {
           </p>
         </div>
         <div className="flex gap-2">
-          <Button variant="outline" size="sm">
+          <Button variant="outline" size="sm" onClick={handleDownloadPdf} disabled={isGenerating}>
             <Download className="mr-2 h-4 w-4" />
-            Descargar
+            {isGenerating ? "Generando..." : "Descargar PDF"}
           </Button>
           <Button variant="outline" size="sm">
             <Share2 className="mr-2 h-4 w-4" />
@@ -362,6 +413,39 @@ export default function DetalleRecetaPage() {
           </CardContent>
         </Card>
       )}
+      {/* Hidden PDF Container for Capture */}
+      <div style={{ position: "absolute", left: "-9999px", top: 0 }}>
+        {prescription && doctorSettings && userId && (
+          <PrescriptionPDF
+            id="prescription-pdf-content"
+            recipe={{
+              created_at: prescription.fecha_prescripcion,
+              medicamentos: prescription.medications?.map(m => ({
+                nombre_comercial: m.nombre_medicamento,
+                nombre_generico: m.medication?.nombre_generico,
+                dosis: m.dosis,
+                presentacion: m.medication?.presentacion ?? undefined, // Handle null/undefined
+                frecuencia: m.frecuencia,
+                duracion: m.duracion_dias ? `${m.duracion_dias} días` : undefined,
+                indicaciones: m.instrucciones_especiales || undefined
+              })) || [],
+              folio: "RX-" + (prescription.id.slice(0, 8).toUpperCase()), // Placeholder folio if not present
+              diagnostico: prescription.diagnostico
+            }}
+            settings={doctorSettings}
+            patient={{
+              nombre_completo: prescription.paciente?.nombre_completo || "Paciente",
+              edad: prescription.paciente?.fecha_nacimiento
+                ? differenceInYears(new Date(), new Date(prescription.paciente.fecha_nacimiento)).toString()
+                : "--",
+              peso: "--",
+              sexo: prescription.paciente?.genero
+                ? (prescription.paciente.genero === 'masculino' ? 'M' : prescription.paciente.genero === 'femenino' ? 'F' : prescription.paciente.genero.charAt(0).toUpperCase())
+                : "--"
+            }}
+          />
+        )}
+      </div>
     </div>
   );
 }

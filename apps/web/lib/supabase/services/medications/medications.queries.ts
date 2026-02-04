@@ -61,7 +61,15 @@ export async function getPatientPrescriptions(patientId: string) {
         medico:profiles!prescriptions_medico_id_fkey(
           id,
           nombre_completo,
-          especialidad
+          especialidad,
+          avatar_url
+        ),
+        paciente:profiles!prescriptions_paciente_id_fkey(
+          id,
+          nombre_completo,
+          cedula,
+          avatar_url,
+          fecha_nacimiento
         ),
         medications:prescription_medications(
           *,
@@ -79,6 +87,87 @@ export async function getPatientPrescriptions(patientId: string) {
   }
 }
 
+// Obtener prescripciones del médico
+export async function getDoctorPrescriptions(medicoId: string) {
+  try {
+    // First, try a simple query to check if basic access works
+    const { data: basicData, error: basicError } = await supabase
+      .from("prescriptions")
+      .select("id, medico_id, paciente_id")
+      .eq("medico_id", medicoId)
+      .limit(1);
+
+    if (basicError) {
+      console.error("Basic query failed - possible RLS issue:", {
+        message: basicError.message,
+        details: basicError.details,
+        hint: basicError.hint,
+        code: basicError.code
+      });
+      throw new Error(`Database access error: ${basicError.message}`);
+    }
+
+    // If basic query works, try the full query with joins
+    const { data, error } = await supabase
+      .from("prescriptions")
+      .select(`
+        *,
+        paciente:profiles!prescriptions_paciente_id_fkey(
+          id,
+          nombre_completo,
+          cedula,
+          avatar_url,
+          fecha_nacimiento
+        ),
+        medications:prescription_medications(
+          *,
+          medication:medications_catalog(*)
+        )
+      `)
+      .eq("medico_id", medicoId)
+      .order("fecha_prescripcion", { ascending: false });
+
+    if (error) {
+      console.error("Full query failed - possible foreign key or join issue:", {
+        message: error.message,
+        details: error.details,
+        hint: error.hint,
+        code: error.code,
+        medicoId
+      });
+
+      // Try without the medications join as fallback
+      const { data: fallbackData, error: fallbackError } = await supabase
+        .from("prescriptions")
+        .select(`
+          *,
+          paciente:profiles!prescriptions_paciente_id_fkey(
+            id,
+            nombre_completo,
+            cedula,
+            avatar_url,
+            fecha_nacimiento
+          )
+        `)
+        .eq("medico_id", medicoId)
+        .order("fecha_prescripcion", { ascending: false });
+
+      if (fallbackError) {
+        console.error("Fallback query also failed:", fallbackError);
+        throw error; // Throw original error
+      }
+
+      console.warn("Using fallback query without medications");
+      return { success: true, data: fallbackData as Prescription[] };
+    }
+
+    return { success: true, data: data as Prescription[] };
+  } catch (error) {
+    console.error("Error fetching doctor prescriptions:", error);
+    return { success: false, error, data: [] };
+  }
+}
+
 // Obtener prescripción específica
 export async function getPrescription(prescriptionId: string) {
   try {
@@ -91,6 +180,13 @@ export async function getPrescription(prescriptionId: string) {
           nombre_completo,
           especialidad,
           avatar_url
+        ),
+        paciente:profiles!prescriptions_paciente_id_fkey(
+          id,
+          nombre_completo,
+          cedula,
+          avatar_url,
+          fecha_nacimiento
         ),
         medications:prescription_medications(
           *,
@@ -225,7 +321,7 @@ export async function getActiveMedicationsSummary(patientId: string): Promise<{ 
     if (error) throw error;
 
     const now = new Date();
-    let proximaToma: ProximaToma | undefined = undefined;
+    let proximaToma: ProximaToma | null = null;
     let minMinutos = Infinity;
 
     const medicamentosActivos = reminders.map((reminder) => {

@@ -34,11 +34,8 @@ export function StructuredTemplateEditor({
   medications,
   onMedicationsChange,
 }: StructuredTemplateEditorProps) {
-  // Usar template por defecto si no hay uno seleccionado
-  const allTemplates = getAllTemplates();
-  const activeTemplate = template || allTemplates[0];
-
   const [fields, setFields] = useState<Record<string, string>>({});
+  const activeTemplate = template;
 
   const [vitalSigns, setVitalSigns] = useState<Record<string, VitalSign>>({
     pa: {

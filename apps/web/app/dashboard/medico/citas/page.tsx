@@ -52,7 +52,22 @@ function CitasContent() {
   // Filters
   const [selectedStatuses, setSelectedStatuses] = useState<string[]>([]);
   const [selectedTypes, setSelectedTypes] = useState<string[]>([]);
-  const [selectedOfficeId, setSelectedOfficeId] = useState<string | null>(null);
+  const [selectedOfficeId, setSelectedOfficeId] = useState<string | null>(() => {
+    // Restore from localStorage on initial load
+    if (typeof window !== 'undefined') {
+      return localStorage.getItem('selectedOfficeId');
+    }
+    return null;
+  });
+
+  useEffect(() => {
+    // Persist to localStorage when office changes
+    if (selectedOfficeId) {
+      localStorage.setItem('selectedOfficeId', selectedOfficeId);
+    } else {
+      localStorage.removeItem('selectedOfficeId');
+    }
+  }, [selectedOfficeId]);
 
   useEffect(() => {
     // Escuchar el evento de cambio de consultorio

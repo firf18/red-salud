@@ -31,6 +31,7 @@ function NuevaCitaContent() {
 
   const [schedules, setSchedules] = useState<any[]>([]);
   const [offices, setOffices] = useState<any[]>([]);
+  const [doctorSpecialty, setDoctorSpecialty] = useState<string>('Medicina Interna');
 
   // Obtener fecha, hora y paciente de los parámetros URL
   const dateParam = searchParams.get("date");
@@ -174,6 +175,19 @@ function NuevaCitaContent() {
         .eq("doctor_id", user.id);
       setOffices(officesData || []);
 
+      // Cargar especialidad del médico
+      const { data: profileData } = await supabase
+        .from('profiles')
+        .select('sacs_especialidad, specialty_id, specialties(name)')
+        .eq('id', user.id)
+        .single();
+
+      const specialty =
+        profileData?.sacs_especialidad ||
+        (profileData?.specialties as any)?.name ||
+        'Medicina Interna';
+      setDoctorSpecialty(specialty);
+
     } catch (err) {
       console.error("Error loading data:", err);
     } finally {
@@ -236,7 +250,8 @@ function NuevaCitaContent() {
 
       if (allConflicts.length > 0) {
         const conflictList = allConflicts.map(apt => {
-          const patientName = apt.paciente?.nombre_completo || apt.offline_patient?.nombre_completo || 'Paciente';
+          const getVal = (obj: any) => Array.isArray(obj) ? obj[0]?.nombre_completo : obj?.nombre_completo;
+          const patientName = getVal(apt.paciente) || getVal(apt.offline_patient) || 'Paciente';
           const time = format(new Date(apt.fecha_hora), 'HH:mm');
           return `${time} - ${patientName}`;
         }).join(', ');
@@ -284,8 +299,10 @@ function NuevaCitaContent() {
       let isOffline = false;
 
       // Handle NEW patient creation
+      // Handle NEW patient creation
       if (data.paciente_id === "NEW" && data.new_patient_data) {
         try {
+          // Intentar crear el paciente
           const { data: newPatient, error: createError } = await supabase
             .from("offline_patients")
             .insert({
@@ -298,12 +315,36 @@ function NuevaCitaContent() {
             .select('id')
             .single();
 
-          if (createError) throw createError;
-          finalPacienteId = newPatient.id;
-          isOffline = true;
+          if (createError) {
+            // Si ya existe (violación de key única), recuperar el existente
+            if (createError.code === '23505') {
+              console.log("Paciente ya existe, recuperando ID...");
+              const { data: existingPatient, error: fetchError } = await supabase
+                .from("offline_patients")
+                .select("id")
+                .eq("doctor_id", user.id)
+                .eq("cedula", data.new_patient_data.cedula)
+                .single();
+
+              if (fetchError || !existingPatient) {
+                console.error("Error fetching existing patient:", fetchError);
+                throw new Error("El paciente ya existe pero no se pudo recuperar su información.");
+              }
+
+              finalPacienteId = existingPatient.id;
+              isOffline = true;
+            } else {
+              // Otros errores
+              throw createError;
+            }
+          } else {
+            // Creado exitosamente
+            finalPacienteId = newPatient.id;
+            isOffline = true;
+          }
         } catch (createErr: any) {
           console.error("Error creating offline patient:", createErr);
-          setError("Error al registrar el nuevo paciente: " + createErr.message);
+          setError("Error al registrar el nuevo paciente: " + (createErr.message || "Error desconocido"));
           setLoading(false);
           return;
         }
@@ -445,6 +486,19 @@ function NuevaCitaContent() {
         status: "success",
       });
 
+      // Track consultation reason usage for smart suggestions
+      if (data.motivo) {
+        try {
+          await fetch('/api/suggestions/consultation-reasons', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ reason: data.motivo }),
+          });
+        } catch (trackError) {
+          console.warn('Could not track reason usage:', trackError);
+        }
+      }
+
       router.push("/dashboard/medico/citas");
     } catch (err: any) {
       console.error("💥 Error creating appointment (FULL):", JSON.stringify(err, null, 2));
@@ -524,6 +578,7 @@ function NuevaCitaContent() {
                   schedules={schedules}
                   offices={offices}
                   selectedOfficeId={searchParams.get("officeId")}
+                  doctorSpecialty={doctorSpecialty}
                 />
               </div>
 

@@ -14,7 +14,7 @@
 
 "use client";
 
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useId } from "react";
 import { Check, ChevronsUpDown, Search } from "lucide-react";
 import { cn } from "./lib/utils";
 import { Input } from "./input";
@@ -161,6 +161,10 @@ export function SpecialtyCombobox({
         }
     };
 
+    const generatedId = useId();
+    const listboxId = id ? `${id}-listbox` : `specialty-listbox-${generatedId}`;
+
+
     return (
         <div ref={containerRef} className={cn("relative", className)}>
             {/* Input con icono de búsqueda */}
@@ -183,7 +187,7 @@ export function SpecialtyCombobox({
                     )}
                     aria-expanded={isOpen}
                     aria-autocomplete="list"
-                    aria-controls="specialty-listbox"
+                    aria-controls={listboxId}
                     role="combobox"
                 />
                 <button
@@ -202,7 +206,7 @@ export function SpecialtyCombobox({
             {isOpen && filteredSpecialties.length > 0 && (
                 <ul
                     ref={listRef}
-                    id="specialty-listbox"
+                    id={listboxId}
                     role="listbox"
                     className="absolute z-50 mt-1 w-full max-h-60 overflow-auto rounded-md bg-white dark:bg-gray-900 border dark:border-gray-700 shadow-lg py-1"
                 >

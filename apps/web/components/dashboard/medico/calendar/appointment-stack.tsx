@@ -63,33 +63,43 @@ export function AppointmentStack({
       <TooltipProvider delayDuration={200}>
         {visibleAppointments.map((apt) => (
           <Tooltip key={apt.id}>
-            <TooltipTrigger asChild>
-              <div
-                className={cn(
-                  "rounded cursor-pointer hover:brightness-95 transition-all w-full flex items-center gap-1",
-                  compact ? "p-0.5 text-[10px]" : "p-1.5 text-xs"
-                )}
-                style={{
-                  backgroundColor: apt.color + "15", // 15 = ~8% opacity
-                  borderLeft: `${compact ? "2px" : "3px"} solid ${apt.color}`,
-                  color: "hsl(var(--foreground))"
-                }}
-                onClick={(e) => {
-                  e.stopPropagation();
-                  onAppointmentClick?.(apt);
-                }}
-              >
-                {/* Icono de tipo small */}
-                <span className="text-muted-foreground opacity-70 flex-shrink-0">
-                  {getTypeIcon(apt.tipo_cita, compact ? "h-2.5 w-2.5" : "h-3 w-3")}
-                </span>
+            <div
+              className={cn(
+                "rounded cursor-pointer transition-all w-full flex items-center gap-1 overflow-hidden",
+                "hover:brightness-95 hover:scale-[1.02] hover:shadow-sm",
+                compact ? "p-0.5 text-[10px] max-w-full" : "p-1.5 text-xs h-9"
+              )}
+              style={{
+                backgroundColor: apt.color + "15", // 15 = ~8% opacity
+                borderLeft: `${compact ? "2px" : "3px"} solid ${apt.color}`,
+                color: "hsl(var(--foreground))"
+              }}
+              onClick={(e) => {
+                e.stopPropagation();
+                onAppointmentClick?.(apt);
+              }}
+            >
+              {/* Icono de tipo small */}
+              <span className="text-muted-foreground opacity-70 flex-shrink-0">
+                {getTypeIcon(apt.tipo_cita, compact ? "h-2.5 w-2.5" : "h-3 w-3")}
+              </span>
 
-                <div className="font-medium truncate flex-1 leading-tight">
+              <TooltipTrigger asChild>
+                <div className={cn(
+                  "font-medium truncate leading-tight min-w-0 flex-1",
+                  compact ? "max-w-[80px]" : "max-w-[300px] md:max-w-md"
+                )}>
                   {apt.paciente_nombre}
                 </div>
-              </div>
-            </TooltipTrigger>
-            <TooltipContent side="right" className="p-0 border-none shadow-lg">
+              </TooltipTrigger>
+            </div>
+
+            <TooltipContent
+              side="right"
+              align="start"
+              sideOffset={10}
+              className="p-0 border-none shadow-lg z-50 pointer-events-auto"
+            >
               <div className="w-[280px] bg-card border rounded-md overflow-hidden shadow-xl animate-in fade-in-0 zoom-in-95">
                 {/* Header: Color & Status */}
                 <div className="px-3 py-2 border-b flex items-center justify-between" style={{ backgroundColor: apt.color + "15" }}>

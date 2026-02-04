@@ -149,11 +149,29 @@ export default function ContactoPage() {
 
     setIsSubmitting(true);
 
-    // Simular envío del formulario
-    await new Promise((resolve) => setTimeout(resolve, 2000));
+    try {
+      const result = await supportService.createTicket({
+        name: formData.name,
+        email: formData.email,
+        phone: formData.phone,
+        company: formData.company,
+        subject: formData.subject,
+        priority: formData.priority,
+        message: formData.message,
+      });
 
-    setIsSubmitting(false);
-    setIsSubmitted(true);
+      if (result.success) {
+        setIsSubmitted(true);
+        toast.success("Mensaje enviado correctamente");
+      } else {
+        toast.error("Hubo un error al enviar el mensaje. Por favor intente de nuevo.");
+      }
+    } catch (error) {
+      console.error("Error in handleSubmit:", error);
+      toast.error("Error inesperado al enviar el mensaje.");
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const handleChange = (field: keyof FormData, value: string) => {

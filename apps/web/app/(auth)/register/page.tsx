@@ -80,14 +80,14 @@ export default function RegisterPage() {
             {roles.map((role) => {
               const config = ROLE_CONFIG[role as UserRole];
               const Icon = iconMap[config.icon];
-              const isMedico = role === 'medico';
+              const isEnabled = role === 'medico' || role === 'farmacia';
 
               return (
                 <div key={role} className={cn(
                   "relative block h-full group",
-                  !isMedico && "opacity-60 cursor-not-allowed"
+                  !isEnabled && "opacity-60 cursor-not-allowed"
                 )}>
-                  {isMedico ? (
+                  {isEnabled ? (
                     <Link href={`/register/${role}`} className="block h-full w-full">
                       {/* Mobile: Horizontal card */}
                       <Card className={cn(

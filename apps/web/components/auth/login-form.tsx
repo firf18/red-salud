@@ -6,7 +6,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Mail, Lock, Eye, EyeOff, Loader2, ArrowLeft } from "lucide-react";
+import { User, Lock, Eye, EyeOff, Loader2, ArrowLeft, Pill, CheckCircle2 } from "lucide-react";
 import { Button } from "@red-salud/ui";
 import { Input } from "@red-salud/ui";
 import { Label } from "@red-salud/ui";
@@ -113,25 +113,20 @@ function LoginFormContent({ role, roleLabel }: LoginFormProps) {
     <div className="h-screen bg-background relative overflow-hidden flex flex-col">
       {/* Background Elements */}
       <div className="absolute inset-0 z-0 overflow-hidden pointer-events-none">
-        <div className="absolute -top-[20%] -left-[10%] w-[50%] h-[50%] rounded-full bg-primary/5 blur-[100px] animate-blob" />
-        <div className="absolute top-[20%] -right-[10%] w-[40%] h-[40%] rounded-full bg-secondary/5 blur-[100px] animate-blob animation-delay-2000" />
-        <div className="absolute -bottom-[20%] left-[20%] w-[40%] h-[40%] rounded-full bg-accent/10 blur-[100px] animate-blob animation-delay-4000" />
+        <div className="absolute -top-[10%] -left-[5%] w-[60%] h-[60%] rounded-full bg-primary/15 blur-[120px] animate-blob" />
+        <div className="absolute top-[10%] -right-[5%] w-[50%] h-[50%] rounded-full bg-secondary/10 blur-[100px] animate-blob animation-delay-2000" />
+        <div className="absolute -bottom-[20%] left-[10%] w-[50%] h-[50%] rounded-full bg-primary/10 blur-[100px] animate-blob animation-delay-4000" />
       </div>
 
-      {/* Header bar with Back button and Logo */}
+      {/* Header bar with Back button */}
       <div className="relative z-10 px-4 pt-4 pb-2 shrink-0 flex items-center justify-between">
         <Link
           href="/login"
-          className="inline-flex items-center gap-2 text-muted-foreground hover:text-primary transition-colors group px-3 py-1.5 rounded-full hover:bg-muted/50 relative z-20"
+          className="inline-flex items-center gap-2 text-muted-foreground hover:text-primary transition-colors group px-4 py-2 rounded-xl bg-background/20 backdrop-blur-md shadow-sm border border-border/50"
         >
           <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
-          <span className="text-xs sm:text-sm font-medium">Cambiar tipo de cuenta</span>
+          <span className="text-xs sm:text-sm font-bold">Volver</span>
         </Link>
-
-        {/* Centered Logo */}
-        <div className="absolute inset-0 flex items-center justify-center pointer-events-none pt-2">
-          <Logo size="md" showIcon className="pointer-events-auto" />
-        </div>
       </div>
 
       {/* Contenedor centrado */}
@@ -142,18 +137,21 @@ function LoginFormContent({ role, roleLabel }: LoginFormProps) {
             animate={{ opacity: 1, scale: 1 }}
             transition={{ duration: 0.3 }}
           >
-            {/* Título */}
-            <div className="text-center mb-6 space-y-1">
-              <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-foreground">
+            {/* Título e Icono estilo Registro */}
+            <div className="text-center mb-8 space-y-3">
+              <div className="inline-flex p-3 bg-blue-500/10 rounded-2xl mb-2 border border-blue-500/20">
+                <Pill className="w-8 h-8 text-blue-600" />
+              </div>
+              <h1 className="text-3xl font-black tracking-tight text-foreground gradient-text-animated">
                 Bienvenido de vuelta
               </h1>
-              <p className="text-muted-foreground text-xs sm:text-sm">
-                Inicia sesión como <span className="font-semibold text-primary">{roleLabel}</span>
+              <p className="text-muted-foreground text-sm">
+                Inicia sesión en su panel de <span className="font-bold text-blue-600">{roleLabel}</span>
               </p>
             </div>
 
             {/* Card del formulario */}
-            <Card className="border shadow-glow bg-card/50 backdrop-blur-sm overflow-hidden">
+            <Card className="border shadow-glow bg-card/40 backdrop-blur-xl overflow-hidden border-white/10 dark:border-white/5">
               <CardContent className="p-5 sm:p-6">
                 <AnimatePresence mode="wait">
                   {error && (
@@ -170,35 +168,39 @@ function LoginFormContent({ role, roleLabel }: LoginFormProps) {
                   )}
                 </AnimatePresence>
 
-                {/* OAuth Google */}
-                <div className="mb-4">
-                  <GoogleSignInButton
-                    onClick={signInWithGoogle}
-                    disabled={isLoading || isOAuthLoading}
-                    mode="login"
-                  />
-                </div>
+                {/* OAuth Google - Hidden for pharmacy */}
+                {role !== "farmacia" && (
+                  <div className="mb-4">
+                    <GoogleSignInButton
+                      onClick={signInWithGoogle}
+                      disabled={isLoading || isOAuthLoading}
+                      mode="login"
+                    />
+                  </div>
+                )}
 
-                <div className="relative mb-4">
-                  <div className="absolute inset-0 flex items-center">
-                    <div className="w-full border-t border-border" />
+                {role !== "farmacia" && (
+                  <div className="relative mb-4">
+                    <div className="absolute inset-0 flex items-center">
+                      <div className="w-full border-t border-border" />
+                    </div>
+                    <div className="relative flex justify-center text-xs sm:text-sm">
+                      <span className="bg-card px-2 text-muted-foreground">
+                        O continúa con tu email
+                      </span>
+                    </div>
                   </div>
-                  <div className="relative flex justify-center text-xs sm:text-sm">
-                    <span className="bg-card px-2 text-muted-foreground">
-                      O continúa con tu email
-                    </span>
-                  </div>
-                </div>
+                )}
 
                 <form onSubmit={handleSubmit(onSubmit)} className="space-y-3">
                   <div className="space-y-1.5">
-                    <Label htmlFor="email" className="text-foreground/80 text-xs sm:text-sm">Correo electrónico</Label>
+                    <Label htmlFor="email" className="text-foreground/80 text-xs sm:text-sm">Usuario</Label>
                     <div className="relative group">
-                      <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 sm:h-5 sm:w-5 text-muted-foreground group-focus-within:text-primary transition-colors" />
+                      <User className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 sm:h-5 sm:w-5 text-muted-foreground group-focus-within:text-primary transition-colors" />
                       <Input
                         id="email"
-                        type="email"
-                        placeholder="tu@email.com"
+                        type="text"
+                        placeholder="Nombre de usuario"
                         className="pl-9 sm:pl-10 h-10 sm:h-11 bg-background/50 focus:bg-background transition-all text-sm"
                         {...register("email")}
                         disabled={isLoading}
@@ -261,17 +263,19 @@ function LoginFormContent({ role, roleLabel }: LoginFormProps) {
 
                   <Button
                     type="submit"
-                    size="lg"
-                    className="w-full h-10 sm:h-11 text-sm sm:text-base shadow-lg shadow-primary/20 hover:shadow-primary/30 transition-all duration-300"
                     disabled={isLoading}
+                    className="w-full h-14 rounded-2xl bg-blue-600 hover:bg-blue-700 text-white font-black text-lg shadow-xl shadow-blue-500/30 transition-all active:scale-[0.98] group mt-2"
                   >
                     {isLoading ? (
                       <>
-                        <Loader2 className="mr-2 h-4 w-4 sm:h-5 sm:w-5 animate-spin" />
+                        <Loader2 className="mr-2 h-5 w-5 animate-spin" />
                         Iniciando sesión...
                       </>
                     ) : (
-                      "Iniciar Sesión"
+                      <div className="flex items-center justify-center gap-3">
+                        <span>Iniciar Sesión</span>
+                        <CheckCircle2 className="w-6 h-6 group-hover:scale-110 transition-transform" />
+                      </div>
                     )}
                   </Button>
                 </form>

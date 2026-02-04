@@ -29,7 +29,7 @@ interface ICDEntity {
 }
 
 interface ICDSearchResult {
-  destinationEntities: Array<{
+  destinationEntities?: Array<{
     id: string;
     title: string;
     theCode?: string;
@@ -50,9 +50,9 @@ export interface ICD11Code {
   id: string;
   code: string;
   title: string;
-  definition?: string;
-  chapter?: string;
-  score?: number;
+  definition?: string | undefined;
+  chapter?: string | undefined;
+  score?: number | undefined;
 }
 
 // Cache del token de autenticación
@@ -94,7 +94,7 @@ async function getAccessToken(): Promise<string> {
     }
 
     const data = await response.json();
-    
+
     // Guardar en cache con tiempo de expiración
     tokenCache = {
       access_token: data.access_token,
@@ -125,18 +125,16 @@ export async function searchICD11(
 
   try {
     const token = await getAccessToken();
-    
-    // API endpoint para búsqueda
-    // Usamos linearization MMS (Mortality and Morbidity Statistics) que es la más común
-    const searchMode = useFlexibleSearch ? "flexisearch" : "words";
-    const url = `https://id.who.int/icd/release/11/2024-01/mms/search?q=${encodeURIComponent(query)}&useFlexisearch=${useFlexibleSearch}&flatResults=true`;
+
+    // API endpoint para búsqueda (actualizado a versión 2025-01)
+    const url = `https://id.who.int/icd/release/11/2025-01/mms/search?q=${encodeURIComponent(query)}&useFlexisearch=${useFlexibleSearch}&flatResults=true`;
 
     const response = await fetch(url, {
       method: "GET",
       headers: {
         Authorization: `Bearer ${token}`,
         Accept: "application/json",
-        "Accept-Language": "es", // Preferir español
+        "Accept-Language": "es",
         "API-Version": "v2",
       },
     });
@@ -156,16 +154,19 @@ export async function searchICD11(
 
     // Transformar resultados al formato esperado
     const results: ICD11Code[] = data.destinationEntities
-      .filter((entity) => entity.theCode) // Solo entidades con código
-      .map((entity) => ({
-        id: entity.id,
-        code: entity.theCode || "",
-        title: entity.title,
-        chapter: entity.chapter,
-        score: entity.score,
-      }))
-      .slice(0, 10); // Limitar a 10 resultados
+      ? data.destinationEntities
+          .filter((entity) => entity.theCode) // Solo entidades con código
+          .map((entity) => ({
+            id: entity.id,
+            code: entity.theCode || "",
+            title: entity.title.replace(/<[^>]*>/g, ''), // Limpiar tags HTML
+            chapter: entity.chapter,
+            score: entity.score,
+          }))
+          .slice(0, 10) // Limitar a 10 resultados
+      : [];
 
+    console.log(`ICD API search successful for "${query}": ${results.length} results`);
     return results;
   } catch (error) {
     console.error("Error searching ICD-11:", error);
@@ -179,7 +180,7 @@ export async function searchICD11(
 export async function getICD11Entity(entityId: string): Promise<ICDEntity | null> {
   try {
     const token = await getAccessToken();
-    
+
     const response = await fetch(entityId, {
       method: "GET",
       headers: {
@@ -209,7 +210,7 @@ export async function getICD11Entity(entityId: string): Promise<ICDEntity | null
 export async function searchICD11ByCode(code: string): Promise<ICD11Code | null> {
   try {
     const results = await searchICD11(code, false);
-    
+
     // Buscar coincidencia exacta de código
     const exactMatch = results.find(
       (result) => result.code.toLowerCase() === code.toLowerCase()

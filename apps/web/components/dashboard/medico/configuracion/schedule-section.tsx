@@ -78,7 +78,8 @@ const DURACIONES = [
 /**
  * Determina si un horario es de mañana o tarde
  */
-const getTimeLabel = (inicio: string): "morning" | "afternoon" => {
+const getTimeLabel = (inicio: string | undefined): "morning" | "afternoon" => {
+  if (!inicio) return "morning";
   const hour = parseInt(inicio.split(':')[0]);
   return hour < 14 ? "morning" : "afternoon";
 };
@@ -100,7 +101,7 @@ export function ScheduleSection() {
 
   useEffect(() => {
     loadOfficesAndSchedules();
-  }, [loadOfficesAndSchedules]);
+  }, []);
 
   /**
    * Retorna el horario predeterminado (lunes a viernes activos)
@@ -261,31 +262,33 @@ export function ScheduleSection() {
    * Alterna el estado activo/inactivo de un día
    */
   const toggleDay = (dia: string) => {
-    setSchedule({
-      ...schedule,
+    setSchedule(prev => ({
+      ...prev,
       [dia]: {
-        ...schedule[dia],
-        activo: !schedule[dia]?.activo,
+        ...prev[dia],
+        activo: !prev[dia]?.activo,
       },
-    });
+    }));
   };
 
   /**
    * Añade un bloque de horario (mañana o tarde)
    */
   const addTimeSlot = (dia: string, type: "morning" | "afternoon") => {
-    const currentSlots = schedule[dia]?.horarios || [];
-    const newSlot = type === "morning"
-      ? { inicio: "09:00", fin: "13:00" }
-      : { inicio: "15:00", fin: "19:00" };
+    setSchedule(prev => {
+      const currentSlots = prev[dia]?.horarios || [];
+      const newSlot = type === "morning"
+        ? { inicio: "09:00", fin: "13:00" }
+        : { inicio: "15:00", fin: "19:00" };
 
-    setSchedule({
-      ...schedule,
-      [dia]: {
-        ...schedule[dia],
-        activo: true,
-        horarios: [...currentSlots, newSlot],
-      },
+      return {
+        ...prev,
+        [dia]: {
+          ...prev[dia],
+          activo: true,
+          horarios: [...currentSlots, newSlot],
+        },
+      };
     });
   };
 
@@ -293,13 +296,15 @@ export function ScheduleSection() {
    * Elimina un bloque de horario de un día
    */
   const removeTimeSlot = (dia: string, index: number) => {
-    const currentSlots = schedule[dia]?.horarios || [];
-    setSchedule({
-      ...schedule,
-      [dia]: {
-        ...schedule[dia],
-        horarios: currentSlots.filter((_, i) => i !== index),
-      },
+    setSchedule(prev => {
+      const currentSlots = prev[dia]?.horarios || [];
+      return {
+        ...prev,
+        [dia]: {
+          ...prev[dia],
+          horarios: currentSlots.filter((_, i) => i !== index),
+        },
+      };
     });
   };
 
@@ -307,14 +312,16 @@ export function ScheduleSection() {
    * Actualiza un campo específico de un bloque de horario
    */
   const updateTimeSlot = (dia: string, index: number, field: "inicio" | "fin", value: string) => {
-    const currentSlots = [...(schedule[dia]?.horarios || [])];
-    currentSlots[index] = { ...currentSlots[index], [field]: value };
-    setSchedule({
-      ...schedule,
-      [dia]: {
-        ...schedule[dia],
-        horarios: currentSlots,
-      },
+    setSchedule(prev => {
+      const currentSlots = [...(prev[dia]?.horarios || [])];
+      currentSlots[index] = { ...currentSlots[index], [field]: value };
+      return {
+        ...prev,
+        [dia]: {
+          ...prev[dia],
+          horarios: currentSlots,
+        },
+      };
     });
   };
 
@@ -397,8 +404,9 @@ export function ScheduleSection() {
       </div>
 
       {/* Days Grid - 7 columns */}
-      <div className="grid grid-cols-7 gap-2">
-        {DIAS_SEMANA.map((dia, index) => {
+      <div className="w-full">
+        <div className="grid grid-cols-7 gap-2">
+          {DIAS_SEMANA.map((dia, index) => {
           const daySchedule = schedule[dia.key] || { activo: false, horarios: [] };
           const isExpanded = expandedDay === dia.key;
 
@@ -410,7 +418,7 @@ export function ScheduleSection() {
             <div
               key={dia.key}
               className={`
-                border rounded-lg overflow-hidden transition-all
+                border rounded-lg overflow-hidden transition-all flex flex-col min-w-0
                 ${daySchedule.activo
                   ? 'border-blue-200 dark:border-blue-800 bg-blue-50 dark:bg-blue-900/10'
                   : 'border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-900/30'
@@ -444,13 +452,13 @@ export function ScheduleSection() {
                       {morningSlots.length > 0 && (
                         <div className="text-[10px] text-gray-600 dark:text-gray-400 flex items-center justify-center gap-1">
                           <Sunrise className="h-2.5 w-2.5" />
-                          {morningSlots[0].inicio}-{morningSlots[0].fin}
+                          {morningSlots[0]?.inicio}-{morningSlots[0]?.fin}
                         </div>
                       )}
                       {afternoonSlots.length > 0 && (
                         <div className="text-[10px] text-gray-600 dark:text-gray-400 flex items-center justify-center gap-1">
                           <Sunset className="h-2.5 w-2.5" />
-                          {afternoonSlots[0].inicio}-{afternoonSlots[0].fin}
+                          {afternoonSlots[0]?.inicio}-{afternoonSlots[0]?.fin}
                         </div>
                       )}
                       {daySchedule.horarios.length > 2 && (
@@ -476,6 +484,7 @@ export function ScheduleSection() {
             </div>
           );
         })}
+        </div>
       </div>
 
       {/* Expanded Day Editor */}

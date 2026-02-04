@@ -1,10 +1,5 @@
-import { RegisterForm } from "@/components/auth/register-form";
+import PharmacyRegisterFlow from "@/components/auth/pharmacy-register-flow";
 
 export default function RegisterFarmaciaPage() {
-  return (
-    <RegisterForm
-      role="farmacia"
-      roleLabel="Farmacia"
-    />
-  );
+  return <PharmacyRegisterFlow />;
 }

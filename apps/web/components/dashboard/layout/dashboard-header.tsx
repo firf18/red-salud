@@ -67,7 +67,10 @@ export function DashboardHeader({
   className,
 }: DashboardHeaderProps) {
   const pathname = usePathname();
+
   const isCitasPage = pathname?.includes("/citas");
+  const isPatientsPage = pathname?.includes("/pacientes");
+  const showOfficeSelector = isCitasPage || isPatientsPage;
 
   const [offices, setOffices] = useState<Office[]>([]);
   const [selectedOffice, setSelectedOffice] = useState<Office | null>(null);
@@ -75,11 +78,11 @@ export function DashboardHeader({
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (isCitasPage) {
-      console.log("📍 Cargando consultorios para página de citas...");
+    if (showOfficeSelector) {
+      console.log("📍 Cargando consultorios...");
       loadOffices();
     }
-  }, [isCitasPage]);
+  }, [showOfficeSelector]);
 
   const loadOffices = async () => {
     try {
@@ -116,6 +119,16 @@ export function DashboardHeader({
       if (data && data.length > 0) {
         setOffices(data);
         console.log("✅ Consultorios cargados correctamente");
+
+        // Restore selected office from localStorage
+        const storedOfficeId = localStorage.getItem('selectedOfficeId');
+        if (storedOfficeId) {
+          const storedOffice = data.find(o => o.id === storedOfficeId);
+          if (storedOffice) {
+            setSelectedOffice(storedOffice);
+            setShowAllOffices(false);
+          }
+        }
       } else {
         console.log("⚠️ No hay consultorios activos para este médico");
         setOffices([]);
@@ -134,6 +147,14 @@ export function DashboardHeader({
   const handleOfficeChange = (office: Office | null) => {
     setSelectedOffice(office);
     setShowAllOffices(office === null);
+
+    // Persist to localStorage
+    if (office?.id) {
+      localStorage.setItem('selectedOfficeId', office.id);
+    } else {
+      localStorage.removeItem('selectedOfficeId');
+    }
+
     // Emitir evento para que el calendario se actualice
     window.dispatchEvent(new CustomEvent("office-changed", {
       detail: { officeId: office?.id || null }
@@ -207,8 +228,8 @@ export function DashboardHeader({
           </div>
         </div>
 
-        {/* Center Section - Office Selector (solo en página de citas) o Mega Menu */}
-        {isCitasPage ? (
+        {/* Center Section - Office Selector (solo en página de citas o pacientes) o Mega Menu */}
+        {showOfficeSelector ? (
           <div className="flex-1 flex justify-center min-w-0">
             {loading ? (
               <div className="text-xs text-muted-foreground">Cargando consultorios...</div>
