@@ -48,10 +48,6 @@ export default function WritePostPage() {
 
   const [newTag, setNewTag] = useState("");
 
-  useEffect(() => {
-    checkUserAndLoadData();
-  }, [checkUserAndLoadData]);
-
   const checkUserAndLoadData = useCallback(async () => {
     setLoading(true);
     try {
@@ -83,6 +79,10 @@ export default function WritePostPage() {
       setLoading(false);
     }
   }, [supabase]);
+
+  useEffect(() => {
+    checkUserAndLoadData();
+  }, [checkUserAndLoadData]);
 
   function handleAddTag() {
     if (newTag.trim() && !post.tags?.includes(newTag.trim())) {

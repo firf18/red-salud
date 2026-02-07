@@ -9,7 +9,7 @@ interface WorkspaceHeaderProps {
     cedula: string;
     nombre_completo: string;
     edad: number | null;
-    genero: string;
+    genero: string | null;
   };
   loading: boolean;
   onBack: () => void;

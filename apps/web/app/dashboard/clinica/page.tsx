@@ -21,7 +21,9 @@ export default function DashboardClinicaPage() {
     // Redirigir automáticamente a la primera clínica si existe
     if (!isLoading && clinics && clinics.length > 0) {
       const firstClinic = clinics[0];
-      router.push(`/dashboard/clinica/${firstClinic.id}`);
+      if (firstClinic) {
+        router.push(`/dashboard/clinica/${firstClinic.id}`);
+      }
     }
   }, [clinics, isLoading, router]);
 

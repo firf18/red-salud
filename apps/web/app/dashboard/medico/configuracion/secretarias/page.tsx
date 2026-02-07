@@ -24,9 +24,7 @@ export default function SecretariasPage() {
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
 
-  useEffect(() => {
-    loadSecretaries();
-  }, [loadSecretaries]);
+
 
   const loadSecretaries = useCallback(async () => {
     try {
@@ -51,6 +49,10 @@ export default function SecretariasPage() {
       setLoading(false);
     }
   }, [supabase, router]);
+
+  useEffect(() => {
+    loadSecretaries();
+  }, [loadSecretaries]);
 
   const handleInviteSecretary = useCallback(async (inviteForm: { email: string; password: string; nombre_completo: string }) => {
     setError(null);

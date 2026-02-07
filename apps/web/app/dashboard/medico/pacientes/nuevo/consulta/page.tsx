@@ -7,6 +7,7 @@ import { VerificationGuard } from "@/components/dashboard/medico/features/verifi
 import { MedicalWorkspace } from "@/components/dashboard/medico/medical-workspace";
 import { QuickRegistrationModal } from "@/components/dashboard/medico/pacientes/quick-registration-modal";
 import { buildPacienteFromParams } from "../_utils/consulta";
+import { OfflinePatient } from "@/components/dashboard/medico/patients/utils";
 
 import { Suspense } from "react";
 
@@ -31,14 +32,22 @@ function ConsultaContent() {
     }
   }, [paciente, router]);
 
-  const handleRegistrationSuccess = (patientId: string, patientData: Record<string, unknown>) => {
+  const handleRegistrationSuccess = (patientId: string, patientData: OfflinePatient) => {
     // Actualizar el estado del paciente con los datos reales de la BD
+    const edad = patientData.fecha_nacimiento && typeof patientData.fecha_nacimiento === 'string'
+      ? calculateAge(patientData.fecha_nacimiento)
+      : null;
+
     setPaciente({
       ...paciente,
       id: patientId,
-      ...patientData,
-      // Asegurar que usamos el formato correcto para MedicalWorkspace
-      edad: patientData.fecha_nacimiento && typeof patientData.fecha_nacimiento === 'string' ? calculateAge(patientData.fecha_nacimiento) : null,
+      cedula: patientData.cedula,
+      nombre_completo: patientData.nombre_completo,
+      genero: patientData.genero || "",
+      fecha_nacimiento: patientData.fecha_nacimiento || undefined,
+      telefono: patientData.telefono || undefined,
+      email: patientData.email || undefined,
+      edad,
     });
     setShowRegistration(false);
   };

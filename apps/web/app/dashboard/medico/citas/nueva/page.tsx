@@ -39,7 +39,7 @@ function NuevaCitaContent() {
   const pacienteParam = searchParams.get("paciente");
 
   const form = useForm<AppointmentFormValues>({
-    resolver: zodResolver(appointmentSchema),
+    resolver: zodResolver(appointmentSchema) as any,
     defaultValues: {
       paciente_id: pacienteParam || "",
       fecha: dateParam ? format(new Date(dateParam), "yyyy-MM-dd") : format(new Date(), "yyyy-MM-dd"),

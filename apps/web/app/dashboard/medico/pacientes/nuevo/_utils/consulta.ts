@@ -3,7 +3,7 @@ export type PacienteParams = {
   cedula: string;
   nombre_completo: string;
   edad: number | null;
-  genero: string;
+  genero: string | null;
   fecha_nacimiento?: string;
   telefono?: string | null;
   email?: string | null;
@@ -22,6 +22,6 @@ export function buildPacienteFromParams(
     cedula,
     nombre_completo: nombre,
     edad,
-    genero,
+    genero: genero || null,
   };
 }

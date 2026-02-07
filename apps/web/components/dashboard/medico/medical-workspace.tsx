@@ -23,7 +23,7 @@ interface MedicalWorkspaceProps {
     cedula: string;
     nombre_completo: string;
     edad: number | null;
-    genero: string;
+    genero: string | null;
   };
   alergias: string[];
   setAlergias: (value: string[]) => void;
@@ -65,7 +65,7 @@ export function MedicalWorkspace({
   // Custom hooks
   const autocomplete = useAutocomplete({ notasMedicas: freeNotesContent });
   const historial = useHistorial(paciente.cedula);
-  
+
   // Análisis de IA separado para cada editor
   const aiAnalysisFreeNotes = useAIAnalysis({
     notasMedicas: freeNotesContent,
@@ -76,7 +76,7 @@ export function MedicalWorkspace({
     diagnosticos,
     setDiagnosticos,
   });
-  
+
   const aiAnalysisStructured = useAIAnalysis({
     notasMedicas: structuredNotesContent,
     paciente,
@@ -86,7 +86,7 @@ export function MedicalWorkspace({
     diagnosticos,
     setDiagnosticos,
   });
-  
+
   // Usar el análisis de IA correspondiente a la pestaña activa
   const currentAIAnalysis = activeTab === "notas" ? aiAnalysisFreeNotes : aiAnalysisStructured;
 
@@ -95,32 +95,33 @@ export function MedicalWorkspace({
 
 
   // Sincronizar con el estado externo solo cuando sea necesario
-  useEffect(() => {
-    if (activeTab === "notas") {
-      setNotasMedicas(freeNotesContent);
-    } else if (activeTab === "estructurado") {
-      setNotasMedicas(structuredNotesContent);
-    }
-  }, [activeTab, freeNotesContent, structuredNotesContent, setNotasMedicas]);
+  // Removed useEffect for syncing state to prevent re-render loops
 
   // Eliminado: useEffect que copiaba contenido entre editores
 
   const handleFreeNotesChange = (value: string) => {
     setFreeNotesContent(value);
     setIsTemplateGenerated(false);
-    // Eliminada la conexión con notasMedicas - ahora es completamente independiente
+    if (activeTab === "notas") {
+      setNotasMedicas(value);
+    }
   };
 
   const handleStructuredNotesChange = (value: string) => {
     setStructuredNotesContent(value);
     setIsTemplateGenerated(true);
-    // Eliminada la conexión con notasMedicas - ahora es completamente independiente
+    if (activeTab === "estructurado") {
+      setNotasMedicas(value);
+    }
   };
 
   const handleTabChange = (value: string) => {
-    // Eliminada toda la lógica de copiado entre editores
-    // Ahora solo cambia la pestaña activa sin modificar contenido
     setActiveTab(value);
+    if (value === "notas") {
+      setNotasMedicas(freeNotesContent);
+    } else if (value === "estructurado") {
+      setNotasMedicas(structuredNotesContent);
+    }
   };
 
   const handleSave = () => {

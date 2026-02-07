@@ -12,6 +12,7 @@ import {
   TrendingUp,
   Calendar,
   Filter,
+  DollarSign,
 } from "lucide-react";
 import { Button } from "@red-salud/ui";
 import { Input } from "@red-salud/ui";
@@ -250,7 +251,7 @@ export default function FidelizacionPage() {
                           <div className="flex items-center gap-2">
                             <DollarSign className="h-4 w-4 text-green-600" />
                             <span className="font-medium">
-                              ${cliente.total_compras.toFixed(2)}
+                              ${(cliente.total_compras || 0).toFixed(2)}
                             </span>
                           </div>
                         </TableCell>
@@ -259,8 +260,8 @@ export default function FidelizacionPage() {
                             <Calendar className="h-4 w-4 text-muted-foreground" />
                             {cliente.fecha_ultima_compra
                               ? new Date(cliente.fecha_ultima_compra).toLocaleDateString(
-                                  "es-VE"
-                                )
+                                "es-VE"
+                              )
                               : "N/A"}
                           </div>
                         </TableCell>

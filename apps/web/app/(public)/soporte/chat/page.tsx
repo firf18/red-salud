@@ -310,7 +310,7 @@ export default function ChatPage() {
 
   // Guardar historial cuando cambia
   useEffect(() => {
-    if (messages.length > 0 && messages[0].id !== "welcome") {
+    if (messages.length > 0 && messages[0]?.id !== "welcome") {
       saveHistory(messages);
     }
   }, [messages]);
@@ -440,7 +440,7 @@ export default function ChatPage() {
         setMessages((prev) => {
           const newMessages = [...prev];
           const lastMessage = newMessages[newMessages.length - 1];
-          if (lastMessage.role === "model") {
+          if (lastMessage && lastMessage.role === "model") {
             lastMessage.content = accumulatedText;
           }
           return newMessages;

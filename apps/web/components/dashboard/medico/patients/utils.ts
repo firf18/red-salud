@@ -35,6 +35,7 @@ export type RegisteredPatient = {
     fecha_nacimiento: string | null;
     genero: string | null;
     telefono: string | null;
+    cedula: string | null;
   };
 };
 

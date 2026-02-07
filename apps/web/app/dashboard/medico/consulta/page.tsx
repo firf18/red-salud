@@ -46,6 +46,9 @@ export default function ConsultaPage() {
           ...(registeredResult.data?.map((rp) => {
             const patient = rp.patient as { id: string; nombre_completo: string; email: string; cedula?: string } | { id: string; nombre_completo: string; email: string; cedula?: string }[];
             const patientData = Array.isArray(patient) ? patient[0] : patient;
+
+            if (!patientData) return null;
+
             return {
               id: patientData.id,
               nombre_completo: patientData.nombre_completo,
@@ -53,7 +56,7 @@ export default function ConsultaPage() {
               cedula: patientData.cedula || null,
               type: "registered" as const,
             };
-          }) || []),
+          }).filter(Boolean) as PatientOption[] || []),
           ...(offlineResult.data?.map((op) => ({
             id: op.id,
             nombre_completo: op.nombre_completo,

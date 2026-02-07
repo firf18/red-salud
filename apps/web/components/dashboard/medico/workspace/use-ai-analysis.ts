@@ -11,7 +11,7 @@ interface UseAIAnalysisProps {
   notasMedicas: string;
   paciente: {
     edad: number | null;
-    genero: string;
+    genero: string | null;
   };
   alergias: string[];
   condicionesCronicas: string[];
@@ -61,7 +61,7 @@ export function useAIAnalysis({
       if (data.success) {
         setAiAnalysis(data.data);
         setShowRecommendations(true);
-        
+
         if (data.data.diagnosticosSugeridos && data.data.diagnosticosSugeridos.length > 0) {
           const nuevosDiagnosticos = data.data.diagnosticosSugeridos.filter(
             (d: string) => !diagnosticos.includes(d)

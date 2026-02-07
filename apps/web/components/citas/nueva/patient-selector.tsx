@@ -15,12 +15,18 @@ interface Patient {
 
 interface PatientSelectorProps {
     patients: Patient[];
-    loadingPatients: boolean;
+    loadingPatients?: boolean;
+    selectedPatientId?: string;
+    onPatientSelect?: (id: string) => void;
 }
 
-export function PatientSelector({ patients }: PatientSelectorProps) {
-    const { setValue, watch } = useFormContext();
-    const pacienteId = watch("paciente_id");
+export function PatientSelector({ patients, selectedPatientId, onPatientSelect }: PatientSelectorProps) {
+    const formContext = useFormContext();
+    const pacienteId = selectedPatientId ?? (formContext ? formContext.watch("paciente_id") : "");
+    const setValue = (name: string, value: any) => {
+        if (formContext) formContext.setValue(name, value);
+        if (name === "paciente_id" && onPatientSelect) onPatientSelect(value);
+    };
     const [cedulaInput, setCedulaInput] = useState("");
     const [nacionalidad, setNacionalidad] = useState("V");
     const [loading, setLoading] = useState(false);

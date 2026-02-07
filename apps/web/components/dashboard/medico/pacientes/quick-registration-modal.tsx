@@ -8,18 +8,9 @@ import { Label } from "@red-salud/ui";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@red-salud/ui";
 import { Loader2 } from "lucide-react";
 import { supabase } from "@/lib/supabase/client";
+import { OfflinePatient } from "@/components/dashboard/medico/patients/utils";
 
-interface OfflinePatient {
-  id: string;
-  doctor_id: string;
-  cedula: string;
-  nombre_completo: string;
-  genero?: string;
-  fecha_nacimiento?: string;
-  telefono?: string;
-  email?: string;
-  status: string;
-}
+
 
 interface QuickRegistrationModalProps {
   open: boolean;

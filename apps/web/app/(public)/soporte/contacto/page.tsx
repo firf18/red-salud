@@ -24,7 +24,9 @@ import { Label } from "@red-salud/ui";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@red-salud/ui";
 import { CONTACT_INFO, ROUTES } from "@/lib/constants";
 import { cn } from "@red-salud/core/utils";
+import { toast } from "sonner";
 import Link from "next/link";
+import { supportService } from "@/lib/supabase/services/support-service";
 
 const contactMethods = [
   {
@@ -447,7 +449,8 @@ export default function ContactoPage() {
             >
               {contactMethods.map((method) => {
                 const Icon = method.icon;
-                const colors = colorClasses[method.color];
+                const defaultColor = { bg: "bg-blue-100 dark:bg-blue-900/30", text: "text-blue-600 dark:text-blue-400" };
+                const colors = colorClasses[method.color] || defaultColor;
                 return (
                   <Card
                     key={method.title}

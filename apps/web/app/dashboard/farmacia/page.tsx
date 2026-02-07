@@ -18,7 +18,7 @@ import { cn } from "@red-salud/core/utils";
 interface KPICardProps {
   title: string;
   value: string | number;
-  icon: React.ElementType;
+  icon: any;
   trend?: string;
   color: string;
 }
@@ -91,7 +91,7 @@ export default function DashboardFarmaciaPage() {
       const ventasMes = salesData.data?.metrics?.total_sales_usd || 0; // Would need separate query for month
       const productosBajos = inventoryData.data?.metrics?.low_stock_count || 0;
       const productosVencidos = inventoryData.data?.metrics?.expiring_soon_count || 0;
-      
+
       // Mock data for other KPIs (would need proper endpoints)
       const recetasPendientes = 0;
       const clientesActivos = 0;
@@ -116,7 +116,7 @@ export default function DashboardFarmaciaPage() {
 
       // Generate alerts from inventory data
       const alertasGeneradas: AlertItem[] = [];
-      
+
       if (productosVencidos > 0) {
         alertasGeneradas.push({
           id: 'alert-1',
@@ -125,7 +125,7 @@ export default function DashboardFarmaciaPage() {
           prioridad: 'critica',
         });
       }
-      
+
       if (productosBajos > 0) {
         alertasGeneradas.push({
           id: 'alert-2',
@@ -273,13 +273,12 @@ export default function DashboardFarmaciaPage() {
                   {alertas.map((alerta) => (
                     <div
                       key={alerta.id}
-                      className={`p-3 rounded-lg border ${
-                        alerta.prioridad === "critica"
+                      className={`p-3 rounded-lg border ${alerta.prioridad === "critica"
                           ? "bg-red-50 border-red-200"
                           : alerta.prioridad === "alta"
-                          ? "bg-yellow-50 border-yellow-200"
-                          : "bg-blue-50 border-blue-200"
-                      }`}
+                            ? "bg-yellow-50 border-yellow-200"
+                            : "bg-blue-50 border-blue-200"
+                        }`}
                     >
                       <p className="font-medium">{alerta.titulo}</p>
                       <p className="text-sm text-muted-foreground">

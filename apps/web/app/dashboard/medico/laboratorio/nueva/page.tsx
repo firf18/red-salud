@@ -91,13 +91,15 @@ export default function NewLabOrderPage() {
             id: p.patient_id,
             nombre_completo: p.patient.nombre_completo,
             email: p.patient.email,
-            type: 'registered'
+            cedula: p.patient.cedula || null,
+            type: 'registered' as const
         })),
         ...patientsState.offlinePatients.map(p => ({
             id: p.id,
             nombre_completo: p.nombre_completo,
             cedula: p.cedula,
-            type: 'offline'
+            email: p.email || null,
+            type: 'offline' as const
         }))
     ];
 

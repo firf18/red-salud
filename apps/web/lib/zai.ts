@@ -1,4 +1,5 @@
 import OpenAI from "openai";
+import { Stream } from "openai/streaming";
 
 /**
  * Z.ai Client Wrapper using OpenAI-compatible SDK
@@ -19,12 +20,29 @@ export const ZAI_MODEL = "glm-4.7";
 /**
  * Helper to generate chat completions with streaming
  */
-export async function createZaiChatCompletion(messages: OpenAI.Chat.Completions.ChatCompletionMessageParam[], stream = true) {
+export async function createZaiChatCompletion(
+    messages: OpenAI.Chat.Completions.ChatCompletionMessageParam[]
+): Promise<Stream<OpenAI.Chat.Completions.ChatCompletionChunk>>;
+
+export async function createZaiChatCompletion(
+    messages: OpenAI.Chat.Completions.ChatCompletionMessageParam[],
+    stream: true
+): Promise<Stream<OpenAI.Chat.Completions.ChatCompletionChunk>>;
+
+export async function createZaiChatCompletion(
+    messages: OpenAI.Chat.Completions.ChatCompletionMessageParam[],
+    stream: false
+): Promise<OpenAI.Chat.Completions.ChatCompletion>;
+
+export async function createZaiChatCompletion(
+    messages: OpenAI.Chat.Completions.ChatCompletionMessageParam[],
+    stream: boolean = true
+) {
     return zai.chat.completions.create({
         model: ZAI_MODEL,
         messages,
         stream,
         temperature: 0.7,
         max_tokens: 1500,
-    });
+    }) as any;
 }
