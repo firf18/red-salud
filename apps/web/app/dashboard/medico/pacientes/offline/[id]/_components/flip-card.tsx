@@ -30,7 +30,7 @@ export function FlipCard({ front, back, className }: FlipCardProps) {
                 className="relative h-full w-full cursor-pointer"
                 initial={false}
                 animate={{ rotateY: isFlipped ? 180 : 0 }}
-                transition={{ duration: 0.6, animationDirection: "normal" }}
+                transition={{ duration: 0.6 }}
                 onAnimationComplete={() => setIsAnimating(false)}
                 style={{ transformStyle: "preserve-3d" }}
             >
