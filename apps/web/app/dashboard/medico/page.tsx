@@ -6,22 +6,20 @@ import { motion } from "framer-motion";
 import {
   Activity,
   Star,
-  Sparkles,
   AlertCircle,
   Clock,
   CircleHelp,
   Crown,
   MessageCircle,
+  Sparkles,
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@red-salud/ui";
 import { Button } from "@red-salud/ui";
 import { Alert, AlertDescription } from "@red-salud/ui";
 import { useDoctorProfile } from "@/hooks/use-doctor-profile";
 import { useDashboardWidgets } from "@/hooks/use-dashboard-widgets";
-import { useTourGuide } from "@/components/dashboard/shared/tour-guide/tour-guide-provider";
 import { supabase } from "@/lib/supabase/client";
 import { fadeInUp, staggerContainer } from "@/lib/animations";
-import { DashboardWidgetGrid } from "@/components/dashboard/medico/dashboard";
 import { DashboardV2 } from "@/components/dashboard/medico/dashboard-v2/DashboardV2";
 import { ThemeToggle } from "@red-salud/ui";
 import { useCurrentOffice } from "@/hooks/use-current-office";
@@ -35,21 +33,15 @@ export default function DoctorDashboardPage() {
   const { profile, loading } = useDoctorProfile(
     userId || undefined
   );
-  const { startTour } = useTourGuide();
 
   // Dashboard widgets state - necesita userId para persistir en Supabase
   const {
     currentMode,
     setMode,
-    getWidgetPositions,
-    saveLayout,
-    resetLayout,
-    toggleWidgetVisibility,
-    state,
   } = useDashboardWidgets(userId || undefined);
 
   // Current office state
-  const { currentOffice, allOffices, updateCurrentOffice } = useCurrentOffice();
+  const { currentOffice, updateCurrentOffice } = useCurrentOffice();
 
   // Si no hay perfil de médico, necesita completar setup
   const needsSetup = !loading && !profile && !!userId;

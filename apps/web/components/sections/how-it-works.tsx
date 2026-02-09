@@ -7,7 +7,7 @@
 "use client";
 
 import { useRef } from "react";
-import { motion, useScroll, useTransform, useSpring, useInView } from "framer-motion";
+import { motion, useScroll, useSpring } from "framer-motion";
 import { UserCircle, Settings, Share2, ArrowRight, Sparkles, CheckCircle2 } from "lucide-react";
 import { cn } from "@red-salud/core/utils";
 import { Button } from "@red-salud/ui";
@@ -135,9 +135,8 @@ export function HowItWorksSection() {
   );
 }
 
-function StepCard({ step, index }: { step: typeof steps[0], index: number }) {
+function StepCard({ step }: { step: typeof steps[0] }) {
   const ref = useRef(null);
-  const isInView = useInView(ref, { margin: "-20% 0px -20% 0px" });
 
   return (
     <motion.div

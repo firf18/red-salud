@@ -3,10 +3,8 @@
 import { useEffect, useState } from "react";
 import { useRouter, useParams } from "next/navigation";
 import { supabase } from "@/lib/supabase/client";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@red-salud/ui";
+import { Card, CardContent, CardHeader, CardTitle } from "@red-salud/ui";
 import { Button } from "@red-salud/ui";
-import { Badge } from "@red-salud/ui";
-import { Separator } from "@red-salud/ui";
 import Image from "next/image";
 import { useMedicalRecord } from "@/hooks/use-medical-records";
 import {
@@ -23,7 +21,6 @@ import {
 import Link from "next/link";
 
 export default function DetalleRegistroMedicoPage() {
-  const [userId, setUserId] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const router = useRouter();
   const params = useParams();
@@ -42,7 +39,6 @@ export default function DetalleRegistroMedicoPage() {
         return;
       }
 
-      setUserId(user.id);
       setLoading(false);
     };
 

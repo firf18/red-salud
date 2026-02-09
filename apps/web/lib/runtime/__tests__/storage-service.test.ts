@@ -11,10 +11,8 @@
  * Validates: Requirements 2.4
  */
 
-import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
+import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import { RuntimeServiceImpl } from '../runtime-service';
-import { TauriStorageService } from '../services/tauri-storage-service';
-import { WebStorageService } from '../services/web-storage-service';
 import type { StorageService } from '../types';
 
 describe('Storage Service Edge Cases', () => {
@@ -30,7 +28,7 @@ describe('Storage Service Edge Cases', () => {
   afterEach(async () => {
     try {
       await storageService.clear();
-    } catch (error) {
+    } catch {
       // Ignore cleanup errors
     }
   });

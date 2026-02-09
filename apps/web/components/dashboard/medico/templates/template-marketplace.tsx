@@ -1,11 +1,11 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Button } from "@red-salud/ui";
 import { Input } from "@red-salud/ui";
 import { Badge } from "@red-salud/ui";
 import { ScrollArea } from "@red-salud/ui";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@red-salud/ui";
+import { Tabs, TabsList, TabsTrigger } from "@red-salud/ui";
 import {
   Dialog,
   DialogContent,
@@ -36,7 +36,7 @@ interface TemplateMarketplaceProps {
   userId: string;
 }
 
-const iconMap: Record<string, any> = {
+const iconMap: Record<string, React.ComponentType<{ className?: string }>> = {
   FileText,
   Stethoscope,
   Activity,
@@ -52,16 +52,10 @@ export function TemplateMarketplace({
 }: TemplateMarketplaceProps) {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState<string>("all");
-  const [favorites, setFavorites] = useState<string[]>([]);
+  const [favorites, setFavorites] = useState<string[]>(() => 
+    getFavoriteTemplates(userId)
+  );
   const [previewTemplate, setPreviewTemplate] = useState<MedicalTemplate | null>(null);
-  const [templates, setTemplates] = useState<MedicalTemplate[]>(OFFICIAL_TEMPLATES);
-
-  useEffect(() => {
-    if (open) {
-      const userFavorites = getFavoriteTemplates(userId);
-      setFavorites(userFavorites);
-    }
-  }, [open, userId]);
 
   const handleToggleFavorite = (templateId: string) => {
     toggleFavorite(userId, templateId);
@@ -69,7 +63,7 @@ export function TemplateMarketplace({
     setFavorites(userFavorites);
   };
 
-  const filteredTemplates = templates.filter((template) => {
+  const filteredTemplates = OFFICIAL_TEMPLATES.filter((template) => {
     const matchesSearch =
       template.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
       template.description.toLowerCase().includes(searchQuery.toLowerCase()) ||

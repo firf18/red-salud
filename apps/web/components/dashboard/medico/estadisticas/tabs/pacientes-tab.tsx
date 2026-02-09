@@ -14,7 +14,6 @@ import { BarChartCard } from "@/components/common/charts/bar-chart-card";
 import { DonutChartCard } from "@/components/common/charts/donut-chart-card";
 import { AreaChartCard } from "@/components/common/charts/area-chart-card";
 import { format, subMonths } from "date-fns";
-import { es } from "date-fns/locale";
 import * as XLSX from "xlsx";
 import { saveAs } from "file-saver";
 
@@ -75,9 +74,9 @@ export const PacientesTab = forwardRef<PacientesTabRef, PacientesTabProps>(
         const rawAppointments = appointmentsValue || [];
 
         // Transformar datos a nombres esperados por el componente
-        const appointments = rawAppointments.map(apt => {
-          const p = apt.paciente as any;
-          const op = apt.offline_paciente as any;
+        const appointments = rawAppointments.map((apt: Record<string, unknown>) => {
+          const p = apt.paciente as Record<string, unknown> | null;
+          const op = apt.offline_paciente as Record<string, unknown> | null;
 
           return {
             patient_id: apt.paciente_id || apt.offline_patient_id,
@@ -124,10 +123,15 @@ export const PacientesTab = forwardRef<PacientesTabRef, PacientesTabProps>(
 
         // 2. Distribución por Edad
         const ageRanges = ["0-17", "18-30", "31-45", "46-60", "61+"];
+        interface AgeRangeData {
+          rango: string;
+          Masculino: number;
+          Femenino: number;
+        }
         const porEdadMap = ageRanges.reduce((acc, range) => {
           acc[range] = { rango: range, Masculino: 0, Femenino: 0 };
           return acc;
-        }, {} as Record<string, any>);
+        }, {} as Record<string, AgeRangeData>);
 
         let sumaEdades = 0;
         let countEdades = 0;
@@ -374,7 +378,15 @@ ${stats.porEdad.map((e) => `- ${e.rango}: M=${e.Masculino}, F=${e.Femenino}`).jo
 
 PacientesTab.displayName = "PacientesTab"; // Recommended for forwardRef
 
-function KPICard({ title, value, icon: Icon, subtext, color }: any) {
+interface KPICardProps {
+  title: string;
+  value: string | number;
+  icon: React.ComponentType<{ className?: string }>;
+  subtext?: string;
+  color: string;
+}
+
+function KPICard({ title, value, icon: Icon, subtext, color }: KPICardProps) {
   const colorClasses: Record<string, string> = {
     blue: "bg-blue-50 text-blue-600 dark:bg-blue-900/20 dark:text-blue-400",
     green: "bg-green-50 text-green-600 dark:bg-green-900/20 dark:text-green-400",

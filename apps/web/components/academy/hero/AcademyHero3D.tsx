@@ -1,11 +1,11 @@
 "use client";
 
-import { useRef, useMemo, useState } from "react";
+import { useRef, useMemo } from "react";
 import { Canvas, useFrame } from "@react-three/fiber";
 import { Points, PointMaterial, Float, Sparkles } from "@react-three/drei";
 import * as THREE from "three";
 
-function DNAHelix(props: any) {
+function DNAHelix(props: React.ComponentProps<'group'>) {
     const ref = useRef<THREE.Points>(null);
 
     // Generate DNA Helix points
@@ -79,11 +79,7 @@ function DNAHelix(props: any) {
     );
 }
 
-function ConnectingLines() {
-    // Represent bonds between strands? Maybe too complex visuals for now.
-    // Let's stick to particles for a cleaner, modern look.
-    return null;
-}
+
 
 export default function AcademyHero3D() {
     return (

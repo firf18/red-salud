@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import Image from "next/image";
 import { motion } from "framer-motion";
 import { Card } from "@red-salud/ui";
 import { Button } from "@red-salud/ui";
@@ -396,9 +397,11 @@ Recuerda citar fuentes cuando sea necesario."
               />
               {post.cover_image && (
                 <div className="mt-3 relative">
-                  <img
+                  <Image
                     src={post.cover_image}
                     alt="Preview"
+                    width={400}
+                    height={128}
                     className="w-full h-32 object-cover rounded-lg"
                   />
                   <button

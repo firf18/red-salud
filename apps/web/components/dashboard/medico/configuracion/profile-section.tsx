@@ -18,7 +18,6 @@ import {
   Save,
   Loader2,
   Lock,
-  X,
   Sparkles,
   CheckCircle,
   AlertCircle,
@@ -164,7 +163,7 @@ export function ProfileSection({ className }: ProfileSectionProps) {
       if (!user) throw new Error("No hay usuario autenticado");
 
       // Actualizar perfil básico (sin nombre ni cédula si está verificado)
-      const profileUpdate: Record<string, any> = {
+      const profileUpdate: Record<string, string | boolean> = {
         telefono: profile.telefono,
       };
 

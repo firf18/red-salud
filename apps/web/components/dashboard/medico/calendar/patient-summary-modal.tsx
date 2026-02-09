@@ -5,7 +5,6 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@red-salud/ui"
 import { Button } from "@red-salud/ui";
 import { Badge } from "@red-salud/ui";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@red-salud/ui";
-import { Card, CardContent, CardHeader, CardTitle } from "@red-salud/ui";
 import { Avatar, AvatarFallback, AvatarImage } from "@red-salud/ui";
 import {
   User,
@@ -77,7 +76,7 @@ export function PatientSummaryModal({
   const [loading, setLoading] = useState(true);
   const [patientData, setPatientData] = useState<PatientData | null>(null);
   const [medicalHistory, setMedicalHistory] = useState<MedicalHistory | null>(null);
-  const [appointmentHistory, setAppointmentHistory] = useState<any[]>([]);
+  const [appointmentHistory, setAppointmentHistory] = useState<Array<{ id: string; fecha: string; tipo_cita: string; estado: string }>>([]);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -205,7 +204,7 @@ export function PatientSummaryModal({
 
         if (records && records.length > 0) {
           const diagnosticosMap = new Map<string, number>();
-          records.forEach((record: any) => {
+          records.forEach((record: { diagnostico?: string }) => {
             if (record.diagnostico) {
               diagnosticosMap.set(
                 record.diagnostico,
@@ -605,7 +604,7 @@ export function PatientSummaryModal({
                               )}
                               {apt.notas_internas && (
                                 <p className="text-xs text-gray-500 mt-1 italic">
-                                  "{apt.notas_internas.substring(0, 80)}{apt.notas_internas.length > 80 ? "..." : ""}"
+                                  &ldquo;{apt.notas_internas.substring(0, 80)}{apt.notas_internas.length > 80 ? "..." : ""}&rdquo;
                                 </p>
                               )}
                             </div>

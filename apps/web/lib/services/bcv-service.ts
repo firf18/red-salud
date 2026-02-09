@@ -26,7 +26,6 @@ export class BCVService {
 
         if (latestDB) {
             const dbDate = new Date(latestDB.created_at).toISOString().split('T')[0];
-            const hoursDiff = (new Date().getTime() - new Date(latestDB.created_at).getTime()) / (1000 * 60 * 60);
 
             // Criteria: Same day AND less than 4 hours old (BCV updates morning/afternoon)
             // Or just "same day" is usually enough for BCV which doesn't change every minute.

@@ -10,19 +10,15 @@
 
 "use client";
 
-import { motion } from "framer-motion";
 import { Label } from "@red-salud/ui";
 import { usePreferences } from "@/lib/contexts/preferences-context";
-import { useI18n } from "@/hooks/use-i18n";
 import {
     Moon,
     Sun,
     Globe,
     Bell,
-    Mail,
     MessageSquare,
-    Palette,
-    Clock
+    Palette
 } from "lucide-react";
 
 /**
@@ -31,7 +27,6 @@ import {
  */
 export function PreferencesSection() {
     const { preferences, updatePreference } = usePreferences();
-    const { t } = useI18n();
 
     // Determina el tema actual, resolviendo "system" al tema real
     const theme = preferences.theme === "system"

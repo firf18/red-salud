@@ -30,8 +30,8 @@ export async function GET(request: NextRequest) {
 
     // Count doctors per specialty
     const specialtyCountMap = new Map<string, number>();
-    doctorSpecialties?.forEach((item: { specialties: any }) => {
-      const specialty = item.specialties;
+    doctorSpecialties?.forEach((item: { specialties: Specialty[] | Specialty }) => {
+      const specialty = Array.isArray(item.specialties) ? item.specialties[0] : item.specialties;
       if (specialty && specialty.active) {
         const count = specialtyCountMap.get(specialty.id) || 0;
         specialtyCountMap.set(specialty.id, count + 1);
@@ -50,8 +50,8 @@ export async function GET(request: NextRequest) {
     // Build response with doctor counts
     const specialties = Array.from(specialtyCountMap.entries()).map(([id, count]) => {
       // Force cast to unknown then Specialty to handle potential array/object mismatch from Supabase inference
-      const foundItem = doctorSpecialties?.find((item: { specialties: any }) => {
-        const s = item.specialties as any;
+      const foundItem = doctorSpecialties?.find((item: { specialties: Specialty[] | Specialty }) => {
+        const s = item.specialties;
         return (Array.isArray(s) ? s[0]?.id : s?.id) === id;
       });
 

@@ -2,6 +2,7 @@
 
 import { Check } from "lucide-react";
 import { cn } from "@red-salud/core/utils";
+import Image from "next/image";
 import type { PrescriptionFrame } from "@/lib/supabase/types/settings";
 
 interface FrameSelectorProps {
@@ -66,9 +67,8 @@ export function FrameSelector({
                                     : "border-transparent hover:border-primary/50"
                             )}
                         >
-                            <img
+                            <Image
                                 alt={frame.name}
-                                loading="lazy"
                                 width={200}
                                 height={258}
                                 className="object-cover w-full h-full"

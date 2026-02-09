@@ -23,7 +23,7 @@ export interface LessonState {
     answers: Array<{
         questionId: string;
         isCorrect: boolean;
-        answer: any;
+        answer: unknown;
     }>;
     /** Vidas restantes */
     lives: number;

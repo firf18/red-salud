@@ -9,12 +9,10 @@
 
 "use client";
 
-import React, { useState, useRef, useEffect, useCallback } from "react";
+import React, { useState, useRef, useEffect, useCallback, useMemo } from "react";
 import { Search, X, ArrowRight, Activity, ChevronRight, Stethoscope } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@red-salud/core/utils";
-import Link from "next/link";
-import { slugify } from "@red-salud/core/utils";
 
 interface Specialty {
     id: string;
@@ -34,53 +32,23 @@ export function SpecialtySearch({
     items,
     onSelect,
     onClear,
-    row1Items,
-    row2Items,
 }: SpecialtySearchProps) {
     const [isExpanded, setIsExpanded] = useState(false);
     const [query, setQuery] = useState("");
-    const [results, setResults] = useState<Specialty[]>([]);
     const [selectedIndex, setSelectedIndex] = useState(0);
-    const [ghostText, setGhostText] = useState("");
 
     const containerRef = useRef<HTMLDivElement>(null);
     const inputRef = useRef<HTMLInputElement>(null);
     const listRef = useRef<HTMLUListElement>(null);
 
-    const handleCollapse = useCallback(() => {
-        setIsExpanded(false);
-        setQuery("");
-        setResults([]);
-        setGhostText("");
-        onClear();
-    }, [onClear]);
-
-    // Cerrar al hacer clic fuera
-    useEffect(() => {
-        const handleClickOutside = (event: MouseEvent) => {
-            if (
-                containerRef.current &&
-                !containerRef.current.contains(event.target as Node)
-            ) {
-                handleCollapse();
-            }
-        };
-        document.addEventListener("mousedown", handleClickOutside);
-        return () => document.removeEventListener("mousedown", handleClickOutside);
-    }, [handleCollapse]);
-
-    // Filtrar resultados y generar Ghost Text
-    useEffect(() => {
+    // Memoize filtered results and ghost text instead of setState in effect
+    const { results, ghostText } = useMemo(() => {
         if (!query.trim()) {
-            setResults([]);
-            setSelectedIndex(0);
-            setGhostText("");
-            return;
+            return { results: [], ghostText: "" };
         }
 
         const normalizedQuery = query.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
 
-        // Algoritmo de búsqueda
         // Algoritmo de búsqueda mejorado: Inicio de palabra
         const filtered = items
             .filter((item) => {
@@ -102,24 +70,31 @@ export function SpecialtySearch({
                 return a.name.localeCompare(b.name);
             });
 
-        setResults(filtered);
-        setSelectedIndex(0);
-
-        // Calcular Ghost Text
-        if (filtered.length > 0) {
-            const topMatch = filtered[0].name;
-            const normalizedTop = topMatch.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
-
-            if (normalizedTop.startsWith(normalizedQuery)) {
-                const matchSuffix = topMatch.slice(query.length);
-                setGhostText(query + matchSuffix);
-            } else {
-                setGhostText("");
-            }
-        } else {
-            setGhostText("");
-        }
+        const text = filtered.length > 0 ? (filtered[0]?.name || "").substring(normalizedQuery.length) : "";
+        
+        return { results: filtered, ghostText: text };
     }, [query, items]);
+
+    const handleCollapse = useCallback(() => {
+        setIsExpanded(false);
+        setQuery("");
+        setSelectedIndex(0);
+        onClear();
+    }, [onClear]);
+
+    // Cerrar al hacer clic fuera
+    useEffect(() => {
+        const handleClickOutside = (event: MouseEvent) => {
+            if (
+                containerRef.current &&
+                !containerRef.current.contains(event.target as Node)
+            ) {
+                handleCollapse();
+            }
+        };
+        document.addEventListener("mousedown", handleClickOutside);
+        return () => document.removeEventListener("mousedown", handleClickOutside);
+    }, [handleCollapse]);
 
     // Scroll automático al item seleccionado
     useEffect(() => {
@@ -146,7 +121,7 @@ export function SpecialtySearch({
         (id: string): 1 | 2 => {
             return row1Items.some((item) => item.id === id) ? 1 : 2;
         },
-        [row1Items]
+        []
     );
 
     const handleSelectItem = (item: Specialty) => {
@@ -179,7 +154,7 @@ export function SpecialtySearch({
             setSelectedIndex((prev) => Math.max(prev - 1, 0));
         } else if (e.key === "Enter") {
             e.preventDefault();
-            handleSelectItem(results[selectedIndex]);
+            handleSelectItem(results[selectedIndex]!);
         }
     };
 

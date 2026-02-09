@@ -7,13 +7,13 @@
  * This is a stub implementation - will be fully implemented in Task 12.
  */
 
-import type { NotificationService, NotificationData } from '../types';
+import type { NotificationService } from '../types';
 
 export class WebNotificationService implements NotificationService {
   /**
    * Show a notification
    */
-  async show(_notification: NotificationData): Promise<void> {
+  async show(): Promise<void> {
     // TODO: Implement in Task 12
     throw new Error('Notification show not yet implemented');
   }
@@ -21,7 +21,7 @@ export class WebNotificationService implements NotificationService {
   /**
    * Schedule a notification for later
    */
-  async schedule(_notification: NotificationData, _delay: number): Promise<string> {
+  async schedule(): Promise<string> {
     // TODO: Implement in Task 12
     throw new Error('Notification scheduling not yet implemented');
   }
@@ -29,7 +29,7 @@ export class WebNotificationService implements NotificationService {
   /**
    * Cancel a scheduled notification
    */
-  async cancel(_notificationId: string): Promise<void> {
+  async cancel(): Promise<void> {
     // TODO: Implement in Task 12
     throw new Error('Notification cancellation not yet implemented');
   }

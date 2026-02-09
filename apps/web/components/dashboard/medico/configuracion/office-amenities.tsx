@@ -3,7 +3,6 @@
 import { OFFICE_AMENITIES } from "@/lib/data/office-options";
 import { Checkbox } from "@red-salud/ui";
 import { Label } from "@red-salud/ui";
-import { motion } from "framer-motion";
 
 interface OfficeAmenitiesProps {
     value: Record<string, boolean> | undefined;

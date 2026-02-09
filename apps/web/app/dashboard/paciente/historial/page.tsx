@@ -21,7 +21,6 @@ import {
   Pill,
   Activity,
   Download,
-  Filter,
   TrendingUp,
 } from "lucide-react";
 import Link from "next/link";

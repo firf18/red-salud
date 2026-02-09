@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { createClient } from "@supabase/supabase-js";
 import { Loader2 } from "lucide-react";
@@ -11,11 +11,7 @@ export default function CallbackPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    handleOAuthCallback();
-  }, []);
-
-  const handleOAuthCallback = async () => {
+  const handleOAuthCallback = useCallback(async () => {
     try {
       const action = searchParams.get("action");
       const role = searchParams.get("role");
@@ -67,7 +63,11 @@ export default function CallbackPage() {
       setError("Error al procesar el inicio de sesión con Google. Intenta nuevamente.");
       setLoading(false);
     }
-  };
+  }, [router, searchParams]);
+
+  useEffect(() => {
+    handleOAuthCallback();
+  }, [handleOAuthCallback]);
 
   if (loading) {
     return (

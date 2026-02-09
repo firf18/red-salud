@@ -1,9 +1,9 @@
 
 "use client";
 
-import { useState } from "react";
+import { useState, useMemo, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { ArrowRight, CheckCircle2, XCircle, Heart } from "lucide-react";
+import { CheckCircle2, XCircle, Heart } from "lucide-react";
 import { Button } from "@red-salud/ui";
 import Link from "next/link";
 import { LessonContent, Question } from "@/types/academy";
@@ -13,6 +13,12 @@ interface LessonRunnerProps {
     onComplete: () => void;
 }
 
+const formatAnswer = (answer: string | string[] | { [key: string]: string }) => {
+    if (typeof answer === 'string') return answer;
+    if (Array.isArray(answer)) return answer.join(', ');
+    return Object.values(answer).join(', ');
+};
+
 export function LessonRunner({ lesson, onComplete }: LessonRunnerProps) {
     const [currentIndex, setCurrentIndex] = useState(0);
     const [selectedOption, setSelectedOption] = useState<string | null>(null);
@@ -21,17 +27,26 @@ export function LessonRunner({ lesson, onComplete }: LessonRunnerProps) {
     const [lives, setLives] = useState(5);
 
     // Flatten content and questions into a single "slides" array
-    // For this simple version, we assume the lesson has optional initial content 
-    // followed by questions.
-    const slides = [
-        ...(lesson.content ? [{ type: 'content', data: lesson.content, title: lesson.title }] : []),
-        ...(lesson.questions || []).map(q => ({ type: 'question', data: q }))
-    ];
+    const slides = useMemo(() => [
+        ...(lesson.content ? [{ type: 'content' as const, data: lesson.content, title: lesson.title }] : []),
+        ...(lesson.questions || []).map(q => ({ type: 'question' as const, data: q }))
+    ], [lesson.content, lesson.questions, lesson.title]);
 
     const currentSlide = slides[currentIndex];
     const progress = ((currentIndex) / slides.length) * 100;
 
-    const handleCheck = () => {
+    const nextSlide = useCallback(() => {
+        if (currentIndex < slides.length - 1) {
+            setCurrentIndex(prev => prev + 1);
+            setSelectedOption(null);
+            setIsChecked(false);
+            setIsCorrect(false);
+        } else {
+            onComplete();
+        }
+    }, [currentIndex, slides.length, onComplete]);
+
+    const handleCheck = useCallback(() => {
         if (!currentSlide || currentSlide.type !== 'question') {
             nextSlide();
             return;
@@ -46,18 +61,7 @@ export function LessonRunner({ lesson, onComplete }: LessonRunnerProps) {
         if (!correct) {
             setLives(prev => Math.max(0, prev - 1));
         }
-    };
-
-    const nextSlide = () => {
-        if (currentIndex < slides.length - 1) {
-            setCurrentIndex(prev => prev + 1);
-            setSelectedOption(null);
-            setIsChecked(false);
-            setIsCorrect(false);
-        } else {
-            onComplete();
-        }
-    };
+    }, [currentSlide, nextSlide, selectedOption]);
 
     if (!currentSlide) return <div>Lesson Loading...</div>;
 
@@ -104,7 +108,6 @@ export function LessonRunner({ lesson, onComplete }: LessonRunnerProps) {
                                 selectedOption={selectedOption}
                                 onSelect={!isChecked ? setSelectedOption : () => { }}
                                 isChecked={isChecked}
-                                isCorrect={isCorrect}
                             />
                         )}
                     </motion.div>
@@ -126,7 +129,7 @@ export function LessonRunner({ lesson, onComplete }: LessonRunnerProps) {
                             </h4>
                             {!isCorrect && (
                                 <p className="text-rose-300 text-sm mt-1">
-                                    La respuesta correcta es: {(currentSlide.data as Question).correctAnswer}
+                                    La respuesta correcta es: {formatAnswer((currentSlide.data as Question).correctAnswer)}
                                 </p>
                             )}
                         </div>
@@ -136,8 +139,8 @@ export function LessonRunner({ lesson, onComplete }: LessonRunnerProps) {
                 <Button
                     size="lg"
                     className={`w-full text-lg h-12 font-bold ${isChecked
-                            ? isCorrect ? 'bg-emerald-500 hover:bg-emerald-400' : 'bg-rose-500 hover:bg-rose-400'
-                            : 'bg-cyan-600 hover:bg-cyan-500'
+                        ? isCorrect ? 'bg-emerald-500 hover:bg-emerald-400' : 'bg-rose-500 hover:bg-rose-400'
+                        : 'bg-cyan-600 hover:bg-cyan-500'
                         }`}
                     onClick={isChecked ? nextSlide : handleCheck}
                     disabled={currentSlide.type === 'question' && !selectedOption && !isChecked}
@@ -153,14 +156,12 @@ function QuestionView({
     question,
     selectedOption,
     onSelect,
-    isChecked,
-    isCorrect
+    isChecked
 }: {
     question: Question;
     selectedOption: string | null;
     onSelect: (id: string) => void;
     isChecked: boolean;
-    isCorrect: boolean;
 }) {
     return (
         <div className="space-y-6">

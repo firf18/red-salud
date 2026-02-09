@@ -14,9 +14,6 @@ import {
   AlertCircle,
   TrendingUp,
   FileText,
-  Award,
-  Languages,
-  Target,
   Lightbulb,
 } from "lucide-react";
 import { Label } from "@red-salud/ui";

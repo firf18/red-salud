@@ -202,7 +202,7 @@ export function WeekCalendarWidget({
     }, []);
 
     // Calcular inicio y fin de la semana actual + offset
-    const { startOfWeek, endOfWeek, dateRange } = useMemo(() => {
+    const { startOfWeek, dateRange } = useMemo(() => {
         // Obtenemos el domingo de la semana actual
         const start = new Date(today);
         const day = today.getDay(); // 0 (Dom) a 6 (Sáb)
@@ -214,14 +214,13 @@ export function WeekCalendarWidget({
         start.setDate(start.getDate() + (weekOffset * 7));
         start.setHours(0, 0, 0, 0);
 
-        const end = new Date(start);
-        end.setDate(start.getDate() + 6);
-        end.setHours(23, 59, 59, 999);
+        const _end = new Date(start);
+        _end.setDate(start.getDate() + 6);
+        _end.setHours(23, 59, 59, 999);
 
         return {
             startOfWeek: start,
-            endOfWeek: end,
-            dateRange: formatDateRange(start, end),
+            dateRange: formatDateRange(start, _end),
         };
     }, [today, weekOffset]);
 

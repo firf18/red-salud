@@ -1,11 +1,9 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import { usePatientProfile, usePatientDocuments } from "@/hooks/use-patient-profile";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@red-salud/ui";
 import { Badge } from "@red-salud/ui";
 import { Button } from "@red-salud/ui";
-import { Separator } from "@red-salud/ui";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@red-salud/ui";
 import {
   AlertCircle,
@@ -291,7 +289,7 @@ export default function MedicalProfileView({
             <CardContent>
               {documents && documents.length > 0 ? (
                 <div className="space-y-3">
-                  {documents.map((doc: any) => (
+                  {documents.map((doc: { id: string; document_name: string; document_type: string; document_url?: string; created_at?: string }) => (
                     <div
                       key={doc.id}
                       className="flex items-center justify-between p-3 border rounded-lg"

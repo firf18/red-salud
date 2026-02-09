@@ -22,7 +22,7 @@ const INITIAL_STATS: DashboardStats = {
 /**
  * Hook para cargar estadísticas del dashboard del paciente
  */
-export function useDashboardStats(userId: string | undefined) {
+export function useDashboardStats() {
   const [stats, setStats] = useState<DashboardStats>(INITIAL_STATS);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);

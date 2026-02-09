@@ -6,7 +6,7 @@ import { StatsBentoGrid } from "./StatsBentoGrid";
 import { ProfessionalMainPanel } from "./ProfessionalMainPanel";
 
 interface DashboardV2Props {
-    profile: any;
+    profile: { nombre_completo: string; especialidad?: string };
     userId?: string;
 }
 

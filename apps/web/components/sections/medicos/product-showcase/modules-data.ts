@@ -7,7 +7,6 @@ import {
     FileText,
     FlaskConical,
     BarChart3,
-    Check,
 } from "lucide-react";
 import { LucideIcon } from "lucide-react";
 

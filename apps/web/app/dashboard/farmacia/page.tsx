@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { createClient } from "@supabase/supabase-js";
 import {
   Package,
   TrendingUp,
@@ -18,7 +17,7 @@ import { cn } from "@red-salud/core/utils";
 interface KPICardProps {
   title: string;
   value: string | number;
-  icon: any;
+  icon: React.ReactNode;
   trend?: string;
   color: string;
 }
@@ -75,7 +74,6 @@ export default function DashboardFarmaciaPage() {
   const loadDashboardData = async () => {
     try {
       const today = new Date().toISOString().split('T')[0];
-      const firstDayOfMonth = new Date(new Date().getFullYear(), new Date().getMonth(), 1).toISOString().split('T')[0];
 
       // Fetch data from API routes
       const [salesResponse, inventoryResponse] = await Promise.all([
@@ -107,7 +105,7 @@ export default function DashboardFarmaciaPage() {
 
       // Set recent sales
       setVentasRecientes(
-        salesData.data?.invoices?.slice(0, 5).map((inv: any) => ({
+        salesData.data?.invoices?.slice(0, 5).map((inv: { id: string; total_usd: number; created_at: string }) => ({
           id: inv.id,
           total: inv.total_usd,
           fecha: inv.created_at,

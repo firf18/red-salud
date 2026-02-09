@@ -10,15 +10,12 @@
 import { useState, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@red-salud/ui";
-import { Label } from "@red-salud/ui";
 import { Switch } from "@red-salud/ui";
 import { Badge } from "@red-salud/ui";
 import { TimePicker } from "@red-salud/ui";
 import {
-  Clock,
   Save,
   Loader2,
-  Plus,
   Trash2,
   ChevronDown,
   ChevronUp,
@@ -101,7 +98,7 @@ export function ScheduleSection() {
 
   useEffect(() => {
     loadOfficesAndSchedules();
-  }, []);
+  }, [loadOfficesAndSchedules]);
 
   /**
    * Retorna el horario predeterminado (lunes a viernes activos)
@@ -333,7 +330,6 @@ export function ScheduleSection() {
     );
   }
 
-  const selectedOffice = offices.find(o => o.id === selectedOfficeId);
 
   return (
     <div className="space-y-6">
@@ -379,9 +375,9 @@ export function ScheduleSection() {
 
       {/* Duration Selector - Visual Radio Buttons */}
       <div className="bg-gray-50 dark:bg-gray-900/30 rounded-lg p-4 border border-gray-200 dark:border-gray-800">
-        <Label className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-3 block">
-          Duración por Consulta
-        </Label>
+              <h4 className="text-sm font-semibold text-gray-900 dark:text-gray-100">
+                Duración por Consulta
+              </h4>
         <div className="grid grid-cols-4 gap-2">
           {DURACIONES.map((dur) => (
             <button
@@ -393,8 +389,7 @@ export function ScheduleSection() {
                 ${duracionCita === dur.value
                   ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300'
                   : 'border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600'
-                }
-              `}
+                }`}
             >
               <div className="text-lg mb-0.5">{dur.icon}</div>
               {dur.label}
@@ -406,84 +401,82 @@ export function ScheduleSection() {
       {/* Days Grid - 7 columns */}
       <div className="w-full">
         <div className="grid grid-cols-7 gap-2">
-          {DIAS_SEMANA.map((dia, index) => {
-          const daySchedule = schedule[dia.key] || { activo: false, horarios: [] };
-          const isExpanded = expandedDay === dia.key;
+          {DIAS_SEMANA.map((dia) => {
+            const daySchedule = schedule[dia.key] || { activo: false, horarios: [] };
+            const isExpanded = expandedDay === dia.key;
 
-          // Separar horarios de mañana y tarde
-          const morningSlots = daySchedule.horarios.filter(slot => getTimeLabel(slot.inicio) === "morning");
-          const afternoonSlots = daySchedule.horarios.filter(slot => getTimeLabel(slot.inicio) === "afternoon");
+            // Separar horarios de mañana y tarde
+            const morningSlots = daySchedule.horarios.filter(slot => getTimeLabel(slot.inicio) === "morning");
+            const afternoonSlots = daySchedule.horarios.filter(slot => getTimeLabel(slot.inicio) === "afternoon");
 
-          return (
-            <div
-              key={dia.key}
-              className={`
-                border rounded-lg overflow-hidden transition-all flex flex-col min-w-0
-                ${daySchedule.activo
-                  ? 'border-blue-200 dark:border-blue-800 bg-blue-50 dark:bg-blue-900/10'
-                  : 'border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-900/30'
-                }
-              `}
-            >
-              {/* Day Header */}
-              <div className="p-3 text-center border-b border-gray-200 dark:border-gray-800">
-                <div className="flex items-center justify-center mb-2">
-                  <Switch
-                    checked={daySchedule.activo}
-                    onCheckedChange={() => toggleDay(dia.key)}
-                    className="scale-75"
-                  />
+            return (
+              <div
+                key={dia.key}
+                className={`border rounded-lg overflow-hidden transition-all flex flex-col min-w-0 ${
+                  daySchedule.activo
+                    ? 'border-blue-200 dark:border-blue-800 bg-blue-50 dark:bg-blue-900/10'
+                    : 'border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-900/30'
+                }`}
+              >
+                {/* Day Header */}
+                <div className="p-3 text-center border-b border-gray-200 dark:border-gray-800">
+                  <div className="flex items-center justify-center mb-2">
+                    <Switch
+                      checked={daySchedule.activo}
+                      onCheckedChange={() => toggleDay(dia.key)}
+                      className="scale-75"
+                    />
+                  </div>
+                  <div className="text-xs font-semibold text-gray-900 dark:text-gray-100">
+                    {dia.label}
+                  </div>
+                  {daySchedule.activo && (
+                    <div className="text-[10px] text-gray-500 dark:text-gray-400 mt-1">
+                      {daySchedule.horarios.length} horario{daySchedule.horarios.length !== 1 ? 's' : ''}
+                    </div>
+                  )}
                 </div>
-                <div className="text-xs font-semibold text-gray-900 dark:text-gray-100">
-                  {dia.label}
-                </div>
+
+                {/* Summary / Edit Button */}
                 {daySchedule.activo && (
-                  <div className="text-[10px] text-gray-500 dark:text-gray-400 mt-1">
-                    {daySchedule.horarios.length} horario{daySchedule.horarios.length !== 1 ? 's' : ''}
+                  <div className="p-2">
+                    {daySchedule.horarios.length > 0 ? (
+                      <div className="space-y-1">
+                        {morningSlots.length > 0 && (
+                          <div className="text-[10px] text-gray-600 dark:text-gray-400 flex items-center justify-center gap-1">
+                            <Sunrise className="h-2.5 w-2.5" />
+                            {morningSlots[0]?.inicio}-{morningSlots[0]?.fin}
+                          </div>
+                        )}
+                        {afternoonSlots.length > 0 && (
+                          <div className="text-[10px] text-gray-600 dark:text-gray-400 flex items-center justify-center gap-1">
+                            <Sunset className="h-2.5 w-2.5" />
+                            {afternoonSlots[0]?.inicio}-{afternoonSlots[0]?.fin}
+                          </div>
+                        )}
+                        {daySchedule.horarios.length > 2 && (
+                          <div className="text-[10px] text-gray-400 text-center">
+                            +{daySchedule.horarios.length - 2}
+                          </div>
+                        )}
+                      </div>
+                    ) : (
+                      <div className="text-[10px] text-gray-400 text-center italic">
+                        Sin horarios
+                      </div>
+                    )}
+                    <button
+                      onClick={() => setExpandedDay(isExpanded ? null : dia.key)}
+                      className="w-full mt-2 px-2 py-1 text-[10px] text-blue-600 dark:text-blue-400 hover:bg-blue-100 dark:hover:bg-blue-900/20 rounded flex items-center justify-center gap-1 transition-colors"
+                    >
+                      {isExpanded ? <ChevronUp className="h-3 w-3" /> : <ChevronDown className="h-3 w-3" />}
+                      {isExpanded ? 'Cerrar' : 'Editar'}
+                    </button>
                   </div>
                 )}
               </div>
-
-              {/* Summary / Edit Button */}
-              {daySchedule.activo && (
-                <div className="p-2">
-                  {daySchedule.horarios.length > 0 ? (
-                    <div className="space-y-1">
-                      {morningSlots.length > 0 && (
-                        <div className="text-[10px] text-gray-600 dark:text-gray-400 flex items-center justify-center gap-1">
-                          <Sunrise className="h-2.5 w-2.5" />
-                          {morningSlots[0]?.inicio}-{morningSlots[0]?.fin}
-                        </div>
-                      )}
-                      {afternoonSlots.length > 0 && (
-                        <div className="text-[10px] text-gray-600 dark:text-gray-400 flex items-center justify-center gap-1">
-                          <Sunset className="h-2.5 w-2.5" />
-                          {afternoonSlots[0]?.inicio}-{afternoonSlots[0]?.fin}
-                        </div>
-                      )}
-                      {daySchedule.horarios.length > 2 && (
-                        <div className="text-[10px] text-gray-400 text-center">
-                          +{daySchedule.horarios.length - 2}
-                        </div>
-                      )}
-                    </div>
-                  ) : (
-                    <div className="text-[10px] text-gray-400 text-center italic">
-                      Sin horarios
-                    </div>
-                  )}
-                  <button
-                    onClick={() => setExpandedDay(isExpanded ? null : dia.key)}
-                    className="w-full mt-2 px-2 py-1 text-[10px] text-blue-600 dark:text-blue-400 hover:bg-blue-100 dark:hover:bg-blue-900/20 rounded flex items-center justify-center gap-1 transition-colors"
-                  >
-                    {isExpanded ? <ChevronUp className="h-3 w-3" /> : <ChevronDown className="h-3 w-3" />}
-                    {isExpanded ? 'Cerrar' : 'Editar'}
-                  </button>
-                </div>
-              )}
-            </div>
-          );
-        })}
+            );
+          })}
         </div>
       </div>
 
@@ -526,7 +519,7 @@ export function ScheduleSection() {
               <div className="space-y-2">
                 {schedule[expandedDay]?.horarios.length === 0 ? (
                   <p className="text-xs text-gray-400 dark:text-gray-500 text-center py-3">
-                    No hay horarios. Haz clic en "Mañana" o "Tarde" para añadir.
+                    No hay horarios. Haz clic en &quot;Mañana&quot; o &quot;Tarde&quot; para añadir.
                   </p>
                 ) : (
                   schedule[expandedDay]?.horarios.map((slot, index) => {

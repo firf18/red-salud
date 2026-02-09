@@ -9,10 +9,7 @@ import {
     FileText,
     Video,
     MessageSquare,
-    Pill,
-    Settings,
-    FlaskConical,
-    TrendingUp
+    FlaskConical
 } from "lucide-react";
 import { cn } from "@red-salud/core/utils";
 import { WidgetWrapper } from "../widget-wrapper";

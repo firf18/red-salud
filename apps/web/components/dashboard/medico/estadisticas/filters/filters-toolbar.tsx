@@ -34,13 +34,6 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@red-salud/ui";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@red-salud/ui";
 import { Checkbox } from "@red-salud/ui";
 
 // ============================================================================

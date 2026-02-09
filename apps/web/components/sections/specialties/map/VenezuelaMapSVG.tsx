@@ -18,14 +18,12 @@ export interface VenezuelaMapSVGProps {
 
 export function VenezuelaMapSVG({
     doctorDistribution,
-    specialtyName,
     onStateSelect,
     height = "500px",
     className,
 }: VenezuelaMapSVGProps) {
     const [selectedStateId, setSelectedStateId] = useState<string | null>(null);
     const [hoveredStateId, setHoveredStateId] = useState<string | null>(null);
-    const [isLoading, setIsLoading] = useState(false);
 
     // Normalizar mapa de distribución para coincidir con IDs
     const normalizedDistribution = useMemo(() => {

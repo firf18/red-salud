@@ -55,7 +55,7 @@ export function usePatientProfile(userId: string | undefined) {
         setPreferences(prefsData.data || null);
         setPrivacySettings(privacyData.data || null);
         setNotificationSettings(notifData.data || null);
-      } catch (err) {
+      } catch {
         setError('Error loading profile data');
       } finally {
         setLoading(false);
@@ -143,7 +143,7 @@ export function usePatientProfile(userId: string | undefined) {
 
 // Hook para actividad
 export function useUserActivity(userId: string | undefined) {
-  const [activity, setActivity] = useState<any[]>([]);
+  const [activity, setActivity] = useState<unknown[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -165,7 +165,7 @@ export function useUserActivity(userId: string | undefined) {
 
 // Hook para sesiones
 export function useUserSessions(userId: string | undefined) {
-  const [sessions, setSessions] = useState<any[]>([]);
+  const [sessions, setSessions] = useState<unknown[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -187,7 +187,7 @@ export function useUserSessions(userId: string | undefined) {
 
 // Hook para métodos de pago
 export function usePaymentMethods(userId: string | undefined) {
-  const [paymentMethods, setPaymentMethods] = useState<any[]>([]);
+  const [paymentMethods, setPaymentMethods] = useState<unknown[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -209,7 +209,7 @@ export function usePaymentMethods(userId: string | undefined) {
 
 // Hook para transacciones
 export function useTransactions(userId: string | undefined) {
-  const [transactions, setTransactions] = useState<any[]>([]);
+  const [transactions, setTransactions] = useState<unknown[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -231,7 +231,7 @@ export function useTransactions(userId: string | undefined) {
 
 // Hook para documentos
 export function usePatientDocuments(userId: string | undefined) {
-  const [documents, setDocuments] = useState<any[]>([]);
+  const [documents, setDocuments] = useState<unknown[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {

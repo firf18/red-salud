@@ -6,16 +6,15 @@
 
 'use client';
 
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import {
   getUserClinics,
   getClinicById,
   getClinicLocations,
   getClinicOverviewStats,
-  getUserClinicRoles,
 } from '@/lib/supabase/services/clinics-service';
 import { generateOperationalAlerts } from '@/lib/supabase/services/clinic-operations-service';
-import type { Clinic, ClinicLocation, ClinicOverviewStats, ClinicAlert } from '@/lib/types/clinic.types';
+import type { ClinicLocation } from '@red-salud/types';
 
 export function useClinicOverview(clinicId?: string, locationIds?: string[]) {
   const queryClient = useQueryClient();
@@ -31,15 +30,6 @@ export function useClinicOverview(clinicId?: string, locationIds?: string[]) {
   });
 
   // Obtener roles del usuario
-  const {
-    data: userRoles,
-    isLoading: loadingRoles,
-  } = useQuery({
-    queryKey: ['user-clinic-roles'],
-    queryFn: getUserClinicRoles,
-  });
-
-  // Obtener clínica actual
   const {
     data: currentClinic,
     isLoading: loadingClinic,

@@ -55,7 +55,7 @@ export function MedicoLayoutClient({ children }: { children: React.ReactNode }) 
 
     // Escuchar cambios de autenticación
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (event, session) => {
+      (event) => {
         if (event === "SIGNED_OUT") {
           router.push("/login");
         }

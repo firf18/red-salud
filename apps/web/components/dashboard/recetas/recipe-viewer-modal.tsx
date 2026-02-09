@@ -1,12 +1,9 @@
 "use client";
 
 import { Dialog, DialogContent, DialogTitle, Button } from "@red-salud/ui";
-import { Printer, Download, X, Minus, Plus, Maximize2 } from "lucide-react";
+import { X, Minus, Plus, Maximize2 } from "lucide-react";
 import { VisualRecipePreview, VisualRecipePreviewProps } from "./visual-recipe-preview";
-import { generateRecipeHtml, downloadRecipePdf } from "@/lib/recipe-utils";
-import { printContent } from "@/lib/print-utils";
 import { useState } from "react";
-import { toast } from "sonner"; // Assuming sonner is available based on package.json
 
 interface RecipeViewerModalProps {
     open: boolean;
@@ -16,7 +13,6 @@ interface RecipeViewerModalProps {
 }
 
 export function RecipeViewerModal({ open, onOpenChange, data, settings }: RecipeViewerModalProps) {
-    const [isProcessing, setIsProcessing] = useState(false);
     const [zoomLevel, setZoomLevel] = useState(1);
 
     if (!data || !settings) return null;
@@ -24,36 +20,6 @@ export function RecipeViewerModal({ open, onOpenChange, data, settings }: Recipe
     const handleZoomIn = () => setZoomLevel(prev => Math.min(prev + 0.1, 2));
     const handleZoomOut = () => setZoomLevel(prev => Math.max(prev - 0.1, 0.5));
     const handleZoomReset = () => setZoomLevel(1);
-
-    const handlePrint = async () => {
-        try {
-            setIsProcessing(true);
-            const html = await generateRecipeHtml(data, settings);
-            printContent(html);
-        } catch (error) {
-            console.error("Print error:", error);
-            toast.error("Error al preparar la impresión");
-        } finally {
-            setIsProcessing(false);
-        }
-    };
-
-    const handleDownload = async () => {
-        try {
-            setIsProcessing(true);
-            await downloadRecipePdf(
-                data,
-                settings,
-                `Receta-${data.patientName?.replace(/[^a-z0-9]/gi, '_') || 'Paciente'}-${data.date?.replace(/\//g, '-') || 'Fecha'}.pdf`
-            );
-            toast.success("Receta descargada correctamente");
-        } catch (error) {
-            console.error("Download error:", error);
-            toast.error("Error al generar el PDF");
-        } finally {
-            setIsProcessing(false);
-        }
-    };
 
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>

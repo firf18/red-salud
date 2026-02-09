@@ -19,7 +19,6 @@ import { cn } from "@red-salud/core/utils";
 import { ThemeToggle } from "@red-salud/ui";
 import { Button } from "@red-salud/ui";
 import { DashboardMegaMenu } from "./dashboard-mega-menu";
-import { ClinicModeToggle } from "./clinic-mode-toggle";
 import { MegaMenuSection } from "@/components/dashboard/medico/configuracion/configuracion-mega-menu-config";
 import {
   DropdownMenu,
@@ -38,8 +37,6 @@ export interface Office {
 }
 
 export interface DashboardHeaderProps {
-  userName?: string;
-  userEmail?: string;
   doctorProfile?: {
     nombre_completo?: string;
     specialty?: { name: string };
@@ -58,8 +55,6 @@ export interface DashboardHeaderProps {
 }
 
 export function DashboardHeader({
-  userName = "Usuario",
-  userEmail,
   doctorProfile,
   onTourClick,
   onChatClick,

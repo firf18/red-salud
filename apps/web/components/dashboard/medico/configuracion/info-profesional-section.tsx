@@ -18,35 +18,25 @@ import { Input } from "@red-salud/ui";
 import { Label } from "@red-salud/ui";
 import { Textarea } from "@red-salud/ui";
 import { Badge } from "@red-salud/ui";
-import { Checkbox } from "@red-salud/ui";
 import {
     Save,
     Loader2,
     GraduationCap,
     Award,
     Languages,
-    DollarSign,
-    Clock,
-    CheckCircle2,
     Pen,
-    FileText,
-    Briefcase,
-    Shield,
-    Users,
     Globe,
     Facebook,
     Linkedin,
     Twitter,
     Instagram,
-    Plus,
-    Youtube,
     Stethoscope,
     X
 } from "lucide-react";
 
 import { SearchableSelect } from "@red-salud/ui";
 import { VENEZUELAN_UNIVERSITIES } from "./constants/universities";
-import { INSURANCE_COMPANIES, AGE_GROUPS, SOCIAL_PLATFORMS } from "./constants/profile-data";
+import { SOCIAL_PLATFORMS } from "./constants/profile-data";
 import { MEDICAL_CONDITIONS_OPTIONS } from "./constants/medical-conditions";
 
 import { supabase } from "@/lib/supabase/client";
@@ -91,7 +81,6 @@ export function InfoProfesionalSection() {
     const [isEditing, setIsEditing] = useState(false);
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
-    const [condicionInput, setCondicionInput] = useState("");
 
     const [data, setData] = useState<ProfesionalData>({
         universidad: "",
@@ -132,8 +121,7 @@ export function InfoProfesionalSection() {
                     .single();
 
                 if (userProfile) {
-                    // @ts-ignore
-                    const matricula = userProfile.sacs_matricula || userProfile.licencia_medica || "";
+                    const matricula = (userProfile as { sacs_matricula?: string; licencia_medica?: string }).sacs_matricula || (userProfile as { licencia_medica?: string }).licencia_medica || "";
                     setData(prev => ({ ...prev, matricula }));
                 }
                 return;
@@ -145,8 +133,7 @@ export function InfoProfesionalSection() {
             }
 
             if (profile) {
-                // @ts-ignore
-                const matriculaSacs = profile.profiles?.sacs_matricula || profile.profiles?.licencia_medica || profile.license_number || "";
+                const matriculaSacs = (profile.profiles as { sacs_matricula?: string; licencia_medica?: string } | undefined)?.sacs_matricula || (profile.profiles as { licencia_medica?: string } | undefined)?.licencia_medica || (profile as { license_number?: string }).license_number || "";
 
                 setData({
                     universidad: profile.university || "",

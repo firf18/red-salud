@@ -15,7 +15,6 @@ import {
     Calendar,
     Clock,
     Video,
-    User,
     ChevronRight,
     Play,
     CheckCircle2,

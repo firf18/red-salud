@@ -7,9 +7,17 @@ import { Calendar, Clock, User, CreditCard, Video, MapPin, Activity } from "luci
 import { Button } from "@red-salud/ui";
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "@red-salud/ui";
 
+interface Patient {
+    id: string;
+    nombre_completo: string;
+    email: string | null;
+    cedula: string | null;
+    type: "registered" | "offline";
+}
+
 interface SummaryViewProps {
     loading: boolean;
-    patients: any[];
+    patients: Patient[];
     isMobile?: boolean;
 }
 
@@ -39,7 +47,7 @@ export function SummaryView({ loading, patients, isMobile = false }: SummaryView
             const [year, month, day] = fecha.split('-').map(Number);
             const dateObj = new Date(year, month - 1, day);
             formattedDate = format(dateObj, "PPPP", { locale: es });
-        } catch (e) {
+        } catch {
             formattedDate = fecha;
         }
     }

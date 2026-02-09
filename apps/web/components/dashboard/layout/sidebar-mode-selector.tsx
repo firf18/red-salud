@@ -1,8 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { PanelLeftDashed, ChevronDown, Maximize2, Minimize2, MousePointer } from "lucide-react";
-import { Button } from "@red-salud/ui";
+import { PanelLeftDashed, Maximize2, Minimize2, MousePointer } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -30,15 +29,9 @@ const modeConfig = {
   }
 };
 
-interface SidebarModeSelectorProps {
-  isCollapsed?: boolean;
-}
-
-export function SidebarModeSelector({ isCollapsed }: SidebarModeSelectorProps) {
+export function SidebarModeSelector(): JSX.Element {
   const { mode, setMode } = useSidebarState();
   const [isOpen, setIsOpen] = useState(false);
-
-  const currentConfig = modeConfig[mode];
 
   const handleModeChange = (newMode: SidebarMode) => {
     setIsOpen(false);

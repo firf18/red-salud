@@ -5,7 +5,6 @@ import { useMemo } from "react";
 import { useRouter, useParams } from "next/navigation";
 import { LessonRunner } from "@/components/academy/LessonRunner";
 import { SAMPLE_LESSON_CONTENT } from "@/lib/mock-data/lesson-content";
-import { LessonContent } from "@/types/academy";
 
 export default function LessonPage() {
     const params = useParams();

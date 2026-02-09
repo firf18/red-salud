@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { createClient } from "@supabase/supabase-js";
 import {
   Package,
@@ -9,14 +9,12 @@ import {
   Edit,
   Trash2,
   AlertTriangle,
-  TrendingUp,
   Filter,
   Download,
   Upload,
   Warehouse,
   Calendar,
   DollarSign,
-  ArrowUpDown,
   RefreshCw,
 } from "lucide-react";
 import { Button } from "@red-salud/ui";
@@ -70,7 +68,7 @@ export default function InventarioPage() {
 
   useEffect(() => {
     filterProductos();
-  }, [productos, searchTerm, selectedCategoria, selectedEstado, selectedWarehouse]);
+  }, [productos, searchTerm, selectedCategoria, selectedEstado, selectedWarehouse, filterProductos]);
 
   const loadProductos = async () => {
     try {
@@ -101,7 +99,7 @@ export default function InventarioPage() {
     }
   };
 
-  const filterProductos = () => {
+  const filterProductos = useCallback(() => {
     let filtered = productos;
 
     if (searchTerm) {
@@ -126,7 +124,7 @@ export default function InventarioPage() {
     }
 
     setFilteredProductos(filtered);
-  };
+  }, [productos, searchTerm, selectedCategoria, selectedEstado, selectedWarehouse]);
 
   const categorias = Array.from(
     new Set(productos.map((p) => p.categoria).filter(Boolean))

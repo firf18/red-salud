@@ -12,7 +12,6 @@ export function useRateLimit() {
   const [error, setError] = useState<string | null>(null);
 
   const checkRateLimit = useCallback(() => {
-    const attempts = parseInt(localStorage.getItem("login_attempts") || "0");
     const lockoutUntil = parseInt(localStorage.getItem("lockout_until") || "0");
 
     if (lockoutUntil && Date.now() < lockoutUntil) {

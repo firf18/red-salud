@@ -2,7 +2,6 @@
 
 import { Avatar, AvatarFallback, AvatarImage } from "@red-salud/ui";
 import { Badge } from "@red-salud/ui";
-import { Button } from "@red-salud/ui";
 import { ScrollArea } from "@red-salud/ui";
 import { cn } from "@red-salud/core/utils";
 import type { Conversation } from "@/lib/supabase/types/messaging";

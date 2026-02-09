@@ -124,9 +124,9 @@ function SortableWidgetItemComponent({
         <div className="absolute inset-0 rounded-2xl bg-primary/5 pointer-events-none" />
       )}
 
-      {/* Widget content - sin animación de filter (costosa) */}
+      {/* Widget content */}
       <div className="h-full">
-        {React.cloneElement(children as React.ReactElement<any>, {
+        {React.cloneElement(children as React.ReactElement<Record<string, unknown>>, {
           isDragging,
         })}
       </div>

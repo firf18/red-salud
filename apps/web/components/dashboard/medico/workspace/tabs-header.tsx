@@ -20,7 +20,6 @@ interface TabsHeaderProps {
 export function TabsHeader({
   activeTab,
   selectedStructuredTemplate,
-  notasMedicas,
   isAnalyzing,
   onShowStructuredMarketplace,
   onAnalyzeWithAI,

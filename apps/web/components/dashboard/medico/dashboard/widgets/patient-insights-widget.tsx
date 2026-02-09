@@ -122,7 +122,7 @@ export function PatientInsightsWidget({
     isDragging
 }: PatientInsightsWidgetProps) {
     // Obtener datos del dashboard
-    const { appointments, stats, isLoading } = useDashboardData(doctorId);
+    const { appointments, isLoading } = useDashboardData(doctorId);
 
     // Calcular métricas de pacientes
     const patientMetrics = useMemo(() => {
@@ -133,7 +133,7 @@ export function PatientInsightsWidget({
         const thirtyDaysAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
 
         // Obtener IDs únicos de pacientes
-        const allPatientIds = new Set(appointments.map(apt => apt.patient_id));
+        const allPatientIds = new Set(appointments.map((apt: { patient_id?: string }) => apt.patient_id).filter(Boolean));
 
         // Pacientes con citas este mes
         const thisMonthPatientIds = new Set(

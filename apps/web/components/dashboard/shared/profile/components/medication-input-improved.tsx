@@ -1,11 +1,10 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useMemo, useRef } from "react";
 import { X, Pill } from "lucide-react";
 import { Input } from "@red-salud/ui";
 import { Label } from "@red-salud/ui";
 import {
-  MEDICAMENTOS_COMUNES,
   FRECUENCIAS_COMUNES,
   buscarMedicamento,
   obtenerDosisComunes,
@@ -31,29 +30,21 @@ export function MedicationInputImproved({
 }: MedicationInputImprovedProps) {
   const [step, setStep] = useState<"nombre" | "dosis" | "frecuencia" | "lista">("lista");
   const [nombreInput, setNombreInput] = useState("");
-  const [showSuggestions, setShowSuggestions] = useState(false);
-  const [filteredMeds, setFilteredMeds] = useState(MEDICAMENTOS_COMUNES);
   const [selectedMed, setSelectedMed] = useState<string>("");
   const [selectedDosis, setSelectedDosis] = useState<string>("");
   const [dosisDisponibles, setDosisDisponibles] = useState<string[]>([]);
   const [frecuenciasDisponibles, setFrecuenciasDisponibles] = useState<string[]>(FRECUENCIAS_COMUNES);
   const inputRef = useRef<HTMLInputElement>(null);
 
-  useEffect(() => {
-    if (nombreInput.trim()) {
-      const filtered = buscarMedicamento(nombreInput);
-      setFilteredMeds(filtered);
-      setShowSuggestions(filtered.length > 0);
-    } else {
-      setFilteredMeds([]);
-      setShowSuggestions(false);
-    }
+  const filteredMeds = useMemo(() => {
+    return nombreInput.trim() ? buscarMedicamento(nombreInput) : [];
   }, [nombreInput]);
+
+  const showSuggestions = filteredMeds.length > 0;
 
   const handleSelectNombre = (nombre: string) => {
     setSelectedMed(nombre);
     setNombreInput("");
-    setShowSuggestions(false);
     
     // Obtener dosis y frecuencias para este medicamento
     const dosis = obtenerDosisComunes(nombre);
@@ -95,14 +86,14 @@ export function MedicationInputImproved({
     setSelectedMed("");
     setSelectedDosis("");
     setNombreInput("");
-    setShowSuggestions(false);
+
   };
 
   const handleCustomNombre = () => {
     if (nombreInput.trim()) {
       setSelectedMed(nombreInput.trim());
       setNombreInput("");
-      setShowSuggestions(false);
+
       setDosisDisponibles([]);
       setFrecuenciasDisponibles(FRECUENCIAS_COMUNES);
       setStep("dosis");
@@ -181,7 +172,7 @@ export function MedicationInputImproved({
               ref={inputRef}
               value={nombreInput}
               onChange={(e) => setNombreInput(e.target.value)}
-              onFocus={() => setShowSuggestions(true)}
+
               placeholder="Escribe el nombre del medicamento..."
               className="mb-2"
               autoFocus
@@ -208,7 +199,7 @@ export function MedicationInputImproved({
                 onClick={handleCustomNombre}
                 className="text-xs text-purple-600 hover:text-purple-800 underline"
               >
-                Usar "{nombreInput}" (no está en la lista)
+                Usar &quot;{nombreInput}&quot; (no est&aacute; en la lista)
               </button>
             )}
           </div>

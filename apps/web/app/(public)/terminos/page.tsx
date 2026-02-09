@@ -50,7 +50,7 @@ export default function TerminosPage() {
             <div className="bg-red-50 border-l-8 border-red-600 p-6 mb-12 rounded-r-xl shadow-sm">
               <h3 className="text-red-800 font-bold text-xl mb-2 mt-0">ADVERTENCIA LEGAL Y ACEPTACIÓN EXPRESA</h3>
               <p className="text-red-900 text-sm m-0 leading-relaxed">
-                De conformidad con la <strong>Ley de Mensajes de Datos y Firmas Electrónicas</strong> de la República Bolivariana de Venezuela, al hacer clic en "Registrarse", "Acceder", "Aceptar" o simplemente al navegar y utilizar los servicios de RED-SALUD, usted manifiesta su voluntad expresa, libre e inequívoca de aceptar y adherirse a este contrato electrónico. Este acto tiene la misma validez jurídica y fuerza probatoria que una firma autógrafa. Si no está de acuerdo con alguna disposición, incluyendo la recolección masiva de datos o las limitaciones de responsabilidad, <strong>NO UTILICE ESTE SERVICIO</strong>.
+                De conformidad con la <strong>Ley de Mensajes de Datos y Firmas Electrónicas</strong> de la República Bolivariana de Venezuela, al hacer clic en &quot;Registrarse&quot;, &quot;Acceder&quot;, &quot;Aceptar&quot; o simplemente al navegar y utilizar los servicios de RED-SALUD, usted manifiesta su voluntad expresa, libre e inequívoca de aceptar y adherirse a este contrato electrónico. Este acto tiene la misma validez jurídica y fuerza probatoria que una firma autógrafa. Si no está de acuerdo con alguna disposición, incluyendo la recolección masiva de datos o las limitaciones de responsabilidad, <strong>NO UTILICE ESTE SERVICIO</strong>.
               </p>
             </div>
 
@@ -58,10 +58,10 @@ export default function TerminosPage() {
 
             <h3>1. Objeto y Ámbito de Aplicación</h3>
             <p>
-              Los presentes Términos y Condiciones (en adelante, los "Términos") regulan el acceso, navegación y uso de la plataforma digital, sitio web, aplicaciones móviles y servicios conexos (en adelante, la "Plataforma" o los "Servicios") propiedad y operados por <strong>RED-SALUD C.A.</strong> (o la entidad legal correspondiente), en adelante "LA EMPRESA".
+              Los presentes Términos y Condiciones (en adelante, los &quot;Términos&quot;) regulan el acceso, navegación y uso de la plataforma digital, sitio web, aplicaciones móviles y servicios conexos (en adelante, la &quot;Plataforma&quot; o los &quot;Servicios&quot;) propiedad y operados por <strong>RED-SALUD C.A.</strong> (o la entidad legal correspondiente), en adelante &quot;LA EMPRESA&quot;.
             </p>
             <p>
-              Estos Términos aplican a todos los visitantes, usuarios, pacientes, médicos, proveedores y cualquier otra persona que acceda a los Servicios (en adelante, el "Usuario").
+              Estos Términos aplican a todos los visitantes, usuarios, pacientes, médicos, proveedores y cualquier otra persona que acceda a los Servicios (en adelante, el &quot;Usuario&quot;).
             </p>
 
             <h3>2. Capacidad Legal</h3>

@@ -16,7 +16,7 @@ import {
   Syringe,
   Radio,
 } from "lucide-react";
-import { slugify } from "@/lib/utils";
+import { slugify } from "@red-salud/core";
 
 const specialties = [
   { name: "Medicina General", Icon: Stethoscope },

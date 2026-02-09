@@ -26,7 +26,7 @@ import { cn } from "@red-salud/core/utils";
 interface FieldWithContextProps {
   label: string;
   value: string | string[];
-  onChange?: (value: any) => void;
+  onChange?: (value: string | string[]) => void;
   type?: "text" | "email" | "phone" | "specialty" | "multi-specialty";
   locked?: boolean;
   verified?: boolean;
@@ -61,7 +61,7 @@ const FieldWithContext = ({
   const renderInput = () => {
     const commonProps = {
       value: Array.isArray(value) ? "" : value,
-      onChange: (e: any) => onChange?.(e.target?.value || e),
+      onChange: (e: React.ChangeEvent<HTMLInputElement>) => onChange?.(e.target?.value || e),
       disabled: locked,
       placeholder,
       onFocus: () => setIsFocused(true),

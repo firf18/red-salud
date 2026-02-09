@@ -8,13 +8,12 @@
 
 "use client";
 
-import { useMemo, useCallback } from "react";
+import { useCallback } from "react";
 import { motion } from "framer-motion";
 import {
     Bell,
     Calendar,
     MessageSquare,
-    AlertTriangle,
     Clock,
     X,
     UserPlus,
@@ -30,7 +29,7 @@ import { Badge } from "@red-salud/ui";
 import { WidgetWrapper } from "../widget-wrapper";
 import { useDashboardData } from "@/hooks/use-dashboard-data";
 import { markNotificationAsRead, markAllNotificationsAsRead } from "@/lib/supabase/services/dashboard-preferences-service";
-import type { DoctorNotification, DashboardNotificationType as NotificationType } from "@red-salud/types";
+import type { DashboardNotificationType as NotificationType } from "@red-salud/types";
 
 // ============================================================================
 // MAPAS DE CONFIGURACIÓN

@@ -11,13 +11,22 @@ import { Search, CheckCircle2, XCircle, Loader2, Info } from "lucide-react";
  * Componente de demostración de la API ICD-11
  * Muestra las capacidades de búsqueda y validación
  */
+
+interface ICD11SearchResult {
+  [key: string]: unknown;
+}
+
+interface ICD11ValidationResult {
+  [key: string]: unknown;
+}
+
 export function ICD11Demo() {
   const [searchQuery, setSearchQuery] = useState("");
-  const [searchResults, setSearchResults] = useState<any[]>([]);
+  const [searchResults, setSearchResults] = useState<ICD11SearchResult[]>([]);
   const [isSearching, setIsSearching] = useState(false);
   
   const [validateCode, setValidateCode] = useState("");
-  const [validationResult, setValidationResult] = useState<any>(null);
+  const [validationResult, setValidationResult] = useState<ICD11ValidationResult | null>(null);
   const [isValidating, setIsValidating] = useState(false);
 
   const handleSearch = async () => {

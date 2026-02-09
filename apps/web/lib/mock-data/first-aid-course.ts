@@ -1,5 +1,5 @@
 
-import { Course, Module } from '@/types/academy';
+import { Course } from '@/types/academy';
 
 export const FIRST_AID_COURSE: Course = {
     id: 'course-1',

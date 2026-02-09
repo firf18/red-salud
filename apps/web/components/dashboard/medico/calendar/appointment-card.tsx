@@ -3,9 +3,8 @@
 import { Badge } from "@red-salud/ui";
 import { Button } from "@red-salud/ui";
 import { Avatar, AvatarFallback, AvatarImage } from "@red-salud/ui";
-import { Video, MessageSquare, Eye, Clock, MapPin, CalendarDays, User } from "lucide-react";
+import { Video, MessageSquare, Eye, Clock, MapPin } from "lucide-react";
 import { format } from "date-fns";
-import { es } from "date-fns/locale";
 import type { CalendarAppointment } from "./types";
 import { APPOINTMENT_STATUS_LABELS, APPOINTMENT_TYPE_LABELS } from "./types";
 

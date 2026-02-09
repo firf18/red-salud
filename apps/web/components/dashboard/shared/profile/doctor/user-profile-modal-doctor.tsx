@@ -65,7 +65,7 @@ export function UserProfileModalDoctor({
   const [toastType, setToastType] = useState<ToastType>("info");
   const [showToast, setShowToast] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
-  const [isSaving, setIsSaving] = useState(false);
+
 
   // Verificar si el médico tiene perfil
   const { profile: doctorProfile, loading: profileLoading } = useDoctorProfile(userId);
@@ -96,8 +96,18 @@ export function UserProfileModalDoctor({
   useEffect(() => {
     if (doctorProfile) {
       // Extraer datos SACS si existen
-      const sacsData = (doctorProfile.sacs_data as any) || {};
-      const profile = doctorProfile as any;
+      const sacsData = (doctorProfile.sacs_data as unknown as {
+        nombre_completo?: string;
+        cedula?: string;
+        matricula_principal?: string;
+        especialidad_display?: string;
+      }) || {};
+      const profile = doctorProfile as unknown as {
+        nombre_completo?: string;
+        email?: string;
+        cedula?: string;
+        universidad?: string;
+      };
 
       setFormData({
         nombre_completo: profile.nombre_completo || sacsData.nombre_completo || userName,
@@ -137,7 +147,7 @@ export function UserProfileModalDoctor({
         "Imagen subida correctamente (pendiente implementación)",
         "warning"
       );
-    } catch (error) {
+    } catch {
       showNotification("Error al subir la imagen", "error");
     }
   });

@@ -21,7 +21,6 @@ import {
   registerPayment,
   reconcilePayment,
   getUnreconciledPayments,
-  getPayerContracts,
   getActivePayerContracts,
   getFinancialKPIs,
   calculateDSO,
@@ -29,13 +28,11 @@ import {
 } from '@/lib/supabase/services/clinic-rcm-service';
 import type {
   ClaimFilters,
-  CreateClaimInput,
-  RegisterPaymentInput,
   RCMClaimItem,
   ClaimSummary,
-} from '@/lib/types/clinic.types';
+} from '@red-salud/types';
 
-export function useClinicRCM(clinicId?: string, locationIds?: string[]) {
+export function useClinicRCM(clinicId?: string) {
   const queryClient = useQueryClient();
 
   // Obtener contratos activos

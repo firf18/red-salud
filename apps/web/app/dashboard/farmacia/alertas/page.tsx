@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { createClient } from "@supabase/supabase-js";
 import {
   Bell,
@@ -12,7 +12,6 @@ import {
   XCircle,
   Filter,
   Archive,
-  Trash2,
 } from "lucide-react";
 import { Button } from "@red-salud/ui";
 import { Input } from "@red-salud/ui";
@@ -27,7 +26,7 @@ interface Alerta {
   estado: string;
   entidad_id: string;
   entidad_tipo: string;
-  datos: any;
+  datos: Record<string, unknown>;
   fecha_creacion: string;
 }
 
@@ -38,37 +37,9 @@ export default function AlertasPage() {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedTipo, setSelectedTipo] = useState("");
   const [selectedPrioridad, setSelectedPrioridad] = useState("");
-  const [selectedEstado, setSelectedEstado] = useState("");
+  const [selectedEstado] = useState("");
 
-  useEffect(() => {
-    loadAlertas();
-  }, []);
-
-  useEffect(() => {
-    filterAlertas();
-  }, [alertas, searchTerm, selectedTipo, selectedPrioridad, selectedEstado]);
-
-  const loadAlertas = async () => {
-    try {
-      const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-      const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
-      const supabase = createClient(supabaseUrl, supabaseAnonKey);
-
-      const { data, error } = await supabase
-        .from("farmacia_alertas")
-        .select("*")
-        .order("fecha_creacion", { ascending: false });
-
-      if (error) throw error;
-      setAlertas(data || []);
-    } catch (error) {
-      console.error("Error cargando alertas:", error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const filterAlertas = () => {
+  const filterAlertas = useCallback(() => {
     let filtered = alertas;
 
     if (searchTerm) {
@@ -92,7 +63,35 @@ export default function AlertasPage() {
     }
 
     setFilteredAlertas(filtered);
-  };
+  }, [alertas, searchTerm, selectedTipo, selectedPrioridad, selectedEstado]);
+
+  const loadAlertas = useCallback(async () => {
+    try {
+      const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
+      const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
+      const supabase = createClient(supabaseUrl, supabaseAnonKey);
+
+      const { data, error } = await supabase
+        .from("farmacia_alertas")
+        .select("*")
+        .order("fecha_creacion", { ascending: false });
+
+      if (error) throw error;
+      setAlertas(data || []);
+    } catch (error) {
+      console.error("Error cargando alertas:", error);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    loadAlertas();
+  }, [loadAlertas]);
+
+  useEffect(() => {
+    filterAlertas();
+  }, [filterAlertas]);
 
   const getPrioridadColor = (prioridad: string) => {
     switch (prioridad) {
@@ -322,11 +321,10 @@ export default function AlertasPage() {
                 {filteredAlertas.map((alerta) => (
                   <div
                     key={alerta.id}
-                    className={`p-4 rounded-lg border ${
-                      alerta.estado === "activa"
+                    className={`p-4 rounded-lg border ${alerta.estado === "activa"
                         ? getPrioridadColor(alerta.prioridad)
                         : "bg-gray-50 border-gray-200 text-gray-400"
-                    }`}
+                      }`}
                   >
                     <div className="flex items-start justify-between">
                       <div className="flex-1">
@@ -339,9 +337,8 @@ export default function AlertasPage() {
                           </span>
                           <h3 className="font-semibold">{alerta.titulo}</h3>
                           <span
-                            className={`px-2 py-1 rounded-full text-xs font-medium ${
-                              alerta.estado === "activa" ? getPrioridadColor(alerta.prioridad) : "bg-gray-200 text-gray-600"
-                            }`}
+                            className={`px-2 py-1 rounded-full text-xs font-medium ${alerta.estado === "activa" ? getPrioridadColor(alerta.prioridad) : "bg-gray-200 text-gray-600"
+                              }`}
                           >
                             {alerta.prioridad.toUpperCase()}
                           </span>

@@ -68,7 +68,7 @@ export function RecentPatientsWidget() {
 
                 const uniquePatientsMap = new Map<string, RecentPatient>();
 
-                appointmentsData.forEach((apt: any) => {
+                appointmentsData.forEach((apt: { paciente_id?: string; offline_patient_id?: string; fecha_hora: string }) => {
                     if (apt.paciente_id) {
                         if (!uniquePatientsMap.has(apt.paciente_id)) {
                             const profile = patientsMap.get(apt.paciente_id);

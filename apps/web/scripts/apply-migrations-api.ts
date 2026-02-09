@@ -41,7 +41,7 @@ async function executeSQL(sql: string, description: string) {
     console.log('');
 
     // Intentar ejecutar una consulta simple para verificar conexión
-    const { data, error } = await supabase.from('profiles').select('count').limit(1);
+    const { error } = await supabase.from('profiles').select('count').limit(1);
 
     if (error) {
       console.error('❌ Error de conexión a Supabase:', error.message);

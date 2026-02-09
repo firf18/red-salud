@@ -3,10 +3,9 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase/client";
-import { Card, CardContent, CardHeader, CardTitle } from "@red-salud/ui";
+import { Card, CardContent } from "@red-salud/ui";
 import { Button } from "@red-salud/ui";
-import { Badge } from "@red-salud/ui";
-import { Loader2, Play, CalendarClock, RefreshCw } from "lucide-react";
+import { Play, CalendarClock, RefreshCw } from "lucide-react";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
 
@@ -104,7 +103,7 @@ export function ActiveConsultationsWidget() {
           : null,
       }));
 
-      setConsultations(combinedData as any[]);
+      setConsultations(combinedData);
     } catch (err) {
       console.error(
         "Error fetching active consultations:",

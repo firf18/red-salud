@@ -34,12 +34,11 @@ export default function SessionPage() {
   const [sessionNotes, setSessionNotes] = useState("");
 
   const { session, loading, refreshSession } = useSession(sessionId);
-  const { start, end, update } = useActiveSession(sessionId);
-  const { participants, join, leave } = useSessionParticipants(sessionId);
-  const { messages, send, markAsRead, refreshMessages } = useSessionChat(sessionId);
+  const { start, end } = useActiveSession(sessionId);
+  const { participants, join } = useSessionParticipants(sessionId);
+  const { messages, send, refreshMessages } = useSessionChat(sessionId);
 
   const videoRef = useRef<HTMLVideoElement>(null);
-  const remoteVideoRef = useRef<HTMLVideoElement>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -61,7 +60,7 @@ export default function SessionPage() {
       }
     };
     getUser();
-  }, [supabase]);
+  }, []);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -87,13 +86,14 @@ export default function SessionPage() {
       initMedia();
     }
 
+    const currentVideoRef = videoRef.current;
     return () => {
-      if (videoRef.current?.srcObject) {
-        const stream = videoRef.current.srcObject as MediaStream;
+      if (currentVideoRef?.srcObject) {
+        const stream = currentVideoRef.srcObject as MediaStream;
         stream.getTracks().forEach((track) => track.stop());
       }
     };
-  }, [session?.status]);
+  }, [session?.status, videoRef]);
 
   const handleStartSession = useCallback(async () => {
     if (!userId) return;
@@ -155,12 +155,7 @@ export default function SessionPage() {
     // Aquí iría la lógica real de compartir pantalla
   };
 
-  const formatTime = (dateString: string) => {
-    return new Date(dateString).toLocaleTimeString("es-ES", {
-      hour: "2-digit",
-      minute: "2-digit",
-    });
-  };
+
 
   if (loading) {
     return (
@@ -188,9 +183,7 @@ export default function SessionPage() {
     );
   }
 
-  const isActive = session.status === "active";
-  const isWaiting = session.status === "waiting";
-  const canStart = session.status === "scheduled" || session.status === "waiting";
+
 
   return (
     <div className="min-h-screen bg-gray-50 p-4">

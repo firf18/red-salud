@@ -1,12 +1,11 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { createClient } from "@supabase/supabase-js";
 import {
   Truck,
   Search,
   MapPin,
-  Clock,
   CheckCircle,
   XCircle,
   Navigation,
@@ -55,7 +54,7 @@ export default function EntregasPage() {
 
   useEffect(() => {
     filterEntregas();
-  }, [entregas, searchTerm, selectedEstado]);
+  }, [entregas, searchTerm, selectedEstado, filterEntregas]);
 
   const loadEntregas = async () => {
     try {
@@ -77,7 +76,7 @@ export default function EntregasPage() {
     }
   };
 
-  const filterEntregas = () => {
+  const filterEntregas = useCallback(() => {
     let filtered = entregas;
 
     if (searchTerm) {
@@ -94,7 +93,7 @@ export default function EntregasPage() {
     }
 
     setFilteredEntregas(filtered);
-  };
+  }, [entregas, searchTerm, selectedEstado]);
 
   const getEstadoColor = (estado: string) => {
     switch (estado) {

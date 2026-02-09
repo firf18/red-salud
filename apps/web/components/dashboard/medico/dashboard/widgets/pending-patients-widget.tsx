@@ -9,6 +9,7 @@
 "use client";
 
 import { useMemo } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import { Users, Clock, ChevronRight, UserCheck, Video, Loader2 } from "lucide-react";
@@ -198,10 +199,10 @@ export function PendingPatientsWidget({
                         {/* View All */}
                         {pendingPatients.length > 0 && (
                             <Button variant="outline" className="w-full text-xs h-7" asChild>
-                                <a href="/dashboard/medico/pacientes">
+                                <Link href="/dashboard/medico/pacientes">
                                     Ver todos los pacientes
                                     <ChevronRight className="h-3 w-3 ml-1" />
-                                </a>
+                                </Link>
                             </Button>
                         )}
                     </>

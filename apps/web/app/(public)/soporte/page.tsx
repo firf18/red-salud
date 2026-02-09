@@ -89,46 +89,6 @@ const helpCategories = [
   },
 ];
 
-// Artículos populares
-const popularArticles = [
-  {
-    title: "Cómo agendar tu primera cita médica",
-    category: "Primeros pasos",
-    readTime: "3 min",
-    href: "/soporte/articulos/agendar-primera-cita",
-  },
-  {
-    title: "Configurar notificaciones y recordatorios",
-    category: "Mi cuenta",
-    readTime: "2 min",
-    href: "/soporte/articulos/configurar-notificaciones",
-  },
-  {
-    title: "Prepararte para una teleconsulta",
-    category: "Telemedicina",
-    readTime: "4 min",
-    href: "/soporte/articulos/preparar-teleconsulta",
-  },
-  {
-    title: "Acceder a tu historial médico",
-    category: "Primeros pasos",
-    readTime: "2 min",
-    href: "/soporte/articulos/acceder-historial",
-  },
-  {
-    title: "Cambiar tu método de pago",
-    category: "Pagos",
-    readTime: "2 min",
-    href: "/soporte/articulos/cambiar-metodo-pago",
-  },
-  {
-    title: "Cancelar o reprogramar una cita",
-    category: "Citas médicas",
-    readTime: "2 min",
-    href: "/soporte/articulos/cancelar-cita",
-  },
-];
-
 // Opciones de contacto
 const contactOptions = [
   {
@@ -371,7 +331,7 @@ export default function SoportePage() {
         setPopularArticles(result.data);
       } else if (result.error) {
         const errorMessage = typeof result.error === 'object' && result.error !== null && 'message' in result.error
-          ? (result.error as any).message
+          ? (result.error as { message: string }).message
           : String(result.error);
         toast.error("Error al cargar artículos populares", {
           description: errorMessage,
@@ -391,7 +351,7 @@ export default function SoportePage() {
           setSearchResults(result.data);
         } else if (result.error) {
           const errorMessage = typeof result.error === 'object' && result.error !== null && 'message' in result.error
-            ? (result.error as any).message
+            ? (result.error as { message: string }).message
             : String(result.error);
           toast.error("Error en la búsqueda", {
             description: errorMessage,

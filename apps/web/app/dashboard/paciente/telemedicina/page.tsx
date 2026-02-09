@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase/client";
 import { usePatientSessions, useSessionStats } from "@/hooks/use-telemedicine";
 import { Button } from "@red-salud/ui";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@red-salud/ui";
+import { Card, CardContent, CardHeader, CardTitle } from "@red-salud/ui";
 import { Badge } from "@red-salud/ui";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@red-salud/ui";
 import {
@@ -14,7 +14,6 @@ import {
   Clock,
   User,
   FileText,
-  TrendingUp,
   Plus,
   Play,
   CheckCircle,
@@ -28,7 +27,7 @@ import type { TelemedicineSession } from "@/lib/supabase/types/telemedicine";
 export default function TelemedicinePage() {
   const router = useRouter();
   const [userId, setUserId] = useState<string | undefined>();
-  const { sessions, loading, refreshSessions } = usePatientSessions(userId);
+  const { sessions, loading } = usePatientSessions(userId);
   const { stats } = useSessionStats(userId);
 
   useEffect(() => {

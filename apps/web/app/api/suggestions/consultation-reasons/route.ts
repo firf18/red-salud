@@ -61,7 +61,7 @@ export async function GET(request: NextRequest) {
         // Si no hay query, devolver sugerencias iniciales
         if (!query || query.length < 2) {
             const initialSuggestions = await getInitialSuggestions(
-                supabase as any,
+                supabase as unknown as SupabaseClient,
                 user.id,
                 specialty,
                 limit
@@ -75,7 +75,7 @@ export async function GET(request: NextRequest) {
         }
 
         // Obtener sugerencias inteligentes
-        const suggestions = await getSmartSuggestions(supabase as any, {
+        const suggestions = await getSmartSuggestions(supabase as unknown as SupabaseClient, {
             doctorId: user.id,
             specialty,
             query,
@@ -153,10 +153,10 @@ export async function POST(request: NextRequest) {
                 await supabase
                     .from('doctor_reason_usage')
                     .update({
-                        use_count: (existing as any).use_count + 1,
+                        use_count: (existing as { use_count: number }).use_count + 1,
                         last_used_at: new Date().toISOString(),
                     })
-                    .eq('id', (existing as any).id);
+                    .eq('id', (existing as { id: string }).id);
             } else {
                 // Insert nuevo
                 await supabase
@@ -166,7 +166,7 @@ export async function POST(request: NextRequest) {
                         reason: reason.trim(),
                         use_count: 1,
                         last_used_at: new Date().toISOString(),
-                    } as any);
+                    });
             }
         }
 

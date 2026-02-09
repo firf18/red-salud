@@ -23,7 +23,6 @@ import {
     Loader2,
     X,
     Calendar,
-    ChevronRight,
     ExternalLink,
 } from "lucide-react";
 import { cn } from "@red-salud/core/utils";

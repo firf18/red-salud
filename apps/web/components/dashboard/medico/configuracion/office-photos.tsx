@@ -1,11 +1,10 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
+import Image from "next/image";
 import { Button } from "@red-salud/ui";
-import { Loader2, X, Upload, Image as ImageIcon, Star, Trash2 } from "lucide-react";
+import { Loader2, Upload, Image as ImageIcon, Star, Trash2 } from "lucide-react";
 import { supabase } from "@/lib/supabase/client";
-import { cn } from "@red-salud/core/utils";
-import { toast } from "sonner"; // Assuming sonner or use toast from ui
 
 interface OfficePhoto {
     id: string;
@@ -103,7 +102,7 @@ export function OfficePhotos({ officeId, onChange }: OfficePhotosProps) {
         }
     };
 
-    const handleDelete = async (photoId: string, url: string) => {
+    const handleDelete = async (photoId: string) => {
         if (!confirm("¿Eliminar esta foto?")) return;
 
         try {
@@ -203,9 +202,11 @@ export function OfficePhotos({ officeId, onChange }: OfficePhotosProps) {
                 <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
                     {photos.map((photo) => (
                         <div key={photo.id} className="relative group aspect-video rounded-lg overflow-hidden border border-gray-200 dark:border-gray-800 bg-gray-100">
-                            <img
+                            <Image
                                 src={photo.url}
                                 alt="Consultorio"
+                                width={300}
+                                height={200}
                                 className="w-full h-full object-cover"
                             />
 

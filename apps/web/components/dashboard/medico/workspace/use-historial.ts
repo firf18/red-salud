@@ -33,12 +33,12 @@ export function useHistorial(cedula: string) {
           if (offlineData && offlineData.length > 0) {
             const historial: HistorialItem[] = offlineData
               .filter(item => item.notas_medico)
-              .map((item: any) => ({
+              .map((item) => ({
                 id: crypto.randomUUID(),
                 fecha: item.created_at,
                 diagnostico: 'Consulta previa',
                 notas: item.notas_medico || 'Sin notas',
-                doctor: item.doctor?.nombre_completo || 'Desconocido',
+                doctor: Array.isArray(item.doctor) ? item.doctor[0]?.nombre_completo || 'Desconocido' : item.doctor?.nombre_completo || 'Desconocido',
               }));
             setHistorialClinico(historial);
           }
@@ -59,7 +59,7 @@ export function useHistorial(cedula: string) {
           .limit(10);
 
         if (notasData && notasData.length > 0) {
-          const historial: HistorialItem[] = notasData.map((nota: any) => ({
+          const historial: HistorialItem[] = notasData.map((nota: { id: string; created_at: string; diagnosis: string | null; content: string | null; doctor: { nombre_completo: string } | null }) => ({
             id: nota.id,
             fecha: nota.created_at,
             diagnostico: nota.diagnosis || 'Sin diagnóstico',

@@ -26,7 +26,7 @@ interface FinanzasStats {
   tasaCobro: number;
 }
 
-export function FinanzasTab({ doctorId, dateRange }: FinanzasTabProps) {
+export function FinanzasTab({ doctorId }: FinanzasTabProps) {
   const [stats, setStats] = useState<FinanzasStats | null>(null);
   const [loading, setLoading] = useState(true);
 

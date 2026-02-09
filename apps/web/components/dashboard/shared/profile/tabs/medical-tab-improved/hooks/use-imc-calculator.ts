@@ -1,29 +1,24 @@
-import { useState, useEffect } from "react";
+import { useMemo } from "react";
 import type { IMCData } from "../types";
 
 export function useIMCCalculator(peso?: string, altura?: string): IMCData {
-  const [imc, setImc] = useState<number | null>(null);
-  const [imcCategoria, setImcCategoria] = useState<string>("");
-
-  useEffect(() => {
+  return useMemo(() => {
     if (peso && altura) {
       const pesoNum = parseFloat(peso);
       const alturaNum = parseFloat(altura) / 100;
       
       if (pesoNum > 0 && alturaNum > 0) {
         const imcCalculado = pesoNum / (alturaNum * alturaNum);
-        setImc(imcCalculado);
+        let categoria = "Normal";
         
-        if (imcCalculado < 18.5) setImcCategoria("Bajo peso");
-        else if (imcCalculado < 25) setImcCategoria("Normal");
-        else if (imcCalculado < 30) setImcCategoria("Sobrepeso");
-        else setImcCategoria("Obesidad");
+        if (imcCalculado < 18.5) categoria = "Bajo peso";
+        else if (imcCalculado < 25) categoria = "Normal";
+        else if (imcCalculado < 30) categoria = "Sobrepeso";
+        else categoria = "Obesidad";
+        
+        return { value: imcCalculado, categoria };
       }
-    } else {
-      setImc(null);
-      setImcCategoria("");
     }
+    return { value: null, categoria: "" };
   }, [peso, altura]);
-
-  return { value: imc, categoria: imcCategoria };
 }

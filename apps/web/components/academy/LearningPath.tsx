@@ -1,8 +1,7 @@
-
 "use client";
 
 import { motion } from "framer-motion";
-import { Check, Star, Lock, Play } from "lucide-react";
+import { Check, Lock, Play } from "lucide-react";
 import Link from "next/link";
 import { cn } from "@red-salud/core/utils";
 import { Course, Module, LessonNode } from "@/types/academy";
@@ -21,7 +20,7 @@ export function LearningPath({ course }: LearningPathProps) {
     );
 }
 
-function ModuleSection({ module, index }: { module: Module; index: number }) {
+function ModuleSection({ module }: { module: Module; index: number }) {
     return (
         <div className="relative">
             {/* Module Header */}
@@ -52,7 +51,6 @@ function ModuleSection({ module, index }: { module: Module; index: number }) {
 function LessonNodeItem({
     node,
     color,
-    isLast
 }: {
     node: LessonNode;
     color: string;
@@ -103,13 +101,21 @@ function LessonNodeItem({
 }
 
 // Helper to get color styles
+const maps: Record<string, string> = {
+    emerald: 'from-emerald-500/20 to-teal-500/10 border-emerald-500/20',
+    blue: 'from-blue-500/20 to-indigo-500/10 border-blue-500/20',
+    rose: 'from-rose-500/20 to-pink-500/10 border-rose-500/20',
+    default: 'from-slate-800 to-slate-900 border-slate-800'
+};
+
+const activeMaps: Record<string, string> = {
+    emerald: 'bg-emerald-500 border-emerald-700 text-white shadow-emerald-500/40',
+    blue: 'bg-blue-500 border-blue-700 text-white shadow-blue-500/40',
+    rose: 'bg-rose-500 border-rose-700 text-white shadow-rose-500/40',
+    default: 'bg-slate-200 border-slate-400 text-slate-900'
+};
+
 function getThemeColors(color: string) {
-    const maps: Record<string, string> = {
-        emerald: 'from-emerald-500/20 to-teal-500/10 border-emerald-500/20',
-        blue: 'from-blue-500/20 to-indigo-500/10 border-blue-500/20',
-        rose: 'from-rose-500/20 to-pink-500/10 border-rose-500/20',
-        default: 'from-slate-800 to-slate-900 border-slate-800'
-    };
     return maps[color] || maps.default;
 }
 
@@ -121,14 +127,6 @@ function getNodeStyles(status: string, color: string) {
     if (status === 'completed') {
         return "bg-amber-500 border-amber-700 text-white shadow-lg shadow-amber-500/20";
     }
-
-    // Active based on color
-    const activeMaps: Record<string, string> = {
-        emerald: 'bg-emerald-500 border-emerald-700 text-white shadow-emerald-500/40',
-        blue: 'bg-blue-500 border-blue-700 text-white shadow-blue-500/40',
-        rose: 'bg-rose-500 border-rose-700 text-white shadow-rose-500/40',
-        default: 'bg-slate-200 border-slate-400 text-slate-900'
-    };
 
     return activeMaps[color] || activeMaps.default;
 }

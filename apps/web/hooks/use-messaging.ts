@@ -44,19 +44,31 @@ export function useMessaging(userId: string) {
     setLoading(false);
   }, [userId]);
 
-  const loadUnreadCount = useCallback(async () => {
-    if (!userId) return;
-
-    const result = await getUnreadMessagesCount(userId);
-    if (result.success) {
-      setUnreadCount(result.data);
-    }
-  }, [userId]);
-
   useEffect(() => {
-    void loadConversations();
-    void loadUnreadCount();
-  }, [loadConversations, loadUnreadCount]);
+    if (!userId) return;
+    
+    const loadData = async () => {
+      setLoading(true);
+      setError(null);
+      
+      const result = await getUserConversations(userId);
+      if (result.success) {
+        setConversations(result.data);
+      } else {
+        setError("Error al cargar conversaciones");
+        console.error(result.error);
+      }
+      
+      const unreadResult = await getUnreadMessagesCount(userId);
+      if (unreadResult.success) {
+        setUnreadCount(unreadResult.data);
+      }
+      
+      setLoading(false);
+    };
+    
+    loadData();
+  }, [userId]);
 
   const createNewConversation = async (data: CreateConversationData) => {
     const result = await createConversation(userId, data);
@@ -111,19 +123,6 @@ export function useConversation(conversationId: string, userId: string) {
   const [sending, setSending] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const loadConversation = useCallback(async () => {
-    if (!conversationId) return;
-
-    const result = await getConversation(conversationId);
-
-    if (result.success) {
-      setConversation(result.data);
-    } else {
-      setError("Error al cargar conversación");
-      console.error(result.error);
-    }
-  }, [conversationId]);
-
   const loadMessages = useCallback(async () => {
     if (!conversationId) return;
 
@@ -145,9 +144,34 @@ export function useConversation(conversationId: string, userId: string) {
   }, [conversationId, userId]);
 
   useEffect(() => {
-    void loadConversation();
-    void loadMessages();
-  }, [loadConversation, loadMessages]);
+    if (!conversationId) return;
+    
+    const loadData = async () => {
+      setLoading(true);
+      setError(null);
+      
+      const convResult = await getConversation(conversationId);
+      if (convResult.success) {
+        setConversation(convResult.data);
+      } else {
+        setError("Error al cargar conversación");
+        console.error(convResult.error);
+      }
+      
+      const msgsResult = await getConversationMessages(conversationId);
+      if (msgsResult.success) {
+        setMessages(msgsResult.data);
+        await markMessagesAsRead(conversationId, userId);
+      } else {
+        setError("Error al cargar mensajes");
+        console.error(msgsResult.error);
+      }
+      
+      setLoading(false);
+    };
+    
+    loadData();
+  }, [conversationId, userId]);
 
   // Suscribirse a nuevos mensajes en tiempo real
   useEffect(() => {

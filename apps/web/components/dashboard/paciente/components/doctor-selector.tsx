@@ -7,8 +7,16 @@ import { User, MapPin, Phone, Clock } from "lucide-react";
 import Image from "next/image";
 import type { DoctorProfile } from "@/lib/supabase/types/appointments";
 
+interface DoctorProfileExtended extends DoctorProfile {
+  direccion?: string;
+  ciudad?: string;
+  estado?: string;
+  telefono?: string;
+  horario?: string;
+}
+
 interface Props {
-  doctors: DoctorProfile[];
+  doctors: DoctorProfileExtended[];
   selectedDoctor: string;
   selectedSpecialtyName?: string;
   onSelect: (id: string) => void;
@@ -54,13 +62,12 @@ export function DoctorSelector({ doctors, selectedDoctor, selectedSpecialtyName,
                       <div className="mt-2 space-y-1">
                         {doctor.anos_experiencia && doctor.anos_experiencia > 0 && (<p className="text-sm text-gray-600">⭐ {doctor.anos_experiencia} años de experiencia</p>)}
                         {doctor.tarifa_consulta && (<p className="text-sm font-medium text-green-600">💵 ${doctor.tarifa_consulta.toFixed(2)} por consulta</p>)}
-                        {/* Note: address fields are not in DoctorProfile, but we can check if they exist in props or if we need to extend the type */}
-                        {/* For now keeping the original logic but checking if fields exist */}
-                        {(doctor as any).direccion || (doctor as any).ciudad && (
-                          <p className="text-sm text-gray-600 flex items-center gap-1"><MapPin className="h-3 w-3" />{(doctor as any).ciudad && (doctor as any).estado ? `${(doctor as any).ciudad}, ${(doctor as any).estado}` : (doctor as any).direccion || (doctor as any).ciudad || (doctor as any).estado}</p>
+                        {/* Address and contact information */}
+                        {(doctor.ciudad || doctor.estado) && (
+                          <p className="text-sm text-gray-600 flex items-center gap-1"><MapPin className="h-3 w-3" />{doctor.ciudad && doctor.estado ? `${doctor.ciudad}, ${doctor.estado}` : doctor.direccion || doctor.ciudad || doctor.estado}</p>
                         )}
-                        {(doctor as any).telefono && (<p className="text-sm text-gray-600 flex items-center gap-1"><Phone className="h-3 w-3" />{(doctor as any).telefono}</p>)}
-                        {(doctor as any).horario && (<p className="text-sm text-gray-600 flex items-center gap-1"><Clock className="h-3 w-3" />Horarios disponibles</p>)}
+                        {doctor.telefono && (<p className="text-sm text-gray-600 flex items-center gap-1"><Phone className="h-3 w-3" />{doctor.telefono}</p>)}
+                        {doctor.horario && (<p className="text-sm text-gray-600 flex items-center gap-1"><Clock className="h-3 w-3" />Horarios disponibles</p>)}
                         {doctor.biografia && (<p className="text-sm text-gray-600 line-clamp-2 mt-2">{doctor.biografia}</p>)}
                       </div>
                     </div>

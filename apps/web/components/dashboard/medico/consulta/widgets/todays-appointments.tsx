@@ -6,9 +6,8 @@ import { supabase } from "@/lib/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@red-salud/ui";
 import { Button } from "@red-salud/ui";
 import { Badge } from "@red-salud/ui";
-import { Loader2, Calendar, Clock, ChevronRight } from "lucide-react";
+import { Loader2, Calendar, ChevronRight } from "lucide-react";
 import { format } from "date-fns";
-import { es } from "date-fns/locale";
 
 interface Appointment {
   id: string;
@@ -79,7 +78,7 @@ export function TodaysAppointmentsWidget() {
           offline_patient: apt.offline_patient_id ? offlineMap.get(apt.offline_patient_id) : null
         }));
 
-        setAppointments(combinedData as any[]);
+        setAppointments(combinedData);
       } catch (err) {
         console.error("Error fetching today appointments:", JSON.stringify(err, null, 2));
       } finally {

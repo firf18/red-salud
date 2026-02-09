@@ -3,10 +3,8 @@
 import { useState, useEffect, useRef } from "react";
 import { Input } from "@red-salud/ui";
 import { Badge } from "@red-salud/ui";
-import { Button } from "@red-salud/ui";
 import { Card } from "@red-salud/ui";
 import { Search, Sparkles, X, Loader2 } from "lucide-react";
-import { cn } from "@red-salud/core/utils";
 
 interface ICD11Code {
   id: string;

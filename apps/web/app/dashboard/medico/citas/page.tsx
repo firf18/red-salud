@@ -1,7 +1,7 @@
 
 "use client";
 import { useEffect, useState, useRef, useCallback } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase/client";
 import { VerificationGuard } from "@/components/dashboard/medico/features/verification-guard";
 import { UnifiedCalendar } from "@/components/dashboard/medico/calendar/unified-calendar";
@@ -37,7 +37,6 @@ interface RawAppointment {
     email: string | null;
   } | null;
 }
-
 
 import { Suspense } from "react";
 
@@ -349,7 +348,7 @@ function CitasContent() {
             paciente_nombre: patientData?.nombre_completo || "Paciente",
             paciente_telefono: patientData?.telefono || null,
             paciente_email: patientData?.email || null,
-            paciente_avatar: isOfflinePatient ? null : (patientData as any)?.avatar_url || null,
+            paciente_avatar: isOfflinePatient ? null : (patientData as { avatar_url?: string | null })?.avatar_url || null,
             fecha_hora: apt.fecha_hora,
             fecha_hora_fin: new Date(
               new Date(apt.fecha_hora).getTime() + (apt.duracion_minutos || 30) * 60000

@@ -48,7 +48,7 @@ export interface DashboardMobileSidebarProps {
   isOpen: boolean;
   onClose: () => void;
   userName?: string;
-  userEmail?: string;
+  userName?: string;
   menuGroups: MenuGroup[];
   dashboardRoute: string;
   onProfileClick?: () => void;
@@ -59,7 +59,7 @@ export function DashboardMobileSidebar({
   isOpen,
   onClose,
   userName = "Usuario",
-  userEmail = "usuario@email.com",
+  userName = "Usuario",
   menuGroups,
   dashboardRoute,
   onProfileClick,

@@ -38,7 +38,7 @@ export function VerifyPhoneModal({ isOpen, onClose }: VerifyPhoneModalProps) {
 
       if (data.devCode) setDevCode(data.devCode);
       setStep("code");
-    } catch (error) {
+    } catch {
       setError("Error al conectar con el servidor");
     } finally {
       setLoading(false);
@@ -71,7 +71,7 @@ export function VerifyPhoneModal({ isOpen, onClose }: VerifyPhoneModalProps) {
         setPhoneNumber("");
         setCode("");
       }, 2000);
-    } catch (error) {
+    } catch {
       setError("Error al verificar código");
     } finally {
       setLoading(false);

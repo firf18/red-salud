@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Button } from "@red-salud/ui";
 import { ChevronLeft, ChevronRight, Plus, Calendar as CalendarIcon } from "lucide-react";
 import { format, addDays, addWeeks, addMonths, subDays, subWeeks, subMonths } from "date-fns";
@@ -25,7 +25,11 @@ interface CalendarMainProps {
   onDateChange?: (date: Date) => void;
   onViewChange?: (view: CalendarView) => void;
   // Drag & Drop
-  dragState?: any;
+  dragState?: {
+    isDragging: boolean;
+    draggedAppointment: CalendarAppointment | null;
+    draggedOver: { date: Date; hour: number } | null;
+  };
   onDragStart?: (appointment: CalendarAppointment) => void;
   onDragOver?: (date: Date, hour: number) => void;
   onDragEnd?: () => void;

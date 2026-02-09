@@ -48,7 +48,7 @@ export default function SecretariasPage() {
     } finally {
       setLoading(false);
     }
-  }, [supabase, router]);
+  }, [router]);
 
   useEffect(() => {
     loadSecretaries();
@@ -108,7 +108,7 @@ export default function SecretariasPage() {
     } finally {
       setLoading(false);
     }
-  }, [supabase, loadSecretaries]);
+  }, [loadSecretaries]);
 
   const handleUpdatePermissions = useCallback(async () => {
     if (!selectedSecretary) return;
@@ -133,7 +133,7 @@ export default function SecretariasPage() {
     } finally {
       setLoading(false);
     }
-  }, [supabase, selectedSecretary, loadSecretaries]);
+  }, [selectedSecretary, loadSecretaries]);
 
   const handleDeleteSecretary = useCallback(async (secretaryId: string) => {
     if (!confirm("¿Estás seguro de eliminar esta secretaria?")) return;
@@ -152,18 +152,20 @@ export default function SecretariasPage() {
       console.error("Error deleting secretary:", err);
       setError(err instanceof Error ? err.message : "Error desconocido");
     }
-  }, [supabase, loadSecretaries]);
+  }, [loadSecretaries]);
 
-  const togglePermission = (key: keyof Secretary["permissions"]) => {
-    if (!selectedSecretary) return;
-    setSelectedSecretary({
-      ...selectedSecretary,
-      permissions: {
-        ...selectedSecretary.permissions,
-        [key]: !selectedSecretary.permissions[key],
-      },
+  const togglePermission = useCallback((key: keyof Secretary["permissions"]) => {
+    setSelectedSecretary(prev => {
+      if (!prev) return null;
+      return {
+        ...prev,
+        permissions: {
+          ...prev.permissions,
+          [key]: !prev.permissions[key],
+        },
+      };
     });
-  };
+  }, []);
 
   if (loading && secretaries.length === 0) {
     return (

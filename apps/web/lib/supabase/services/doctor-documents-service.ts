@@ -422,7 +422,7 @@ export async function getDocumentProgress(userId: string): Promise<ServiceResult
 
         const uploadedTypes = new Set(docs?.map(d => d.document_type) || []);
         const requiredTypes = Object.entries(DOCTOR_DOCUMENT_TYPES)
-            .filter(([_type, config]) => config.required)
+            .filter(([, config]) => config.required)
             .map(([type]) => type);
 
         const missingRequired = requiredTypes.filter(t => !uploadedTypes.has(t));

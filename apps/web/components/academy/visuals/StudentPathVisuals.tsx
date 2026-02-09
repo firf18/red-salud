@@ -1,8 +1,8 @@
 "use client";
 
-import { useMemo, useRef } from "react";
+import { useRef } from "react";
 import { Canvas, useFrame } from "@react-three/fiber";
-import { Float, Stars, Sphere, Torus, MeshDistortMaterial, Box, Line } from "@react-three/drei";
+import { Float, Stars, Sphere, Torus, MeshDistortMaterial, Box } from "@react-three/drei";
 import * as THREE from "three";
 
 
@@ -73,19 +73,23 @@ function PracticeScene() {
     );
 }
 
+
+
+const MENTORSHIP_PARTICLES = Array.from({ length: 15 }, () => ({
+    position: [(Math.random() - 0.5) * 3, (Math.random() - 0.5) * 3, (Math.random() - 0.5) * 3] as [number, number, number]
+}));
+
 function MentorshipScene() {
     const group = useRef<THREE.Group>(null);
+    const mentorshipParticles = MENTORSHIP_PARTICLES;
+
     useFrame((state, delta) => {
         if (group.current) { group.current.rotation.y += delta * 0.2; }
     });
 
-    const particles = useMemo(() => Array.from({ length: 15 }, () => ({
-        position: [(Math.random() - 0.5) * 3, (Math.random() - 0.5) * 3, (Math.random() - 0.5) * 3] as [number, number, number]
-    })), []);
-
     return (
         <group ref={group}>
-            {particles.map((p, i) => (
+            {mentorshipParticles.map((p, i) => (
                 <group key={i} position={p.position}>
                     <Sphere args={[0.08, 16, 16]}>
                         <meshBasicMaterial color="#a855f7" />

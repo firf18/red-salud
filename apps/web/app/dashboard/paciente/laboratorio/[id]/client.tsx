@@ -1,25 +1,22 @@
 "use client";
 
-import { use, useState, useEffect } from "react";
+import { use } from "react";
 import { useLabOrder } from "@/hooks/use-laboratory";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle, Badge, Button, Tabs, TabsContent, TabsList, TabsTrigger, Separator } from "@red-salud/ui";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle, Badge, Button, Tabs, TabsContent, TabsList, TabsTrigger } from "@red-salud/ui";
 import {
   FlaskConical,
   Calendar,
-  FileText,
-  Download,
   AlertCircle,
   CheckCircle2,
   Clock,
   TrendingUp,
   ArrowLeft,
   User,
-  Building2,
+  Loader2,
   AlertTriangle,
   Info,
-  Loader2,
+  Download,
 } from "lucide-react";
-import { supabase } from "@/lib/supabase/client";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
 import Link from "next/link";

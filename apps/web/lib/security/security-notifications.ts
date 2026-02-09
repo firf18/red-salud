@@ -67,7 +67,7 @@ export async function createSecurityNotification(
     }
 
     return { success: true };
-  } catch (_error) {
+  } catch {
     return { success: false, error: "Error al crear notificación" };
   }
 }
@@ -235,7 +235,7 @@ export async function getSecurityNotifications(
     }));
 
     return { success: true, data: notifications };
-  } catch (_error) {
+  } catch {
     return { success: false, error: "Error al obtener notificaciones" };
   }
 }
@@ -257,7 +257,7 @@ export async function markNotificationAsRead(
     }
 
     return { success: true };
-  } catch (_error) {
+  } catch {
     return { success: false, error: "Error al marcar notificación" };
   }
 }
@@ -286,13 +286,13 @@ export async function markAllNotificationsAsRead(): Promise<{
     }
 
     return { success: true };
-  } catch (_error) {
+  } catch {
     return { success: false, error: "Error al marcar notificaciones" };
   }
 }
 
 /**
- * Elimina una notificación
+ * Obtiene todas las notificaciones de seguridad del usuario
  */
 export async function deleteNotification(
   notificationId: string
@@ -308,7 +308,7 @@ export async function deleteNotification(
     }
 
     return { success: true };
-  } catch (_error) {
+  } catch {
     return { success: false, error: "Error al eliminar notificación" };
   }
 }

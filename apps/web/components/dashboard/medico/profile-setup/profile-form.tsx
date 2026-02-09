@@ -34,7 +34,6 @@ interface Props {
 
 export function ProfileForm({
   verificationData,
-  specialties,
   filteredSpecialties,
   specialtyId,
   specialtySearch,

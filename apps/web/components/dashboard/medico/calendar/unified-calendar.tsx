@@ -6,9 +6,9 @@
 
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Button } from "@red-salud/ui";
-import { ChevronLeft, ChevronRight, Plus, Calendar as CalendarIcon, AlignJustify, LayoutGrid, LayoutList } from "lucide-react";
+import { ChevronLeft, ChevronRight, Plus, Calendar as CalendarIcon, AlignJustify } from "lucide-react";
 import { format, addDays, addWeeks, addMonths, subDays, subWeeks, subMonths, startOfWeek, endOfWeek, startOfMonth, endOfMonth, eachDayOfInterval, isSameDay, isSameMonth, isToday, parseISO } from "date-fns";
 import { es } from "date-fns/locale";
 import type { CalendarAppointment } from "./types";
@@ -47,12 +47,19 @@ export function UnifiedCalendar({
   const [currentDate, setCurrentDate] = useState(new Date());
   const [viewMode, setViewMode] = useState<ViewMode>("week");
   const isDesktop = useMediaQuery("(min-width: 768px)");
+  const prevIsDesktop = useRef(isDesktop);
 
   // Switch to day view on mobile if in week view
   useEffect(() => {
-    if (!isDesktop && viewMode === "week") {
-      setViewMode("day");
+    if (!isDesktop && prevIsDesktop.current && viewMode === "week") {
+      // Use a timeout to avoid setState warning in useEffect
+      const timeoutId = setTimeout(() => {
+        setViewMode("day");
+      }, 0);
+      prevIsDesktop.current = isDesktop;
+      return () => clearTimeout(timeoutId);
     }
+    prevIsDesktop.current = isDesktop;
   }, [isDesktop, viewMode]);
 
   // Estado para la hora actual
@@ -122,14 +129,6 @@ export function UnifiedCalendar({
     }
   };
 
-  const getAppointmentsForDate = (date: Date) => {
-    const filtered = appointments.filter(apt => isSameDay(new Date(apt.fecha_hora), date));
-    if (filtered.length > 0) {
-      console.log(`📅 Appointments for ${format(date, 'yyyy-MM-dd')}:`, filtered.length);
-    }
-    return filtered;
-  };
-
   const getAppointmentsForHour = (date: Date, hour: number) => {
     return appointments.filter(apt => {
       const aptDate = new Date(apt.fecha_hora);
@@ -139,7 +138,6 @@ export function UnifiedCalendar({
 
   const renderDayView = () => {
     const hours = Array.from({ length: 16 }, (_, i) => i + 7); // 7 AM - 10 PM
-    const dayAppointments = getAppointmentsForDate(currentDate);
 
     // Ajuste de ancho responsivo
     return (
@@ -308,12 +306,8 @@ export function UnifiedCalendar({
         >
           <style>{`.month-grid::-webkit-scrollbar { display: none; }`}</style>
           {calendarDays.map(day => {
-            const dayAppointments = getAppointmentsForDate(day);
             const isCurrentMonth = isSameMonth(day, currentDate);
-            const appointmentCount = dayAppointments.length;
-
-            // Get unique colors for indicators
-            const uniqueColors = [...new Set(dayAppointments.map(apt => apt.color))].slice(0, 4);
+            const dayAppointments = appointments.filter(apt => isSameDay(new Date(apt.fecha_hora), day));
 
             return (
               <div

@@ -22,11 +22,20 @@ const OPCIONES_ACTIVIDAD = [
   { value: "intensa", label: "Intensa" },
 ];
 
+interface LifestyleData {
+  fumar: boolean | null;
+  beber_alcohol: boolean | null;
+  ejercicio: string | null;
+  horas_sueno: number | null;
+  estres_nivel: string | null;
+  notas: string | null;
+}
+
 interface LifestyleHabitsProps {
   isEditing: boolean;
-  localData: any;
-  setLocalData: (data: any) => void;
-  formData: any;
+  localData: LifestyleData;
+  setLocalData: (data: LifestyleData) => void;
+  formData: LifestyleData;
 }
 
 export function LifestyleHabitsSection({

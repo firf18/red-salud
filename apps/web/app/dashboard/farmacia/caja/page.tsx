@@ -12,23 +12,16 @@ import {
   DollarSign,
   Receipt,
   X,
-  Barcode,
   Package,
-  Clock,
-  AlertCircle,
-  Pause,
+  Barcode,
+  QrCode,
   Play,
-  Save,
-  Keyboard,
-  User,
-  Scan,
-  DollarSign as CurrencyIcon,
+  Pause,
 } from "lucide-react";
 import { Button } from "@red-salud/ui";
 import { Input } from "@red-salud/ui";
 import { Card, CardContent, CardHeader, CardTitle } from "@red-salud/ui";
-import { cn } from "@red-salud/core/utils";
-import { CurrencyManager, BCVRateFetcher } from "@red-salud/core/pharmacy";
+import { BCVRateFetcher } from "@red-salud/core/pharmacy";
 
 interface Producto {
   id: string;
@@ -71,19 +64,171 @@ export default function CajaPage() {
   const [metodoPago, setMetodoPago] = useState<"efectivo" | "tarjeta" | "pago_movil" | "zelle" | "transferencia">("efectivo");
   const [procesando, setProcesando] = useState(false);
   const [exchangeRate, setExchangeRate] = useState<number>(36);
-  const [showUSD, setShowUSD] = useState(true);
   const [heldCarts, setHeldCarts] = useState<HeldCart[]>([]);
   const [showHeldCarts, setShowHeldCarts] = useState(false);
   const [showKeyboardShortcuts, setShowKeyboardShortcuts] = useState(false);
-  const [quantityInput, setQuantityInput] = useState<number>(1);
-  const [selectedProduct, setSelectedProduct] = useState<Producto | null>(null);
 
-  useEffect(() => {
-    loadProductos();
-    loadExchangeRate();
-    loadHeldCarts();
-    setupKeyboardShortcuts();
+  const loadExchangeRate = useCallback(async () => {
+    try {
+      const rate = await BCVRateFetcher.fetchRateWithFallback(36);
+      setExchangeRate(rate);
+    } catch (error) {
+      console.error('Error loading exchange rate:', error);
+    }
   }, []);
+
+  const loadHeldCarts = useCallback(() => {
+    const held: HeldCart[] = [];
+    for (let i = 0; i < localStorage.length; i++) {
+      const key = localStorage.key(i);
+      if (key?.startsWith('hold_')) {
+        const heldCartStr = localStorage.getItem(key);
+        if (heldCartStr) {
+          held.push(JSON.parse(heldCartStr));
+        }
+      }
+    }
+    setHeldCarts(held);
+  }, []);
+
+  const loadProductos = useCallback(async () => {
+    try {
+      const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
+      const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
+      const supabase = createClient(supabaseUrl, supabaseAnonKey);
+
+      const { data, error } = await supabase
+        .from("farmacia_inventario")
+        .select("*")
+        .eq("estado", "activo")
+        .order("nombre");
+
+      if (error) throw error;
+      setProductos(data || []);
+    } catch (error) {
+      console.error("Error cargando productos:", error);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  const filterProductos = useCallback(() => {
+    let filtered = productos;
+
+    if (searchTerm) {
+      const term = searchTerm.toLowerCase();
+      filtered = filtered.filter(
+        (p) =>
+          p.nombre.toLowerCase().includes(term) ||
+          p.categoria.toLowerCase().includes(term) ||
+          p.ingrediente_activo?.toLowerCase().includes(term) ||
+          p.nombre_generico?.toLowerCase().includes(term) ||
+          p.presentacion.toLowerCase().includes(term)
+      );
+    }
+
+    setFilteredProductos(filtered);
+  }, [productos, searchTerm]);
+
+  const subtotalUSD = carrito.reduce(
+    (sum, item) => sum + item.producto.precio_venta_usd * item.cantidad,
+    0
+  );
+  const subtotalVES = carrito.reduce(
+    (sum, item) => sum + item.producto.precio_venta_ves * item.cantidad,
+    0
+  );
+  const ivaUSD = carrito.reduce(
+    (sum, item) => sum + (item.producto.precio_venta_usd * item.cantidad * item.producto.iva_rate),
+    0
+  );
+  const ivaVES = carrito.reduce(
+    (sum, item) => sum + (item.producto.precio_venta_ves * item.cantidad * item.producto.iva_rate),
+    0
+  );
+  const totalUSD = subtotalUSD + ivaUSD;
+  const totalVES = subtotalVES + ivaVES;
+
+  const holdCart = useCallback(() => {
+    if (carrito.length === 0) {
+      alert('El carrito está vacío');
+      return;
+    }
+    const holdId = `hold_${Date.now()}`;
+    const heldCart: HeldCart = {
+      id: holdId,
+      items: carrito,
+      timestamp: new Date().toISOString(),
+    };
+    localStorage.setItem(holdId, JSON.stringify(heldCart));
+    setCarrito([]);
+    loadHeldCarts();
+    alert('Carrito guardado en espera');
+  }, [carrito, loadHeldCarts]);
+
+  const procesarVenta = useCallback(async () => {
+    if (carrito.length === 0) return;
+
+    setProcesando(true);
+    try {
+      const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
+      const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
+      const supabase = createClient(supabaseUrl, supabaseAnonKey);
+
+      // Generate invoice number
+      const invoiceNumber = `INV-${Date.now()}`;
+
+      // Create venta
+      const { error } = await supabase
+        .from("farmacia_ventas")
+        .insert({
+          invoice_number: invoiceNumber,
+          productos: carrito.map((item) => ({
+            producto_id: item.producto.id,
+            nombre: item.producto.nombre,
+            cantidad: item.cantidad,
+            precio_unitario_usd: item.producto.precio_venta_usd,
+            precio_unitario_ves: item.producto.precio_venta_ves,
+            subtotal_usd: item.producto.precio_venta_usd * item.cantidad,
+            subtotal_ves: item.producto.precio_venta_ves * item.cantidad,
+            iva_rate: item.producto.iva_rate,
+          })),
+          subtotal_usd: subtotalUSD,
+          subtotal_ves: subtotalVES,
+          iva_usd: ivaUSD,
+          iva_ves: ivaVES,
+          total_usd: totalUSD,
+          total_ves: totalVES,
+          metodo_pago: metodoPago,
+          exchange_rate: exchangeRate,
+          estado: "completada",
+        })
+        .select()
+        .single();
+
+      if (error) throw error;
+
+      // Update inventory (FEFO - First Expired First Out)
+      for (const item of carrito) {
+        const { error: updateError } = await supabase
+          .from("farmacia_inventario")
+          .update({ stock_actual: item.producto.stock_actual - item.cantidad })
+          .eq("id", item.producto.id);
+
+        if (updateError) throw updateError;
+      }
+
+      // Clear cart and reload products
+      setCarrito([]);
+      loadProductos();
+      alert(`Venta procesada exitosamente\nFactura: ${invoiceNumber}`);
+    } catch (error) {
+      console.error("Error procesando venta:", error);
+      alert("Error al procesar la venta");
+    } finally {
+      setProcesando(false);
+    }
+  }, [carrito, metodoPago, exchangeRate, subtotalUSD, subtotalVES, ivaUSD, ivaVES, totalUSD, totalVES, loadProductos]);
 
   const setupKeyboardShortcuts = useCallback(() => {
     const handleKeyPress = (e: KeyboardEvent) => {
@@ -121,73 +266,18 @@ export default function CajaPage() {
 
     window.addEventListener('keydown', handleKeyPress);
     return () => window.removeEventListener('keydown', handleKeyPress);
-  }, [carrito, showHeldCarts]);
+  }, [carrito, showHeldCarts, showKeyboardShortcuts, holdCart, procesarVenta]);
 
-  const loadExchangeRate = async () => {
-    try {
-      const rate = await BCVRateFetcher.fetchRateWithFallback(36);
-      setExchangeRate(rate);
-    } catch (error) {
-      console.error('Error loading exchange rate:', error);
-    }
-  };
-
-  const loadHeldCarts = () => {
-    const held: HeldCart[] = [];
-    for (let i = 0; i < localStorage.length; i++) {
-      const key = localStorage.key(i);
-      if (key?.startsWith('hold_')) {
-        const heldCartStr = localStorage.getItem(key);
-        if (heldCartStr) {
-          held.push(JSON.parse(heldCartStr));
-        }
-      }
-    }
-    setHeldCarts(held);
-  };
+  useEffect(() => {
+    loadProductos();
+    loadExchangeRate();
+    loadHeldCarts();
+    setupKeyboardShortcuts();
+  }, [setupKeyboardShortcuts, loadProductos, loadExchangeRate, loadHeldCarts]);
 
   useEffect(() => {
     filterProductos();
-  }, [productos, searchTerm]);
-
-  const loadProductos = async () => {
-    try {
-      const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-      const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
-      const supabase = createClient(supabaseUrl, supabaseAnonKey);
-
-      const { data, error } = await supabase
-        .from("farmacia_inventario")
-        .select("*")
-        .eq("estado", "activo")
-        .order("nombre");
-
-      if (error) throw error;
-      setProductos(data || []);
-    } catch (error) {
-      console.error("Error cargando productos:", error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const filterProductos = () => {
-    let filtered = productos;
-
-    if (searchTerm) {
-      const term = searchTerm.toLowerCase();
-      filtered = filtered.filter(
-        (p) =>
-          p.nombre.toLowerCase().includes(term) ||
-          p.categoria.toLowerCase().includes(term) ||
-          p.ingrediente_activo?.toLowerCase().includes(term) ||
-          p.nombre_generico?.toLowerCase().includes(term) ||
-          p.presentacion.toLowerCase().includes(term)
-      );
-    }
-
-    setFilteredProductos(filtered);
-  };
+  }, [productos, searchTerm, filterProductos]);
 
   const agregarAlCarrito = (producto: Producto, cantidad: number = 1) => {
     // Check if product requires prescription
@@ -225,7 +315,6 @@ export default function CajaPage() {
       }
       return [...prev, { producto, cantidad }];
     });
-    setQuantityInput(1);
   };
 
   const eliminarDelCarrito = (productoId: string) => {
@@ -252,41 +341,7 @@ export default function CajaPage() {
     );
   };
 
-  const subtotalUSD = carrito.reduce(
-    (sum, item) => sum + item.producto.precio_venta_usd * item.cantidad,
-    0
-  );
-  const subtotalVES = carrito.reduce(
-    (sum, item) => sum + item.producto.precio_venta_ves * item.cantidad,
-    0
-  );
-  const ivaUSD = carrito.reduce(
-    (sum, item) => sum + (item.producto.precio_venta_usd * item.cantidad * item.producto.iva_rate),
-    0
-  );
-  const ivaVES = carrito.reduce(
-    (sum, item) => sum + (item.producto.precio_venta_ves * item.cantidad * item.producto.iva_rate),
-    0
-  );
-  const totalUSD = subtotalUSD + ivaUSD;
-  const totalVES = subtotalVES + ivaVES;
 
-  const holdCart = () => {
-    if (carrito.length === 0) {
-      alert('El carrito está vacío');
-      return;
-    }
-    const holdId = `hold_${Date.now()}`;
-    const heldCart: HeldCart = {
-      id: holdId,
-      items: carrito,
-      timestamp: new Date().toISOString(),
-    };
-    localStorage.setItem(holdId, JSON.stringify(heldCart));
-    setCarrito([]);
-    loadHeldCarts();
-    alert('Carrito guardado en espera');
-  };
 
   const retrieveHeldCart = (holdId: string) => {
     const heldCartStr = localStorage.getItem(holdId);
@@ -304,69 +359,6 @@ export default function CajaPage() {
     loadHeldCarts();
   };
 
-  const procesarVenta = async () => {
-    if (carrito.length === 0) return;
-
-    setProcesando(true);
-    try {
-      const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-      const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
-      const supabase = createClient(supabaseUrl, supabaseAnonKey);
-
-      // Generate invoice number
-      const invoiceNumber = `INV-${Date.now()}`;
-
-      // Create venta
-      const { data: venta, error: ventaError } = await supabase
-        .from("farmacia_ventas")
-        .insert({
-          invoice_number: invoiceNumber,
-          productos: carrito.map((item) => ({
-            producto_id: item.producto.id,
-            nombre: item.producto.nombre,
-            cantidad: item.cantidad,
-            precio_unitario_usd: item.producto.precio_venta_usd,
-            precio_unitario_ves: item.producto.precio_venta_ves,
-            subtotal_usd: item.producto.precio_venta_usd * item.cantidad,
-            subtotal_ves: item.producto.precio_venta_ves * item.cantidad,
-            iva_rate: item.producto.iva_rate,
-          })),
-          subtotal_usd: subtotalUSD,
-          subtotal_ves: subtotalVES,
-          iva_usd: ivaUSD,
-          iva_ves: ivaVES,
-          total_usd: totalUSD,
-          total_ves: totalVES,
-          metodo_pago: metodoPago,
-          exchange_rate: exchangeRate,
-          estado: "completada",
-        })
-        .select()
-        .single();
-
-      if (ventaError) throw ventaError;
-
-      // Update inventory (FEFO - First Expired First Out)
-      for (const item of carrito) {
-        const { error: updateError } = await supabase
-          .from("farmacia_inventario")
-          .update({ stock_actual: item.producto.stock_actual - item.cantidad })
-          .eq("id", item.producto.id);
-
-        if (updateError) throw updateError;
-      }
-
-      // Clear cart and reload products
-      setCarrito([]);
-      loadProductos();
-      alert(`Venta procesada exitosamente\nFactura: ${invoiceNumber}`);
-    } catch (error) {
-      console.error("Error procesando venta:", error);
-      alert("Error al procesar la venta");
-    } finally {
-      setProcesando(false);
-    }
-  };
 
   if (loading) {
     return (
@@ -601,7 +593,7 @@ export default function CajaPage() {
                           onClick={() => setMetodoPago("zelle")}
                           className="flex flex-col items-center gap-1"
                         >
-                          <CurrencyIcon className="h-4 w-4" />
+                          <QrCode className="h-4 w-4" />
                           <span className="text-xs">Zelle</span>
                         </Button>
                         <Button

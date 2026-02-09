@@ -9,8 +9,6 @@
 
 import { useState } from "react";
 import { useRouter, usePathname, useSearchParams } from "next/navigation";
-import { Menu, Bell } from "lucide-react";
-import { Button } from "@red-salud/ui";
 import { PATIENT_MODULE_CONFIG } from "@/lib/constants";
 import { signOut } from "@/lib/supabase/auth";
 import { UserProfileModal } from "@/components/dashboard/shared/profile";
@@ -20,7 +18,6 @@ import { DashboardMobileHeader } from "./dashboard-mobile-header";
 import { DashboardHeader } from "./dashboard-header";
 import { SidebarAwareContent } from "./sidebar-aware-content";
 import { useSessionSetup, useSessionValidation } from "@/hooks/auth";
-import { SessionTimer } from "@/components/auth";
 import { ChatWidget } from "@/components/chatbot/chat-widget";
 import { useDoctorProfile } from "@/hooks/use-doctor-profile";
 import { useTourGuide } from "@/components/dashboard/shared/tour-guide/tour-guide-provider";
@@ -63,7 +60,6 @@ export function DashboardLayoutClient({
   // Detectar si estamos en la página de configuración, estadísticas o citas y configurar mega menú
   const isConfiguracionPage = pathname?.includes("/configuracion");
   const isEstadisticasPage = pathname?.includes("/estadisticas");
-  const isCitasPage = pathname?.includes("/citas");
   const activeTab = (searchParams?.get("tab") as string) || (isConfiguracionPage ? "perfil" : "resumen");
 
   const megaMenuConfig = isConfiguracionPage
@@ -196,8 +192,6 @@ export function DashboardLayoutClient({
       {/* Desktop Header - Solo para médicos - Full Width */}
       {userRole === "medico" && (
         <DashboardHeader
-          userName={userName}
-          userEmail={userEmail}
           doctorProfile={doctorProfile}
           onTourClick={() => startTour("dashboard-overview")}
           onChatClick={() => {
@@ -213,11 +207,9 @@ export function DashboardLayoutClient({
         {/* Desktop Sidebar */}
         <DashboardSidebar
           userName={userName}
-          userEmail={userEmail}
           menuGroups={menuGroups}
           dashboardRoute={dashboardRoute}
           onProfileClick={handleProfileClick}
-          onLogout={handleLogout}
         />
 
         {/* Mobile Sidebar */}
@@ -225,7 +217,6 @@ export function DashboardLayoutClient({
           isOpen={mobileSidebarOpen}
           onClose={() => setMobileSidebarOpen(false)}
           userName={userName}
-          userEmail={userEmail}
           menuGroups={menuGroups}
           dashboardRoute={dashboardRoute}
           onProfileClick={handleMobileProfileClick}

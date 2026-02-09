@@ -1,8 +1,9 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import Image from "next/image";
 import Link from "next/link";
-import { Card, CardContent, CardHeader, CardTitle, Button, Badge, Switch, Label } from "@red-salud/ui";
+import { Card, CardContent, CardHeader, CardTitle, Button, Badge, Switch } from "@red-salud/ui";
 import { FileText, Layout, ChevronRight, Pen, ImageIcon } from "lucide-react";
 import { toast } from "sonner";
 
@@ -18,7 +19,7 @@ import type { DoctorSettings, PrescriptionFrame } from "@/lib/supabase/types/set
 import { SignatureCanvas, LogoUpload } from "@/components/dashboard/configuracion";
 
 export function RecipeSettingsSection() {
-    const { user, profile } = useAuth();
+    const { user } = useAuth();
     const [loading, setLoading] = useState(true);
     const [signatureSaving, setSignatureSaving] = useState(false);
     const [logoUploading, setLogoUploading] = useState(false);
@@ -156,9 +157,11 @@ export function RecipeSettingsSection() {
                         <div className="flex items-center gap-4">
                             {selectedFrame ? (
                                 <div className="w-24 h-32 border rounded-lg overflow-hidden bg-white shadow-sm">
-                                    <img
+                                    <Image
                                         src={selectedFrame.image_url}
                                         alt={selectedFrame.name}
+                                        width={96}
+                                        height={128}
                                         className="w-full h-full object-cover"
                                         style={{
                                             filter: selectedFrame.has_customizable_color && settings?.frame_color

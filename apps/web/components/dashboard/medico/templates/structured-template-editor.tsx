@@ -6,7 +6,6 @@ import { Label } from "@red-salud/ui";
 import { Textarea } from "@red-salud/ui";
 import { AlertCircle, CheckCircle, AlertTriangle } from "lucide-react";
 import { StructuredTemplate } from "@/lib/templates/structured-templates";
-import { getAllTemplates } from "@/lib/templates/extended-templates";
 import { MedicationInput } from "../inputs/medication-input";
 
 interface VitalSign {
@@ -30,7 +29,6 @@ interface StructuredTemplateEditorProps {
 export function StructuredTemplateEditor({
   template,
   onChange,
-  paciente,
   medications,
   onMedicationsChange,
 }: StructuredTemplateEditorProps) {
@@ -358,7 +356,7 @@ export function StructuredTemplateEditor({
               </div>
 
               {/* Alertas de signos vitales */}
-              {Object.entries(vitalSigns).some(([key, _]) => getVitalSignStatus(key) === "danger") && (
+              {Object.entries(vitalSigns).some(([key]) => getVitalSignStatus(key) === "danger") && (
                 <div className="p-3 bg-red-50 border border-red-200 rounded-lg flex items-start gap-2">
                   <AlertCircle className="h-5 w-5 text-red-600 flex-shrink-0 mt-0.5" />
                   <div>

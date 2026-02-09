@@ -12,7 +12,7 @@
  */
 
 import { useRef } from "react";
-import { motion, useScroll, useTransform, useSpring, MotionValue } from "framer-motion";
+import { motion, useScroll, useSpring } from "framer-motion";
 import { Counter } from "@red-salud/ui";
 import { useImpactData } from "./useImpactData";
 import { IMPACT_SECTION_CONTENT } from "./impact-section.data";

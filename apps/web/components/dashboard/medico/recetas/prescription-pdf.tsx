@@ -4,7 +4,7 @@ import { format } from "date-fns";
 import { es } from "date-fns/locale";
 import { Mail, MapPin, Phone } from "lucide-react";
 
-import { cn } from "@/lib/utils";
+import { cn } from "@red-salud/core";
 import type { DoctorSettings } from "@/lib/supabase/types/settings";
 // We need types for the Recipe and Patient. Since these might be defined in other files
 // but we want to be robust, I'll define interface subsets here or import if available.

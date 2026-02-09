@@ -259,10 +259,10 @@ export function DocumentsTab({ userId }: DocumentsTabProps) {
                 Para verificar tu cédula con foto, primero debes:
               </p>
               <ol className="text-sm text-gray-600 mt-2 space-y-1 list-decimal list-inside">
-                <li>Ir a la sección "Mi Perfil"</li>
+                <li>Ir a la sección &quot;Mi Perfil&quot;</li>
                 <li>Ingresar tu número de cédula</li>
                 <li>Validar con datos oficiales del CNE</li>
-                <li>Hacer clic en "Guardar" para anclar tu cédula</li>
+                <li>Hacer clic en &quot;Guardar&quot; para anclar tu cédula</li>
                 <li>Regresar aquí para subir la foto</li>
               </ol>
             </div>

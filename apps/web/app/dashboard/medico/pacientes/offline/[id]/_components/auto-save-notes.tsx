@@ -1,8 +1,8 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import { Textarea } from "@red-salud/ui";
-import { Loader2, Check, Cloud } from "lucide-react";
+import { Loader2, Check } from "lucide-react";
 import { cn } from "@red-salud/core/utils";
 
 interface AutoSaveNotesProps {
@@ -15,29 +15,30 @@ interface AutoSaveNotesProps {
 export function AutoSaveNotes({ initialValue, onSave, placeholder, className }: AutoSaveNotesProps) {
     const [value, setValue] = useState(initialValue || "");
     const [status, setStatus] = useState<"idle" | "saving" | "saved" | "error">("idle");
-    const timeoutRef = useRef<NodeJS.Timeout | null>(null);
 
-    const handleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-        const newValue = e.target.value;
-        setValue(newValue);
-        setStatus("idle");
+    useEffect(() => {
+        if (value === initialValue || status === "saving") return;
 
-        if (timeoutRef.current) {
-            clearTimeout(timeoutRef.current);
-        }
-
-        timeoutRef.current = setTimeout(async () => {
+        const timer = setTimeout(async () => {
             setStatus("saving");
             try {
-                await onSave(newValue);
+                await onSave(value);
                 setStatus("saved");
-                // Reset to idle after 2 seconds
                 setTimeout(() => setStatus("idle"), 2000);
             } catch (err) {
                 console.error("Error auto-saving:", err);
                 setStatus("error");
             }
-        }, 1000); // 1 second debounce
+        }, 1000);
+
+        return () => clearTimeout(timer);
+    }, [value, initialValue, onSave, status]);
+
+    const handleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+        setValue(e.target.value);
+        if (status !== "saving") {
+            setStatus("idle");
+        }
     };
 
     return (

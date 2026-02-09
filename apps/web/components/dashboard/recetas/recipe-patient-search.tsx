@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { Loader2, Search, User, Check, X } from "lucide-react";
+import { Loader2, Search, X } from "lucide-react";
 import { cn } from "@red-salud/core/utils";
 import { Input } from "@red-salud/ui";
 import { Button } from "@red-salud/ui";

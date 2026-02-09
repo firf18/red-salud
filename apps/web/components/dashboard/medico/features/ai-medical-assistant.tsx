@@ -13,7 +13,6 @@ import {
   FileText,
   AlertCircle,
   CheckCircle2,
-  Copy,
   RefreshCw
 } from "lucide-react";
 import { Alert, AlertDescription } from "@red-salud/ui";

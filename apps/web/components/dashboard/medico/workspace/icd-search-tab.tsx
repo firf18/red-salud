@@ -116,14 +116,12 @@ export function ICDSearchTab({
   diagnosticos,
   onAddDiagnostico,
   onRemoveDiagnostico,
-  notasMedicas = "",
 }: ICDSearchTabProps) {
   const [icdSearchQuery, setIcdSearchQuery] = useState("");
   const [icdResults, setIcdResults] = useState<ICDResult[]>([]);
   const [isSearchingICD, setIsSearchingICD] = useState(false);
   const [recentSearches, setRecentSearches] = useState<string[]>([]);
   const [apiError, setApiError] = useState<string | null>(null);
-  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
 
   // Cargar búsquedas recientes del localStorage
   useEffect(() => {
@@ -158,9 +156,9 @@ export function ICDSearchTab({
     }, 500);
 
     return () => clearTimeout(timer);
-  }, [icdSearchQuery]);
+  }, [icdSearchQuery, handleSearchICD]);
 
-  const handleSearchICD = async (query?: string) => {
+  const handleSearchICD = useCallback(async (query?: string) => {
     const searchQuery = query || icdSearchQuery;
     if (!searchQuery.trim()) return;
 
@@ -190,7 +188,7 @@ export function ICDSearchTab({
     } finally {
       setIsSearchingICD(false);
     }
-  };
+  }, [icdSearchQuery, saveRecentSearch]);
 
   const handleCategoryClick = (searches: string[]) => {
     setSelectedCategory(searches[0]);

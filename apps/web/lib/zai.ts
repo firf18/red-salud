@@ -37,12 +37,12 @@ export async function createZaiChatCompletion(
 export async function createZaiChatCompletion(
     messages: OpenAI.Chat.Completions.ChatCompletionMessageParam[],
     stream: boolean = true
-) {
+): Promise<Stream<OpenAI.Chat.Completions.ChatCompletionChunk> | OpenAI.Chat.Completions.ChatCompletion> {
     return zai.chat.completions.create({
         model: ZAI_MODEL,
         messages,
         stream,
         temperature: 0.7,
         max_tokens: 1500,
-    }) as any;
+    }) as Stream<OpenAI.Chat.Completions.ChatCompletionChunk> | OpenAI.Chat.Completions.ChatCompletion;
 }

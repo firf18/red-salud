@@ -1,15 +1,13 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase/client";
 import { Button } from "@red-salud/ui";
 import {
   ArrowLeft,
-  UserPlus,
   AlertCircle,
   Stethoscope,
-  Sparkles,
   Save
 } from "lucide-react";
 import { Alert, AlertDescription } from "@red-salud/ui";
@@ -23,12 +21,9 @@ import { Suspense } from "react";
 
 function NuevoPacienteContent() {
   const router = useRouter();
-  const searchParams = useSearchParams();
-  const fromCita = searchParams.get("from") === "cita";
 
-  const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [currentStep, setCurrentStep] = useState(1);
+  const [currentStep] = useState(1);
   const [validatingCedula, setValidatingCedula] = useState(false);
   const [cedulaFound, setCedulaFound] = useState(false);
 
@@ -51,16 +46,15 @@ function NuevoPacienteContent() {
     telefono: "",
     email: "",
     direccion: "",
-    office_id: typeof window !== 'undefined' ? localStorage.getItem('selectedOfficeId') || undefined : undefined,
+    office_id: typeof window !== "undefined" ? localStorage.getItem("selectedOfficeId") || undefined : undefined,
   });
   const [edad, setEdad] = useState<number | null>(null);
 
   // Medical data
   const [alergias, setAlergias] = useState<string[]>([]);
-  const [condicionesCronicas, setCondicionesCronicas] = useState<string[]>([]);
-  const [medicamentosActuales, setMedicamentosActuales] = useState<string[]>([]);
+  const [condicionesCronicas] = useState<string[]>([]);
+  const [medicamentosActuales] = useState<string[]>([]);
   const [notasMedicas, setNotasMedicas] = useState("");
-  const [diagnosticos, setDiagnosticos] = useState<string[]>([]);
   const [observaciones, setObservaciones] = useState("");
   const [emailError, setEmailError] = useState<string | null>(null);
   const [telefonoError, setTelefonoError] = useState<string | null>(null);
@@ -136,21 +130,18 @@ function NuevoPacienteContent() {
     setTelefonoError(validatePhoneFormat(formData.telefono));
   }, [formData.telefono]);
 
-  useEffect(() => {
-    const { formatted } = enforceVzlaPhone(formData.telefono);
-    if (formatted !== formData.telefono) setFormData((prev) => ({ ...prev, telefono: formatted }));
-  }, []);
-
   const saveDraft = useCallback(async () => {
     try {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return;
+
       const { data: existing } = await supabase
         .from("offline_patients")
         .select("id")
         .eq("doctor_id", user.id)
         .eq("cedula", formData.cedula)
         .maybeSingle();
+
       const payload: Record<string, unknown> = {
         doctor_id: user.id,
         cedula: formData.cedula,
@@ -167,14 +158,18 @@ function NuevoPacienteContent() {
         status: "draft",
         location_id: formData.office_id || null,
       };
+
       if (existing?.id) {
         await supabase.from("offline_patients").update(payload).eq("id", existing.id);
       } else {
         await supabase.from("offline_patients").insert(payload);
       }
+
       if (!draftSavedOnce) setDraftSavedOnce(true);
-    } catch { }
-  }, [supabase, formData, alergias, condicionesCronicas, medicamentosActuales, notasMedicas, observaciones, draftSavedOnce]);
+    } catch (err) {
+      console.error("Error saving draft:", err);
+    }
+  }, [formData, alergias, condicionesCronicas, medicamentosActuales, notasMedicas, observaciones, draftSavedOnce]);
 
   useEffect(() => {
     const ready = formData.cedula.trim().length >= 6 && !!formData.nombre_completo.trim();
@@ -184,7 +179,7 @@ function NuevoPacienteContent() {
     return () => clearInterval(interval);
   }, [formData.cedula, formData.nombre_completo, currentStep, saveDraft]);
 
-  const handleNextStep = () => {
+  const handleNextStep = useCallback(() => {
     if (!formData.cedula || !formData.nombre_completo) {
       setError("La cédula y el nombre completo son obligatorios");
       return;
@@ -197,92 +192,7 @@ function NuevoPacienteContent() {
       genero: formData.genero || "",
     }).toString();
     router.push(`/dashboard/medico/pacientes/nuevo/consulta?${q}`);
-  };
-
-  const handleSubmit = async () => {
-    setLoading(true);
-    setError(null);
-
-    try {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) {
-        router.push("/login/medico");
-        return;
-      }
-
-      if (!formData.cedula || formData.cedula.length < 6) {
-        setError("La cédula es requerida y debe tener al menos 6 dígitos");
-        setLoading(false);
-        return;
-      }
-
-      const { data: existingPatient } = await supabase
-        .from("profiles")
-        .select("id")
-        .eq("cedula", formData.cedula)
-        .single();
-
-      if (existingPatient) {
-        const { error: relationError } = await supabase
-          .from("doctor_patients")
-          .insert({
-            doctor_id: user.id,
-            patient_id: existingPatient.id,
-            first_consultation_date: new Date().toISOString(),
-            last_consultation_date: new Date().toISOString(),
-            total_consultations: 0,
-            notes: notasMedicas || null,
-          });
-
-        if (relationError && relationError.code !== "23505") {
-          throw relationError;
-        }
-
-        router.push(`/dashboard/medico/pacientes/${existingPatient.id}`);
-        return;
-      }
-
-      const notasConDiagnosticos = notasMedicas +
-        (diagnosticos.length > 0 ? `\n\nDiagnósticos:\n${diagnosticos.join("\n")}` : "");
-
-      const { data: offlinePatient, error: insertError } = await supabase
-        .from("offline_patients")
-        .insert({
-          doctor_id: user.id,
-          cedula: formData.cedula,
-          nombre_completo: formData.nombre_completo,
-          fecha_nacimiento: formData.fecha_nacimiento || null,
-          genero: formData.genero || null,
-          telefono: formData.telefono || null,
-          email: formData.email || null,
-          direccion: formData.direccion || null,
-          alergias: alergias.length > 0 ? alergias : null,
-          condiciones_cronicas: condicionesCronicas.length > 0 ? condicionesCronicas : null,
-          medicamentos_actuales: medicamentosActuales.length > 0 ? medicamentosActuales : null,
-          notas_medico: notasConDiagnosticos || null,
-          status: "offline",
-          location_id: formData.office_id || null,
-        })
-        .select()
-        .single();
-
-      if (insertError) throw insertError;
-
-      await supabase.from("user_activity_log").insert({
-        user_id: user.id,
-        activity_type: "offline_patient_created",
-        description: `Paciente offline registrado: ${formData.nombre_completo} (${formData.cedula})`,
-        status: "success",
-      });
-
-      router.push(`/dashboard/medico/pacientes/offline/${offlinePatient.id}`);
-    } catch (err) {
-      console.error("Error creating patient:", err);
-      setError(err instanceof Error ? err.message : "Error al registrar el paciente");
-    } finally {
-      setLoading(false);
-    }
-  };
+  }, [formData, edad, router]);
 
   const canProceed = formData.cedula.trim().length >= 6 && formData.nombre_completo.trim().length >= 2;
 
@@ -290,8 +200,6 @@ function NuevoPacienteContent() {
     <VerificationGuard>
       {currentStep === 1 ? (
         <div className="min-h-screen w-full bg-gradient-to-br from-slate-50 via-white to-blue-50/30 dark:from-slate-950 dark:via-slate-900 dark:to-slate-950">
-          {/* Content */}
-          {/* Header simplificado y orgánico - Botón pegado a la izquierda */}
           <div className="w-full px-4 py-6 pb-0">
             <Button
               type="button"
@@ -305,9 +213,7 @@ function NuevoPacienteContent() {
             </Button>
           </div>
 
-          {/* Content */}
           <div className="w-full px-6 py-6 max-w-5xl mx-auto space-y-6">
-
             {error && (
               <Alert variant="destructive" className="mb-6 animate-in slide-in-from-top-2 border-red-200 dark:border-red-900 bg-red-50 dark:bg-red-950/50">
                 <AlertCircle className="h-4 w-4" />
@@ -315,7 +221,6 @@ function NuevoPacienteContent() {
               </Alert>
             )}
 
-            {/* Form */}
             <PatientPrimaryInfo
               formData={formData}
               setFormData={(data) => setFormData(data)}
@@ -340,7 +245,6 @@ function NuevoPacienteContent() {
               }}
             />
 
-            {/* Actions */}
             <div className="mt-8 flex flex-col sm:flex-row items-center justify-end gap-3">
               {draftSavedOnce && (
                 <div className="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400 mr-auto">

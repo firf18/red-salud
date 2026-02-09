@@ -3,6 +3,7 @@
 import { Button } from "@red-salud/ui";
 import { Upload, Users } from "lucide-react";
 import { cn } from "@red-salud/core/utils";
+import Image from "next/image";
 import type { PrescriptionWatermark } from "@/lib/supabase/types/settings";
 
 interface WatermarkSelectorProps {
@@ -50,9 +51,8 @@ export function WatermarkSelector({
                                         : "border-transparent hover:border-primary/50"
                                 )}
                             >
-                                <img
+                                <Image
                                     alt={watermark.name}
-                                    loading="lazy"
                                     width={200}
                                     height={112}
                                     className="object-contain w-full h-full p-2 invert-0 dark:invert"

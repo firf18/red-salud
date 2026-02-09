@@ -215,7 +215,7 @@ export function MedicationInput({ medications, onChange }: MedicationInputProps)
           {/* Sin resultados */}
           {showSuggestions && query.length > 2 && results.length === 0 && !isSearching && (
             <div className="absolute top-full left-0 right-0 mt-1 bg-white border rounded-lg shadow-lg z-20 p-4 text-center text-sm text-gray-500">
-              No se encontraron medicamentos para "{query}"
+              No se encontraron medicamentos para &quot;{query}&quot;
             </div>
           )}
         </div>

@@ -6,7 +6,6 @@
  */
 
 import { Metadata } from 'next';
-import Link from 'next/link';
 import { AcademyHeader } from "@/components/academy/AcademyHeader";
 import { LearningPath } from "@/components/academy/LearningPath";
 import { FIRST_AID_COURSE } from "@/lib/mock-data/first-aid-course";

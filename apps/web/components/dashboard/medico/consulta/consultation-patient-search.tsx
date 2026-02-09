@@ -1,13 +1,11 @@
 "use client";
 
 import * as React from "react";
-import { Loader2, Search, User, X, CreditCard, Stethoscope } from "lucide-react";
+import { Loader2, Search, X, Stethoscope } from "lucide-react";
 import { cn } from "@red-salud/core/utils";
-import { Button } from "@red-salud/ui";
 import { Input } from "@red-salud/ui";
 import { validateCedulaWithCNE } from "@/lib/services/cedula-validation";
 import { toast } from "sonner";
-import { Badge } from "@red-salud/ui";
 
 export interface PatientOption {
     id: string;
@@ -33,12 +31,6 @@ export function ConsultationPatientSearch({
     const [cedulaInput, setCedulaInput] = React.useState("");
     const [loading, setLoading] = React.useState(false);
     const [notFound, setNotFound] = React.useState(false);
-
-    // Limpiar búsqueda
-    const handleClear = () => {
-        setCedulaInput("");
-        setNotFound(false);
-    };
 
     // Manejar cambio en input
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {

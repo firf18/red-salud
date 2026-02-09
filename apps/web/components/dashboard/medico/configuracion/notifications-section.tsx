@@ -8,9 +8,7 @@ import { Badge } from "@red-salud/ui";
 import {
   Bell,
   Mail,
-  MessageSquare,
   Calendar,
-  Users,
   Save,
   Loader2
 } from "lucide-react";

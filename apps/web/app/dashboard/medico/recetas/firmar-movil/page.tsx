@@ -19,7 +19,7 @@ export default function MobileSignaturePage() {
 
     const [isLoading, setIsLoading] = useState(true);
     const [isSaving, setIsSaving] = useState(false);
-    const [currentUser, setCurrentUser] = useState<any>(null);
+    const [currentUser, setCurrentUser] = useState<Record<string, unknown> | null>(null);
     const sigCanvasRef = useRef<SignatureCanvasRef>(null);
 
     useEffect(() => {
@@ -32,7 +32,7 @@ export default function MobileSignaturePage() {
                 router.push("/login/medico");
                 return;
             }
-            setCurrentUser(user);
+            setCurrentUser(user as Record<string, unknown>);
             setIsLoading(false);
 
             if (targetUid && user.id !== targetUid) {
@@ -57,12 +57,12 @@ export default function MobileSignaturePage() {
             const blob = await res.blob();
             const file = new File([blob], "signature-mobile.png", { type: "image/png" });
 
-            const { success, url, error } = await uploadRecipeAsset(currentUser.id, file, "signature");
+            const { success, url, error } = await uploadRecipeAsset(currentUser.id as string, file, "signature");
 
             if (success && url) {
                 // Update settings - null officeId means global/default which is usually what we want for mobile quick sign
                 // Or we could try to infer office, but safe default is global
-                await updateDoctorRecipeSettings(currentUser.id, { digital_signature_url: url }, null);
+                await updateDoctorRecipeSettings(currentUser.id as string, { digital_signature_url: url }, null);
 
                 toast.success("Firma guardada exitosamente");
                 // Optional: redirect back or show success state

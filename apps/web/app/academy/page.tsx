@@ -9,18 +9,12 @@
 import { Metadata } from 'next';
 import Link from 'next/link';
 import {
-    Brain,
-    Target,
-    TrendingUp,
     Award,
     BookOpen,
     ArrowRight,
     CheckCircle2,
     Sparkles,
-    BarChart3,
     FlaskConical,
-    Stethoscope,
-    Heart,
     ChevronRight,
 } from 'lucide-react';
 import { Button } from "@red-salud/ui";
@@ -37,41 +31,6 @@ export const metadata: Metadata = {
         'La plataforma de aprendizaje médico más avanzada de Venezuela. Metodología científica comprobada para pacientes y profesionales de la salud.',
 };
 
-/** Metodologías científicas que usamos */
-const METHODOLOGIES = [
-    {
-        icon: Brain,
-        title: 'Repetición Espaciada',
-        description:
-            'Algoritmos que optimizan el momento exacto para repasar contenido, maximizando la retención a largo plazo.',
-        metric: '87%',
-        metricLabel: 'mejor retención',
-    },
-    {
-        icon: Target,
-        title: 'Práctica de Recuperación',
-        description:
-            'Evaluaciones frecuentes que fortalecen las conexiones neuronales y consolidan el aprendizaje.',
-        metric: '2.5x',
-        metricLabel: 'más efectivo',
-    },
-    {
-        icon: TrendingUp,
-        title: 'Aprendizaje Intercalado',
-        description:
-            'Mezclar temas relacionados para construir una comprensión más profunda y flexible del conocimiento.',
-        metric: '43%',
-        metricLabel: 'mejor aplicación',
-    },
-    {
-        icon: BarChart3,
-        title: 'Análisis de Progreso',
-        description:
-            'Métricas detalladas que identifican áreas de mejora y personalizan tu ruta de aprendizaje.',
-        metric: '100%',
-        metricLabel: 'personalizado',
-    },
-];
 
 /** Especialidades destacadas */
 const FEATURED_SPECIALTIES = [
@@ -83,29 +42,7 @@ const FEATURED_SPECIALTIES = [
     { name: 'Ginecología', lessons: 90, category: 'ginecologia', color: '#ec4899' },
 ];
 
-/** Estadísticas de la plataforma */
-const STATS = [
-    { value: '115+', label: 'Especialidades' },
-    { value: '2,500+', label: 'Lecciones' },
-    { value: '50K+', label: 'Estudiantes' },
-    { value: '95%', label: 'Satisfacción' },
-];
 
-/** Beneficios por tipo de usuario */
-const USER_BENEFITS = {
-    patients: [
-        'Entiende tus diagnósticos con claridad',
-        'Aprende a prevenir enfermedades',
-        'Toma decisiones informadas sobre tu salud',
-        'Comunicación efectiva con tu médico',
-    ],
-    professionals: [
-        'Mantén tu formación actualizada',
-        'Certificaciones con validez profesional',
-        'Contenido basado en evidencia científica',
-        'Acceso a las últimas investigaciones',
-    ],
-};
 
 export default function AcademyPage() {
     return (

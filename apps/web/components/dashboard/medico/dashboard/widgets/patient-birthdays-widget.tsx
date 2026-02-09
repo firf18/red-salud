@@ -387,9 +387,9 @@ export function PatientBirthdaysWidget({
 /**
  * Procesa pacientes de Supabase.
  */
-function processPatients(patients: any[]): BirthdayPatient[] {
+function processPatients(patients: Array<{ patient?: { id?: string; fecha_nacimiento?: string } }>): BirthdayPatient[] {
     // Eliminar duplicados por ID
-    const uniquePatients = new Map<string, any>();
+    const uniquePatients = new Map<string, { id?: string; fecha_nacimiento?: string }>();
     patients.forEach(p => {
         if (p.patient?.id && p.patient.fecha_nacimiento) {
             uniquePatients.set(p.patient.id, {

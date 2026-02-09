@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useMemo } from "react";
 import { X, ChevronLeft, ChevronRight, Plus } from "lucide-react";
 import { Button } from "@red-salud/ui";
 import { Input } from "@red-salud/ui";
@@ -25,30 +25,24 @@ export function MedicalChipInput({
   template,
 }: MedicalChipInputProps) {
   const [inputValue, setInputValue] = useState("");
-  const [showSuggestions, setShowSuggestions] = useState(false);
-  const [filteredSuggestions, setFilteredSuggestions] = useState<string[]>([]);
   const scrollRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
-  useEffect(() => {
-    if (inputValue.trim()) {
-      const filtered = suggestions.filter((s) =>
-        s.toLowerCase().includes(inputValue.toLowerCase())
-      );
-      setFilteredSuggestions(filtered);
-      setShowSuggestions(filtered.length > 0);
-    } else {
-      setFilteredSuggestions([]);
-      setShowSuggestions(false);
-    }
+  const filteredSuggestions = useMemo(() => {
+    return inputValue.trim()
+      ? suggestions.filter((s) =>
+          s.toLowerCase().includes(inputValue.toLowerCase())
+        )
+      : [];
   }, [inputValue, suggestions]);
+
+  const showSuggestions = filteredSuggestions.length > 0;
 
   const handleAdd = (item: string) => {
     const trimmed = item.trim();
     if (trimmed && !value.includes(trimmed)) {
       onChange([...value, trimmed]);
       setInputValue("");
-      setShowSuggestions(false);
     }
   };
 

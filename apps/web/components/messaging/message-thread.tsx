@@ -8,7 +8,6 @@ import { format } from "date-fns";
 import { es } from "date-fns/locale";
 import { useEffect, useRef } from "react";
 import { FileText, Download } from "lucide-react";
-import { Button } from "@red-salud/ui";
 
 interface MessageThreadProps {
   messages: Message[];

@@ -146,13 +146,6 @@ function ConfiguracionContent() {
 
   const activeTab = (tabFromUrl && TABS.some(t => t.id === tabFromUrl)) ? (tabFromUrl as TabType) : "perfil";
 
-  const handleTabChange = (tabId: TabType) => {
-    const newUrl = tabId === "perfil"
-      ? "/dashboard/medico/configuracion"
-      : `/dashboard/medico/configuracion?tab=${tabId}`;
-    router.push(newUrl, { scroll: false });
-  };
-
   const renderTabContent = () => {
     switch (activeTab) {
       case "perfil": return <ProfileSectionV2 />;

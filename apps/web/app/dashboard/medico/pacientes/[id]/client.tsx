@@ -5,7 +5,6 @@ import { useRouter, useParams } from "next/navigation";
 import { supabase } from "@/lib/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, Button, Tabs, TabsContent, TabsList, TabsTrigger, Badge, Avatar, AvatarFallback, AvatarImage } from "@red-salud/ui";
 import {
-  User,
   Calendar,
   FileText,
   Pill,
@@ -16,7 +15,6 @@ import {
   MapPin,
   Edit,
   Plus,
-  Clock,
   AlertCircle,
 } from "lucide-react";
 import { format } from "date-fns";

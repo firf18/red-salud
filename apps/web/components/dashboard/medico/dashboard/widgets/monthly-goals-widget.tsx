@@ -11,17 +11,15 @@
 import { useState, useEffect, useMemo } from "react";
 import { motion } from "framer-motion";
 import {
-    Target,
-    TrendingUp,
-    ChevronRight,
     Loader2,
     CheckCircle,
-    Plus,
     Edit,
     Calendar,
     Users,
     DollarSign,
-    Star
+    Star,
+    Target,
+    TrendingUp
 } from "lucide-react";
 import { cn } from "@red-salud/core/utils";
 import { Button } from "@red-salud/ui";
@@ -195,13 +193,10 @@ export function MonthlyGoalsWidget({
         const now = new Date();
         const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
 
-        const monthAppointments = appointments?.filter((apt: any) => {
+        const monthAppointments = appointments?.filter((apt: { appointment_date: string; status: string }) => {
             const aptDate = new Date(apt.appointment_date);
             return aptDate >= startOfMonth && apt.status === "completed";
         }).length || 0;
-
-        // Valor de muestra para ingresos (se puede conectar a billing real)
-        const monthRevenue = monthAppointments * 50; // Estimación básica
 
         // Generar metas por defecto (0 si no hay guardadas)
         const defaultGoals: Goal[] = [

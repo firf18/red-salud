@@ -161,8 +161,21 @@ export function useTodayIntakeLog(patientId: string | undefined) {
   }, [patientId]);
 
   useEffect(() => {
-    void loadIntakeLog();
-  }, [loadIntakeLog]);
+    if (!patientId) return;
+    
+    const loadData = async () => {
+      setLoading(true);
+      const result = await getTodayIntakeLog(patientId);
+      if (result.success) {
+        setIntakeLog(result.data);
+      } else {
+        setError(String(result.error) || 'Error loading intake log');
+      }
+      setLoading(false);
+    };
+    
+    loadData();
+  }, [patientId]);
 
   const recordIntake = async (intakeId: string, status: 'tomado' | 'omitido', notes?: string) => {
     const result = await recordMedicationIntake(intakeId, status, notes);
@@ -220,8 +233,21 @@ export function useActiveMedicationsSummary(patientId: string | undefined) {
   }, [patientId]);
 
   useEffect(() => {
-    void loadSummary();
-  }, [loadSummary]);
+    if (!patientId) return;
+    
+    const loadData = async () => {
+      setLoading(true);
+      const result = await getActiveMedicationsSummary(patientId);
+      if (result.success) {
+        setSummary(result.data);
+      } else {
+        setError(String(result.error) || 'Error loading summary');
+      }
+      setLoading(false);
+    };
+    
+    loadData();
+  }, [patientId]);
 
   return { summary, loading, error, refreshSummary: loadSummary };
 }

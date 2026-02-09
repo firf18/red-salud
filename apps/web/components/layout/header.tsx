@@ -6,7 +6,7 @@ import { usePathname } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { Menu, X, ChevronDown } from "lucide-react";
 import { Button } from "@red-salud/ui";
-import { ROUTES, APP_NAME, AUTH_ROUTES } from "@/lib/constants";
+import { ROUTES, AUTH_ROUTES } from "@/lib/constants";
 import { cn } from "@red-salud/core/utils";
 import { Logo, ThemeToggle, useTheme } from "@red-salud/ui";
 import { MainNav } from "@/components/layout/main-nav";
@@ -39,16 +39,17 @@ export function Header() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const pathname = usePathname();
   const { theme } = useTheme();
-  const [effectiveTheme, setEffectiveTheme] = useState<"light" | "dark">("light");
 
-  useEffect(() => {
+  // Compute effective theme based on system preference
+  const getEffectiveTheme = (): "light" | "dark" => {
     if (theme === "system") {
-      const isDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
-      setEffectiveTheme(isDark ? "dark" : "light");
-    } else {
-      setEffectiveTheme(theme as "light" | "dark");
+      if (typeof window === "undefined") return "light";
+      return window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
     }
-  }, [theme]);
+    return (theme as "light" | "dark") || "light";
+  };
+
+  const effectiveTheme = getEffectiveTheme();
 
   // Pages with dark hero sections where header should be white when transparent
   // Home page is only dark hero in dark mode

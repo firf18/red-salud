@@ -10,7 +10,7 @@ interface OfficeInstructionsProps {
         receptionist_name?: string;
         whatsapp?: string;
     } | undefined;
-    onChange: (instructions: string, receptionInfo: any) => void;
+    onChange: (instructions: string, receptionInfo: { receptionist_name?: string; whatsapp?: string }) => void;
 }
 
 export function OfficeInstructions({ instructions = "", receptionInfo = {}, onChange }: OfficeInstructionsProps) {

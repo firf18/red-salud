@@ -8,8 +8,8 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import { motion, AnimatePresence } from "framer-motion";
-import { Save, Loader2, Sparkles, Eye, EyeOff } from "lucide-react";
+import { motion } from "framer-motion";
+import { Save, Loader2, Eye, EyeOff } from "lucide-react";
 import { Button } from "@red-salud/ui";
 import { supabase } from "@/lib/supabase/client";
 import { cn } from "@red-salud/core/utils";
@@ -143,7 +143,7 @@ export function ProfileSectionV2() {
       // Extraer especialidades adicionales del SACS
       const sacsPostgrados = doctorData?.sacs_data?.postgrados || [];
       const especialidadesAdicionales = sacsPostgrados
-        .map((pg: any) => pg.postgrado)
+        .map((pg: { postgrado: string }) => pg.postgrado)
         .filter((pg: string) => pg !== doctorData?.sacs_data?.especialidad_display);
 
       const profileState: ProfileData = {
@@ -158,7 +158,7 @@ export function ProfileSectionV2() {
         is_verified: doctorData?.verified || false,
         especialidades_permitidas: [
           doctorData?.sacs_data?.especialidad_display,
-          ...(doctorData?.sacs_data?.postgrados?.map((pg: any) => pg.postgrado) || [])
+          ...(doctorData?.sacs_data?.postgrados?.map((pg: { postgrado: string }) => pg.postgrado) || [])
         ].filter(Boolean) || [],
       };
 
@@ -194,7 +194,7 @@ export function ProfileSectionV2() {
       if (!user) throw new Error("No hay usuario autenticado");
 
       // Actualizar perfil básico
-      const profileUpdate: Record<string, any> = {
+      const profileUpdate: Record<string, string | boolean> = {
         telefono: profile.telefono,
       };
 
@@ -208,7 +208,7 @@ export function ProfileSectionV2() {
         .eq("id", user.id);
 
       // Preparar actualización de doctor_details
-      const doctorUpdate: Record<string, any> = {
+      const doctorUpdate: Record<string, string | number | boolean | null> = {
         biografia: profile.biografia,
       };
 
@@ -358,7 +358,7 @@ export function ProfileSectionV2() {
                 <FieldWithContext
                   label="Nombre Completo"
                   value={profile.nombre_completo}
-                  onChange={(value) => updateProfile({ nombre_completo: value })}
+                  onChange={(value) => updateProfile({ nombre_completo: value as string })}
                   locked={profile.is_verified}
                   verified={profile.is_verified}
                   contextInfo={
@@ -380,7 +380,7 @@ export function ProfileSectionV2() {
                 <FieldWithContext
                   label="Teléfono"
                   value={profile.telefono}
-                  onChange={(value) => updateProfile({ telefono: value })}
+                  onChange={(value) => updateProfile({ telefono: value as string })}
                   type="phone"
                   contextInfo="Número de contacto para que los pacientes puedan comunicarse contigo."
                   impact="Los pacientes podrán contactarte directamente (+40% de conversión)"
@@ -409,7 +409,7 @@ export function ProfileSectionV2() {
                 <FieldWithContext
                   label="Especialidad Principal"
                   value={profile.especialidad}
-                  onChange={(value) => updateProfile({ especialidad: value })}
+                  onChange={(value) => updateProfile({ especialidad: value as string })}
                   type="specialty"
                   locked={profile.is_verified}
                   verified={profile.is_verified}
@@ -425,7 +425,7 @@ export function ProfileSectionV2() {
                 <FieldWithContext
                   label="Especialidades Adicionales"
                   value={profile.especialidades_adicionales}
-                  onChange={(value) => updateProfile({ especialidades_adicionales: value })}
+                  onChange={(value) => updateProfile({ especialidades_adicionales: value as string[] })}
                   type="multi-specialty"
                   locked={profile.is_verified && profile.especialidades_adicionales.length > 0}
                   verified={profile.is_verified && profile.especialidades_adicionales.length > 0}

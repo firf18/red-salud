@@ -63,7 +63,7 @@ export default function NuevoRecordatorioPage() {
     }
   };
 
-  const selectMedication = (medication: any) => {
+  const selectMedication = (medication: { nombre_comercial: string; dosis_usual?: string }) => {
     setNombreMedicamento(medication.nombre_comercial);
     setDosis(medication.dosis_usual || "");
     clearSearch();
@@ -103,7 +103,7 @@ export default function NuevoRecordatorioPage() {
       dosis,
       horarios,
       dias_semana: diasSemana.length > 0 ? diasSemana : undefined,
-      fecha_inicio: fechaInicio.toISOString().split("T")[0],
+      fecha_inicio: fechaInicio.toISOString().split("T")[0] || "",
       fecha_fin: fechaFin?.toISOString().split("T")[0],
       notificar_email: notificarEmail,
       notificar_push: notificarPush,

@@ -6,19 +6,17 @@
 'use client';
 
 import React, { useState, useCallback } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
 import { LessonPlayerProps, LessonState } from './LessonPlayer.types';
 import { LessonHeader } from './LessonHeader';
 import { QuestionRenderer } from './QuestionRenderer';
 import { LessonFooter } from './LessonFooter';
-import { AcademyGamificationService } from '@/lib/academy/services/gamification.service';
+
 
 /**
  * Componente LessonPlayer
  * Gestiona el estado de la lección, validación de respuestas y navegación.
  */
 export const LessonPlayer: React.FC<LessonPlayerProps> = ({
-    lesson,
     questions,
     onComplete,
     onExit

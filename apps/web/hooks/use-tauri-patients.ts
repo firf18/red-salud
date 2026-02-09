@@ -10,7 +10,6 @@ export interface Patient {
     last_name: string;
     email?: string;
     phone?: string;
-    [key: string]: any;
 }
 
 export function useTauriPatients(doctorId: string) {

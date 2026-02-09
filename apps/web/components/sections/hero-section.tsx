@@ -57,8 +57,21 @@ const defaultMetrics: DashboardMetrics = {
 export function HeroSection() {
   const { user } = useAuth();
   const [metrics, setMetrics] = useState<DashboardMetrics>(defaultMetrics);
-  const [loading, setLoading] = useState(true);
-  const [doctors, setDoctors] = useState<any[]>([]);
+  const [doctors, setDoctors] = useState<Array<{
+    profile?: {
+      nombre_completo?: string;
+    };
+    nombre_completo?: string;
+    profiles?: {
+      nombre_completo?: string;
+    };
+    especialidad?: {
+      name?: string;
+    };
+    specialty?: {
+      name?: string;
+    };
+  }>>([]);
   const [currentDoctorIndex, setCurrentDoctorIndex] = useState(0);
   const { scrollYProgress } = useScroll();
   const yRange = useTransform(scrollYProgress, [0, 1], [0, 100]);

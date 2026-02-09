@@ -10,10 +10,8 @@ import {
   Activity,
   MessageSquare,
   Video,
-  LogOut,
   Stethoscope,
   Home,
-  PanelLeftDashed,
 } from "lucide-react";
 import { Avatar, AvatarFallback } from "@red-salud/ui";
 import { cn } from "@red-salud/core/utils";
@@ -48,11 +46,9 @@ export interface MenuGroup {
 
 export interface DashboardSidebarProps {
   userName?: string;
-  userEmail?: string;
   menuGroups: MenuGroup[];
   dashboardRoute: string;
   onProfileClick?: () => void;
-  onLogout?: () => void;
 }
 
 export function DashboardSidebar({
@@ -60,7 +56,6 @@ export function DashboardSidebar({
   menuGroups,
   dashboardRoute,
   onProfileClick,
-  onLogout,
 }: DashboardSidebarProps) {
   const { mode, isExpanded, handleMouseEnter, handleMouseLeave } = useSidebarState();
   const pathname = usePathname();

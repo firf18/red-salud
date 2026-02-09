@@ -1,7 +1,6 @@
 "use client";
 
 import { Button } from "@red-salud/ui";
-import { Badge } from "@red-salud/ui";
 import { X } from "lucide-react";
 
 interface DiagnosticsPanelProps {

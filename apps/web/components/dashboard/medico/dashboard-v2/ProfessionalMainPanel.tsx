@@ -20,13 +20,12 @@ import { formatDistanceToNow } from "date-fns";
 import { es } from "date-fns/locale";
 
 interface ProfessionalMainPanelProps {
-    profile: any;
     userId?: string;
 }
 
-export function ProfessionalMainPanel({ profile, userId }: ProfessionalMainPanelProps) {
-    const [appointments, setAppointments] = useState<any[]>([]);
-    const [activities, setActivities] = useState<any[]>([]);
+export function ProfessionalMainPanel({ userId }: ProfessionalMainPanelProps) {
+    const [appointments, setAppointments] = useState<Array<{ id: string; fecha_hora: string; paciente?: { nombre_completo: string } }>>([]);
+    const [activities, setActivities] = useState<Array<{ id: string; action: string; timestamp: string }>>([]);
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
@@ -40,10 +39,9 @@ export function ProfessionalMainPanel({ profile, userId }: ProfessionalMainPanel
                 ]);
 
                 if (appointmentsRes.success && appointmentsRes.data) {
-                    const now = new Date();
                     const nextOnes = appointmentsRes.data
-                        .filter((apt: any) => apt.status !== 'cancelled' && apt.status !== 'completed')
-                        .sort((a: any, b: any) => new Date(`${a.appointment_date}T${a.appointment_time}`).getTime() - new Date(`${b.appointment_date}T${b.appointment_time}`).getTime());
+                        .filter((apt: { status: string }) => apt.status !== 'cancelled' && apt.status !== 'completed')
+                        .sort((a: { appointment_date: string; appointment_time: string }, b: { appointment_date: string; appointment_time: string }) => new Date(`${a.appointment_date}T${a.appointment_time}`).getTime() - new Date(`${b.appointment_date}T${b.appointment_time}`).getTime());
 
                     setAppointments(nextOnes);
                 }

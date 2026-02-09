@@ -23,15 +23,13 @@ import {
     Pencil,
     Trash2,
     Save,
-    X,
     Loader2,
-    Star,
-    Map,
     CheckCircle2,
     DollarSign,
     Users,
     FileText,
-    Component
+    Map,
+    Star
 } from "lucide-react";
 import { supabase } from "@/lib/supabase/client";
 import { Toast } from "@red-salud/ui";
@@ -99,7 +97,6 @@ const TABS = [
     { id: "pricing", label: "Precios", icon: DollarSign },
     { id: "patients", label: "Pacientes", icon: Users },
     { id: "instructions", label: "Llegada", icon: FileText },
-    { id: "photos", label: "Fotos", icon: Component },
 ];
 
 /**
@@ -195,7 +192,7 @@ export function OfficesSection() {
             } else {
                 // Crear nuevo consultorio
                 // Necesitamos devolver el ID para poder subir fotos inmediatamente si el usuario quiere
-                const { data: newOffice, error } = await supabase
+                const { error } = await supabase
                     .from("doctor_offices")
                     .insert({
                         doctor_id: user.id,
@@ -407,7 +404,8 @@ export function OfficesSection() {
                                     onClick={handleCancel}
                                     className="h-8 w-8 p-0"
                                 >
-                                    <X className="h-4 w-4" />
+                                    <span className="sr-only">Cerrar</span>
+                                    ✕
                                 </Button>
                             </div>
 

@@ -1,12 +1,12 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { FlipCard } from "./flip-card";
 import { Card, CardHeader, CardTitle, CardContent, Button, Input, Label, Badge } from "@red-salud/ui";
 import { Phone, Mail, MapPin, Calendar, Check, X, Edit2, Loader2 } from "lucide-react";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
-import { cn } from "@red-salud/core/utils";
+import { Badge } from "@red-salud/ui";
 
 interface ContactFlipCardProps {
     patient: {
@@ -30,6 +30,15 @@ export function ContactFlipCard({ patient, onSave }: ContactFlipCardProps) {
         direccion: patient.direccion || "",
         fecha_nacimiento: (patient.fecha_nacimiento?.split('T')[0]) ?? ""
     });
+
+    useEffect(() => {
+        setFormData({
+            telefono: patient.telefono || "",
+            email: patient.email || "",
+            direccion: patient.direccion || "",
+            fecha_nacimiento: (patient.fecha_nacimiento?.split('T')[0]) ?? ""
+        });
+    }, [patient]);
     const [loading, setLoading] = useState(false);
 
     // We need a way to trigger the flip from within if using custom buttons, 
@@ -41,23 +50,21 @@ export function ContactFlipCard({ patient, onSave }: ContactFlipCardProps) {
     // OR just clicking the card flips it. Let's stick to "Click card to flip" for simplicity, 
     // but maybe add a visual cue.
 
-    const handleSave = async (e: React.MouseEvent) => {
+    const handleSave = useCallback(async (e: React.MouseEvent) => {
         e.stopPropagation();
         setLoading(true);
         try {
             await onSave(formData);
-            // We can't easily trigger a flip from here because FlipCard state is internal.
-            // But we can suggest the user click back or let the parent re-render if it resets state.
         } catch (error) {
-            // Error is already logged and toasted in the parent handleUpdateContact
+            console.error("Error saving contact:", error);
         } finally {
             setLoading(false);
         }
-    };
+    }, [formData, onSave]);
 
-    const handleChange = (field: string, value: string) => {
+    const handleChange = useCallback((field: string, value: string) => {
         setFormData(prev => ({ ...prev, [field]: value }));
-    };
+    }, []);
 
     const Front = (
         <Card className="h-full border hover:border-primary/50 transition-colors cursor-pointer group relative">
@@ -200,6 +207,3 @@ export function ContactFlipCard({ patient, onSave }: ContactFlipCardProps) {
     );
 }
 
-function BadgeWrapper({ children, variant, className }: any) {
-    return <Badge variant={variant} className={className}>{children}</Badge>
-}

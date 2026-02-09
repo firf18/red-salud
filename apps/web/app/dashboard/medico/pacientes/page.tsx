@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase/client";
 import { Card, CardContent } from "@red-salud/ui";
@@ -9,14 +9,7 @@ import {
   Users,
   UserPlus,
   Search,
-  Filter,
-  ArrowUpDown,
-  Laptop,
-  WifiOff,
   Stethoscope,
-  ChevronDown,
-  Building2,
-  AlertCircle,
   Sparkles
 } from "lucide-react";
 import { Toast, type ToastType } from "@red-salud/ui";
@@ -65,7 +58,7 @@ export default function DoctorPatientsPage() {
   const [showMetricsModal, setShowMetricsModal] = useState(false);
   const [metricsData, setMetricsData] = useState<Record<string, unknown> | null>(null);
 
-  const handleView = (p: RegisteredPatient | OfflinePatient) => {
+  const handleView = useCallback((p: RegisteredPatient | OfflinePatient) => {
     const isRegistered = "patient" in p;
     if (isRegistered) {
       const rp = p as RegisteredPatient;
@@ -74,11 +67,11 @@ export default function DoctorPatientsPage() {
       const op = p as OfflinePatient;
       router.push(`/dashboard/medico/pacientes/offline/${op.id}`);
     }
-  };
+  }, [router]);
 
-  const handleMessage = (p: RegisteredPatient) => {
+  const handleMessage = useCallback((p: RegisteredPatient) => {
     router.push(`/dashboard/medico/mensajeria?patient=${p.patient_id}`);
-  };
+  }, [router]);
 
   useEffect(() => {
     const init = async () => {
@@ -92,14 +85,7 @@ export default function DoctorPatientsPage() {
     init();
   }, [router]);
 
-  // Re-run loadAverageTime when selectedOfficeId changes
-  useEffect(() => {
-    if (userId) {
-      loadAverageTime(userId, state.selectedOfficeId);
-    }
-  }, [userId, state.selectedOfficeId]);
-
-  const loadAverageTime = async (doctorId: string, officeId?: string | null) => {
+  const loadAverageTime = useCallback(async (doctorId: string, officeId?: string | null) => {
     try {
       let query = supabase
         .from("appointments")
@@ -155,13 +141,20 @@ export default function DoctorPatientsPage() {
     } catch (err) {
       console.error("Error loading average time:", err instanceof Error ? err.message : "Unknown error");
     }
-  };
+  }, []);
 
-  const handleShowMetrics = () => {
+  // Re-run loadAverageTime when selectedOfficeId changes
+  useEffect(() => {
+    if (userId) {
+      loadAverageTime(userId, state.selectedOfficeId);
+    }
+  }, [userId, state.selectedOfficeId, loadAverageTime]);
+
+  const handleShowMetrics = useCallback(() => {
     setShowMetricsModal(true);
-  };
+  }, []);
 
-  const loadTodayAppointments = async () => {
+  const loadTodayAppointments = useCallback(async () => {
     if (!userId) return;
 
     setLoadingToday(true);
@@ -179,9 +172,9 @@ export default function DoctorPatientsPage() {
     } finally {
       setLoadingToday(false);
     }
-  };
+  }, [userId]);
 
-  const toggleSection = async (section: string) => {
+  const toggleSection = useCallback(async (section: string) => {
     if (expandedSection === section) {
       setExpandedSection(null);
     } else {
@@ -190,9 +183,9 @@ export default function DoctorPatientsPage() {
         await loadTodayAppointments();
       }
     }
-  };
+  }, [expandedSection, todayAppointments.length, loadTodayAppointments]);
 
-  const handleStartConsultation = async (appointment: TodayAppointment) => {
+  const handleStartConsultation = useCallback(async (appointment: TodayAppointment) => {
     if (!userId) return;
 
     setActionLoading(appointment.id);
@@ -238,7 +231,7 @@ export default function DoctorPatientsPage() {
       alert(err instanceof Error ? err.message : "Error al iniciar la consulta");
       setActionLoading(null);
     }
-  };
+  }, [userId, router]);
 
   // Filter today appointments by office if needed
   const displayedTodayAppointments = state.officeAppointmentIds
@@ -294,13 +287,13 @@ export default function DoctorPatientsPage() {
     setToast({ message, type, isVisible: true });
   };
 
-  const handleRegisterPatient = () => {
+  const handleRegisterPatient = useCallback(() => {
     if (!state.selectedOfficeId) {
       showToast("Debes seleccionar un consultorio específico arriba para registrar un paciente", "warning");
       return;
     }
     router.push("/dashboard/medico/pacientes/nuevo");
-  };
+  }, [state.selectedOfficeId, router]);
 
   return (
     <VerificationGuard>

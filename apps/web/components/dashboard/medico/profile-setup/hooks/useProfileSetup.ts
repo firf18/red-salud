@@ -101,7 +101,7 @@ export function useProfileSetup() {
       const { data, error } = await supabase.functions.invoke("verify-doctor-sacs", {
         body: { cedula, tipo_documento: tipoDocumento, user_id: userId },
       });
-      if (error) throw error as any;
+      if (error) throw error instanceof Error ? error : new Error(String(error));
       setVerificationResult(data as VerificationResult);
       if ((data as VerificationResult).verified && (data as VerificationResult).data) {
         setLicenseNumber((data as VerificationResult).data!.matricula_principal);

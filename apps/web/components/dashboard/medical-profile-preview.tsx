@@ -11,7 +11,6 @@ import {
   Scissors,
   FileText,
   Share2,
-  Shield,
   User,
   Phone,
   Droplet,

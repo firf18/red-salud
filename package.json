@@ -11,7 +11,7 @@
         "tauri:dev": "pnpm --filter @red-salud/farmacia-desktop tauri:dev",
         "tauri:farmacia:dev": "pnpm --filter @red-salud/farmacia-desktop tauri:dev",
         "tauri:medico:dev": "pnpm --filter red-salud-desktop-medico tauri dev",
-        "lint": "pnpm --filter red-salud-web lint"
+        "lint": "cd apps/web && npx eslint ."
     },
     "dependencies": {
         "html2canvas": "^1.4.1",

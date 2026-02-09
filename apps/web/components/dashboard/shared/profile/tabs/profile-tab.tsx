@@ -18,7 +18,6 @@ export function ProfileTab({
   isEditing,
   setIsEditing,
   handleSave,
-  isLoading,
 }: TabComponentProps) {
   // Estado local para edición
   const [localData, setLocalData] = useState(formData);

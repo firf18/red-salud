@@ -5,10 +5,8 @@ import { supabase } from "@/lib/supabase/client";
 import { WidgetWrapper } from "../widget-wrapper";
 import { Card, CardContent } from "@red-salud/ui";
 import { Badge } from "@red-salud/ui";
-import { TrendingUp, TrendingDown, DollarSign, Calendar, Target, BarChart3 } from "lucide-react";
+import { TrendingUp, TrendingDown, DollarSign, Target, BarChart3 } from "lucide-react";
 import { Skeleton } from "@red-salud/ui";
-import { format } from "date-fns";
-import { es } from "date-fns/locale";
 
 interface RevenueData {
   total_revenue: number;
@@ -30,7 +28,6 @@ interface RevenueData {
 
 interface RevenueAnalyticsWidgetProps {
   doctorId?: string;
-  profile?: any;
 }
 
 export function RevenueAnalyticsWidget({ doctorId }: RevenueAnalyticsWidgetProps) {

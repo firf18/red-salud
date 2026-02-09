@@ -80,7 +80,7 @@ export const supportService = {
 
             if (error) throw error;
 
-            const articles = (data || []).map((doc: any) => ({
+            const articles = (data || []).map((doc: KBSearchResult) => ({
                 ...doc,
                 category: doc.metadata?.category || 'General',
                 similarity: 1 // Default for popular articles

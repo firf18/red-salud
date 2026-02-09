@@ -1,6 +1,6 @@
 "use client";
 
-import { Card, CardContent } from "@red-salud/ui";
+import { Card } from "@red-salud/ui";
 import { Activity, Clock, Users, CalendarCheck } from "lucide-react";
 import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabase/client";

@@ -13,7 +13,6 @@ import {
   Eye,
   MessageSquare,
   Calendar,
-  FileText,
   Pill,
   MoreVertical,
   Phone,

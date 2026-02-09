@@ -96,7 +96,7 @@ const categories = [
     },
 ];
 
-export function MainNav({ isScrolled, theme = "light" }: MainNavProps) {
+export function MainNav({ theme = "light" }: MainNavProps) {
     const textColorClass = theme === "dark" ? "text-white hover:bg-white/10 hover:text-white" : "text-foreground hover:bg-primary/5 hover:text-primary";
     const triggerColorClass = `${textColorClass} transition-colors`;
 

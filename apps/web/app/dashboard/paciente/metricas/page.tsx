@@ -5,9 +5,8 @@ import type { LucideIcon } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase/client";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@red-salud/ui";
+import { Card, CardContent } from "@red-salud/ui";
 import { Button } from "@red-salud/ui";
-import { Badge } from "@red-salud/ui";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@red-salud/ui";
 import {
   useHealthDashboardSummary,

@@ -4,7 +4,6 @@ import { useState, useEffect, useCallback } from "react";
 import {
   getPatientLabOrders,
   getLabOrderDetails,
-  getLabOrderResults,
   getLabTestTypes,
   getLabTestCategories,
   getPatientLabStats,
@@ -60,9 +59,30 @@ export function useLaboratory(patientId: string, filters?: LabOrderFilters) {
 
   // Cargar datos cuando cambien las dependencias
   useEffect(() => {
-    void loadOrders();
-    void loadStats();
-  }, [loadOrders, loadStats]);
+    if (!patientId) return;
+    
+    const loadData = async () => {
+      setLoading(true);
+      setError(null);
+      
+      const result = await getPatientLabOrders(patientId, filters);
+      if (result.success) {
+        setOrders(result.data);
+      } else {
+        setError("Error al cargar órdenes de laboratorio");
+        console.error(result.error);
+      }
+      
+      const statsResult = await getPatientLabStats(patientId);
+      if (statsResult.success) {
+        setStats(statsResult.data);
+      }
+      
+      setLoading(false);
+    };
+    
+    loadData();
+  }, [patientId, filters]);
 
   return {
     orders,
@@ -100,20 +120,32 @@ export function useLabOrder(orderId: string) {
     setLoading(false);
   }, [orderId]);
 
-  const loadStatusHistory = useCallback(async () => {
-    if (!orderId) return;
-
-    const result = await getLabOrderStatusHistory(orderId);
-
-    if (result.success) {
-      setStatusHistory(result.data);
-    }
-  }, [orderId]);
-
   useEffect(() => {
-    void loadOrder();
-    void loadStatusHistory();
-  }, [loadOrder, loadStatusHistory]);
+    if (!orderId) return;
+    
+    const loadData = async () => {
+      setLoading(true);
+      setError(null);
+      
+      const result = await getLabOrderDetails(orderId);
+      if (result.success) {
+        setOrder(result.data);
+        setResults(result.data?.results || []);
+      } else {
+        setError("Error al cargar orden de laboratorio");
+        console.error(result.error);
+      }
+      
+      const historyResult = await getLabOrderStatusHistory(orderId);
+      if (historyResult.success) {
+        setStatusHistory(historyResult.data);
+      }
+      
+      setLoading(false);
+    };
+    
+    loadData();
+  }, [orderId]);
 
   return {
     order,

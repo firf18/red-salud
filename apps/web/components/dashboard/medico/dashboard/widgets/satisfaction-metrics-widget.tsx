@@ -8,7 +8,7 @@
 
 "use client";
 
-import { useMemo, useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import {
     Star,
@@ -282,7 +282,7 @@ export function SatisfactionMetricsWidget({
                                         </div>
                                         {review.comment && (
                                             <p className="text-[10px] text-muted-foreground line-clamp-2">
-                                                "{review.comment}"
+                                                &quot;{review.comment}&quot;
                                             </p>
                                         )}
                                     </motion.div>
@@ -308,7 +308,7 @@ export function SatisfactionMetricsWidget({
 /**
  * Procesa ratings reales de Supabase.
  */
-function processRatings(ratings: any[]): SatisfactionStats {
+function processRatings(ratings: ReviewData[]): SatisfactionStats {
     const total = ratings.length;
     const sum = ratings.reduce((acc, r) => acc + (r.rating || 0), 0);
     const average = total > 0 ? sum / total : 0;

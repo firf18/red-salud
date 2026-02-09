@@ -189,7 +189,7 @@ export function SpecialtiesTicker() {
   const router = useRouter(); // Asegúrate de importar useRouter de next/navigation
 
   const handleSearchSelect = useCallback(
-    (id: string, rowIndex: 1 | 2) => {
+    (id: string) => {
       // Encontrar el item para obtener el slug
       // Como optimization, podríamos pasar el nombre directo desde el Search,
       // pero aquí buscamos en items por seguridad.
@@ -337,8 +337,6 @@ interface SpecialtyCardProps {
  * Tarjeta individual de especialidad.
  */
 function SpecialtyCard({ item, isHighlighted = false }: SpecialtyCardProps) {
-  // Memoizar el icono para evitar recrearlo en cada render
-  const Icon = React.useMemo(() => getIconForSpecialty(item.name), [item.name]);
   const isLocked = item.doctorCount === 0;
 
   return (
@@ -377,7 +375,7 @@ function SpecialtyCard({ item, isHighlighted = false }: SpecialtyCardProps) {
             isHighlighted && "from-primary to-blue-600 text-white"
           )}
         >
-          <Icon className="h-4 w-4" />
+          {getIconForSpecialty(item.name)({ className: "h-4 w-4" })}
         </div>
 
         {/* Contenido */}

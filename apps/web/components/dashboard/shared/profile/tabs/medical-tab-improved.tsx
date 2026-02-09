@@ -6,7 +6,6 @@ import { Button } from "@red-salud/ui";
 import type { TabComponentProps } from "../types";
 import { useState, useEffect } from "react";
 import type { Medication } from "../components/medication-input-improved";
-import { useImcCalculation } from "./hooks/use-imc-calculation";
 import { useMedicalDataParsing } from "./hooks/use-medical-data-parsing";
 import { VitalDataSection } from "./components/vital-data-section";
 import { LifestyleHabitsSection } from "./components/lifestyle-habits-section";

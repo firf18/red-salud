@@ -3,7 +3,6 @@
 
 import { useRef, useEffect, useState, useImperativeHandle, forwardRef } from "react";
 import { cn } from "@red-salud/core/utils";
-import { Button } from "@red-salud/ui";
 
 interface SignatureCanvasProps {
     className?: string;

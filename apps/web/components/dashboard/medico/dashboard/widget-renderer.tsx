@@ -35,10 +35,6 @@ import { MonthlyGoalsWidget } from "./widgets/monthly-goals-widget";
 import { RevenueAnalyticsWidget } from "./widgets/revenue-analytics-widget";
 import { ProductivityScoreWidget } from "./widgets/productivity-score-widget";
 
-// Placeholder para widgets en desarrollo
-import { WidgetWrapper } from "./widget-wrapper";
-import { TrendingUp, Gauge } from "lucide-react";
-
 // ============================================================================
 // TIPOS
 // ============================================================================

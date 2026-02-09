@@ -1,5 +1,5 @@
 
-import { Stethoscope, Heart, Brain, Baby, Activity, Mic2, Shield, Laptop, Apple, Move, Smile, Pill, Building2, Microscope } from "lucide-react";
+import { Stethoscope, Heart, Brain, Baby, Activity, Laptop, Apple, Move, Smile, Pill, Building2, Microscope } from "lucide-react";
 
 export const ACADEMY_CATEGORIES = [
     {

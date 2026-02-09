@@ -30,8 +30,6 @@ import {
   Heart,
   Plus,
   Eye,
-  Sparkles,
-  CheckCircle,
   Zap,
   Baby,
   User,
@@ -52,7 +50,6 @@ import {
 } from "lucide-react";
 import { StructuredTemplate } from "@/lib/templates/structured-templates";
 import { getAllTemplates } from "@/lib/templates/extended-templates";
-import { CustomTemplateCreator } from "./custom-template-creator";
 import { cn } from "@red-salud/core/utils";
 
 interface StructuredTemplateMarketplaceProps {
@@ -61,7 +58,7 @@ interface StructuredTemplateMarketplaceProps {
   onSelectTemplate: (template: StructuredTemplate) => void;
 }
 
-const iconMap: Record<string, any> = {
+const iconMap: Record<string, React.ComponentType<{ className?: string }>> = {
   FileText,
   Stethoscope,
   Activity,
@@ -89,11 +86,8 @@ export function StructuredTemplateMarketplace({
   onClose,
   onSelectTemplate,
 }: StructuredTemplateMarketplaceProps) {
-  const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState<string>("all");
   const [previewTemplate, setPreviewTemplate] = useState<StructuredTemplate | null>(null);
-  const [showCustomCreator, setShowCustomCreator] = useState(false);
-  const [customTemplates, setCustomTemplates] = useState<StructuredTemplate[]>([]);
   const [allTemplates, setAllTemplates] = useState<StructuredTemplate[]>([]);
   const [favorites, setFavorites] = useState<string[]>([]);
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
@@ -415,7 +409,7 @@ export function StructuredTemplateMarketplace({
             </div>
             <AlertDialogTitle className="text-center text-xl font-bold">¿Eliminar Plantilla?</AlertDialogTitle>
             <AlertDialogDescription className="text-center text-gray-500">
-              Esta acción eliminará permanentemente la plantilla <strong>"{allTemplates.find(t => t.id === templateToDelete)?.name}"</strong>.
+              Esta acción eliminará permanentemente la plantilla <strong>&quot;{allTemplates.find(t => t.id === templateToDelete)?.name}&quot;</strong>.
               No podrás recuperarla ni usarla en futuras consultas.
             </AlertDialogDescription>
           </AlertDialogHeader>

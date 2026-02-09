@@ -14,11 +14,11 @@ export interface RecentActivity {
 /**
  * Hook para cargar actividades recientes y citas próximas
  */
-export function useDashboardData(userId: string | undefined) {
+export function useDashboardData() {
   const [recentActivities, setRecentActivities] = useState<RecentActivity[]>([]);
-  const [upcomingAppointments, setUpcomingAppointments] = useState<any[]>([]);
-  const [latestMetrics, setLatestMetrics] = useState<any[]>([]);
-  const [activeMedications, setActiveMedications] = useState<any[]>([]);
+  const [upcomingAppointments, setUpcomingAppointments] = useState<unknown[]>([]);
+  const [latestMetrics, setLatestMetrics] = useState<unknown[]>([]);
+  const [activeMedications, setActiveMedications] = useState<unknown[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 

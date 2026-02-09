@@ -6,7 +6,7 @@ import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContaine
 interface BarChartCardProps {
     title: string;
     description?: string;
-    data: any[];
+    data: Record<string, unknown>[];
     categories: string[];
     colors: string[];
     index: string;
@@ -17,14 +17,21 @@ interface BarChartCardProps {
     stack?: boolean;
 }
 
-const CustomTooltip = ({ active, payload, label, formatter }: any) => {
+interface TooltipProps {
+    active?: boolean;
+    payload?: Array<{ name: string; value: number; color: string }>;
+    label?: string;
+    formatter?: (value: number) => string;
+}
+
+const CustomTooltip = ({ active, payload, label, formatter }: TooltipProps) => {
     if (active && payload && payload.length) {
         return (
             <div className="bg-white/95 dark:bg-slate-900/95 border border-slate-200 dark:border-slate-800 p-3 rounded-lg shadow-lg backdrop-blur-sm">
                 <p className="font-medium text-slate-900 dark:text-slate-100 mb-2">
                     {label}
                 </p>
-                {payload.map((entry: any, index: number) => (
+                {payload.map((entry, index: number) => (
                     <div key={index} className="flex items-center gap-2 text-sm">
                         <div
                             className="w-2 h-2 rounded-full"

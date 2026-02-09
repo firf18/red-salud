@@ -21,8 +21,6 @@ import { GoogleSignInButton } from "@/components/auth/google-signin-button";
 import { validateUserRole } from "@/lib/auth/role-validator";
 import { type UserRole } from "@/lib/constants";
 import { sessionManager } from "@/lib/security/session-manager";
-import { Logo } from "@red-salud/ui";
-import { cn } from "@red-salud/core/utils";
 
 interface LoginFormProps {
   role: UserRole;

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { X, Key, Loader2, Check, AlertCircle } from "lucide-react";
 
@@ -71,7 +71,7 @@ export function SecurityQuestionsModal({ isOpen, onClose }: SecurityQuestionsMod
         onClose();
         setSuccess(false);
       }, 2000);
-    } catch (error) {
+    } catch {
       setError("Error al conectar con el servidor");
     } finally {
       setLoading(false);

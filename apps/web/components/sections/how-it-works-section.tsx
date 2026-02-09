@@ -55,8 +55,8 @@ export function HowItWorksSection() {
         {/* Steps Grid */}
         <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
           {steps.map((step, index) => {
-            const Icon = step.icon;
             const isLast = index === steps.length - 1;
+            const Icon = step.icon;
 
             return (
               <div key={step.number} className="relative">
@@ -109,7 +109,6 @@ export function HowItWorksSection() {
         <div className="lg:hidden">
           <div className="space-y-4">
             {steps.map((step, index) => {
-              const Icon = step.icon;
               return (
                 <div key={step.number} className="flex gap-4">
                   {/* Timeline line */}

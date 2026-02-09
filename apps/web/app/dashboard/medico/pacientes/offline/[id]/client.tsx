@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useMemo } from "react";
 import { useRouter, useParams } from "next/navigation";
 import { supabase } from "@/lib/supabase/client";
 import {
@@ -18,10 +18,6 @@ import {
 import {
   ArrowLeft,
   User,
-  Calendar,
-  Phone,
-  Mail,
-  MapPin,
   Droplet,
   AlertCircle,
   Pill,
@@ -97,7 +93,7 @@ export default function OfflinePatientDetailPage() {
     loadPatient();
   }, [loadPatient]);
 
-  const handleUpdateTags = async (field: keyof OfflinePatient, action: 'add' | 'remove', item: string) => {
+  const handleUpdateTags = useCallback(async (field: keyof OfflinePatient, action: 'add' | 'remove', item: string) => {
     if (!patient) return;
 
     const currentList = (patient[field] as string[]) || [];
@@ -126,9 +122,9 @@ export default function OfflinePatientDetailPage() {
       // Revert on error
       setPatient(prev => prev ? { ...prev, [field]: currentList } : null);
     }
-  };
+  }, [patient]);
 
-  const handleSaveNotes = async (newNotes: string) => {
+  const handleSaveNotes = useCallback(async (newNotes: string) => {
     if (!patient) return;
 
     try {
@@ -138,22 +134,16 @@ export default function OfflinePatientDetailPage() {
         .eq("id", patient.id);
 
       if (error) throw error;
-      // State update is handled by the component's internal state + prop update from parent isn't strictly necessary 
-      // if we trust the component, but good for consistency if we re-render.
-      // However, to avoid cursor jumps, we might rely on the component's internal state primarily for the text area.
-      // We'll update our local state silently.
       setPatient(prev => prev ? { ...prev, notas_medico: newNotes } : null);
     } catch (err) {
       console.error("Error saving notes:", err);
-      throw err; // Component handles error state
+      throw err;
     }
-  };
+  }, [patient]);
 
-  const handleUpdateContact = async (newData: any) => {
+  const handleUpdateContact = useCallback(async (newData: Record<string, unknown>) => {
     if (!patient) return;
 
-    // Sanitize data: convert empty strings to null for database compatibility
-    // and trim strings to avoid accidental whitespace issues
     const sanitizedData = Object.fromEntries(
       Object.entries(newData).map(([key, value]) => [
         key,
@@ -161,7 +151,6 @@ export default function OfflinePatientDetailPage() {
       ])
     );
 
-    // Optimistic Update
     setPatient(prev => prev ? { ...prev, ...sanitizedData } : null);
 
     try {
@@ -170,42 +159,38 @@ export default function OfflinePatientDetailPage() {
         .update(sanitizedData)
         .eq("id", patient.id);
 
-      if (error) {
-        console.error("Supabase update error detail:", error);
-        throw error;
-      }
+      if (error) throw error;
 
       toast.success("Información de contacto actualizada");
-      // Re-fetch to get latest updated_at or other server-side changes
       loadPatient();
-    } catch (err: any) {
-      console.error("Error updating contact:", err?.message || err);
-      toast.error(err?.message || "Error al actualizar contacto");
-      // Revert optimism by reloading from server
+    } catch (err) {
+      console.error("Error updating contact:", err);
+      toast.error(err instanceof Error ? err.message : "Error al actualizar contacto");
       loadPatient();
     }
-  };
+  }, [patient, loadPatient]);
 
-  const calculateAge = (birthDate: string | null) => {
-    if (!birthDate) return null;
+  const age = useMemo(() => {
+    if (!patient?.fecha_nacimiento) return null;
     const today = new Date();
-    const birth = new Date(birthDate);
+    const birth = new Date(patient.fecha_nacimiento);
     let age = today.getFullYear() - birth.getFullYear();
     const monthDiff = today.getMonth() - birth.getMonth();
     if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birth.getDate())) {
       age--;
     }
     return age;
-  };
+  }, [patient?.fecha_nacimiento]);
 
-  const getInitials = (name: string) => {
-    return name
+  const initials = useMemo(() => {
+    if (!patient?.nombre_completo) return "";
+    return patient.nombre_completo
       .split(" ")
       .map((n) => n[0])
       .join("")
       .toUpperCase()
       .slice(0, 2);
-  };
+  }, [patient?.nombre_completo]);
 
   if (loading) {
     return (
@@ -228,7 +213,6 @@ export default function OfflinePatientDetailPage() {
     );
   }
 
-  const age = calculateAge(patient.fecha_nacimiento);
 
   return (
     <VerificationGuard>
@@ -265,7 +249,7 @@ export default function OfflinePatientDetailPage() {
                 <div className="flex flex-col md:flex-row items-center md:items-start gap-6">
                   <Avatar className="h-24 w-24 border-4 border-background shadow-sm">
                     <AvatarFallback className="text-3xl bg-primary/10 text-primary font-bold">
-                      {getInitials(patient.nombre_completo)}
+                      {initials}
                     </AvatarFallback>
                   </Avatar>
                   <div className="flex-1 text-center md:text-left space-y-2">
@@ -321,7 +305,7 @@ export default function OfflinePatientDetailPage() {
               {/* 2. Allergies (Flip Card) */}
               <MedicalFlipCard
                 title="Alergias"
-                icon={AlertCircle}
+                icon={<AlertCircle className="h-4 w-4" />}
                 items={patient.alergias}
                 colorClass="text-orange-600 dark:text-orange-400"
                 bgClass="bg-orange-50/50 border-orange-100 dark:bg-orange-900/10 dark:border-orange-900/20"
@@ -332,7 +316,7 @@ export default function OfflinePatientDetailPage() {
               {/* 3. Medications (Flip Card) - Using 'medicamentos_actuales' */}
               <MedicalFlipCard
                 title="Medicación"
-                icon={Pill}
+                icon={<Pill className="h-4 w-4" />}
                 items={patient.medicamentos_actuales}
                 colorClass="text-blue-600 dark:text-blue-400"
                 bgClass="bg-blue-50/50 border-blue-100 dark:bg-blue-900/10 dark:border-blue-900/20"

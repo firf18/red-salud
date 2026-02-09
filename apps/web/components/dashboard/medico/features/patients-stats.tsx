@@ -1,6 +1,6 @@
 "use client";
 
-import { Card, CardContent, CardHeader, CardTitle } from "@red-salud/ui";
+import { Card, CardContent } from "@red-salud/ui";
 import { Badge } from "@red-salud/ui";
 import { Users, TrendingUp, TrendingDown, Activity } from "lucide-react";
 

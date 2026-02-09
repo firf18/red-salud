@@ -2,17 +2,17 @@
 
 import { useState, useRef, useEffect } from "react";
 import {
-  Dialog, DialogContent, DialogHeader, DialogTitle,
+  Dialog, DialogContent, DialogTitle,
   DialogDescription, Button, Input, Label, Textarea,
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
   Badge, ScrollArea, Tabs, TabsList, TabsTrigger, TabsContent,
-  Switch, Separator, Card
+  Switch
 } from "@red-salud/ui";
 import {
-  Plus, X, GripVertical, Save, Trash2, Settings,
+  Plus, GripVertical, Save, Trash2, Settings,
   Type, List, CheckSquare, Circle, Hash, Calendar,
   AlignLeft, Activity, Pill, Layout, Info, Eye,
-  ArrowLeft, PanelsTopLeft, Sparkles
+  ArrowLeft, PanelsTopLeft
 } from "lucide-react";
 import { StructuredTemplate, StructuredTemplateField } from "@/lib/templates/structured-templates";
 import { cn } from "@red-salud/core/utils";
@@ -26,7 +26,14 @@ interface CustomTemplateCreatorProps {
 
 type FieldType = StructuredTemplateField['type'];
 
-const FIELD_TYPES: { type: FieldType; label: string; icon: any; description: string }[] = [
+interface FieldTypeConfig {
+  type: FieldType;
+  label: string;
+  icon: React.ComponentType<{ className?: string }>;
+  description: string;
+}
+
+const FIELD_TYPES: FieldTypeConfig[] = [
   { type: 'header', label: 'Título de Sección', icon: Layout, description: 'Divisor de secciones' },
   { type: 'info', label: 'Texto Informativo', icon: Info, description: 'Instrucciones o notas estáticas' },
   { type: 'textarea', label: 'Área de Texto', icon: AlignLeft, description: 'Texto largo en varias líneas' },
@@ -59,6 +66,15 @@ export function CustomTemplateCreator({
   const [activeTab, setActiveTab] = useState("builder");
 
   const fieldCounterRef = useRef(0);
+  const templateIdRef = useRef<string | null>(null);
+
+  // Initialize template ID lazily on first access
+  const getTemplateId = () => {
+    if (!templateIdRef.current) {
+      templateIdRef.current = `custom_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    }
+    return templateIdRef.current;
+  };
 
   // Focus on new field when added
   useEffect(() => {
@@ -108,10 +124,10 @@ export function CustomTemplateCreator({
     if (!templateName || fields.length === 0) return;
 
     const template: StructuredTemplate = {
-      id: `custom_${Date.now()}`,
+      id: getTemplateId(),
       name: templateName,
       description: templateDescription,
-      category: templateCategory as any,
+      category: templateCategory as typeof StructuredTemplate.prototype.category,
       icon: 'FileText',
       color: 'blue',
       author: 'custom',
@@ -290,7 +306,7 @@ export function CustomTemplateCreator({
                       <Info className="h-4 w-4" />
                       Consejo
                     </h4>
-                    Configura primero los datos generales y luego ve a la pestaña "Campos" para construir tu formulario.
+                    Configura primero los datos generales y luego ve a la pestaña &quot;Campos&quot; para construir tu formulario.
                   </div>
                 </TabsContent>
 

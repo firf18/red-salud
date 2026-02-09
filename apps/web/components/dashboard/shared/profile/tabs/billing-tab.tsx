@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import {
   CreditCard,
@@ -11,37 +11,59 @@ import {
 import { Button } from "@red-salud/ui";
 import { getPaymentMethods, getTransactions } from "@/lib/supabase/services/billing-service";
 
+interface PaymentMethod {
+  id: string;
+  user_id: string;
+  type?: string;
+  last_four?: string;
+  expires_at?: string;
+}
+
+interface Transaction {
+  id: string;
+  user_id: string;
+  amount: number;
+  status: "pending" | "paid" | "failed";
+  created_at: string;
+}
+
 interface BillingTabProps {
   userId?: string;
 }
 
 export function BillingTab({ userId }: BillingTabProps) {
-  const [paymentMethods, setPaymentMethods] = useState<any[]>([]);
-  const [transactions, setTransactions] = useState<any[]>([]);
+  const [paymentMethods, setPaymentMethods] = useState<PaymentMethod[]>([]);
+  const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (userId) {
-      loadData();
-    }
-  }, [userId, loadData]);
-
-  const loadData = useCallback(async () => {
     if (!userId) return;
 
-    setLoading(true);
-    const [methodsResult, transactionsResult] = await Promise.all([
-      getPaymentMethods(userId),
-      getTransactions(userId, 10),
-    ]);
+    let isMounted = true;
 
-    if (methodsResult.success) {
-      setPaymentMethods(methodsResult.data || []);
-    }
-    if (transactionsResult.success) {
-      setTransactions(transactionsResult.data || []);
-    }
-    setLoading(false);
+    const loadData = async () => {
+      setLoading(true);
+      const [methodsResult, transactionsResult] = await Promise.all([
+        getPaymentMethods(userId),
+        getTransactions(userId, 10),
+      ]);
+
+      if (isMounted) {
+        if (methodsResult.success) {
+          setPaymentMethods(methodsResult.data || []);
+        }
+        if (transactionsResult.success) {
+          setTransactions(transactionsResult.data || []);
+        }
+        setLoading(false);
+      }
+    };
+
+    loadData();
+
+    return () => {
+      isMounted = false;
+    };
   }, [userId]);
 
   const totalSpent = transactions

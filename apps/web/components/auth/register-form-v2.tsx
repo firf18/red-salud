@@ -25,7 +25,6 @@ import { registerSchema, type RegisterFormData } from "@red-salud/core/validatio
 import { signUp, signIn, type UserRole } from "@/lib/supabase/auth";
 import { useOAuthErrors } from "@/hooks/auth/use-oauth-errors";
 import { useOAuthSignIn } from "@/hooks/auth/use-oauth-signin";
-import { cn } from "@red-salud/core/utils";
 
 interface RegisterFormProps {
   role: UserRole;

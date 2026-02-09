@@ -14,7 +14,6 @@ import {
   Pill,
   Download,
   Share2,
-  Clock,
   AlertCircle,
 } from "lucide-react";
 import Link from "next/link";

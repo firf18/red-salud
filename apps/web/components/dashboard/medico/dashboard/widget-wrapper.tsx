@@ -48,7 +48,6 @@ interface WidgetWrapperProps {
 export const WidgetWrapper = forwardRef<HTMLDivElement, WidgetWrapperProps>(
     (
         {
-            id,
             title,
             icon,
             children,

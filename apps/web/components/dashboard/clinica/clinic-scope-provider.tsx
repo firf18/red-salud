@@ -6,8 +6,8 @@
 
 'use client';
 
-import React, { createContext, useContext, useState, useEffect } from 'react';
-import type { Clinic, ClinicLocation } from '@/lib/types/clinic.types';
+import React, { createContext, useContext, useState } from 'react';
+import type { Clinic, ClinicLocation } from '@red-salud/types';
 
 interface ClinicScopeContextValue {
   selectedClinicId: string | null;
@@ -51,7 +51,7 @@ export function ClinicScopeProvider({ children }: { children: React.ReactNode })
     const mainLocation = currentLocations.find((l) => l.is_main);
     if (mainLocation) {
       setSelectedLocationIds([mainLocation.id]);
-    } else if (currentLocations.length > 0) {
+    } else if (currentLocations.length > 0 && currentLocations[0]) {
       setSelectedLocationIds([currentLocations[0].id]);
     }
   };

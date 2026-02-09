@@ -1,7 +1,5 @@
 "use client";
 
-import { Card, CardContent } from "@red-salud/ui";
-
 interface Props {
   doctorName?: string;
   doctorFee?: number | null;

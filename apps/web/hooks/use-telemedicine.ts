@@ -15,7 +15,6 @@ import {
   markMessagesAsRead,
   createPrescription,
   getPatientPrescriptions,
-  getSessionPrescriptions,
   enterWaitingRoom,
   getWaitingRoomPatients,
   admitPatient,

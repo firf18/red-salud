@@ -16,18 +16,17 @@ import { DollarSign, CreditCard } from "lucide-react";
 import { useBCVRate } from "@/hooks/use-bcv-rate";
 
 interface OfficePricingProps {
-    officeId?: string;
     value: {
         consultation_fee?: number;
         currency?: string;
         payment_methods?: string[];
         insurance_accepted?: boolean;
     } | undefined;
-    onChange: (value: any) => void;
+    onChange: (value: { consultation_fee?: number; currency?: string; payment_methods?: string[]; insurance_accepted?: boolean }) => void;
 }
 
 export function OfficePricing({ value = {}, onChange }: OfficePricingProps) {
-    const handleChange = (field: string, val: any) => {
+    const handleChange = (field: string, val: string | boolean | number) => {
         onChange({
             ...value,
             [field]: val
@@ -43,7 +42,7 @@ export function OfficePricing({ value = {}, onChange }: OfficePricingProps) {
         }
     };
 
-    const { data: bcvResponse, isLoading: isLoadingRate } = useBCVRate();
+    const { data: bcvResponse } = useBCVRate();
 
     const getConversionDisplay = (amount: number | undefined, currency: string | undefined) => {
         if (!amount || !bcvResponse?.rates) return null;

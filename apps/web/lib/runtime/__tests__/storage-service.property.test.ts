@@ -16,11 +16,9 @@
  * Validates: Requirements 2.4, 7.5
  */
 
-import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
+import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import fc from 'fast-check';
 import { RuntimeServiceImpl } from '../runtime-service';
-import { TauriStorageService } from '../services/tauri-storage-service';
-import { WebStorageService } from '../services/web-storage-service';
 import type { StorageService } from '../types';
 
 /**
@@ -50,7 +48,7 @@ describe('Property 3: Dual State Update on Successful Fetch', () => {
     // Clean up storage after each test
     try {
       await storageService.clear();
-    } catch (error) {
+    } catch {
       // Ignore cleanup errors
     }
   });

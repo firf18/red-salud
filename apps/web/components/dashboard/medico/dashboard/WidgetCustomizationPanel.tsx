@@ -9,7 +9,6 @@
 "use client";
 
 import { useState, useCallback, useMemo } from "react";
-import { motion, AnimatePresence } from "framer-motion";
 import {
     Eye,
     Settings2,
@@ -21,6 +20,7 @@ import {
     MessageSquare,
     Zap,
 } from "lucide-react";
+import { motion } from "framer-motion";
 import * as LucideIcons from "lucide-react";
 import { cn } from "@red-salud/core/utils";
 import { Button } from "@red-salud/ui";
@@ -29,10 +29,9 @@ import { Badge } from "@red-salud/ui";
 import {
     Sheet,
     SheetContent,
-    SheetDescription,
+    SheetFooter,
     SheetHeader,
     SheetTitle,
-    SheetFooter,
 } from "@red-salud/ui";
 import { ScrollArea } from "@red-salud/ui";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@red-salud/ui";
@@ -66,7 +65,7 @@ interface WidgetCustomizationPanelProps {
 }
 
 // Mapeo de categorías a etiquetas en español e iconos
-const CATEGORY_MAP: Record<string, { label: string; icon: any }> = {
+const CATEGORY_MAP: Record<string, { label: string; icon: React.ComponentType<{ className?: string }> }> = {
     stats: { label: "Métricas", icon: BarChart3 },
     calendar: { label: "Gestión de Citas", icon: Calendar },
     communication: { label: "Comunicación", icon: MessageSquare },
@@ -96,15 +95,15 @@ function WidgetCard({
     isAvailable,
     onToggle,
     matchSearch,
+    Icon,
 }: {
     config: WidgetConfig;
     isVisible: boolean;
     isAvailable: boolean;
     onToggle: () => void;
     matchSearch: boolean;
+    Icon: React.ComponentType<{ className?: string }>;
 }) {
-    const Icon = getIcon(config.icon);
-
     if (!matchSearch) return null;
 
     return (
@@ -176,11 +175,8 @@ export function WidgetCustomizationPanel({
     hiddenWidgets,
     onToggleWidget,
     onResetLayout,
-    onSave,
 }: WidgetCustomizationPanelProps) {
     const [activeTab, setActiveTab] = useState<"widgets" | "layout">("widgets");
-    const [searchQuery, setSearchQuery] = useState("");
-    const [hasChanges, setHasChanges] = useState(false);
 
     // Obtener widgets disponibles para el modo actual ordenados por categoría
     const widgetsByCategory = useMemo(() => {
@@ -202,7 +198,7 @@ export function WidgetCustomizationPanel({
         });
 
         // Filtrar categorías vacías
-        const result: { id: string; label: string; icon: any; widgets: WidgetConfig[] }[] = [];
+        const result: { id: string; label: string; icon: React.ComponentType<{ className?: string }>; widgets: WidgetConfig[] }[] = [];
         orderedCategories.forEach(cat => {
             if (grouped[cat] && grouped[cat].length > 0) {
                 const catInfo = CATEGORY_MAP[cat] || { label: cat, icon: LayoutGrid };
@@ -222,21 +218,18 @@ export function WidgetCustomizationPanel({
     const handleToggle = useCallback(
         (widgetId: WidgetId) => {
             onToggleWidget(widgetId);
-            setHasChanges(true);
         },
         [onToggleWidget]
     );
 
     const handleReset = useCallback(() => {
         onResetLayout();
-        setHasChanges(false);
     }, [onResetLayout]);
 
     const handleSave = useCallback(() => {
         onSave?.();
-        setHasChanges(false);
         onClose();
-    }, [onSave, onClose]);
+    }, [onClose]);
 
     // Función para filtrar widgets según búsqueda
     const doesMatchSearch = (widget: WidgetConfig) => {
@@ -277,7 +270,7 @@ export function WidgetCustomizationPanel({
                 {/* Tabs más limpias */}
                 <Tabs
                     value={activeTab}
-                    onValueChange={(v) => setActiveTab(v as any)}
+                    onValueChange={(v) => setActiveTab(v as "widgets" | "layout")}
                     className="flex-1 flex flex-col overflow-hidden"
                 >
                     <div className="px-6 pt-6 pb-2">
@@ -318,16 +311,20 @@ export function WidgetCustomizationPanel({
                                                 {category.label}
                                             </div>
                                             <div className="grid grid-cols-1 gap-3">
-                                                {category.widgets.map((config) => (
-                                                    <WidgetCard
-                                                        key={config.id}
-                                                        config={config}
-                                                        isVisible={!hiddenWidgets.includes(config.id)}
-                                                        isAvailable={true}
-                                                        onToggle={() => handleToggle(config.id)}
-                                                        matchSearch={doesMatchSearch(config)}
-                                                    />
-                                                ))}
+                                                {category.widgets.map((config) => {
+                                                    const Icon = getIcon(config.icon);
+                                                    return (
+                                                        <WidgetCard
+                                                            key={config.id}
+                                                            config={config}
+                                                            Icon={Icon}
+                                                            isVisible={!hiddenWidgets.includes(config.id)}
+                                                            isAvailable={true}
+                                                            onToggle={() => handleToggle(config.id)}
+                                                            matchSearch={doesMatchSearch(config)}
+                                                        />
+                                                    );
+                                                })}
                                             </div>
                                         </div>
                                     );

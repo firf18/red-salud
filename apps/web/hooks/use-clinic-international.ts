@@ -24,7 +24,6 @@ import {
   getCountryRequirements,
 } from '@/lib/supabase/services/clinic-international-service';
 import type {
-  CreateInternationalPatientInput,
   InternationalPatient,
   TravelDocument,
 } from '@red-salud/types';

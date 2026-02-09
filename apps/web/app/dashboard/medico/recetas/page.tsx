@@ -6,8 +6,6 @@ import {
   Card,
   CardContent,
   CardHeader,
-  CardTitle,
-  CardDescription,
   Button,
   Input,
   Badge,
@@ -24,11 +22,6 @@ import {
   DropdownMenuTrigger,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuSeparator,
-  Tooltip,
-  TooltipTrigger,
-  TooltipContent,
-  TooltipProvider,
   Dialog,
   DialogContent,
   DialogTitle,
@@ -37,21 +30,19 @@ import {
   Pill,
   Plus,
   Search,
-  MoreVertical,
   Eye,
-  Printer,
-  Download,
-  Filter,
-  Calendar,
   User,
   Loader2,
   CheckCircle2,
   Clock,
   XCircle,
-  Settings,
   ChevronLeft,
   ChevronRight,
   History,
+  Settings,
+  MoreVertical,
+  Printer,
+  Download
 } from "lucide-react";
 import { VerificationGuard } from "@/components/dashboard/medico/features/verification-guard";
 import { getDoctorPrescriptions } from "@/lib/supabase/services/medications-service";
@@ -59,7 +50,6 @@ import { supabase } from "@/lib/supabase/client";
 import { Prescription } from "@/lib/supabase/types/medications";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
-import { cn } from "@red-salud/core/utils";
 import { RecipeViewerModal } from "@/components/dashboard/recetas/recipe-viewer-modal";
 import {
   constructRecipeData,
@@ -82,7 +72,6 @@ export default function RecipesListPage() {
   const [isViewModalOpen, setIsViewModalOpen] = useState(false);
 
   // State for Patient History Modal
-  const [historyPatientId, setHistoryPatientId] = useState<string | null>(null);
   const [isHistoryModalOpen, setIsHistoryModalOpen] = useState(false);
   const [patientHistory, setPatientHistory] = useState<Prescription[]>([]);
   const [selectedPatientName, setSelectedPatientName] = useState("");
@@ -93,21 +82,9 @@ export default function RecipesListPage() {
 
   // Cache for settings/profile to avoid refetching on every click
   const [recipeSettings, setRecipeSettings] = useState<DoctorRecipeSettings | null>(null);
-  const [doctorProfile, setDoctorProfile] = useState<any>(null); // Simplified type for now
-  const [isPreparingAction, setIsPreparingAction] = useState(false);
+  const [doctorProfile, setDoctorProfile] = useState<Record<string, unknown> | null>(null);
 
-  useEffect(() => {
-    async function getUserId() {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (user) {
-        setUserId(user.id);
-        fetchSettingsAndProfile(user.id);
-      }
-    }
-    getUserId();
-  }, []);
-
-  async function fetchSettingsAndProfile(uid: string) {
+  const fetchSettingsAndProfile = useCallback(async (uid: string) => {
     try {
       // Parallel fetch for speed
       const [settingsRes, profileRes, detailsRes] = await Promise.all([
@@ -145,7 +122,18 @@ export default function RecipesListPage() {
     } catch (e) {
       console.error("Error loading settings:", e);
     }
-  }
+  }, []);
+
+  useEffect(() => {
+    async function getUserId() {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        setUserId(user.id);
+        fetchSettingsAndProfile(user.id);
+      }
+    }
+    getUserId();
+  }, [fetchSettingsAndProfile]);
 
   useEffect(() => {
     if (!userId) return;
@@ -198,34 +186,14 @@ export default function RecipesListPage() {
     return uniqueRecipes.slice(start, start + itemsPerPage);
   }, [uniqueRecipes, currentPage]);
 
-  const handlePageChange = (newPage: number) => {
+  const handlePageChange = useCallback((newPage: number) => {
     if (newPage >= 1 && newPage <= totalPages) {
       setCurrentPage(newPage);
     }
-  };
+  }, [totalPages]);
 
-  const handleOpenHistory = (recipe: Prescription) => {
-    const pInfo = getPatientDisplayInfo(recipe);
-    // Determine ID (either registered patient ID or offline patient ID)
-    // We use a prefix or just string id to filter.
-    // Easiest is to filter the 'recipes' list by the same patient reference.
-
-    const patId = recipe.paciente?.id || recipe.offline_patient?.id;
-    if (!patId) return;
-
-    setSelectedPatientName(pInfo.name);
-
-    // Filter history from all loaded recipes (client-side for now)
-    const history = recipes.filter(r =>
-      (r.paciente?.id === patId) || (r.offline_patient?.id === patId)
-    );
-
-    setPatientHistory(history);
-    setIsHistoryModalOpen(true);
-  };
-
-  // Helper to get display data
-  const getPatientDisplayInfo = (recipe: Prescription) => {
+  // Helper to get display data - memoized to be used in handlers
+  const getPatientDisplayInfo = useCallback((recipe: Prescription) => {
     if (recipe.paciente) {
       return {
         name: recipe.paciente.nombre_completo,
@@ -253,9 +221,29 @@ export default function RecipesListPage() {
       initial: "?",
       age: undefined,
     };
-  };
+  }, []);
 
-  const prepareActionData = (recipe: Prescription) => {
+  const handleOpenHistory = useCallback((recipe: Prescription) => {
+    const pInfo = getPatientDisplayInfo(recipe);
+    // Determine ID (either registered patient ID or offline patient ID)
+    // We use a prefix or just string id to filter.
+    // Easiest is to filter the 'recipes' list by the same patient reference.
+
+    const patId = recipe.paciente?.id || recipe.offline_patient?.id;
+    if (!patId) return;
+
+    setSelectedPatientName(pInfo.name);
+
+    // Filter history from all loaded recipes (client-side for now)
+    const history = recipes.filter(r =>
+      (r.paciente?.id === patId) || (r.offline_patient?.id === patId)
+    );
+
+    setPatientHistory(history);
+    setIsHistoryModalOpen(true);
+  }, [recipes, getPatientDisplayInfo]);
+
+  const prepareActionData = useCallback((recipe: Prescription) => {
     if (!recipeSettings || !doctorProfile) {
       toast.error("Cargando configuración...");
       return null;
@@ -263,14 +251,14 @@ export default function RecipesListPage() {
     const data = constructRecipeData(recipe, doctorProfile, recipeSettings);
     const settings = constructRecipeSettings(recipeSettings);
     return { data, settings };
-  };
+  }, [recipeSettings, doctorProfile]);
 
-  const handleViewRecipe = (recipe: Prescription) => {
+  const handleViewRecipe = useCallback((recipe: Prescription) => {
     setSelectedRecipe(recipe);
     setIsViewModalOpen(true);
-  };
+  }, []);
 
-  const handlePrint = async (recipe: Prescription) => {
+  const handlePrint = useCallback(async (recipe: Prescription) => {
     const prep = prepareActionData(recipe);
     if (!prep) return;
 
@@ -285,9 +273,9 @@ export default function RecipesListPage() {
     } finally {
       setIsPreparingAction(false);
     }
-  };
+  }, [prepareActionData]);
 
-  const handleDownload = async (recipe: Prescription) => {
+  const handleDownload = useCallback(async (recipe: Prescription) => {
     const prep = prepareActionData(recipe);
     if (!prep) return;
 
@@ -303,7 +291,7 @@ export default function RecipesListPage() {
     } finally {
       setIsPreparingAction(false);
     }
-  };
+  }, [prepareActionData]);
 
   const getStatusBadge = (status: string) => {
     switch (status) {
@@ -428,7 +416,7 @@ export default function RecipesListPage() {
               <div className="text-sm text-gray-500">
                 Mostrando {uniqueRecipes.length} de {filteredRecipes.length} recetas (agrupadas por paciente)
               </div>
-            </div >
+            </div>
 
             {/* Recipes Table or Empty State */}
             {
@@ -503,7 +491,7 @@ export default function RecipesListPage() {
                                   </span>
                                 </TableCell>
                                 <TableCell>
-                                  {getStatusBadge(recipe.estado || 'activa')}
+                                  {getStatusBadge(recipe.status || 'activa')}
                                 </TableCell>
                                 <TableCell className="text-right">
                                   <div className="flex justify-end gap-2">
@@ -610,12 +598,12 @@ export default function RecipesListPage() {
                               {recipe.diagnostico || "Sin diagnóstico"}
                             </span>
                           </div>
-                          {getStatusBadge(recipe.estado || 'activa')}
+                          {getStatusBadge(recipe.status || 'activa')}
                         </div>
                       </CardHeader>
                       <CardContent className="py-2 px-4 text-sm">
                         <ul className="list-disc pl-4 text-gray-600 space-y-1">
-                          {recipe.medications?.slice(0, 3).map((m: any, i: number) => (
+                          {recipe.medications?.slice(0, 3).map((m: { medication?: { nombre_comercial?: string; concentracion?: string }; nombre_medicamento?: string }, i: number) => (
                             <li key={i}>
                               {(m.medication?.nombre_comercial || m.nombre_medicamento || "Medicamento") +
                                 (m.medication?.concentracion ? ` ${m.medication.concentracion}` : "")}

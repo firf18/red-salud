@@ -9,19 +9,16 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
 import {
     BarChart3,
     Loader2,
-    CheckCircle2,
-    XCircle,
     Activity,
     Wallet,
     Users,
     Stethoscope,
     TrendingUp,
     TrendingDown,
-    Calendar,
     Baby,
     PersonStanding
 } from "lucide-react";
@@ -37,11 +34,9 @@ import {
     ResponsiveContainer,
     PieChart,
     Pie,
-    Cell,
-    Legend
+    Cell
 } from "recharts";
 import { cn } from "@red-salud/core/utils";
-import { Button } from "@red-salud/ui";
 import { Badge } from "@red-salud/ui";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@red-salud/ui";
 import { WidgetWrapper } from "../widget-wrapper";

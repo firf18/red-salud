@@ -1,17 +1,14 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase/client";
-import { Card, CardContent, CardHeader, CardTitle } from "@red-salud/ui";
-import { Button } from "@red-salud/ui";
-import { Label } from "@red-salud/ui";
-import { Input } from "@red-salud/ui";
-import { Textarea } from "@red-salud/ui";
+import { Card, CardContent, CardHeader, CardTitle, Button, Label, Input, Textarea } from "@red-salud/ui";
 import { Pill, Save, ArrowLeft, Loader2, Plus, Building2 } from "lucide-react";
 import { VerificationGuard } from "@/components/dashboard/medico/features/verification-guard";
 import { RecipePatientSearch, type PatientOption } from "@/components/dashboard/recetas/recipe-patient-search";
 import { usePatientsList } from "@/components/dashboard/medico/patients/hooks/usePatientsList";
+import { useOffices } from "@/hooks/dashboard/use-offices"; // Added this
 import { createPrescription } from "@/lib/supabase/services/medications-service";
 import { MedicationInput, RecipePreview, type MedicationItemData } from "@/components/dashboard/recetas";
 import { toast } from "sonner";
@@ -24,10 +21,11 @@ import type { CreatePrescriptionData } from "@/lib/supabase/types/medications";
 export default function NewPrescriptionPage() {
     const router = useRouter();
     const [userId, setUserId] = useState<string | null>(null);
-    const { state: patientsState, actions: patientsActions } = usePatientsList(userId);
+    const { state: patientsState } = usePatientsList(userId);
 
     // Office selection for multi-office doctors
-    const { currentOffice, allOffices, updateCurrentOffice, loading: officeLoading } = useCurrentOffice();
+    const { currentOffice, updateCurrentOffice } = useCurrentOffice();
+    const { offices: allOffices } = useOffices(); // Fix undefined allOffices bug
 
     const [selectedPatient, setSelectedPatient] = useState<PatientOption | null>(null);
     const [diagnosis, setDiagnosis] = useState("");
@@ -57,8 +55,8 @@ export default function NewPrescriptionPage() {
         init();
     }, [router]);
 
-    const handleAddMedication = () => {
-        setMedications([...medications, {
+    const handleAddMedication = useCallback(() => {
+        setMedications(prev => [...prev, {
             medicamento: "",
             presentacion: "",
             dosis: "",
@@ -67,24 +65,26 @@ export default function NewPrescriptionPage() {
             viaAdministracion: "Oral",
             instrucciones: ""
         }]);
-    };
+    }, []);
 
-    const handleRemoveMedication = (index: number) => {
-        setMedications(medications.filter((_, i) => i !== index));
-    };
+    const handleRemoveMedication = useCallback((index: number) => {
+        setMedications(prev => prev.filter((_, i) => i !== index));
+    }, []);
 
-    const handleMedicationChange = (index: number, field: keyof MedicationItemData, value: string) => {
-        const newMedications = [...medications];
-        newMedications[index] = { ...newMedications[index], [field]: value };
-        setMedications(newMedications);
-    };
+    const handleMedicationChange = useCallback((index: number, field: keyof MedicationItemData, value: string) => {
+        setMedications(prev => {
+            const next = [...prev];
+            next[index] = { ...next[index], [field]: value };
+            return next;
+        });
+    }, []);
 
-    const handlePatientFound = (patient: PatientOption) => {
+    const handlePatientFound = useCallback((patient: PatientOption) => {
         setSelectedPatient(patient);
         toast.success(`Paciente seleccionado: ${patient.nombre_completo}`);
-    };
+    }, []);
 
-    const handleCnePatientFound = async (cedula: string, nombre: string) => {
+    const handleCnePatientFound = useCallback(async (cedula: string, nombre: string) => {
         if (!userId) return;
 
         // Check if already in offline list (client-side check first)
@@ -127,19 +127,15 @@ export default function NewPrescriptionPage() {
                 email: data.email
             };
 
-            // Update local lists?
-            // For now just select them. The hook will refresh on next mount or if we triggered reload.
-            // patientsActions.loadData(userId) if exposed? 
-
             setSelectedPatient(newPatient);
 
         } catch (err) {
             console.error("Error creating offline patient:", err);
             toast.error("Error al registrar paciente temporal");
         }
-    };
+    }, [userId, patientsState.offlinePatients]);
 
-    const handleSubmit = async () => {
+    const handleSubmit = useCallback(async () => {
         if (!userId || !selectedPatient || !diagnosis || medications.some(m => !m.medicamento)) {
             toast.error("Por favor complete los campos requeridos");
             return;
@@ -179,7 +175,7 @@ export default function NewPrescriptionPage() {
         } finally {
             setSubmitting(false);
         }
-    };
+    }, [userId, selectedPatient, diagnosis, notes, medications, router]);
 
     // Prepare options for ConsultationPatientSearch
     const patientOptions: PatientOption[] = [
@@ -229,7 +225,6 @@ export default function NewPrescriptionPage() {
                             className="rounded-md border border-gray-300 bg-white px-3 py-2 text-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
                             value={currentOffice?.id || ""}
                             onChange={(e) => updateCurrentOffice(e.target.value)}
-                            disabled={officeLoading}
                         >
                             {allOffices.map((office) => (
                                 <option key={office.id} value={office.id}>

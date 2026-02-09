@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase/client";
 import { ConsultationPatientSearch, PatientOption } from "@/components/dashboard/medico/consulta/consultation-patient-search";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@red-salud/ui";
-import { Loader2, Stethoscope } from "lucide-react";
+import { Stethoscope } from "lucide-react";
 import { ActiveConsultationsWidget } from "@/components/dashboard/medico/consulta/widgets/active-consultations";
 import { TodaysAppointmentsWidget } from "@/components/dashboard/medico/consulta/widgets/todays-appointments";
 import { RecentPatientsWidget } from "@/components/dashboard/medico/consulta/widgets/recent-patients";
@@ -14,7 +14,6 @@ import { FastStatsWidget } from "@/components/dashboard/medico/consulta/widgets/
 export default function ConsultaPage() {
   const router = useRouter();
   const [patients, setPatients] = useState<PatientOption[]>([]);
-  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const loadPatients = async () => {
@@ -69,8 +68,6 @@ export default function ConsultaPage() {
         setPatients(allPatients);
       } catch (err) {
         console.error("Error loading patients:", err);
-      } finally {
-        setLoading(false);
       }
     };
 

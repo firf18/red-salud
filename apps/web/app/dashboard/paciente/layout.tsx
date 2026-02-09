@@ -14,7 +14,7 @@ export default function PacienteLayout({
 }) {
   const router = useRouter();
   const { user, loading } = useAuth();
-  const [profile, setProfile] = useState<any>(null);
+  const [profile, setProfile] = useState<Record<string, unknown> | null>(null);
   const [profileLoading, setProfileLoading] = useState(true);
 
   useEffect(() => {
@@ -66,7 +66,7 @@ export default function PacienteLayout({
   return (
     <AppProviders>
       <DashboardLayoutClient
-        userName={profile?.nombre_completo || user?.email?.split("@")[0]}
+        userName={profile?.nombre_completo as string | undefined || user?.email?.split("@")[0]}
         userEmail={user?.email}
         userId={user?.id}
         userRole="paciente"

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { createClient } from "@supabase/supabase-js";
 import {
   ShoppingCart,
@@ -30,7 +30,7 @@ interface Venta {
   fecha: string;
   nombre_cliente: string;
   cedula_cliente: string;
-  productos: any[];
+  productos: unknown[];
   subtotal: number;
   descuento: number;
   iva: number;
@@ -54,7 +54,7 @@ export default function VentasPage() {
 
   useEffect(() => {
     filterVentas();
-  }, [ventas, searchTerm, selectedEstado, selectedMetodoPago]);
+  }, [ventas, searchTerm, selectedEstado, selectedMetodoPago, filterVentas]);
 
   const loadVentas = async () => {
     try {
@@ -76,7 +76,7 @@ export default function VentasPage() {
     }
   };
 
-  const filterVentas = () => {
+  const filterVentas = useCallback(() => {
     let filtered = ventas;
 
     if (searchTerm) {
@@ -97,7 +97,7 @@ export default function VentasPage() {
     }
 
     setFilteredVentas(filtered);
-  };
+  }, [ventas, searchTerm, selectedEstado, selectedMetodoPago]);
 
   const getEstadoColor = (estado: string) => {
     switch (estado) {
@@ -330,18 +330,21 @@ export default function VentasPage() {
                 <div className="border-t pt-4">
                   <p className="font-medium mb-2">Productos</p>
                   <div className="space-y-2">
-                    {ventaSeleccionada.productos?.map((producto, index) => (
-                      <div
-                        key={index}
-                        className="flex justify-between p-2 bg-muted/50 rounded"
-                      >
-                        <span>{producto.nombre}</span>
-                        <span>
-                          {producto.cantidad} x ${producto.precio_unitario.toFixed(2)} = $
-                          {(producto.cantidad * producto.precio_unitario).toFixed(2)}
-                        </span>
-                      </div>
-                    ))}
+                    {ventaSeleccionada.productos?.map((producto, index) => {
+                      const prod = producto as { nombre: string; cantidad: number; precio_unitario: number };
+                      return (
+                        <div
+                          key={index}
+                          className="flex justify-between p-2 bg-muted/50 rounded"
+                        >
+                          <span>{prod.nombre}</span>
+                          <span>
+                            {prod.cantidad} x ${prod.precio_unitario.toFixed(2)} = $
+                            {(prod.cantidad * prod.precio_unitario).toFixed(2)}
+                          </span>
+                        </div>
+                      );
+                    })}
                   </div>
                 </div>
 

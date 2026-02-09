@@ -1,7 +1,7 @@
 "use client";
 
 import { useSearchParams, useRouter } from "next/navigation";
-import { Suspense } from "react";
+import { Suspense, useMemo } from "react";
 import { VerificationGuard } from "@/components/dashboard/medico/features/verification-guard";
 import { MedicalWorkspace } from "@/components/dashboard/medico/medical-workspace";
 import { Loader2 } from "lucide-react";
@@ -32,12 +32,17 @@ function ConsultaContent() {
     setNotasMedicas,
     diagnosticos,
     setDiagnosticos,
-    tratamiento,
-    setTratamiento,
-    observaciones,
-    setObservaciones,
     saveConsultation,
   } = useConsultation(appointmentId, pacienteId, fromPage);
+
+  const pacienteData = useMemo(() => ({
+    cedula: patient?.cedula || "",
+    nombre_completo: patient?.nombre_completo || "",
+    edad: patient?.fecha_nacimiento
+      ? Math.floor((new Date().getTime() - new Date(patient.fecha_nacimiento).getTime()) / (365.25 * 24 * 60 * 60 * 1000))
+      : null,
+    genero: (patient?.genero as string | null) || "",
+  }), [patient]);
 
   if (loading) {
     return (
@@ -66,14 +71,6 @@ function ConsultaContent() {
     );
   }
 
-  const pacienteData = {
-    cedula: patient.cedula,
-    nombre_completo: patient.nombre_completo,
-    edad: patient.fecha_nacimiento
-      ? Math.floor((new Date().getTime() - new Date(patient.fecha_nacimiento).getTime()) / (365.25 * 24 * 60 * 60 * 1000))
-      : null,
-    genero: patient.genero || "",
-  };
 
   return (
     <VerificationGuard>

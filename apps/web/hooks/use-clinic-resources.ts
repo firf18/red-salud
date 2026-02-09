@@ -10,13 +10,12 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { createClient } from '@/lib/supabase/client';
 import type {
     ResourceWithPosition,
-    ClinicArea,
     AreaWithResources,
     ResourceAssignment,
     CreateResourceInput,
     CreateAreaInput,
     AssignResourceInput,
-} from '@/lib/types/clinic.types';
+} from '@red-salud/types';
 
 const supabase = createClient();
 
@@ -34,9 +33,9 @@ export function useClinicResources(locationId: string, floor?: number) {
             let query = supabase
                 .from('clinic_resources')
                 .select(`
-          *,
-          area:area_id (*)
-        `)
+                  *,
+                  area:area_id (*)
+                `)
                 .eq('location_id', locationId);
 
             if (floor !== undefined) {
@@ -203,7 +202,7 @@ export function useUpdateResourceStatus() {
             if (error) throw error;
             return data;
         },
-        onSuccess: (data) => {
+        onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ['clinic-resources'] });
         },
     });

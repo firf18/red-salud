@@ -210,11 +210,24 @@ const features = [
     },
 ];
 
+interface Doctor {
+    name: string;
+    specialty: string;
+    rating: string;
+    available: boolean;
+}
+
+interface DoctorData {
+    id: string;
+    average_rating: number | null;
+    specialty: { name: string } | null;
+    profile: { full_name: string } | null;
+}
+
 export function PacientesProductShowcase() {
     const [activeFeature, setActiveFeature] = useState("buscar");
-    const [realDoctors, setRealDoctors] = useState<any[]>([]);
+    const [realDoctors, setRealDoctors] = useState<Doctor[]>([]);
     const [pharmacyCount, setPharmacyCount] = useState<number | null>(null);
-    const [isLoading, setIsLoading] = useState(true);
 
     useEffect(() => {
         async function fetchData() {
@@ -235,7 +248,7 @@ export function PacientesProductShowcase() {
                 if (doctorsError) throw doctorsError;
 
                 if (doctorsData) {
-                    setRealDoctors(doctorsData.map(d => ({
+                    setRealDoctors(doctorsData.map((d: DoctorData) => ({
                         name: d.profile?.full_name || 'Médico Verificado',
                         specialty: d.specialty?.name || 'Medicina General',
                         rating: d.average_rating || '5.0',
@@ -268,7 +281,7 @@ export function PacientesProductShowcase() {
                 ...f,
                 preview: (
                     <div className="space-y-3">
-                        {realDoctors.map((doc, i) => (
+                        {realDoctors.map((doc: Doctor, i) => (
                             <div key={i} className={cn(
                                 "flex items-center justify-between p-3 rounded-lg border transition-colors",
                                 doc.available
@@ -308,6 +321,8 @@ export function PacientesProductShowcase() {
     });
 
     const currentFeature = updatedFeatures.find(f => f.id === activeFeature) || updatedFeatures[0];
+
+    if (!currentFeature) return null;
 
     return (
         <section id="demo" className="py-24 relative overflow-hidden">

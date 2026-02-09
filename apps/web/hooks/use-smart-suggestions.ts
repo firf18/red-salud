@@ -9,8 +9,7 @@ import { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import { debounce } from 'lodash';
 import {
     searchAllReasons,
-    getTopReasons,
-    SpecialtyReason
+    getTopReasons
 } from '@/lib/data/specialty-reasons-data';
 import { searchConsultationReasons } from '@/lib/data/consultation-reasons';
 

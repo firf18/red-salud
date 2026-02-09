@@ -13,9 +13,7 @@ export function generateRTCToken(
   appId: string,
   appCertificate: string,
   channelName: string,
-  uid: number,
-  role: RtcRole = RtcRole.PUBLISHER,
-  expirationTimeInSeconds: number = 3600
+  uid: number
 ): string {
   // TODO: Implementar con agora-token cuando esté disponible
   console.warn("generateRTCToken: Implementación placeholder");
@@ -25,8 +23,7 @@ export function generateRTCToken(
 export function generateRTMToken(
   appId: string,
   appCertificate: string,
-  userId: string,
-  expirationTimeInSeconds: number = 3600
+  userId: string
 ): string {
   // TODO: Implementar con agora-token cuando esté disponible
   console.warn("generateRTMToken: Implementación placeholder");

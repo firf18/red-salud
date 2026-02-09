@@ -14,12 +14,9 @@ export function printContent(contentHtml: string) {
 
   doc.open();
 
-  // Get all style elements from main document to inject into iframe
-  const styleSheets = Array.from(document.styleSheets);
-  let styles = "";
-
   // Attempt to copy styles. Note: CORS might block accessing cssRules for some external sheets.
   // For a Next.js app, tailwind usually is in a <style> tag or local link
+  let styles = "";
   Array.from(document.querySelectorAll("style, link[rel='stylesheet']")).forEach((node) => {
     styles += node.outerHTML;
   });

@@ -2,7 +2,7 @@
 
 import React from "react";
 import { useFormContext } from "react-hook-form";
-import { Clock, DollarSign, AlertTriangle, CalendarIcon } from "lucide-react";
+import { Clock, DollarSign } from "lucide-react";
 import {
     Card,
     CardContent,
@@ -24,9 +24,6 @@ import {
     SelectValue,
     Switch,
     Calendar,
-    Popover,
-    PopoverContent,
-    PopoverTrigger,
     Button,
     Tooltip,
     TooltipContent,
@@ -35,9 +32,6 @@ import {
 } from "@red-salud/ui";
 import { cn } from "@red-salud/core/utils";
 import { format, getDay } from "date-fns";
-import { es } from "date-fns/locale";
-import { searchAllReasons, getTopReasons } from "@/lib/data/specialty-reasons-data";
-
 interface TimeRange {
     inicio: string;
     fin: string;
@@ -60,12 +54,20 @@ interface Office {
     nombre: string;
 }
 
+interface Patient {
+    id: string;
+    nombre_completo: string;
+    email: string | null;
+    cedula: string | null;
+    type: "registered" | "offline";
+}
+
 interface AppointmentFormProps {
-    getMinDate: () => string;
-    getMinTime: () => string;
-    isTimeValid: () => boolean;
+    getMinDate?: () => string;
+    getMinTime?: () => string;
+    isTimeValid?: () => boolean;
     motivoSuggestions: string[];
-    patients: any[];
+    patients: Patient[];
     schedules?: Schedule[];
     offices?: Office[];
     selectedOfficeId?: string | null;
@@ -74,11 +76,7 @@ interface AppointmentFormProps {
 }
 
 export function AppointmentForm({
-    getMinDate,
-    getMinTime,
-    isTimeValid,
     motivoSuggestions,
-    patients,
     schedules = [],
     offices = [],
     selectedOfficeId,
@@ -102,7 +100,7 @@ export function AppointmentForm({
     const smartSuggestions = React.useMemo(() => {
         if (searchTerm.length >= 2) {
             return searchAllReasons(searchTerm, doctorSpecialty)
-                .filter((s: any) => !currentMotivoValue.includes(s.reason))
+                .filter((s: { reason: string }) => !currentMotivoValue.includes(s.reason))
                 .slice(0, 8);
         }
         return [];
@@ -124,7 +122,7 @@ export function AppointmentForm({
         let baseSuggestions: string[] = [];
 
         if (searchTerm.length >= 2) {
-            baseSuggestions = smartSuggestions.map((s: any) => s.reason || s);
+            baseSuggestions = smartSuggestions.map((s: { reason: string } | string) => typeof s === 'string' ? s : s.reason || s);
         } else {
             baseSuggestions = initialSuggestions;
         }
@@ -167,7 +165,7 @@ export function AppointmentForm({
         // schedules passed to this component seems to be the raw doctor_schedules table row
         // which contains the 'horarios' JSON column.
 
-        const availableSchedules = schedules.filter((schedule: any) => {
+        const availableSchedules = schedules.filter((schedule: Schedule) => {
             const dayConfig = schedule.horarios?.[dayName];
             return dayConfig && dayConfig.activo === true;
         });
@@ -179,7 +177,7 @@ export function AppointmentForm({
         // Check if CURRENT selected office has active schedule for this day
         if (selectedOfficeId) {
             // Try exact match first
-            const exactMatch = availableSchedules.find((s: any) => s.office_id === selectedOfficeId);
+            const exactMatch = availableSchedules.find((s: Schedule) => s.office_id === selectedOfficeId);
             const dayConfig = exactMatch?.horarios?.[dayName];
 
             // If exact match exists AND has ranges, we are good
@@ -189,7 +187,7 @@ export function AppointmentForm({
         }
 
         // Fallback: If no ranges in current office, check for global or ANY other valid schedule
-        const validFallback = availableSchedules.find((s: any) => s.horarios?.[dayName]?.horarios?.length > 0);
+        const validFallback = availableSchedules.find((s: Schedule) => s.horarios?.[dayName]?.horarios?.length > 0);
 
         if (validFallback) {
             if (selectedOfficeId && validFallback.office_id !== selectedOfficeId) {
@@ -203,7 +201,7 @@ export function AppointmentForm({
         }
 
         // If not available in current office, recommend the first one that is available
-        const otherSchedule: any = availableSchedules[0];
+        const otherSchedule = availableSchedules[0] as { office_id: string };
         const officeName = offices.find(o => o.id === otherSchedule.office_id)?.nombre || "Otro consultorio";
 
         return {
@@ -362,7 +360,6 @@ export function AppointmentForm({
 
                                     const getAvailableSlots = () => {
                                         if (!selectedDate || !schedules.length) return [];
-                                        const date = new Date(selectedDate);
                                         const dayIndex = getDay(new Date(selectedDate + "T12:00:00"));
                                         const daysMap = ['domingo', 'lunes', 'martes', 'miercoles', 'jueves', 'viernes', 'sabado'];
                                         const dayName = daysMap[dayIndex];
@@ -400,7 +397,7 @@ export function AppointmentForm({
                                         const isToday = new Date(selectedDate + "T12:00:00").toDateString() === now.toDateString();
                                         const currentMinutes = now.getHours() * 60 + now.getMinutes();
 
-                                        ranges.forEach((range: any) => {
+                                        ranges.forEach((range: { inicio: string; fin: string }) => {
                                             if (!range.inicio || !range.fin) return;
                                             const [startH, startM] = range.inicio.split(':').map(Number);
                                             const [endH, endM] = range.fin.split(':').map(Number);

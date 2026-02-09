@@ -1,12 +1,10 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { createClient } from "@supabase/supabase-js";
 import {
   Users,
   Search,
-  Star,
-  Trophy,
   Gift,
   Award,
   TrendingUp,
@@ -36,7 +34,7 @@ interface ClienteFidelizacion {
   fecha_ultima_compra: string;
   total_compras: number;
   numero_compras: number;
-  beneficios_activos: any[];
+  beneficios_activos: unknown[];
 }
 
 export default function FidelizacionPage() {
@@ -49,10 +47,6 @@ export default function FidelizacionPage() {
   useEffect(() => {
     loadClientes();
   }, []);
-
-  useEffect(() => {
-    filterClientes();
-  }, [clientes, searchTerm, selectedNivel]);
 
   const loadClientes = async () => {
     try {
@@ -74,7 +68,7 @@ export default function FidelizacionPage() {
     }
   };
 
-  const filterClientes = () => {
+  const filterClientes = useCallback(() => {
     let filtered = clientes;
 
     if (searchTerm) {
@@ -88,22 +82,16 @@ export default function FidelizacionPage() {
     }
 
     setFilteredClientes(filtered);
-  };
+  }, [clientes, searchTerm, selectedNivel]);
 
-  const getNivelColor = (nivel: string) => {
-    switch (nivel) {
-      case "bronce":
-        return "bg-orange-100 text-orange-800";
-      case "plata":
-        return "bg-gray-200 text-gray-800";
-      case "oro":
-        return "bg-yellow-100 text-yellow-800";
-      case "platino":
-        return "bg-purple-100 text-purple-800";
-      default:
-        return "bg-gray-100 text-gray-800";
-    }
-  };
+  useEffect(() => {
+    filterClientes();
+  }, [clientes, searchTerm, selectedNivel, filterClientes]);
+
+  useEffect(() => {
+    loadClientes();
+  }, []);
+
 
   const getNivelIcon = (nivel: string) => {
     switch (nivel) {

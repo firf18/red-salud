@@ -17,8 +17,6 @@ import {
     ChevronRight,
     Loader2,
     Play,
-    User,
-    Calendar,
     VideoOff
 } from "lucide-react";
 import { cn } from "@red-salud/core/utils";
@@ -150,11 +148,6 @@ export function UpcomingTelemedicineWidget({
     // Handler para iniciar videollamada
     const handleStartCall = (appointmentId: string) => {
         router.push(`/dashboard/medico/telemedicina/sala/${appointmentId}`);
-    };
-
-    // Handler para ver detalles del paciente
-    const handleViewPatient = (patientId: string) => {
-        router.push(`/dashboard/medico/pacientes/${patientId}`);
     };
 
     // Encontrar la próxima cita urgente

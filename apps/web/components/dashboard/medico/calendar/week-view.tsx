@@ -3,7 +3,7 @@
 import { useMemo } from "react";
 import { format, startOfWeek, addDays, isSameDay, isToday as checkIsToday } from "date-fns";
 import { es } from "date-fns/locale";
-import { AppointmentCard } from "./appointment-card";
+
 import type { CalendarAppointment } from "./types";
 import { Clock } from "lucide-react";
 
@@ -12,7 +12,6 @@ interface WeekViewProps {
   appointments: CalendarAppointment[];
   onAppointmentClick?: (appointment: CalendarAppointment) => void;
   onTimeSlotClick?: (date: Date, hour: number) => void;
-  onMessage?: (appointment: CalendarAppointment) => void;
   onStartVideo?: (appointment: CalendarAppointment) => void;
   startHour?: number;
   endHour?: number;
@@ -23,8 +22,6 @@ export function WeekView({
   appointments,
   onAppointmentClick,
   onTimeSlotClick,
-  onMessage,
-  onStartVideo,
   startHour = 7,
   endHour = 20,
 }: WeekViewProps) {
@@ -61,32 +58,28 @@ export function WeekView({
           <div className="w-20 flex-shrink-0 border-r border-blue-200 bg-white/90 backdrop-blur-sm flex items-center justify-center">
             <Clock className="h-5 w-5 text-gray-500" />
           </div>
-          
+
           {/* Day headers */}
           {weekDays.map((day) => {
             const isCurrentDay = checkIsToday(day);
             return (
               <div
                 key={day.toISOString()}
-                className={`flex-1 p-4 text-center border-r border-blue-100 last:border-r-0 transition-all ${
-                  isCurrentDay 
-                    ? "bg-gradient-to-b from-blue-500 to-blue-600 text-white shadow-lg scale-105" 
+                className={`flex-1 p-4 text-center border-r border-blue-100 last:border-r-0 transition-all ${isCurrentDay
+                    ? "bg-gradient-to-b from-blue-500 to-blue-600 text-white shadow-lg scale-105"
                     : "bg-white/80 backdrop-blur-sm hover:bg-blue-50/50"
-                }`}
+                  }`}
               >
-                <div className={`text-xs font-semibold uppercase tracking-wider ${
-                  isCurrentDay ? "text-blue-100" : "text-gray-600"
-                }`}>
+                <div className={`text-xs font-semibold uppercase tracking-wider ${isCurrentDay ? "text-blue-100" : "text-gray-600"
+                  }`}>
                   {format(day, "EEE", { locale: es })}
                 </div>
-                <div className={`text-3xl font-bold mt-1 ${
-                  isCurrentDay ? "text-white" : "text-gray-900"
-                }`}>
+                <div className={`text-3xl font-bold mt-1 ${isCurrentDay ? "text-white" : "text-gray-900"
+                  }`}>
                   {format(day, "d")}
                 </div>
-                <div className={`text-xs mt-0.5 ${
-                  isCurrentDay ? "text-blue-100" : "text-gray-500"
-                }`}>
+                <div className={`text-xs mt-0.5 ${isCurrentDay ? "text-blue-100" : "text-gray-500"
+                  }`}>
                   {format(day, "MMM", { locale: es })}
                 </div>
               </div>
@@ -100,18 +93,16 @@ export function WeekView({
         <div className="min-w-full">
           {hours.map((hour) => {
             const isCurrentHourRow = hour === currentHour && isSameDay(today, date);
-            
+
             return (
-              <div 
-                key={hour} 
-                className={`flex border-b border-gray-200 transition-colors ${
-                  isCurrentHourRow ? "bg-yellow-50/50 border-yellow-300" : ""
-                }`}
+              <div
+                key={hour}
+                className={`flex border-b border-gray-200 transition-colors ${isCurrentHourRow ? "bg-yellow-50/50 border-yellow-300" : ""
+                  }`}
               >
                 {/* Time Label - Sticky left */}
-                <div className={`w-20 flex-shrink-0 p-3 text-sm font-semibold border-r border-gray-200 bg-gray-50/90 backdrop-blur-sm sticky left-0 z-10 flex items-start justify-center ${
-                  isCurrentHourRow ? "bg-yellow-100 text-yellow-800" : "text-gray-700"
-                }`}>
+                <div className={`w-20 flex-shrink-0 p-3 text-sm font-semibold border-r border-gray-200 bg-gray-50/90 backdrop-blur-sm sticky left-0 z-10 flex items-start justify-center ${isCurrentHourRow ? "bg-yellow-100 text-yellow-800" : "text-gray-700"
+                  }`}>
                   <div className="text-center">
                     <div>{format(new Date().setHours(hour, 0, 0, 0), "HH:mm")}</div>
                     {isCurrentHourRow && (
@@ -126,19 +117,16 @@ export function WeekView({
                   const slotTime = new Date(day.getFullYear(), day.getMonth(), day.getDate(), hour);
                   const isPast = slotTime < new Date();
                   const isCurrentDay = checkIsToday(day);
-                  
+
                   return (
                     <div
                       key={`${day.toISOString()}-${hour}`}
-                      className={`flex-1 p-2 h-24 border-r border-gray-200 last:border-r-0 transition-all duration-200 ${
-                        isCurrentDay ? "bg-blue-50/30" : ""
-                      } ${
-                        isPast
+                      className={`flex-1 p-2 h-24 border-r border-gray-200 last:border-r-0 transition-all duration-200 ${isCurrentDay ? "bg-blue-50/30" : ""
+                        } ${isPast
                           ? "bg-gray-50/70 cursor-not-allowed opacity-60"
                           : "cursor-pointer hover:bg-blue-50 hover:shadow-inner"
-                      } ${
-                        isCurrentHourRow ? "ring-2 ring-inset ring-yellow-300/50" : ""
-                      }`}
+                        } ${isCurrentHourRow ? "ring-2 ring-inset ring-yellow-300/50" : ""
+                        }`}
                       onClick={() => {
                         if (!isPast) {
                           onTimeSlotClick?.(day, hour);
@@ -164,12 +152,11 @@ export function WeekView({
                                 {apt.motivo}
                               </div>
                               <div className="flex items-center gap-1 mt-1">
-                                <span className={`text-[10px] px-1.5 py-0.5 rounded-full font-medium ${
-                                  apt.status === "confirmada" ? "bg-green-100 text-green-700" :
-                                  apt.status === "pendiente" ? "bg-yellow-100 text-yellow-700" :
-                                  apt.status === "completada" ? "bg-blue-100 text-blue-700" :
-                                  "bg-gray-100 text-gray-600"
-                                }`}>
+                                <span className={`text-[10px] px-1.5 py-0.5 rounded-full font-medium ${apt.status === "confirmada" ? "bg-green-100 text-green-700" :
+                                    apt.status === "pendiente" ? "bg-yellow-100 text-yellow-700" :
+                                      apt.status === "completada" ? "bg-blue-100 text-blue-700" :
+                                        "bg-gray-100 text-gray-600"
+                                  }`}>
                                   {apt.status}
                                 </span>
                               </div>

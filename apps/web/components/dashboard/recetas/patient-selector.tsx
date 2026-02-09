@@ -6,13 +6,6 @@ import {
     CardContent,
     CardHeader,
     CardTitle,
-    Input,
-    Label,
-    Select,
-    SelectTrigger,
-    SelectValue,
-    SelectContent,
-    SelectItem,
     Button,
     Command,
     CommandInput,
@@ -23,10 +16,10 @@ import {
     PopoverTrigger,
     PopoverContent,
     Avatar,
-    AvatarImage,
     AvatarFallback,
+    Label,
 } from "@red-salud/ui";
-import { User, Search, Check, Loader2 } from "lucide-react";
+import { Search, Check, Loader2, User } from "lucide-react";
 import { cn } from "@red-salud/core/utils";
 
 interface Patient {

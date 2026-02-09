@@ -9,7 +9,16 @@ import { format } from "date-fns";
 import { useI18n } from "@/hooks/use-i18n";
 
 interface HealthMetricsProps {
-  metrics: any[];
+  metrics: Array<{
+    id: string;
+    valor: number;
+    valor_secundario?: number;
+    fecha_medicion: string;
+    metric_type?: {
+      nombre: string;
+      unidad_medida: string;
+    };
+  }>;
 }
 
 export function HealthMetricsSection({ metrics }: HealthMetricsProps) {

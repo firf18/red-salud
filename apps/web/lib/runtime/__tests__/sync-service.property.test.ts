@@ -58,7 +58,7 @@ describe('Property 1: Offline Operations Queue Changes', () => {
       if (storageService) {
         await storageService.clear();
       }
-    } catch (_error) {
+    } catch {
       // Ignore cleanup errors
     }
   });
@@ -550,7 +550,7 @@ describe('Property 7: Sync Store Update', () => {
       if (storageService) {
         await storageService.clear();
       }
-    } catch (_error) {
+    } catch {
       // Ignore cleanup errors
     }
 

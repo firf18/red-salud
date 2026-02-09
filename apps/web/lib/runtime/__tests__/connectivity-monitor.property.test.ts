@@ -297,9 +297,6 @@ describe('Property 5: Connectivity State Propagation', () => {
 
           // If we unsubscribed before all transitions, callback should not have been called after unsubscribe
           if (unsubscribeAfter < transitionCount) {
-            // Calculate transitions after unsubscribe
-            const transitionsAfterUnsubscribe = transitionCount - unsubscribeAfter;
-            
             // Callback should not have been called for transitions after unsubscribe
             expect(callback).toHaveBeenCalledTimes(0);
           }
@@ -318,7 +315,6 @@ describe('Property 5: Connectivity State Propagation', () => {
       fc.asyncProperty(
         fc.array(fc.boolean(), { minLength: 5, maxLength: 20 }),
         async (rapidChanges) => {
-          const callback = vi.fn();
           const receivedStatuses: boolean[] = [];
 
           monitor.onStatusChange((status) => {

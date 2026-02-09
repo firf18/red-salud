@@ -57,7 +57,7 @@ export function PatientsGrid({ patients, onView, onMessage, loading = false }: P
           const pData = isRegistered ? (patient as RegisteredPatient).patient : (patient as OfflinePatient);
           const age = calculateAge(pData.fecha_nacimiento);
           return (
-            <Card key={(patient as any).id} className="hover:shadow-md transition-shadow">
+            <Card key={isRegistered ? (patient as RegisteredPatient).id : (patient as OfflinePatient).id} className="hover:shadow-md transition-shadow">
               <CardContent className="p-5">
                 <div className="flex items-start gap-3 mb-4">
                   <Avatar className="h-12 w-12">

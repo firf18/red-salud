@@ -4,7 +4,6 @@ import { motion } from 'framer-motion';
 import { ArrowRight, CheckCircle2 } from 'lucide-react';
 import { Button } from "@red-salud/ui";
 import Link from 'next/link';
-import Image from 'next/image';
 
 export function Hero({ stats }: { stats?: { patients: number } }) {
   const patientCount = stats?.patients || 0;

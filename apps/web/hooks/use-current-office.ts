@@ -52,8 +52,8 @@ export function useCurrentOffice() {
             if (office) {
                 setCurrentOffice(office);
             }
-        } catch (error) {
-            console.error("[useCurrentOffice] Error updating:", error);
+        } catch {
+            console.error("[useCurrentOffice] Error updating:");
         }
     }, [allOffices]);
 
@@ -119,7 +119,7 @@ export function useCurrentOffice() {
             if (typeof error === 'object' && error !== null) {
                 try {
                     console.error("Error details:", JSON.stringify(error, null, 2));
-                } catch (e) {
+                } catch {
                     // Ignore circular reference errors
                 }
             }

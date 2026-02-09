@@ -18,7 +18,6 @@ import {
 } from "@red-salud/ui";
 import { Avatar, AvatarFallback, AvatarImage } from "@red-salud/ui";
 import { format } from "date-fns";
-import { es } from "date-fns/locale";
 import { Badge } from "@red-salud/ui";
 
 interface AppointmentStackProps {

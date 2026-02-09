@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState } from "react";
 import { motion } from "framer-motion";
 import {
   Lock,
@@ -12,13 +12,7 @@ import {
   Check,
   AlertCircle,
   Edit2,
-  X,
-  Eye,
-  EyeOff,
-  Loader2,
   Monitor,
-  Clock,
-  MapPin,
   History,
 } from "lucide-react";
 import { ChangePasswordModal } from "../components/security/change-password-modal";
@@ -48,50 +42,52 @@ interface NotificationSettings {
 export function SecurityTabNew({ userEmail, userId }: SecurityTabProps) {
   const [activeModal, setActiveModal] = useState<string | null>(null);
 
-  // Inicializar con valores por defecto - sin loading
-  const [notifications, setNotifications] = useState<NotificationSettings>({
-    login_alerts: true,
-    account_changes: true,
-    appointment_reminders: true,
-    lab_results: true,
-    doctor_messages: true,
-    security_alerts: true,
-    password_changes: true,
-    new_device_login: true,
-    suspicious_activity: true,
-  });
-
-  const [has2FA, setHas2FA] = useState(false);
-  const [hasSecurityQuestions, setHasSecurityQuestions] = useState(false);
-  const [phoneVerified, setPhoneVerified] = useState(false);
-
-  // Cargar configuraciones en segundo plano sin bloquear la UI
-  useEffect(() => {
-    loadSecuritySettingsInBackground();
-  }, [loadSecuritySettingsInBackground]);
-
-  const loadSecuritySettingsInBackground = useCallback(async () => {
+  const [securityState, setSecurityState] = useState(() => {
     try {
-      // TODO: Implementar llamadas reales cuando las APIs estén listas
-      // Por ahora, simular datos locales
-
-      // Cargar desde localStorage o Supabase
       const stored = localStorage.getItem(`security_settings_${userId}`);
       if (stored) {
         const data = JSON.parse(stored);
-        if (data.notifications) setNotifications(data.notifications);
-        if (data.has2FA !== undefined) setHas2FA(data.has2FA);
-        if (data.hasSecurityQuestions !== undefined) setHasSecurityQuestions(data.hasSecurityQuestions);
-        if (data.phoneVerified !== undefined) setPhoneVerified(data.phoneVerified);
+        return {
+          notifications: data.notifications || {
+            login_alerts: true,
+            account_changes: true,
+            appointment_reminders: true,
+            lab_results: true,
+            doctor_messages: true,
+            security_alerts: true,
+            password_changes: true,
+            new_device_login: true,
+            suspicious_activity: true,
+          },
+          has2FA: data.has2FA ?? false,
+          hasSecurityQuestions: data.hasSecurityQuestions ?? false,
+          phoneVerified: data.phoneVerified ?? false,
+        };
       }
     } catch (error) {
       console.error("Error loading security settings:", error);
     }
-  }, [userId]);
+    return {
+      notifications: {
+        login_alerts: true,
+        account_changes: true,
+        appointment_reminders: true,
+        lab_results: true,
+        doctor_messages: true,
+        security_alerts: true,
+        password_changes: true,
+        new_device_login: true,
+        suspicious_activity: true,
+      } as NotificationSettings,
+      has2FA: false,
+      hasSecurityQuestions: false,
+      phoneVerified: false,
+    };
+  });
 
   const handleNotificationToggle = (key: keyof NotificationSettings) => {
-    const updated = { ...notifications, [key]: !notifications[key] };
-    setNotifications(updated);
+    const updated = { ...securityState.notifications, [key]: !securityState.notifications[key] };
+    setSecurityState(prev => ({ ...prev, notifications: updated }));
 
     // Guardar en localStorage
     try {
@@ -164,11 +160,11 @@ export function SecurityTabNew({ userEmail, userId }: SecurityTabProps) {
                   Autenticación de Dos Factores (2FA)
                 </p>
                 <p className="text-xs text-gray-500">
-                  {has2FA ? "Activado" : "Agrega una capa extra de seguridad"}
+                  {securityState.has2FA ? "Activado" : "Agrega una capa extra de seguridad"}
                 </p>
               </div>
             </div>
-            {has2FA ? (
+            {securityState.has2FA ? (
               <span className="inline-flex items-center gap-1 text-xs font-medium text-green-700 bg-green-100 px-3 py-1 rounded-full">
                 <Check className="h-3 w-3" />
                 Activo
@@ -213,11 +209,11 @@ export function SecurityTabNew({ userEmail, userId }: SecurityTabProps) {
                   Verificación de Teléfono
                 </p>
                 <p className="text-xs text-gray-500">
-                  {phoneVerified ? "Teléfono verificado" : "Verifica tu número de teléfono"}
+                  {securityState.phoneVerified ? "Teléfono verificado" : "Verifica tu número de teléfono"}
                 </p>
               </div>
             </div>
-            {phoneVerified ? (
+            {securityState.phoneVerified ? (
               <span className="inline-flex items-center gap-1 text-xs font-medium text-green-700 bg-green-100 px-3 py-1 rounded-full">
                 <Check className="h-3 w-3" />
                 Verificado
@@ -243,11 +239,11 @@ export function SecurityTabNew({ userEmail, userId }: SecurityTabProps) {
                   Preguntas de Seguridad
                 </p>
                 <p className="text-xs text-gray-500">
-                  {hasSecurityQuestions ? "Configuradas" : "Para recuperación de cuenta"}
+                  {securityState.hasSecurityQuestions ? "Configuradas" : "Para recuperación de cuenta"}
                 </p>
               </div>
             </div>
-            {hasSecurityQuestions ? (
+            {securityState.hasSecurityQuestions ? (
               <Edit2 className="h-4 w-4 text-gray-400" />
             ) : (
               <span className="text-xs font-medium text-gray-500 bg-gray-100 px-3 py-1 rounded-full">
@@ -305,7 +301,7 @@ export function SecurityTabNew({ userEmail, userId }: SecurityTabProps) {
             Notificaciones de Seguridad
           </h3>
 
-          {notifications && (
+          {securityState.notifications && (
             <div className="space-y-3">
               {[
                 {
@@ -366,7 +362,7 @@ export function SecurityTabNew({ userEmail, userId }: SecurityTabProps) {
                     <input
                       type="checkbox"
                       className="sr-only peer"
-                      checked={notifications[item.key]}
+                      checked={securityState.notifications[item.key]}
                       onChange={() => handleNotificationToggle(item.key)}
                     />
                     <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
@@ -384,9 +380,9 @@ export function SecurityTabNew({ userEmail, userId }: SecurityTabProps) {
                   Recomendación de Seguridad
                 </h4>
                 <p className="text-sm text-yellow-700">
-                  {!has2FA && "Activa la autenticación de dos factores para mayor seguridad. "}
-                  {!hasSecurityQuestions && "Configura preguntas de seguridad para recuperar tu cuenta. "}
-                  {!phoneVerified && "Verifica tu teléfono para recibir alertas importantes."}
+                  {!securityState.has2FA && "Activa la autenticación de dos factores para mayor seguridad. "}
+                  {!securityState.hasSecurityQuestions && "Configura preguntas de seguridad para recuperar tu cuenta. "}
+                  {!securityState.phoneVerified && "Verifica tu teléfono para recibir alertas importantes."}
                 </p>
               </div>
             </div>
@@ -404,22 +400,19 @@ export function SecurityTabNew({ userEmail, userId }: SecurityTabProps) {
         isOpen={activeModal === "2fa"}
         onClose={() => {
           setActiveModal(null);
-          loadSecuritySettingsInBackground();
         }}
-        has2FA={has2FA}
+        has2FA={securityState.has2FA}
       />
       <VerifyPhoneModal
         isOpen={activeModal === "phone"}
         onClose={() => {
           setActiveModal(null);
-          loadSecuritySettingsInBackground();
         }}
       />
       <SecurityQuestionsModal
         isOpen={activeModal === "questions"}
         onClose={() => {
           setActiveModal(null);
-          loadSecuritySettingsInBackground();
         }}
       />
       <ActiveSessionsModal

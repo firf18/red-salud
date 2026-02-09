@@ -11,14 +11,17 @@ import {
 } from "lucide-react";
 import { supabase } from "@/lib/supabase/client";
 
-interface PrivacyCardProps {
-  privacy: any;
-  setPrivacy: (p: any) => void;
-  saving: boolean;
-  onSave: () => void;
+interface PrivacySettings {
+  publicProfile?: boolean;
+  showInDirectory?: boolean;
 }
 
-export function PrivacyCard({ privacy, setPrivacy, saving, onSave }: PrivacyCardProps) {
+interface PrivacyCardProps {
+  privacy: PrivacySettings;
+  setPrivacy: (p: PrivacySettings) => void;
+}
+
+export function PrivacyCard({ privacy, setPrivacy }: PrivacyCardProps) {
   const router = useRouter();
   const [loggingOut, setLoggingOut] = useState(false);
   const [deletingAccount, setDeletingAccount] = useState(false);

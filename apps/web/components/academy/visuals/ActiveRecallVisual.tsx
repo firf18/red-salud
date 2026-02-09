@@ -1,17 +1,9 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 
 export function ActiveRecallVisual() {
-    const [pathLength, setPathLength] = useState(0);
-
-    useEffect(() => {
-        const interval = setInterval(() => {
-            setPathLength((prev) => (prev >= 1 ? 0 : prev + 0.01));
-        }, 50);
-        return () => clearInterval(interval);
-    }, []);
 
     // Memoize random values for animations to ensure purity
     const randomValues = useState(() => ({

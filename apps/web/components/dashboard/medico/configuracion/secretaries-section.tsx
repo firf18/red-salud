@@ -3,7 +3,6 @@
 import { useState, useEffect } from "react";
 import { Button } from "@red-salud/ui";
 import { Input } from "@red-salud/ui";
-import { Label } from "@red-salud/ui";
 import { Badge } from "@red-salud/ui";
 import { Avatar, AvatarFallback, AvatarImage } from "@red-salud/ui";
 import { 
@@ -62,7 +61,7 @@ export function SecretariesSection() {
       if (error) throw error;
 
       if (data) {
-        const formattedSecretaries: Secretary[] = data.map((item: any) => ({
+        const formattedSecretaries: Secretary[] = data.map((item: { id: string; secretary?: { email?: string; nombre_completo?: string; avatar_url?: string } | null; status: string; created_at: string }) => ({
           id: item.id,
           email: item.secretary?.email || "",
           nombre_completo: item.secretary?.nombre_completo || "Sin nombre",

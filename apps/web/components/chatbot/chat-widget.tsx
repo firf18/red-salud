@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { MessageCircle, X } from "lucide-react";
+import { MessageCircle } from "lucide-react";
 import { Button } from "@red-salud/ui";
 import { ChatWindow, type ChatContext, type ChatPersona } from "./chat-window";
 import { motion, AnimatePresence } from "framer-motion";

@@ -1,7 +1,6 @@
 "use client";
 
 import { Activity, Droplet } from "lucide-react";
-import { Button } from "@red-salud/ui";
 import { Input } from "@red-salud/ui";
 import { Label } from "@red-salud/ui";
 import { TIPOS_SANGRE } from "../../constants";
@@ -9,9 +8,9 @@ import { useImcCalculation } from "../hooks/use-imc-calculation";
 
 interface VitalDataProps {
   isEditing: boolean;
-  localData: any;
-  setLocalData: (data: any) => void;
-  formData: any;
+  localData: Record<string, unknown>;
+  setLocalData: (data: Record<string, unknown>) => void;
+  formData: Record<string, unknown>;
 }
 
 export function VitalDataSection({

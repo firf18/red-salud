@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import {
@@ -13,7 +13,6 @@ import {
     DialogContent,
     DialogHeader,
     DialogTitle,
-    DialogTrigger,
     Input,
     Label,
 } from "@red-salud/ui";
@@ -49,7 +48,7 @@ export default function PlantillasPage() {
     const [watermarkName, setWatermarkName] = useState("");
     const fileInputRef = useRef<HTMLInputElement>(null);
 
-    const [settings, setSettings] = useState<DoctorSettings | null>(null);
+    const [, setSettings] = useState<DoctorSettings | null>(null);
     const [frames, setFrames] = useState<PrescriptionFrame[]>([]);
     const [watermarks, setWatermarks] = useState<PrescriptionWatermark[]>([]);
 
@@ -58,40 +57,40 @@ export default function PlantillasPage() {
     const [selectedWatermarkId, setSelectedWatermarkId] = useState<string>();
     const [frameColor, setFrameColor] = useState("#0da9f7");
 
-    // Load data on mount
-    useEffect(() => {
-        async function loadData() {
-            if (!user?.id) return;
+    const loadData = useCallback(async () => {
+        if (!user?.id) return;
 
-            setLoading(true);
-            try {
-                const [settingsRes, framesRes, watermarksRes] = await Promise.all([
-                    getDoctorSettings(user.id),
-                    getAvailableFrames(user.id),
-                    getAvailableWatermarks(user.id),
-                ]);
+        setLoading(true);
+        try {
+            const [settingsRes, framesRes, watermarksRes] = await Promise.all([
+                getDoctorSettings(user.id),
+                getAvailableFrames(user.id),
+                getAvailableWatermarks(user.id),
+            ]);
 
-                if (framesRes.success) setFrames(framesRes.data);
-                if (watermarksRes.success) setWatermarks(watermarksRes.data);
+            if (framesRes.success) setFrames(framesRes.data);
+            if (watermarksRes.success) setWatermarks(watermarksRes.data);
 
-                if (settingsRes.success && settingsRes.data) {
-                    setSettings(settingsRes.data);
-                    setSelectedFrameId(settingsRes.data.active_frame_id || undefined);
-                    setSelectedWatermarkId(settingsRes.data.active_watermark_id || undefined);
-                    setFrameColor(settingsRes.data.frame_color || "#0da9f7");
-                }
-            } catch (error) {
-                console.error("Error loading data:", error);
-                toast.error("Error al cargar las plantillas");
-            } finally {
-                setLoading(false);
+            if (settingsRes.success && settingsRes.data) {
+                setSettings(settingsRes.data);
+                setSelectedFrameId(settingsRes.data.active_frame_id || undefined);
+                setSelectedWatermarkId(settingsRes.data.active_watermark_id || undefined);
+                setFrameColor(settingsRes.data.frame_color || "#0da9f7");
             }
+        } catch (error) {
+            console.error("Error loading data:", error);
+            toast.error("Error al cargar las plantillas");
+        } finally {
+            setLoading(false);
         }
-
-        loadData();
     }, [user?.id]);
 
-    const handleSave = async () => {
+    // Load data on mount
+    useEffect(() => {
+        loadData();
+    }, [loadData]);
+
+    const handleSave = useCallback(async () => {
         if (!user?.id) return;
 
         setSaving(true);
@@ -114,9 +113,9 @@ export default function PlantillasPage() {
         } finally {
             setSaving(false);
         }
-    };
+    }, [user?.id, selectedFrameId, selectedWatermarkId, frameColor]);
 
-    const handleUploadWatermark = async () => {
+    const handleUploadWatermark = useCallback(async () => {
         if (!user?.id || !fileInputRef.current?.files?.[0]) return;
 
         const file = fileInputRef.current.files[0];
@@ -137,7 +136,7 @@ export default function PlantillasPage() {
         } finally {
             setUploading(false);
         }
-    };
+    }, [user?.id, watermarkName]);
 
     // Find selected frame for color preview
     const selectedFrame = frames.find((f) => f.id === selectedFrameId);

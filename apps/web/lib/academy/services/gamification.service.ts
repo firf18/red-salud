@@ -5,7 +5,7 @@
  */
 
 import { createClient } from '@/lib/supabase/client';
-import type { UserStats, StreakInfo, LivesInfo, LevelInfo, LeagueTier } from '../types/gamification.types';
+import type { UserStats, StreakInfo, LivesInfo, LeagueTier } from '../types/gamification.types';
 
 /** XP necesario por nivel (progresión exponencial suave) */
 const XP_PER_LEVEL = [0, 100, 250, 450, 700, 1000, 1350, 1750, 2200, 2700, 3250];

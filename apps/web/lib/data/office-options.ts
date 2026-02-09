@@ -1,4 +1,4 @@
-import { Wifi, Car, Accessibility, Baby, Coffee, CreditCard, Clock, Stethoscope } from "lucide-react";
+import { Wifi, Car, Accessibility, Baby, Coffee, Clock, Stethoscope } from "lucide-react";
 
 export const OFFICE_AMENITIES = [
     { id: "wifi", label: "Wifi Gratis", icon: Wifi },

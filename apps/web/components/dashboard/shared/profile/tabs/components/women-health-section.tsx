@@ -4,9 +4,9 @@ import { Label } from "@red-salud/ui";
 
 interface WomenHealthProps {
   isEditing: boolean;
-  localData: any;
-  setLocalData: (data: any) => void;
-  formData: any;
+  localData: Record<string, unknown>;
+  setLocalData: (data: Record<string, unknown>) => void;
+  formData: Record<string, unknown>;
 }
 
 export function WomenHealthSection({

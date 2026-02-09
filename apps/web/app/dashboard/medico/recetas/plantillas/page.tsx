@@ -4,18 +4,15 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { toast } from "sonner";
-import { Loader2, Check, Upload, CircleCheckBig, Palette, Users, ArrowLeft } from "lucide-react";
+import { Loader2, Check, Upload, CircleCheckBig, Palette, ArrowLeft } from "lucide-react";
 import { supabase } from "@/lib/supabase/client";
 import {
     getDoctorRecipeSettings,
-    updateDoctorRecipeSettings,
-    uploadRecipeAsset,
-    DoctorRecipeSettings
+    uploadRecipeAsset
 } from "@/lib/supabase/services/recipe-settings";
-import { Button, Label, Card, Separator, Tabs, TabsContent, TabsList, TabsTrigger } from "@red-salud/ui";
+import { Button, Label, Card, Tabs, TabsContent, TabsList, TabsTrigger } from "@red-salud/ui";
 import { cn } from "@red-salud/core/utils";
 import { VisualRecipePreview } from "@/components/dashboard/recetas/visual-recipe-preview";
-import { getProfile } from "@/lib/supabase/services/profile"; // ensure this exists or use query
 import {
     TemplateModern, TemplateGeometric, TemplateElegant,
     TemplateClinical, TemplateWaves, TemplateTech,
@@ -63,7 +60,6 @@ export default function TemplateEditorPage() {
     const [userId, setUserId] = useState<string | null>(null);
 
     // State
-    // State
     const [selectedTemplate, setSelectedTemplate] = useState<string>("plantilla-3");
     const [selectedWatermark, setSelectedWatermark] = useState<string | null>(null);
     const [frameColor, setFrameColor] = useState<string>("#0da9f7");
@@ -80,58 +76,59 @@ export default function TemplateEditorPage() {
         cedula: "0000000"
     });
 
-    // Load Data
-    useEffect(() => {
-        async function loadData() {
-            setIsLoading(true);
-            try {
-                const { data: { user } } = await supabase.auth.getUser();
-                if (!user) {
-                    router.push("/login/medico");
-                    return;
-                }
-                setUserId(user.id);
-
-                // Fetch Profile Data for Preview
-                const { data: profile } = await supabase
-                    .from("profiles")
-                    .select("first_name, last_name, specialty, professional_license")
-                    .eq("id", user.id)
-                    .single();
-
-                if (profile) {
-                    setPreviewData({
-                        doctorName: `${profile.first_name} ${profile.last_name}`,
-                        specialty: profile.specialty || "Medicina General",
-                        cedula: profile.professional_license || "Sin Cédula"
-                    });
-                }
-
-                const { success, data } = await getDoctorRecipeSettings(user.id);
-                if (success && data) {
-                    setSelectedTemplate(data.template_id || "plantilla-3");
-                    setFrameColor(data.frame_color || "#0da9f7");
-                    setUserAssets({
-                        logo: data.logo_url,
-                        signature: data.digital_signature_url
-                    });
-                    if (data.selected_watermark_url) {
-                        const found = WATERMARKS.find(w => w.image === data.selected_watermark_url);
-                        if (found) setSelectedWatermark(found.image);
-                        else setSelectedWatermark(data.selected_watermark_url);
-                    }
-                }
-            } catch (error) {
-                console.error("Error loading settings:", error);
-                toast.error("Error cargando configuración");
-            } finally {
-                setIsLoading(false);
+    const loadData = useCallback(async () => {
+        setIsLoading(true);
+        try {
+            const { data: { user } } = await supabase.auth.getUser();
+            if (!user) {
+                router.push("/login/medico");
+                return;
             }
+            setUserId(user.id);
+
+            // Fetch Profile Data for Preview
+            const { data: profile } = await supabase
+                .from("profiles")
+                .select("first_name, last_name, specialty, professional_license")
+                .eq("id", user.id)
+                .single();
+
+            if (profile) {
+                setPreviewData({
+                    doctorName: `${profile.first_name} ${profile.last_name}`,
+                    specialty: profile.specialty || "Medicina General",
+                    cedula: profile.professional_license || "Sin Cédula"
+                });
+            }
+
+            const { success, data } = await getDoctorRecipeSettings(user.id);
+            if (success && data) {
+                setSelectedTemplate(data.template_id || "plantilla-3");
+                setFrameColor(data.frame_color || "#0da9f7");
+                setUserAssets({
+                    logo: data.logo_url,
+                    signature: data.digital_signature_url
+                });
+                if (data.selected_watermark_url) {
+                    const found = WATERMARKS.find(w => w.image === data.selected_watermark_url);
+                    if (found) setSelectedWatermark(found.image);
+                    else setSelectedWatermark(data.selected_watermark_url);
+                }
+            }
+        } catch (error) {
+            console.error("Error loading settings:", error);
+            toast.error("Error cargando configuración");
+        } finally {
+            setIsLoading(false);
         }
-        loadData();
     }, [router]);
 
-    const handleSave = async () => {
+    // Load Data
+    useEffect(() => {
+        loadData();
+    }, [loadData]);
+
+    const handleSave = useCallback(async () => {
         if (!userId) return;
         setIsSaving(true);
         try {
@@ -143,15 +140,15 @@ export default function TemplateEditorPage() {
 
             if (!success) throw error;
             toast.success("Plantilla guardada correctamente");
-        } catch (error: any) {
-            console.error("Error saving template details:", error?.message || error, error);
-            toast.error(`Error al guardar cambios: ${error?.message || "Error desconocido"}`);
+        } catch (error: unknown) {
+            console.error("Error saving template details:", error instanceof Error ? error.message : error, error);
+            toast.error(`Error al guardar cambios: ${error instanceof Error ? error.message : "Error desconocido"}`);
         } finally {
             setIsSaving(false);
         }
-    };
+    }, [userId, selectedTemplate, frameColor, selectedWatermark]);
 
-    const handleWatermarkUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const handleWatermarkUpload = useCallback(async (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
         if (!file || !userId) return;
 
@@ -181,7 +178,7 @@ export default function TemplateEditorPage() {
             // Reset input
             e.target.value = "";
         }
-    };
+    }, [userId]);
 
     if (isLoading) {
         return (

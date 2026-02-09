@@ -4,15 +4,13 @@ import { useState, useEffect, useCallback } from 'react';
 import {
   getDoctorProfile,
   updateDoctorProfile,
-  getSpecialties,
   getDoctorStats,
 } from '@/lib/supabase/services/doctors-service';
 import type { DoctorProfile, MedicalSpecialty, DoctorProfileFormData } from '@/lib/supabase/types/doctors';
 
 export function useDoctorProfile(userId?: string) {
   const [profile, setProfile] = useState<DoctorProfile | null>(null);
-  const [specialties, setSpecialties] = useState<MedicalSpecialty[]>([]);
-  const [stats, setStats] = useState<any>(null);
+  const [stats, setStats] = useState<Record<string, unknown> | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -34,39 +32,41 @@ export function useDoctorProfile(userId?: string) {
     setLoading(false);
   }, [userId]);
 
-  const loadSpecialties = useCallback(async () => {
-    try {
-      const result = await getSpecialties();
-      if (result.success && result.data) {
-        setSpecialties(result.data);
-      }
-    } catch (err) {
-      // Silenciar error de specialties - no es crítico para el funcionamiento
-      // La tabla specialties puede no existir aún
-    }
-  }, []);
-
-  const loadStats = useCallback(async () => {
-    if (!userId) return;
-
-    try {
-      const result = await getDoctorStats(userId);
-      if (result.success && result.data) {
-        setStats(result.data);
-      }
-    } catch (err) {
-      console.error('Error loading stats:', err);
-      setError('Error loading stats');
-    }
-  }, [userId]);
-
   useEffect(() => {
-    if (userId) {
-      void loadProfile();
-      void loadStats();
-      // No cargar specialties - la tabla puede no existir
-    }
-  }, [userId, loadProfile, loadStats]);
+    if (!userId) return;
+    
+    const loadData = async () => {
+      setLoading(true);
+      setError(null);
+      
+      try {
+        const profileResult = await getDoctorProfile(userId);
+        if (profileResult.success && profileResult.data) {
+          setProfile(profileResult.data);
+        } else {
+          setProfile(null);
+          setError(profileResult.error || 'No se pudo cargar el perfil');
+        }
+      } catch (error) {
+        console.error('Error loading profile:', error);
+        setError('Error loading profile');
+      }
+
+      try {
+        const statsResult = await getDoctorStats(userId);
+        if (statsResult.success && statsResult.data) {
+          setStats(statsResult.data);
+        }
+      } catch (error) {
+        console.error('Error loading stats:', error);
+        setError('Error loading stats');
+      }
+      
+      setLoading(false);
+    };
+    
+    loadData();
+  }, [userId]);
 
   const updateProfile = async (updates: Partial<DoctorProfile>) => {
     if (!userId) return { success: false, error: 'No user ID' };
@@ -99,12 +99,10 @@ export function useDoctorProfile(userId?: string) {
 
   const refreshProfile = () => {
     loadProfile();
-    loadStats();
   };
 
   return {
     profile,
-    specialties,
     stats,
     loading,
     error,

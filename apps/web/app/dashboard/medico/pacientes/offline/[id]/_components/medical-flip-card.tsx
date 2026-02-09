@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import { FlipCard } from "./flip-card";
 import { Card, CardHeader, CardTitle, CardContent, Badge, Button, Input } from "@red-salud/ui";
 import { Plus, X, RotateCcw } from "lucide-react";
@@ -8,7 +8,7 @@ import { cn } from "@red-salud/core/utils";
 
 interface MedicalFlipCardProps {
     title: string;
-    icon: any;
+    icon: React.ReactNode;
     items: string[] | null;
     colorClass: string; // e.g., "text-red-600"
     bgClass: string; // e.g., "bg-red-50"
@@ -18,7 +18,7 @@ interface MedicalFlipCardProps {
 
 export function MedicalFlipCard({
     title,
-    icon: Icon,
+    icon,
     items = [],
     colorClass,
     bgClass,
@@ -28,27 +28,27 @@ export function MedicalFlipCard({
     const safeItems = items || [];
     const [newItem, setNewItem] = useState("");
 
-    const handleAdd = (e: React.MouseEvent) => {
+    const handleAdd = useCallback((e: React.MouseEvent) => {
         e.stopPropagation(); // Prevent flip
         if (newItem.trim()) {
             onAdd(newItem.trim());
             setNewItem("");
         }
-    };
+    }, [newItem, onAdd, setNewItem]);
 
-    const handleRemove = (e: React.MouseEvent, item: string) => {
+    const handleRemove = useCallback((e: React.MouseEvent, item: string) => {
         e.stopPropagation(); // Prevent flip
         onRemove(item);
-    };
+    }, [onRemove]);
 
-    const stopProp = (e: React.MouseEvent) => e.stopPropagation();
+    const stopProp = useCallback((e: React.MouseEvent) => e.stopPropagation(), []);
 
     // Front Content (Summary)
     const Front = (
         <Card className={cn("h-full border-2 hover:shadow-lg transition-shadow cursor-pointer", bgClass)}>
             <CardHeader className="p-4 pb-2">
                 <CardTitle className={cn("text-sm font-medium flex items-center gap-2", colorClass)}>
-                    <Icon className="h-4 w-4" /> {title}
+                    {icon} {title}
                 </CardTitle>
             </CardHeader>
             <CardContent className="p-4 pt-0">
@@ -83,7 +83,7 @@ export function MedicalFlipCard({
                     <CardTitle className={cn("text-xs font-bold uppercase tracking-wider", colorClass)}>
                         Editar {title}
                     </CardTitle>
-                    <Button variant="ghost" size="icon" className="h-6 w-6" onClick={(e) => {
+                    <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => {
                         // Determine how to trigger flip back from parent if needed, 
                         // but for now relying on parent FlipCard click-outside or generic toggle
                         // Actually the FlipCard toggles on click. We need a way to close it "programmatically" or just click a "Done" button that propagates
@@ -101,7 +101,7 @@ export function MedicalFlipCard({
                         placeholder="Nuevo..."
                         className="h-8 text-xs"
                         onKeyDown={(e) => {
-                            if (e.key === 'Enter') handleAdd(e as any);
+                            if (e.key === 'Enter') handleAdd(e as unknown as React.MouseEvent);
                         }}
                     />
                     <Button size="sm" onClick={handleAdd} className="h-8 w-8 p-0 shrink-0">

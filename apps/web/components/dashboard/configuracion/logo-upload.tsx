@@ -4,6 +4,7 @@ import { useRef } from "react";
 import { Switch, Button, Label } from "@red-salud/ui";
 import { ImageIcon, Upload } from "lucide-react";
 import { cn } from "@red-salud/core/utils";
+import Image from "next/image";
 
 interface LogoUploadProps {
     enabled: boolean;
@@ -66,10 +67,12 @@ export function LogoUpload({
 
             {logoUrl && (
                 <div className="flex justify-center p-4 bg-slate-50 rounded-lg border">
-                    <img
+                    <Image
                         src={logoUrl}
                         alt="Logo del consultorio"
                         className="max-h-20 object-contain"
+                        width={80}
+                        height={80}
                     />
                 </div>
             )}

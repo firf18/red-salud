@@ -29,7 +29,6 @@ interface RelatedSpecialtiesProps {
  */
 export function RelatedSpecialties({
     relatedSlugs,
-    currentSpecialty,
 }: RelatedSpecialtiesProps) {
     if (!relatedSlugs || relatedSlugs.length === 0) return null;
 

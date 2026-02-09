@@ -1,22 +1,21 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase/client";
 import { Button } from "@red-salud/ui";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@red-salud/ui";
 import { Label } from "@red-salud/ui";
-import { Input } from "@red-salud/ui";
 import { Textarea } from "@red-salud/ui";
 import { useMedicalSpecialties, useAvailableDoctors, useAvailableTimeSlots, useCreateAppointment } from "@/hooks/use-appointments";
-import { ArrowLeft, Video, MapPin, Phone, Check } from "lucide-react";
+import { ArrowLeft, Check } from "lucide-react";
 import { SpecialtyGrid } from "@/components/dashboard/paciente/components/specialty-grid";
 import { DoctorSelector } from "@/components/dashboard/paciente/components/doctor-selector";
 import { DateTimePicker } from "@/components/dashboard/paciente/components/date-time-picker";
 import { ConsultationTypeSelector } from "@/components/dashboard/paciente/components/consultation-type-selector";
 import { AppointmentSummary } from "@/components/dashboard/paciente/components/appointment-summary";
 import Link from "next/link";
-import { es } from "date-fns/locale";
+
 
 export default function NuevaCitaPage() {
   const [userId, setUserId] = useState<string | null>(null);
@@ -59,7 +58,7 @@ export default function NuevaCitaPage() {
 
 
 
-  const handleSubmit = async () => {
+  const handleSubmit = useCallback(async () => {
     if (!userId || !selectedDoctor || !selectedDate || !selectedTime) return;
 
     const result = await create(userId, {
@@ -73,10 +72,9 @@ export default function NuevaCitaPage() {
     if (result.success) {
       router.push("/dashboard/paciente/citas");
     }
-  };
+  }, [userId, selectedDoctor, selectedDate, selectedTime, consultationType, reason, create, router]);
 
   const selectedDoctorData = doctors.find((d) => d.id === selectedDoctor);
-  const availableTimeSlots = timeSlots.filter((slot) => slot.available);
 
   return (
     <div className="container mx-auto py-8 px-4 max-w-4xl">

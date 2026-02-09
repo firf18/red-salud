@@ -63,14 +63,10 @@ interface DashboardControlsProps {
  * />
  */
 export function DashboardControls({
-  mode,
-  onModeChange,
   onResetLayout,
   hiddenWidgets = [],
   onToggleWidget,
   onOpenThemeEditor,
-  simpleWidgetCount = 0,
-  proWidgetCount = 0,
 }: DashboardControlsProps) {
   // Estado del panel de personalización
   const [isCustomizing, setIsCustomizing] = useState(false);

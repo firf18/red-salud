@@ -14,7 +14,15 @@ interface AppointmentAlertProps {
 }
 
 interface UpcomingAppointmentsProps {
-  appointments: any[];
+  appointments: Array<{
+    id: string;
+    fecha_hora: string;
+    motivo?: string;
+    status: string;
+    doctor?: {
+      nombre_completo?: string;
+    };
+  }>;
   activeTelemed: number;
 }
 

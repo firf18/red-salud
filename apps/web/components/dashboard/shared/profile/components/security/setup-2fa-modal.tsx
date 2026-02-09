@@ -8,10 +8,9 @@ import Image from "next/image";
 interface Setup2FAModalProps {
   isOpen: boolean;
   onClose: () => void;
-  has2FA: boolean;
 }
 
-export function Setup2FAModal({ isOpen, onClose, has2FA }: Setup2FAModalProps) {
+export function Setup2FAModal({ isOpen, onClose }: Setup2FAModalProps) {
   const [step, setStep] = useState<"setup" | "verify" | "success">("setup");
   const [qrCode, setQrCode] = useState("");
   const [secret, setSecret] = useState("");
@@ -40,7 +39,7 @@ export function Setup2FAModal({ isOpen, onClose, has2FA }: Setup2FAModalProps) {
       setSecret(data.secret);
       setBackupCodes(data.backupCodes);
       setStep("verify");
-    } catch (error) {
+    } catch {
       setError("Error al conectar con el servidor");
     } finally {
       setLoading(false);
@@ -72,7 +71,7 @@ export function Setup2FAModal({ isOpen, onClose, has2FA }: Setup2FAModalProps) {
         setStep("setup");
         setVerificationCode("");
       }, 3000);
-    } catch (error) {
+    } catch {
       setError("Error al verificar código");
     } finally {
       setLoading(false);

@@ -1,8 +1,7 @@
 "use client";
 
-import { useEffect, useState, useRef } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
-import Link from "next/link";
+import { useEffect, useState, useRef, useCallback } from "react";
+import { useRouter } from "next/navigation";
 import Image from "next/image";
 import {
     CardDescription,
@@ -29,7 +28,7 @@ import {
     FilePenLine,
     Upload,
     LayoutTemplate,
-    ChevronRight,
+
     CircleCheckBig,
     Crop,
     Square,
@@ -109,76 +108,7 @@ export default function RecipeSettingsPage() {
     // Expandable Preview State
     const [isPreviewModalOpen, setIsPreviewModalOpen] = useState(false);
 
-    // Load initial data
-    useEffect(() => {
-        async function loadData() {
-            setIsLoading(true);
-            try {
-                const { data: { user } } = await supabase.auth.getUser();
-                if (!user) {
-                    router.push("/login/medico");
-                    return;
-                }
-                setUserId(user.id);
-
-                // Fetch Profile
-                const { data: profile } = await supabase
-                    .from("profiles")
-                    .select("nombre_completo, especialidad, sacs_especialidad, cedula, email, sacs_matricula")
-                    .eq("id", user.id)
-                    .single();
-
-                if (profile) {
-                    setProfileData({
-                        nombre_completo: profile.nombre_completo || "",
-                        cedula: profile.cedula || "",
-                        matricula: (profile as any).sacs_matricula || "",
-                        especialidad: (profile as any).sacs_especialidad || profile.especialidad || "",
-                        titulo: (profile as any).titulo || "Médico",
-                        email: (profile as any).email || "", // Assuming email might be in profile or joined
-                    });
-                }
-
-                // Fetch Offices
-                const { data: officesData } = await supabase
-                    .from("doctor_offices")
-                    .select("id, nombre, direccion, telefono")
-                    .eq("doctor_id", user.id)
-                    .eq("activo", true);
-
-                if (officesData) {
-                    setOffices(officesData as unknown as Office[]);
-                }
-
-                // Get profile email for fallback
-                const userEmail = (profile as any)?.email || "";
-
-                // Initial fetch for global settings or default
-                await fetchSettingsForContext(user.id, null, userEmail);
-
-            } catch (error) {
-                console.error("Error loading settings:", error);
-                toast.error("Error cargando la configuración");
-            } finally {
-                setIsLoading(false);
-            }
-        }
-        loadData();
-    }, [router]);
-
-    // Generate QR Code when mobile sign modal opens
-    useEffect(() => {
-        if (isMobileSignModalOpen && userId && typeof window !== 'undefined') {
-            const url = `${window.location.origin}/dashboard/medico/recetas/firmar-movil?uid=${userId}`;
-            QRCode.toDataURL(url, { width: 300, margin: 2 }, (err, url) => {
-                if (!err) {
-                    setMobileSignQrUrl(url);
-                }
-            });
-        }
-    }, [isMobileSignModalOpen, userId]);
-
-    const fetchSettingsForContext = async (uid: string, officeId: string | null, fallbackEmail?: string) => {
+    const fetchSettingsForContext = useCallback(async (uid: string, officeId: string | null, fallbackEmail?: string) => {
         setIsLoading(true);
         try {
             const { success, data } = await getDoctorRecipeSettings(uid, officeId);
@@ -218,21 +148,79 @@ export default function RecipeSettingsPage() {
         } finally {
             setIsLoading(false);
         }
-    };
+    }, [offices, profileData.email]);
 
-    const handleOfficeChange = async (value: string) => {
+    const loadData = useCallback(async () => {
+        setIsLoading(true);
+        try {
+            const { data: { user } } = await supabase.auth.getUser();
+            if (!user) {
+                router.push("/login/medico");
+                return;
+            }
+            setUserId(user.id);
+
+            // Fetch Profile
+            const { data: profile } = await supabase
+                .from("profiles")
+                .select("nombre_completo, especialidad, sacs_especialidad, cedula, email, sacs_matricula")
+                .eq("id", user.id)
+                .single();
+
+            if (profile) {
+                setProfileData({
+                    nombre_completo: profile.nombre_completo || "",
+                    cedula: profile.cedula || "",
+                    matricula: (profile as { sacs_matricula?: string }).sacs_matricula || "",
+                    especialidad: (profile as { sacs_especialidad?: string; especialidad?: string }).sacs_especialidad || profile.especialidad || "",
+                    titulo: (profile as { titulo?: string }).titulo || "Médico",
+                    email: (profile as { email?: string }).email || "", // Assuming email might be in profile or joined
+                });
+            }
+
+            // Fetch Offices
+            const { data: officesData } = await supabase
+                .from("doctor_offices")
+                .select("id, nombre, direccion, telefono")
+                .eq("doctor_id", user.id)
+                .eq("activo", true);
+
+            if (officesData) {
+                setOffices(officesData as unknown as Office[]);
+            }
+
+            // Get profile email for fallback
+            const userEmail = (profile as { email?: string })?.email || "";
+
+            // Initial fetch for global settings or default
+            await fetchSettingsForContext(user.id, null, userEmail);
+
+        } catch (error) {
+            console.error("Error loading settings:", error);
+            toast.error("Error cargando la configuración");
+        } finally {
+            setIsLoading(false);
+        }
+    }, [router, fetchSettingsForContext]);
+
+    // Load initial data
+    useEffect(() => {
+        loadData();
+    }, [loadData]);
+
+    const handleOfficeChange = useCallback(async (value: string) => {
         setSelectedOfficeId(value);
         if (userId) {
             const oid = value === "global" ? null : value;
             await fetchSettingsForContext(userId, oid, profileData.email);
         }
-    };
+    }, [userId, fetchSettingsForContext, profileData.email]);
 
-    const handleSettingsChange = (field: string, value: any) => {
+    const handleSettingsChange = useCallback((field: string, value: string | boolean) => {
         setFormData((prev) => ({ ...prev, [field]: value }));
-    };
+    }, []);
 
-    const handleSaveSignature = async () => {
+    const handleSaveSignature = useCallback(async () => {
         if (!userId || !sigCanvasRef.current) return;
 
         if (sigCanvasRef.current.isEmpty()) {
@@ -263,9 +251,9 @@ export default function RecipeSettingsPage() {
             console.error("Error saving signature:", error);
             toast.error("Error al guardar la firma");
         }
-    };
+    }, [userId, selectedOfficeId]);
 
-    const handleLogoFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const handleLogoFileSelect = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
         if (!e.target.files || e.target.files.length === 0) return;
         const file = e.target.files[0];
         if (file) {
@@ -275,9 +263,9 @@ export default function RecipeSettingsPage() {
             setIsLogoModalOpen(true);
         }
         e.target.value = "";
-    };
+    }, []);
 
-    const handleSaveLogoFromModal = async () => {
+    const handleSaveLogoFromModal = useCallback(async () => {
         if (!userId || !tempLogoFile) return;
 
         try {
@@ -298,9 +286,9 @@ export default function RecipeSettingsPage() {
             console.error("Error uploading logo:", error);
             toast.error("Error al guardar el logo");
         }
-    };
+    }, [userId, tempLogoFile, selectedOfficeId]);
 
-    const handleSaveAll = async () => {
+    const handleSaveAll = useCallback(async () => {
         if (!userId) return;
         setIsSaving(true);
         try {
@@ -328,7 +316,19 @@ export default function RecipeSettingsPage() {
         } finally {
             setIsSaving(false);
         }
-    };
+    }, [userId, selectedOfficeId, formData]);
+
+    // Generate QR Code when mobile sign modal opens
+    useEffect(() => {
+        if (isMobileSignModalOpen && userId && typeof window !== 'undefined') {
+            const url = `${window.location.origin}/dashboard/medico/recetas/firmar-movil?uid=${userId}`;
+            QRCode.toDataURL(url, { width: 300, margin: 2 }, (err, url) => {
+                if (!err) {
+                    setMobileSignQrUrl(url);
+                }
+            });
+        }
+    }, [isMobileSignModalOpen, userId]);
 
     if (isLoading) {
         return (
@@ -601,7 +601,8 @@ export default function RecipeSettingsPage() {
                                             <Image
                                                 src={settings.logo_url}
                                                 alt="Logo"
-                                                fill
+                                                width={96}
+                                                height={96}
                                                 className="object-contain p-1"
                                             />
                                         ) : (
@@ -780,10 +781,12 @@ export default function RecipeSettingsPage() {
 
                         <div className="relative w-full h-64 bg-gray-100 rounded-lg overflow-hidden flex items-center justify-center">
                             {tempLogoUrl && (
-                                <img
+                                <Image
                                     className="max-h-full max-w-full object-contain"
                                     alt="Logo preview"
                                     src={tempLogoUrl}
+                                    width={200}
+                                    height={200}
                                     style={{ transform: `scale(${logoZoom[0]})` }}
                                 />
                             )}

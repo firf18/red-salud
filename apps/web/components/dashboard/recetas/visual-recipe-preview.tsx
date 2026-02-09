@@ -1,7 +1,5 @@
 import { forwardRef } from "react";
 import { cn } from "@red-salud/core/utils";
-import { format } from "date-fns";
-import { es } from "date-fns/locale";
 import {
     TemplateModern, TemplateGeometric, TemplateElegant,
     TemplateClinical, TemplateWaves, TemplateTech,
@@ -245,6 +243,7 @@ export const VisualRecipePreview = forwardRef<HTMLDivElement, VisualRecipePrevie
                     {/* Logo (Top Left) */}
                     {showLogo && logoUrl && (
                         <div style={{ top: layout.logoTop, left: layout.logoLeft, width: "165px", height: "93px", position: "absolute" }}>
+                            {/* eslint-disable-next-line @next/next/no-img-element */}
                             <img
                                 src={logoUrl}
                                 alt="logo"
@@ -348,6 +347,7 @@ export const VisualRecipePreview = forwardRef<HTMLDivElement, VisualRecipePrevie
                         {/* Signature Image */}
                         {showSignature && signatureUrl && (
                             <div style={{ left: "50%", width: "180px", bottom: "122px", height: "70px", position: "absolute", transform: "translateX(-50%)" }}>
+                                {/* eslint-disable-next-line @next/next/no-img-element */}
                                 <img
                                     src={signatureUrl}
                                     alt="signature"

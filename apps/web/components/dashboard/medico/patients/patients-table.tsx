@@ -95,7 +95,7 @@ export function PatientsTable({ patients, onView, onMessage, loading = false }: 
                     : new Date((patient as OfflinePatient).created_at);
 
                   return (
-                    <TableRow key={(patient as any).id}>
+                    <TableRow key={isRegistered ? (patient as RegisteredPatient).id : (patient as OfflinePatient).id}>
                       <TableCell>
                         <div className="flex items-center gap-3">
                           <Avatar>

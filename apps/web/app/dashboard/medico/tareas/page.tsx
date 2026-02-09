@@ -14,26 +14,24 @@ import {
     CheckSquare,
     Plus,
     Search,
-    Filter,
     Check,
-    Trash2,
     Calendar,
     Clock,
     AlertCircle,
     AlertTriangle,
     Loader2,
-    X,
+    Trash2,
     ChevronDown,
     MoreHorizontal,
     Edit2,
     ArrowLeft,
+    Filter,
 } from "lucide-react";
 import { cn } from "@red-salud/core/utils";
 import { Button } from "@red-salud/ui";
 import { Input } from "@red-salud/ui";
 import { Textarea } from "@red-salud/ui";
 import { Badge } from "@red-salud/ui";
-import { Card, CardContent, CardHeader, CardTitle } from "@red-salud/ui";
 import {
     Dialog,
     DialogContent,
@@ -47,7 +45,7 @@ import {
     DropdownMenuItem,
     DropdownMenuTrigger,
 } from "@red-salud/ui";
-import { useTasks, isTaskOverdue, isTaskDueToday, type TaskFilters } from "@/hooks/use-tasks";
+import { useTasks, isTaskOverdue, isTaskDueToday } from "@/hooks/use-tasks";
 import type { DoctorTask, TaskPriority } from "@red-salud/types";
 import { supabase } from "@/lib/supabase/client";
 import Link from "next/link";

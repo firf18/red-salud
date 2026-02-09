@@ -15,7 +15,7 @@ export function RecentActivitySection({ activities }: RecentActivityProps) {
   const { t } = useI18n();
 
   const getActivityIcon = (type: string) => {
-    const icons: Record<string, any> = {
+    const icons: Record<string, React.ComponentType<{ className?: string }>> = {
       appointment_created: Calendar,
       appointment_cancelled: Calendar,
       prescription_created: Pill,

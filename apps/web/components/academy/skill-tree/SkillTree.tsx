@@ -6,7 +6,6 @@
 'use client';
 
 import React from 'react';
-import { motion } from 'framer-motion';
 import { ArrowLeft, Settings, Info, BookOpen, Trophy, Star } from 'lucide-react';
 import Link from 'next/link';
 import { cn } from "@red-salud/core/utils";
@@ -18,7 +17,6 @@ import { UnitSection } from './UnitSection';
  * Orquesta la visualización de niveles y unidades.
  */
 export const SkillTree: React.FC<SkillTreeProps> = ({
-    specialtyId,
     specialtyName,
     color,
     units,

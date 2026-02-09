@@ -81,7 +81,7 @@ export async function verifySACSDoctor(cedula: string): Promise<VerificationResu
           data: data as SACSVerificationData
         };
       }
-    } catch (err) {
+    } catch {
       console.log('SACS no disponible, usando verificación manual');
     }
 

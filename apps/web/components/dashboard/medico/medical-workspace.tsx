@@ -1,7 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { supabase } from "@/lib/supabase/client";
+import { useState } from "react";
 import { Tabs, TabsContent } from "@red-salud/ui";
 import { StructuredTemplate } from "@/lib/templates/structured-templates";
 import { WorkspaceHeader } from "./workspace/workspace-header";
@@ -60,7 +59,6 @@ export function MedicalWorkspace({
   const [selectedStructuredTemplate, setSelectedStructuredTemplate] = useState<StructuredTemplate | null>(null);
   const [freeNotesContent, setFreeNotesContent] = useState(notasMedicas || "");
   const [structuredNotesContent, setStructuredNotesContent] = useState("");
-  const [isTemplateGenerated, setIsTemplateGenerated] = useState(false);
 
   // Custom hooks
   const autocomplete = useAutocomplete({ notasMedicas: freeNotesContent });

@@ -9,23 +9,18 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import {
   getClinicResources,
-  getAvailableResources,
   updateResourceStatus,
   getStaffShifts,
   getActiveShifts,
-  createStaffShift,
-  updateStaffShift,
   cancelStaffShift,
   getOperationalMetrics,
   getDailyMetricsSummary,
-  generateOperationalAlerts,
   getClinicDepartments,
 } from '@/lib/supabase/services/clinic-operations-service';
 import type {
   ResourceFilters,
   ClinicResource,
-  StaffShift,
-} from '@/lib/types/clinic.types';
+} from '@red-salud/types';
 
 export function useClinicOperations(locationIds?: string[]) {
   const queryClient = useQueryClient();
@@ -81,7 +76,7 @@ export function useClinicOperations(locationIds?: string[]) {
     queryFn: () => {
       if (!locationIds || locationIds.length === 0) return null;
       const today = new Date().toISOString().split('T')[0];
-      return getDailyMetricsSummary(locationIds, today);
+      return getDailyMetricsSummary(locationIds!, today);
     },
     enabled: !!locationIds && locationIds.length > 0,
     refetchInterval: 60000, // Cada minuto
@@ -223,22 +218,22 @@ export function useOperationalMetrics(
   // Calcular promedios
   const averages = metrics
     ? {
-        avgAppointments:
-          metrics.reduce((sum, m) => sum + m.total_appointments, 0) / metrics.length,
-        avgCompletionRate:
-          metrics.reduce(
-            (sum, m) =>
-              sum +
-              (m.total_appointments > 0
-                ? (m.completed_appointments / m.total_appointments) * 100
-                : 0),
-            0
-          ) / metrics.length,
-        avgOccupancy:
-          metrics.reduce((sum, m) => sum + (m.occupancy_rate || 0), 0) / metrics.length,
-        totalRevenue: metrics.reduce((sum, m) => sum + m.revenue_amount, 0),
-        totalPatients: metrics.reduce((sum, m) => sum + m.patient_count, 0),
-      }
+      avgAppointments:
+        metrics.reduce((sum, m) => sum + m.total_appointments, 0) / metrics.length,
+      avgCompletionRate:
+        metrics.reduce(
+          (sum, m) =>
+            sum +
+            (m.total_appointments > 0
+              ? (m.completed_appointments / m.total_appointments) * 100
+              : 0),
+          0
+        ) / metrics.length,
+      avgOccupancy:
+        metrics.reduce((sum, m) => sum + (m.occupancy_rate || 0), 0) / metrics.length,
+      totalRevenue: metrics.reduce((sum, m) => sum + m.revenue_amount, 0),
+      totalPatients: metrics.reduce((sum, m) => sum + m.patient_count, 0),
+    }
     : null;
 
   return {

@@ -23,14 +23,14 @@ interface PatientSelectorProps {
 export function PatientSelector({ patients, selectedPatientId, onPatientSelect }: PatientSelectorProps) {
     const formContext = useFormContext();
     const pacienteId = selectedPatientId ?? (formContext ? formContext.watch("paciente_id") : "");
-    const setValue = (name: string, value: any) => {
+    const setValue = (name: string, value: string | number) => {
         if (formContext) formContext.setValue(name, value);
         if (name === "paciente_id" && onPatientSelect) onPatientSelect(value);
     };
     const [cedulaInput, setCedulaInput] = useState("");
     const [nacionalidad, setNacionalidad] = useState("V");
     const [loading, setLoading] = useState(false);
-    const [searchResult, setSearchResult] = useState<any>(null);
+    const [searchResult, setSearchResult] = useState<{ nombre_completo: string; cedula: string; nacionalidad: string; isLocal?: boolean } | null>(null);
     const [error, setError] = useState<string | null>(null);
 
     // Initialize/Update searchResult if pacienteId matches a known patient
@@ -79,7 +79,7 @@ export function PatientSelector({ patients, selectedPatientId, onPatientSelect }
                 });
             }
 
-        } catch (err: any) {
+        } catch (err: Error) {
             setError(err.message);
         } finally {
             setLoading(false);

@@ -18,7 +18,6 @@ import type { TabComponentProps } from "../types";
 
 export function DocumentsTabDidit({
   formData,
-  isLoading: parentLoading,
 }: Omit<TabComponentProps, "setFormData" | "isEditing" | "setIsEditing" | "handleSave">) {
   const [isCreatingSession, setIsCreatingSession] = useState(false);
   const [sessionUrl, setSessionUrl] = useState<string | null>(null);

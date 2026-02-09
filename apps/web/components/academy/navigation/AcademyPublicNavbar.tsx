@@ -40,7 +40,7 @@ export function AcademyPublicNavbar() {
     const [isScrolled, setIsScrolled] = useState(false);
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
     const [isCoursesOpen, setIsCoursesOpen] = useState(false);
-    const { user, isLoading, signOut } = useSupabaseAuth();
+    const { user, isLoading } = useSupabaseAuth();
 
     useEffect(() => {
         const handleScroll = () => {

@@ -6,7 +6,7 @@ import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend } from "recha
 interface DonutChartCardProps {
     title: string;
     description?: string;
-    data: any[];
+    data: Record<string, unknown>[];
     category: string;
     index: string;
     colors: string[];
@@ -15,7 +15,13 @@ interface DonutChartCardProps {
     height?: number;
 }
 
-const CustomTooltip = ({ active, payload, formatter }: any) => {
+interface TooltipProps {
+    active?: boolean;
+    payload?: Array<{ name: string; value: number; payload: { fill: string } }>;
+    formatter?: (value: number) => string;
+}
+
+const CustomTooltip = ({ active, payload, formatter }: TooltipProps) => {
     if (active && payload && payload.length) {
         const data = payload[0];
         return (

@@ -1,11 +1,11 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase/client";
 import Image from "next/image";
 import { Button } from "@red-salud/ui";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@red-salud/ui";
+import { Card, CardContent } from "@red-salud/ui";
 import { Badge } from "@red-salud/ui";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@red-salud/ui";
 import { usePatientAppointments } from "@/hooks/use-appointments";
@@ -20,13 +20,125 @@ interface PatientAppointment {
   consultation_type: string;
   reason?: string;
   doctor?: {
-    nombre_completo: string;
-    avatar_url: string | null;
+    nombre_completo?: string;
+    avatar_url?: string | null;
     specialty?: {
-      name: string;
+      name?: string;
     };
   };
 }
+
+const getStatusBadge = (status: string) => {
+  const variants: Record<string, { variant: "default" | "secondary" | "destructive" | "outline"; label: string }> = {
+    pending: { variant: "secondary", label: "Pendiente" },
+    confirmed: { variant: "default", label: "Confirmada" },
+    cancelled: { variant: "destructive", label: "Cancelada" },
+    completed: { variant: "outline", label: "Completada" },
+    no_show: { variant: "destructive", label: "No asistió" },
+  };
+  const config = variants[status];
+  return <Badge variant={config?.variant || "secondary"}>{config?.label || status}</Badge>;
+};
+
+const getConsultationIcon = (type: string) => {
+  switch (type) {
+    case "video":
+      return <Video className="h-4 w-4" />;
+    case "presencial":
+      return <MapPin className="h-4 w-4" />;
+    case "telefono":
+      return <Phone className="h-4 w-4" />;
+    default:
+      return <Video className="h-4 w-4" />;
+  }
+};
+
+const getConsultationLabel = (type: string) => {
+  switch (type) {
+    case "video":
+      return "Videollamada";
+    case "presencial":
+      return "Presencial";
+    case "telefono":
+      return "Teléfono";
+    default:
+      return type;
+  }
+};
+
+const AppointmentCard = ({ appointment }: { appointment: PatientAppointment }) => (
+  <Card>
+    <CardContent className="pt-6">
+      <div className="flex items-start justify-between mb-4">
+        <div className="flex items-center gap-3">
+          <div className="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center">
+            {appointment.doctor?.avatar_url ? (
+              <Image
+                src={appointment.doctor.avatar_url}
+                alt={appointment.doctor.nombre_completo || "Doctor"}
+                width={48}
+                height={48}
+                className="rounded-full object-cover"
+              />
+            ) : (
+              <span className="text-lg font-semibold text-primary">
+                {appointment.doctor?.nombre_completo?.charAt(0) || "D"}
+              </span>
+            )}
+          </div>
+          <div>
+            <h3 className="font-semibold">{appointment.doctor?.nombre_completo || "Doctor"}</h3>
+            <p className="text-sm text-muted-foreground">
+              {appointment.doctor?.specialty?.name || "Medicina General"}
+            </p>
+          </div>
+        </div>
+        {getStatusBadge(appointment.status)}
+      </div>
+
+      <div className="space-y-2 text-sm">
+        <div className="flex items-center gap-2 text-muted-foreground">
+          <Calendar className="h-4 w-4" />
+          <span>
+            {new Date(appointment.appointment_date).toLocaleDateString("es-ES", {
+              weekday: "long",
+              year: "numeric",
+              month: "long",
+              day: "numeric",
+            })}
+          </span>
+        </div>
+        <div className="flex items-center gap-2 text-muted-foreground">
+          <Clock className="h-4 w-4" />
+          <span>{appointment.appointment_time.slice(0, 5)}</span>
+        </div>
+        <div className="flex items-center gap-2 text-muted-foreground">
+          {getConsultationIcon(appointment.consultation_type)}
+          <span>{getConsultationLabel(appointment.consultation_type)}</span>
+        </div>
+      </div>
+
+      {appointment.reason && (
+        <div className="mt-4 p-3 bg-muted rounded-lg">
+          <p className="text-sm">
+            <span className="font-medium">Motivo:</span> {appointment.reason}
+          </p>
+        </div>
+      )}
+
+      <div className="mt-4 flex gap-2">
+        <Button variant="outline" size="sm" className="flex-1">
+          Ver Detalles
+        </Button>
+        {(appointment.status === "pending" || appointment.status === "confirmed") && (
+          <Button variant="destructive" size="sm">
+            Cancelar
+          </Button>
+        )}
+      </div>
+    </CardContent>
+  </Card>
+);
 
 export default function CitasPage() {
   const [userId, setUserId] = useState<string | null>(null);
@@ -53,6 +165,21 @@ export default function CitasPage() {
 
   const { appointments, loading: appointmentsLoading } = usePatientAppointments(userId || undefined);
 
+  const upcomingAppointments = useMemo(() => appointments.filter(
+    (apt) =>
+      (apt.status === "pending" || apt.status === "confirmed") &&
+      new Date(`${apt.appointment_date}T${apt.appointment_time}`) > new Date()
+  ), [appointments]);
+
+  const pastAppointments = useMemo(() => appointments.filter(
+    (apt) =>
+      apt.status === "completed" ||
+      (apt.status !== "cancelled" &&
+        new Date(`${apt.appointment_date}T${apt.appointment_time}`) < new Date())
+  ), [appointments]);
+
+  const cancelledAppointments = useMemo(() => appointments.filter((apt) => apt.status === "cancelled"), [appointments]);
+
   if (loading || appointmentsLoading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
@@ -64,132 +191,7 @@ export default function CitasPage() {
     );
   }
 
-  const upcomingAppointments = appointments.filter(
-    (apt) =>
-      (apt.status === "pending" || apt.status === "confirmed") &&
-      new Date(`${apt.appointment_date}T${apt.appointment_time}`) > new Date()
-  );
 
-  const pastAppointments = appointments.filter(
-    (apt) =>
-      apt.status === "completed" ||
-      (apt.status !== "cancelled" &&
-        new Date(`${apt.appointment_date}T${apt.appointment_time}`) < new Date())
-  );
-
-  const cancelledAppointments = appointments.filter((apt) => apt.status === "cancelled");
-
-  const getStatusBadge = (status: string) => {
-    const variants: Record<string, { variant: any; label: string }> = {
-      pending: { variant: "secondary", label: "Pendiente" },
-      confirmed: { variant: "default", label: "Confirmada" },
-      cancelled: { variant: "destructive", label: "Cancelada" },
-      completed: { variant: "outline", label: "Completada" },
-      no_show: { variant: "destructive", label: "No asistió" },
-    };
-    const config = variants[status] || variants.pending;
-    return <Badge variant={config.variant}>{config.label}</Badge>;
-  };
-
-  const getConsultationIcon = (type: string) => {
-    switch (type) {
-      case "video":
-        return <Video className="h-4 w-4" />;
-      case "presencial":
-        return <MapPin className="h-4 w-4" />;
-      case "telefono":
-        return <Phone className="h-4 w-4" />;
-      default:
-        return <Video className="h-4 w-4" />;
-    }
-  };
-
-  const getConsultationLabel = (type: string) => {
-    switch (type) {
-      case "video":
-        return "Videollamada";
-      case "presencial":
-        return "Presencial";
-      case "telefono":
-        return "Teléfono";
-      default:
-        return type;
-    }
-  };
-
-  const AppointmentCard = ({ appointment }: { appointment: PatientAppointment }) => (
-    <Card>
-      <CardContent className="pt-6">
-        <div className="flex items-start justify-between mb-4">
-          <div className="flex items-center gap-3">
-            <div className="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center">
-              {appointment.doctor?.avatar_url ? (
-                <Image
-                  src={appointment.doctor.avatar_url}
-                  alt={appointment.doctor.nombre_completo}
-                  width={48}
-                  height={48}
-                  className="rounded-full object-cover"
-                />
-              ) : (
-                <span className="text-lg font-semibold text-primary">
-                  {appointment.doctor?.nombre_completo?.charAt(0) || "D"}
-                </span>
-              )}
-            </div>
-            <div>
-              <h3 className="font-semibold">{appointment.doctor?.nombre_completo || "Doctor"}</h3>
-              <p className="text-sm text-muted-foreground">
-                {appointment.doctor?.specialty?.name || "Medicina General"}
-              </p>
-            </div>
-          </div>
-          {getStatusBadge(appointment.status)}
-        </div>
-
-        <div className="space-y-2 text-sm">
-          <div className="flex items-center gap-2 text-muted-foreground">
-            <Calendar className="h-4 w-4" />
-            <span>
-              {new Date(appointment.appointment_date).toLocaleDateString("es-ES", {
-                weekday: "long",
-                year: "numeric",
-                month: "long",
-                day: "numeric",
-              })}
-            </span>
-          </div>
-          <div className="flex items-center gap-2 text-muted-foreground">
-            <Clock className="h-4 w-4" />
-            <span>{appointment.appointment_time.slice(0, 5)}</span>
-          </div>
-          <div className="flex items-center gap-2 text-muted-foreground">
-            {getConsultationIcon(appointment.consultation_type)}
-            <span>{getConsultationLabel(appointment.consultation_type)}</span>
-          </div>
-        </div>
-
-        {appointment.reason && (
-          <div className="mt-4 p-3 bg-muted rounded-lg">
-            <p className="text-sm">
-              <span className="font-medium">Motivo:</span> {appointment.reason}
-            </p>
-          </div>
-        )}
-
-        <div className="mt-4 flex gap-2">
-          <Button variant="outline" size="sm" className="flex-1">
-            Ver Detalles
-          </Button>
-          {(appointment.status === "pending" || appointment.status === "confirmed") && (
-            <Button variant="destructive" size="sm">
-              Cancelar
-            </Button>
-          )}
-        </div>
-      </CardContent>
-    </Card>
-  );
 
   return (
     <div className="container mx-auto py-8 px-4">

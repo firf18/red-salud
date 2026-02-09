@@ -16,7 +16,6 @@ import {
   ConnectivityMonitorImpl,
   resetConnectivityMonitor,
   getConnectivityMonitor,
-  type ConnectivityCallback,
 } from '../connectivity-monitor';
 import { RuntimeService } from '../runtime-service';
 import type { NetworkService } from '../types';

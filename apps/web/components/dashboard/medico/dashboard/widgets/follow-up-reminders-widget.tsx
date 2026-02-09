@@ -16,7 +16,6 @@ import {
     Calendar,
     ChevronRight,
     Loader2,
-    User,
     Clock,
     Send,
     CheckCircle,
@@ -162,7 +161,7 @@ export function FollowUpRemindersWidget({
             lastReason?: string;
         }>();
 
-        appointments.forEach((apt: any) => {
+        appointments.forEach((apt: { status: string; patient_id?: string; appointment_date: string; appointment_time?: string; patient?: { nombre_completo?: string; avatar_url?: string }; reason?: string }) => {
             // Solo contar citas completadas
             if (apt.status !== "completed") return;
 

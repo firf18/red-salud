@@ -132,9 +132,9 @@ export function useConsultation(appointmentId: string | null, pacienteId: string
                     setObservaciones(recordData.observaciones || "");
                 }
             }
-        } catch (err: any) {
+        } catch (err: unknown) {
             console.error("Error loading data:", err);
-            setError(err.message || "Error al cargar los datos");
+            setError(err instanceof Error ? err.message : "Error al cargar los datos");
         } finally {
             setLoading(false);
         }
@@ -386,13 +386,10 @@ export function useConsultation(appointmentId: string | null, pacienteId: string
             } else {
                 router.push("/dashboard/medico/citas");
             }
-        } catch (err: any) {
+        } catch (err: unknown) {
             console.error("Error saving consultation:", err);
-            // Intenta extraer más información del error si es un objeto vacío
-            if (typeof err === 'object' && Object.keys(err).length === 0) {
-                console.error("Empty error object details:", JSON.stringify(err, Object.getOwnPropertyNames(err)));
-            }
-            alert(err.message || JSON.stringify(err) || "Error al guardar la consulta");
+            const errorMessage = err instanceof Error ? err.message : JSON.stringify(err);
+            alert(errorMessage || "Error al guardar la consulta");
         } finally {
             setSaving(false);
         }

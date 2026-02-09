@@ -6,7 +6,7 @@ import { supabase } from "@/lib/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@red-salud/ui";
 import { Button } from "@red-salud/ui";
 import { Badge } from "@red-salud/ui";
-import { FlaskConical, Plus, Calendar, User, FileText, Search, Filter } from "lucide-react";
+import { FlaskConical, Plus, Calendar, User, Search } from "lucide-react";
 import { VerificationGuard } from "@/components/dashboard/medico/features/verification-guard";
 import { Input } from "@red-salud/ui";
 import {

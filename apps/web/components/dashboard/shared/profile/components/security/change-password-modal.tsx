@@ -7,10 +7,9 @@ import { X, Eye, EyeOff, Lock, Loader2, Check, AlertCircle } from "lucide-react"
 interface ChangePasswordModalProps {
   isOpen: boolean;
   onClose: () => void;
-  userEmail: string;
 }
 
-export function ChangePasswordModal({ isOpen, onClose, userEmail }: ChangePasswordModalProps) {
+export function ChangePasswordModal({ isOpen, onClose }: ChangePasswordModalProps) {
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -18,7 +17,6 @@ export function ChangePasswordModal({ isOpen, onClose, userEmail }: ChangePasswo
   const [showNew, setShowNew] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
   const [success, setSuccess] = useState(false);
 
   const passwordStrength = (password: string) => {
@@ -73,7 +71,7 @@ export function ChangePasswordModal({ isOpen, onClose, userEmail }: ChangePasswo
         setConfirmPassword("");
         setSuccess(false);
       }, 2000);
-    } catch (error) {
+    } catch {
       setError("Error al conectar con el servidor");
     } finally {
       setLoading(false);

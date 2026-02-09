@@ -37,8 +37,19 @@ export function usePatientAppointments(patientId: string | undefined) {
   }, [patientId]);
 
   useEffect(() => {
-    refreshAppointments();
-  }, [refreshAppointments]);
+    if (!patientId) return;
+    const loadData = async () => {
+      setLoading(true);
+      const result = await getPatientAppointments(patientId);
+      if (result.success) {
+        setAppointments(result.data);
+      } else {
+        setError(String(result.error) || 'Error loading appointments');
+      }
+      setLoading(false);
+    };
+    loadData();
+  }, [patientId]);
 
   return { appointments, loading, error, refreshAppointments };
 }
@@ -63,8 +74,19 @@ export function useDoctorAppointments(doctorId: string | undefined) {
   }, [doctorId, session?.access_token]);
 
   useEffect(() => {
-    refreshAppointments();
-  }, [refreshAppointments]);
+    if (!doctorId) return;
+    const loadData = async () => {
+      setLoading(true);
+      const result = await getDoctorAppointments(doctorId, session?.access_token);
+      if (result.success) {
+        setAppointments(result.data);
+      } else {
+        setError(String(result.error) || 'Error loading appointments');
+      }
+      setLoading(false);
+    };
+    loadData();
+  }, [doctorId, session?.access_token]);
 
   return { appointments, loading, error, refreshAppointments };
 }
@@ -75,26 +97,19 @@ export function useMedicalSpecialties(onlyWithDoctors: boolean = false) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    console.log('🎣 useMedicalSpecialties hook called with onlyWithDoctors:', onlyWithDoctors);
-
     const loadSpecialties = async () => {
-      console.log('⏳ Loading specialties...');
       const result = await getMedicalSpecialties(onlyWithDoctors);
-      console.log('📦 Result from getMedicalSpecialties:', result);
 
       if (result.success) {
-        console.log('✅ Setting specialties:', result.data.length);
         setSpecialties(result.data);
       } else {
-        console.error('❌ Failed to load specialties:', result.error);
+        console.error('Error loading specialties:', result.error);
       }
       setLoading(false);
     };
 
     loadSpecialties();
   }, [onlyWithDoctors]);
-
-  console.log('🎣 Hook returning:', { specialties: specialties.length, loading });
 
   return { specialties, loading };
 }
@@ -152,13 +167,12 @@ export function useAvailableTimeSlots(
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    if (!doctorId || !date) {
-      // Solo limpiar si ya hay datos
-      setTimeSlots(prev => prev.length > 0 ? [] : prev);
-      return;
-    }
-
     const loadTimeSlots = async () => {
+      if (!doctorId || !date) {
+        setTimeSlots([]);
+        return;
+      }
+
       setLoading(true);
       const result = await getAvailableTimeSlots(doctorId, date);
       if (result.success) {

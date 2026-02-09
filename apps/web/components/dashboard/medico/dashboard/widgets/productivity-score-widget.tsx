@@ -6,7 +6,7 @@ import { WidgetWrapper } from "../widget-wrapper";
 import { Card, CardContent } from "@red-salud/ui";
 import { Badge } from "@red-salud/ui";
 import { Progress } from "@red-salud/ui";
-import { Gauge, Target, Clock, CheckCircle, TrendingUp, Calendar } from "lucide-react";
+import { Gauge, Clock, CheckCircle, TrendingUp, Calendar } from "lucide-react";
 import { Skeleton } from "@red-salud/ui";
 
 interface ProductivityMetrics {
@@ -25,7 +25,6 @@ interface ProductivityMetrics {
 
 interface ProductivityScoreWidgetProps {
   doctorId?: string;
-  profile?: any;
 }
 
 export function ProductivityScoreWidget({ doctorId }: ProductivityScoreWidgetProps) {
@@ -73,9 +72,9 @@ export function ProductivityScoreWidget({ doctorId }: ProductivityScoreWidgetPro
 
       // Calcular métricas
       const consultationsCompleted = weeklyConsultations?.length || 0;
-      const monthlyCompleted = monthlyConsultations?.length || 0;
-      const avgConsultationTime = monthlyConsultations?.length
-        ? monthlyConsultations.reduce((sum, c) => sum + (c.duracion_minutos || 30), 0) / monthlyConsultations.length
+      const monthlyConsultationsLength = monthlyConsultations?.length || 0;
+      const avgConsultationTime = monthlyConsultationsLength
+        ? monthlyConsultations.reduce((sum, c) => sum + (c.duracion_minutos || 30), 0) / monthlyConsultationsLength
         : 30;
 
       const tasksCompleted = tasks?.filter(t => t.is_completed).length || 0;
@@ -114,8 +113,9 @@ export function ProductivityScoreWidget({ doctorId }: ProductivityScoreWidgetPro
         best_day: 'Lunes' // Placeholder
       });
 
-    } catch (err: any) {
-      console.warn("ProductivityScoreWidget: Error loading metrics, using mocks.", err.message || err);
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : "Unknown error";
+      console.warn("ProductivityScoreWidget: Error loading metrics, using mocks.", errorMessage);
       // Fallback a datos mock si falla la carga (ej. tablas no existen)
       setMetrics(generateMockMetrics());
       // No seteamos error para mostrar la UI con datos mock

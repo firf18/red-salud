@@ -11,7 +11,7 @@ export interface MedicalRecord {
     diagnosis: string;
     treatment: string;
     created_at: string;
-    [key: string]: any;
+    [key: string]: unknown;
 }
 
 export function useTauriMedicalRecords(patientId: string) {

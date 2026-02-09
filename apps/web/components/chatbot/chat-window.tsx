@@ -2,7 +2,7 @@
 
 import { useState, useRef, useEffect, useCallback } from "react";
 import { usePathname } from "next/navigation";
-import { Send, X, Bot, User, Loader2, ThumbsUp, ThumbsDown, Sparkles, MessageCircle } from "lucide-react";
+import { Send, X, Bot, User, Loader2, ThumbsUp, ThumbsDown } from "lucide-react";
 import { Button } from "@red-salud/ui";
 import { Input } from "@red-salud/ui";
 import { ScrollArea } from "@red-salud/ui";
@@ -113,7 +113,6 @@ export function ChatWindow({ isOpen, onClose, persona = "default", context, sugg
     const [isLoading, setIsLoading] = useState(false);
     const [showSuggestions, setShowSuggestions] = useState(true);
     const [isAtBottom, setIsAtBottom] = useState(true);
-    const scrollAreaRef = useRef<HTMLDivElement>(null);
     const scrollBottomRef = useRef<HTMLDivElement>(null);
     const inputRef = useRef<HTMLInputElement>(null);
 
@@ -236,7 +235,7 @@ export function ChatWindow({ isOpen, onClose, persona = "default", context, sugg
         setShowSuggestions(false);
         // Auto submit
         setTimeout(() => {
-            handleSubmit(new Event("submit") as any, question);
+            handleSubmit(new Event('submit') as React.FormEvent, question);
         }, 100);
     };
 
@@ -355,7 +354,7 @@ export function ChatWindow({ isOpen, onClose, persona = "default", context, sugg
                             <div>
                                 <h3 className="font-semibold text-sm">{t("header_title")}</h3>
                                 <p className="text-xs text-primary-foreground/80 flex items-center gap-1">
-                                    <Sparkles className="h-3 w-3" /> {t("header_subtitle")}
+                                    {t("header_subtitle")}
                                 </p>
                             </div>
                         </div>
@@ -383,7 +382,7 @@ export function ChatWindow({ isOpen, onClose, persona = "default", context, sugg
                     {/* Messages */}
                     <ScrollArea
                         className="flex-1 p-4 bg-muted/20"
-                        onScroll={handleScroll as any}
+                        onScroll={handleScroll as React.UIEventHandler<HTMLDivElement>}
                     >
                         <div className="space-y-4">
                             {messages.map((message) => (

@@ -4,7 +4,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@red-
 import { Input } from "@red-salud/ui";
 import { Button } from "@red-salud/ui";
 import { Search } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useMemo, useState } from "react";
 
 import type { MedicalSpecialty } from "@/lib/supabase/types/appointments";
 
@@ -17,17 +17,13 @@ interface Props {
 
 export function SpecialtyGrid({ specialties, selectedSpecialty, onSelected, onContinue }: Props) {
   const [searchQuery, setSearchQuery] = useState("");
-  const [filteredSpecialties, setFilteredSpecialties] = useState<MedicalSpecialty[]>(specialties);
-
-  useEffect(() => {
+  
+  const filteredSpecialties = useMemo(() => {
     if (!searchQuery.trim()) {
-      setFilteredSpecialties(specialties);
-      return;
+      return specialties;
     }
     const q = searchQuery.toLowerCase();
-    setFilteredSpecialties(
-      specialties.filter((s) => (s.name?.toLowerCase().includes(q) || s.description?.toLowerCase().includes(q)))
-    );
+    return specialties.filter((s) => (s.name?.toLowerCase().includes(q) || s.description?.toLowerCase().includes(q)));
   }, [searchQuery, specialties]);
 
   return (
@@ -74,7 +70,7 @@ export function SpecialtyGrid({ specialties, selectedSpecialty, onSelected, onCo
         ) : (
           <div className="text-center py-12">
             <Search className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-            <p className="text-muted-foreground">No se encontraron especialidades que coincidan con "{searchQuery}"</p>
+            <p className="text-muted-foreground">No se encontraron especialidades que coincidan con &quot;{searchQuery}&quot;</p>
             <Button variant="outline" onClick={() => setSearchQuery("")} className="mt-4">Ver todas las especialidades</Button>
           </div>
         )}

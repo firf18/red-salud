@@ -12,7 +12,7 @@ export interface Appointment {
     status: 'scheduled' | 'confirmed' | 'cancelled' | 'completed';
     type: string;
     notes?: string;
-    [key: string]: any;
+    [key: string]: unknown;
 }
 
 export function useTauriAppointments(doctorId: string) {

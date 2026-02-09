@@ -5,7 +5,6 @@ export async function GET(request: NextRequest) {
     try {
         const { searchParams } = new URL(request.url);
         const limit = parseInt(searchParams.get('limit') || '6');
-        const featured = searchParams.get('featured') === 'true';
 
         // El frontend pide específicamente ?featured=true&limit=6
         // La función getFeaturedDoctors ya filtra por verified y sacs_verified

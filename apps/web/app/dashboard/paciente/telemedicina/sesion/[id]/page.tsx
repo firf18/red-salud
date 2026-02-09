@@ -4,6 +4,6 @@ export async function generateStaticParams() {
     return [{ id: "1" }];
 }
 
-export default function Page({ params }: { params: Promise<{ id: string }> }) {
+export default function Page() {
     return <SessionPage />;
 }

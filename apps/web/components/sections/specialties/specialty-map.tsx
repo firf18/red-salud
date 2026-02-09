@@ -3,7 +3,6 @@
 import React, { useEffect, useState, useMemo } from "react";
 import { ComposableMap, Geographies, Geography, ZoomableGroup } from "react-simple-maps";
 import { scaleQuantile } from "d3-scale";
-import { Tooltip } from "react-tooltip";
 import { Loader2, MapPin, Users, Activity } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@red-salud/core/utils";
@@ -51,7 +50,7 @@ const generateMockData = (total: number) => {
     return data;
 };
 
-export function SpecialtyMap({ specialtyName, doctorCount, distribution }: SpecialtyMapProps) {
+export function SpecialtyMap({ doctorCount, distribution }: SpecialtyMapProps) {
     const [hoveredState, setHoveredState] = useState<{ name: string; count: number } | null>(null);
 
     // Calcular data inicial sin setState en useEffect
@@ -65,22 +64,11 @@ export function SpecialtyMap({ specialtyName, doctorCount, distribution }: Speci
     }, [distribution, doctorCount]);
 
     const [data, setData] = useState<Record<string, number>>(initialData);
-    const [mounted, setMounted] = useState(false);
 
+    // Actualizar data cuando cambien initialData
     useEffect(() => {
-        setMounted(true);
-    }, []);
-
-    // Actualizar data cuando cambien las props
-    useEffect(() => {
-        if (distribution && Object.keys(distribution).length > 0) {
-            setData(distribution);
-        } else if (doctorCount > 0) {
-            setData(generateMockData(doctorCount));
-        } else {
-            setData({});
-        }
-    }, [distribution, doctorCount]);
+        setData(initialData);
+    }, [initialData]);
 
     const colorScale = useMemo(() => {
         const values = Object.values(data).filter(v => v > 0);

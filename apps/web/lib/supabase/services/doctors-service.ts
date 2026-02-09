@@ -491,7 +491,7 @@ export async function getAvailableSlots(
   const dayKey = isNaN(dayIndex) ? null : dayNames[dayIndex];
 
   // Ensure schedule exists and access property safely
-  const scheduleConfig = profile.schedule as Record<string, any>; // Type assertion since we checked existence
+  const scheduleConfig = profile.schedule as Record<string, { enabled: boolean; slots?: Array<{ start: string; end: string }> }>;
   const daySchedule = dayKey ? scheduleConfig?.[dayKey] : null;
 
   if (!daySchedule?.enabled) {

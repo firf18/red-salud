@@ -1,7 +1,7 @@
 "use client";
 
 import { motion, HTMLMotionProps } from "framer-motion";
-import { cn } from "@/lib/utils";
+import { cn } from "@red-salud/core";
 
 interface FadeInProps extends HTMLMotionProps<"div"> {
     delay?: number;

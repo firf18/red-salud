@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { createClient } from "@supabase/supabase-js";
 import {
   Pill,
@@ -8,9 +8,7 @@ import {
   CheckCircle,
   XCircle,
   Clock,
-  AlertTriangle,
   FileText,
-  User,
   Calendar,
   Filter,
 } from "lucide-react";
@@ -36,7 +34,7 @@ interface Receta {
   fecha_emision: string;
   fecha_vencimiento: string;
   diagnostico: string;
-  medicamentos: any[];
+  medicamentos: unknown[];
   indicaciones: string;
   estado: string;
   prioridad: string;
@@ -50,15 +48,7 @@ export default function RecetasPage() {
   const [selectedEstado, setSelectedEstado] = useState("");
   const [selectedPrioridad, setSelectedPrioridad] = useState("");
 
-  useEffect(() => {
-    loadRecetas();
-  }, []);
-
-  useEffect(() => {
-    filterRecetas();
-  }, [recetas, searchTerm, selectedEstado, selectedPrioridad]);
-
-  const loadRecetas = async () => {
+  const loadRecetas = useCallback(async () => {
     try {
       const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
       const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
@@ -76,9 +66,9 @@ export default function RecetasPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
-  const filterRecetas = () => {
+  const filterRecetas = useCallback(() => {
     let filtered = recetas;
 
     if (searchTerm) {
@@ -99,7 +89,15 @@ export default function RecetasPage() {
     }
 
     setFilteredRecetas(filtered);
-  };
+  }, [recetas, searchTerm, selectedEstado, selectedPrioridad]);
+
+  useEffect(() => {
+    loadRecetas();
+  }, [loadRecetas]);
+
+  useEffect(() => {
+    filterRecetas();
+  }, [filterRecetas]);
 
   const procesarReceta = async (recetaId: string) => {
     try {

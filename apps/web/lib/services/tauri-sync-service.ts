@@ -1,5 +1,4 @@
 import { invoke } from "@tauri-apps/api/core";
-import { tauriApiService } from "./tauri-api-service";
 import { tauriNotificationService } from "./tauri-notification-service";
 
 export const tauriSyncService = {

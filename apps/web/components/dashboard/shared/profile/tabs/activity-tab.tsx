@@ -12,38 +12,59 @@ import {
 import { Button } from "@red-salud/ui";
 import { getUserActivity, getUserSessions } from "@/lib/supabase/services/activity-service";
 
+interface ActivityRecord {
+  id: string;
+  user_id: string;
+  action: string;
+  timestamp: string;
+  details?: Record<string, unknown>;
+}
+
+interface SessionRecord {
+  id: string;
+  user_id: string;
+  device?: string;
+  location?: string;
+  last_active_at?: string;
+}
+
 interface ActivityTabProps {
   userId?: string;
 }
 
 export function ActivityTab({ userId }: ActivityTabProps) {
-  const [activities, setActivities] = useState<any[]>([]);
-  const [sessions, setSessions] = useState<any[]>([]);
+  const [activities, setActivities] = useState<ActivityRecord[]>([]);
+  const [sessions, setSessions] = useState<SessionRecord[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (userId) {
-      loadData();
-    }
-  }, [userId]);
-
-  const loadData = async () => {
     if (!userId) return;
-    
-    setLoading(true);
-    const [activityResult, sessionsResult] = await Promise.all([
-      getUserActivity(userId, 10),
-      getUserSessions(userId),
-    ]);
 
-    if (activityResult.success) {
-      setActivities(activityResult.data || []);
-    }
-    if (sessionsResult.success) {
-      setSessions(sessionsResult.data || []);
-    }
-    setLoading(false);
-  };
+    let mounted = true;
+    const loadData = async () => {
+      setLoading(true);
+      const [activityResult, sessionsResult] = await Promise.all([
+        getUserActivity(userId, 10),
+        getUserSessions(userId),
+      ]);
+
+      if (!mounted) return;
+
+      if (activityResult.success) {
+        setActivities(activityResult.data || []);
+      }
+      if (sessionsResult.success) {
+        setSessions(sessionsResult.data || []);
+      }
+      setLoading(false);
+    };
+
+    loadData();
+
+    return () => {
+      mounted = false;
+    };
+  }, [userId]);
 
   return (
     <motion.article

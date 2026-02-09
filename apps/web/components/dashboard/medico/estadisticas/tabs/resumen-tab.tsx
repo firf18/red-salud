@@ -13,16 +13,11 @@ import {
   Users,
   Calendar,
   DollarSign,
-  TrendingUp,
-  Clock,
-  Activity,
   ArrowUpRight,
   ArrowDownRight,
   CheckCircle,
-  XCircle,
   AlertCircle
 } from "lucide-react";
-import { motion } from "framer-motion";
 import { AreaChartCard } from "@/components/common/charts/area-chart-card";
 import { DonutChartCard } from "@/components/common/charts/donut-chart-card";
 import { format, subMonths } from "date-fns";
@@ -46,6 +41,16 @@ interface StatusData {
   value: number;
 }
 
+interface RecentActivity {
+  id: string;
+  appointment_date: string;
+  status: 'completed' | 'scheduled' | 'cancelled';
+  patients?: {
+    first_name: string;
+    last_name: string;
+  };
+}
+
 interface ResumenStats {
   totalPacientes: number;
   citasHoy: number;
@@ -59,14 +64,14 @@ interface ResumenStats {
   consultasPendientes: number;
   trendData: TrendData[];
   statusData: StatusData[];
-  recentActivity: any[];
+  recentActivity: RecentActivity[];
 }
 
 export interface ResumenTabRef {
   exportData: (format: "markdown" | "excel") => void;
 }
 
-export const ResumenTab = forwardRef<ResumenTabRef, ResumenTabProps>(({ doctorId, dateRange }, ref) => {
+export const ResumenTab = forwardRef<ResumenTabRef, ResumenTabProps>(({ doctorId }, ref) => {
   const [stats, setStats] = useState<ResumenStats | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -313,7 +318,7 @@ ${stats.recentActivity.map(a => `- ${format(new Date(a.appointment_date), "dd/MM
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
-                {stats.recentActivity.map((activity, i) => (
+                {stats.recentActivity.map((activity) => (
                   <div key={activity.id} className="flex items-center justify-between">
                     <div className="flex items-center gap-3">
                       <div className={`w-2 h-2 rounded-full ${activity.status === 'completed' ? 'bg-green-500' :
@@ -345,7 +350,16 @@ ${stats.recentActivity.map(a => `- ${format(new Date(a.appointment_date), "dd/MM
 ResumenTab.displayName = "ResumenTab";
 
 // Sub-components for cleaner code
-function KPICard({ title, value, icon: Icon, trend, trendUp, color }: any) {
+interface KPICardProps {
+  title: string;
+  value: string | number;
+  icon: React.ComponentType<{ className?: string }>;
+  trend?: number;
+  trendUp?: boolean;
+  color: 'blue' | 'emerald' | 'purple' | 'teal';
+}
+
+function KPICard({ title, value, icon: Icon, trend, trendUp, color }: KPICardProps) {
   const colorClasses: Record<string, string> = {
     blue: "bg-blue-50 text-blue-600 dark:bg-blue-900/20 dark:text-blue-400",
     emerald: "bg-emerald-50 text-emerald-600 dark:bg-emerald-900/20 dark:text-emerald-400",

@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { motion } from 'framer-motion';
-import { Trophy, BookOpen, Star } from 'lucide-react';
+import { Trophy, BookOpen } from 'lucide-react';
 import { cn } from "@red-salud/core/utils";
 import { UnitSectionProps } from './SkillTree.types';
 import { LessonNode } from './LessonNode';
@@ -65,7 +65,7 @@ export const UnitSection: React.FC<UnitSectionProps> = ({
                         {unit.name}
                     </h3>
                     <p className="text-white/60 text-sm leading-relaxed mb-6 italic">
-                        "{unit.description}"
+                        &ldquo;{unit.description}&rdquo;
                     </p>
 
                     {/* Guía visual del camino si la unidad no está bloqueada */}

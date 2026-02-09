@@ -9,7 +9,8 @@
 "use client";
 
 import { useState, useEffect, useCallback, useRef } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import Image from "next/image";
+import { motion } from "framer-motion";
 import { Button } from "@red-salud/ui";
 import { Badge } from "@red-salud/ui";
 import { Progress } from "@red-salud/ui";
@@ -20,10 +21,7 @@ import {
     DialogHeader,
     DialogTitle,
 } from "@red-salud/ui";
-import { Input } from "@red-salud/ui";
-import { Label } from "@red-salud/ui";
 import {
-    FileText,
     Upload,
     Download,
     CheckCircle,
@@ -50,7 +48,6 @@ import {
     uploadDoctorDocument,
     deleteDoctorDocument,
     getDocumentDownloadUrl,
-    type DoctorDocument,
     type DoctorDocumentType,
 } from "@/lib/supabase/services/doctor-documents-service";
 import { cn } from "@red-salud/core/utils";
@@ -118,19 +115,7 @@ interface DocumentUI {
     filePath: string;
     fileSize: number | null;
     mimeType: string | null;
-    extractedData: any;
-}
-
-/**
- * Estado de cada tipo de documento
- */
-interface DocumentTypeState {
-    type: DoctorDocumentType;
-    config: typeof DOCUMENT_CONFIGS[DoctorDocumentType];
-    document: DocumentUI | null;
-    isUploading: boolean;
-    isAnalyzing: boolean;
-    isDeleting: boolean;
+    extractedData: Record<string, unknown>;
 }
 
 export function DocumentsSection() {
@@ -252,7 +237,7 @@ export function DocumentsSection() {
 
                 toast.success("Completa la verificación en la ventana emergente");
             }
-        } catch (error: any) {
+        } catch (error: Error) {
             toast.error(error.message || "Error al iniciar verificación");
             setIsVerifyingIdentity(false);
         }
@@ -304,7 +289,7 @@ export function DocumentsSection() {
             } else {
                 toast.error(result.error || "Error al subir");
             }
-        } catch (error: any) {
+        } catch (error: Error) {
             toast.error(error.message || "Error al subir");
         } finally {
             setUploadingType(null);
@@ -382,7 +367,7 @@ export function DocumentsSection() {
             } else {
                 toast.error(result.error || "Error al analizar");
             }
-        } catch (error: any) {
+        } catch (error: Error) {
             toast.error(error.message || "Error al analizar");
         } finally {
             setAnalyzingId(null);
@@ -406,7 +391,7 @@ export function DocumentsSection() {
     };
 
     // Calcular progreso
-    const requiredTypes = Object.entries(DOCUMENT_CONFIGS).filter(([_, c]) => c.required);
+    const requiredTypes = Object.entries(DOCUMENT_CONFIGS).filter(([, c]) => c.required);
     const uploadedRequired = requiredTypes.filter(([type]) => {
         if (type === "cedula") return identityVerified;
         return documents.some(d => d.type === type);
@@ -818,10 +803,12 @@ export function DocumentsSection() {
                     {previewDoc && (
                         <div className="py-4">
                             {previewDoc.mimeType?.startsWith("image/") ? (
-                                <img
+                                <Image
                                     src={previewDoc.fileUrl}
                                     alt={previewDoc.name}
-                                    className="w-full rounded-lg"
+                                    width={600}
+                                    height={400}
+                                    className="w-full rounded-lg object-cover"
                                 />
                             ) : (
                                 <iframe

@@ -14,20 +14,17 @@ import {
   Trash2,
   Plus,
   Minus,
-  Printer,
   User,
   Package,
   Pill,
   Heart,
   Activity,
   CheckCircle,
-  XCircle,
   AlertCircle,
   Clock,
   Menu,
   X,
 } from "lucide-react";
-import { Card, CardContent } from "@red-salud/ui";
 import { cn } from "@red-salud/core/utils";
 
 interface CartItem {
@@ -65,12 +62,10 @@ export default function POSPage() {
   const [cart, setCart] = useState<CartItem[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [products, setProducts] = useState<Product[]>([]);
-  const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
-  const [loading, setLoading] = useState(false);
-  const [exchangeRate, setExchangeRate] = useState(1);
   const [activePaymentMethod, setActivePaymentMethod] = useState<string | null>(null);
   const [showPaymentModal, setShowPaymentModal] = useState(false);
   const [showScanner, setShowScanner] = useState(false);
+  const [exchangeRate] = useState(36);
 
   // Calculate totals
   const subtotalUSD = cart.reduce((sum, item) => sum + item.total_usd, 0);
@@ -206,12 +201,6 @@ export default function POSPage() {
     setCart([]);
     setActivePaymentMethod(null);
     setShowPaymentModal(false);
-  };
-
-  // Handle barcode scan
-  const handleBarcodeScan = (barcode: string) => {
-    setSearchQuery(barcode);
-    searchProducts(barcode);
   };
 
   // Process payment

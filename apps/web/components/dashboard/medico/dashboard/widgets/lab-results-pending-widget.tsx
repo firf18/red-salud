@@ -13,14 +13,11 @@ import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import {
     FlaskConical,
-    AlertCircle,
     ChevronRight,
     Loader2,
     Eye,
     CheckCircle,
     FileText,
-    User,
-    Clock,
     AlertTriangle
 } from "lucide-react";
 import { cn } from "@red-salud/core/utils";
@@ -355,11 +352,13 @@ export function LabResultsPendingWidget({
 /**
  * Procesa órdenes de laboratorio de Supabase.
  */
-function processLabOrders(orders: any[]): PendingLabResult[] {
-    return orders.map(order => {
-        const testTypes = order.lab_results?.map((r: any) => r.test_type?.nombre).filter(Boolean) || [];
-        const allValues = order.lab_results?.flatMap((r: any) => r.lab_result_values || []) || [];
-        const abnormalValues = allValues.filter((v: any) => v.es_anormal);
+function processLabOrders(orders: unknown[]): PendingLabResult[] {
+    return orders.map((order: unknown) => {
+        const orderData = order as Record<string, unknown>;
+        const labResults = orderData.lab_results as Array<Record<string, unknown>> | undefined;
+        const testTypes = labResults?.map((r: Record<string, unknown>) => (r.test_type as Record<string, unknown>)?.nombre).filter(Boolean) || [];
+        const allValues = labResults?.flatMap((r: Record<string, unknown>) => (r.lab_result_values as Array<Record<string, unknown>>) || []) || [];
+        const abnormalValues = allValues.filter((v: Record<string, unknown>) => v.es_anormal);
 
         return {
             id: order.id,

@@ -6,7 +6,6 @@ import { Textarea } from "@red-salud/ui";
 import { Label } from "@red-salud/ui";
 import {
   CheckCircle,
-  UserPlus,
   Phone,
   Mail,
   MapPin,
@@ -16,10 +15,7 @@ import {
   User,
   Calendar,
   Shield,
-  Building2,
-  ChevronDown
 } from "lucide-react";
-import { useOffices } from "@/hooks/dashboard/use-offices";
 import "../_styles/responsive.css";
 
 type FormData = {
@@ -56,7 +52,6 @@ type Props = {
 export function PatientPrimaryInfo({
   formData,
   setFormData,
-  edad,
   cedulaFound,
   validatingCedula,
   alergias,
@@ -72,8 +67,6 @@ export function PatientPrimaryInfo({
   dateMax,
   enforcePhonePrefix
 }: Props) {
-  const { offices, loading: loadingOffices } = useOffices();
-
   return (
     <div className="space-y-6">
 

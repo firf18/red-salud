@@ -10,8 +10,7 @@ import {
   CalendarClock, 
   Clock, 
   Play, 
-  CheckCircle2, 
-  UserX,
+  CheckCircle2,
   Loader2,
   AlertCircle
 } from "lucide-react";
@@ -124,14 +123,7 @@ export function TodayPatientsSection({ doctorId }: TodayPatientsSectionProps) {
   const [error, setError] = useState<string | null>(null);
   const [actionLoading, setActionLoading] = useState<string | null>(null);
 
-  useEffect(() => {
-    loadTodayAppointments();
-    // Recargar cada 30 segundos
-    const interval = setInterval(loadTodayAppointments, 30000);
-    return () => clearInterval(interval);
-  }, [doctorId]);
-
-  const loadTodayAppointments = async () => {
+  const loadTodayAppointments = useCallback(async () => {
     try {
       const { data, error } = await getTodayAppointments(doctorId);
       if (error) throw error;
@@ -143,7 +135,14 @@ export function TodayPatientsSection({ doctorId }: TodayPatientsSectionProps) {
     } finally {
       setLoading(false);
     }
-  };
+  }, [doctorId]);
+
+  useEffect(() => {
+    loadTodayAppointments();
+    // Recargar cada 30 segundos
+    const interval = setInterval(loadTodayAppointments, 30000);
+    return () => clearInterval(interval);
+  }, [doctorId, loadTodayAppointments]);
 
   const handleStartConsultation = async (appointment: TodayAppointment) => {
     setActionLoading(appointment.id);
@@ -344,13 +343,13 @@ export function TodayPatientsSection({ doctorId }: TodayPatientsSectionProps) {
                       </p>
                       <Badge 
                         variant="outline" 
-                        className={`text-xs ${getStatusColor(appointment.status as any)} ${
+                        className={`text-xs ${getStatusColor(appointment.status)} ${
                           (appointment.status === "en_espera" || appointment.status === "en_consulta") 
                             ? "animate-pulse" 
                             : ""
                         }`}
                       >
-                        {getStatusLabel(appointment.status as any)}
+                        {getStatusLabel(appointment.status)}
                       </Badge>
                     </div>
                     <div className="flex items-center gap-3 text-sm text-gray-600">

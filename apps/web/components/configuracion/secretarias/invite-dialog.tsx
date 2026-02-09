@@ -17,7 +17,7 @@ import {
 interface InviteDialogProps {
     open: boolean;
     onOpenChange: (open: boolean) => void;
-    onInvite: (data: any) => Promise<void>;
+    onInvite: (data: { email: string; nombre_completo: string; password: string }) => Promise<void>;
     loading: boolean;
 }
 

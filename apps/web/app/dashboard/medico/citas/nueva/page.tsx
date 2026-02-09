@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, Suspense } from "react";
+import { useState, useEffect, Suspense, useCallback } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { supabase } from "@/lib/supabase/client";
 import { ArrowLeft, AlertCircle } from "lucide-react";
@@ -10,7 +10,7 @@ import { VerificationGuard } from "@/components/dashboard/medico/features/verifi
 import { searchConsultationReasons } from "@/lib/data/consultation-reasons";
 
 // React Hook Form & Zod
-import { useForm, FormProvider } from "react-hook-form";
+import { useForm, FormProvider, SubmitHandler } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { appointmentSchema, AppointmentFormValues } from "@/validations/appointment";
 
@@ -19,18 +19,69 @@ import { PatientSelector } from "@/components/citas/nueva/patient-selector";
 import { AppointmentForm } from "@/components/citas/nueva/appointment-form";
 import { SummaryView } from "@/components/citas/nueva/summary-view";
 
+interface Patient {
+  id: string;
+  nombre_completo: string;
+  email: string | null;
+  cedula: string | null;
+  type: "registered" | "offline";
+}
+
+interface TimeRange {
+  inicio: string;
+  fin: string;
+}
+
+interface DaySchedule {
+  activo: boolean;
+  horarios: TimeRange[];
+}
+
+interface Schedule {
+  office_id?: string;
+  horarios?: {
+    [key: string]: DaySchedule;
+  };
+}
+
+interface Office {
+  id: string;
+  nombre: string;
+}
+
+interface AppointmentConflict {
+  id: string;
+  fecha_hora: string;
+  duracion_minutos: number;
+  motivo: string | null;
+  paciente: { nombre_completo: string } | { nombre_completo: string }[] | null;
+  offline_patient: { nombre_completo: string } | { nombre_completo: string }[] | null;
+}
+
+interface RegisteredPatientResult {
+  patient_id: string;
+  patient: {
+    id: string;
+    nombre_completo: string;
+    email: string | null;
+  } | {
+    id: string;
+    nombre_completo: string;
+    email: string | null;
+  }[] | null;
+}
+
 function NuevaCitaContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [patients, setPatients] = useState<any[]>([]);
+  const [patients, setPatients] = useState<Patient[]>([]);
   const [loadingPatients, setLoadingPatients] = useState(true);
-  const [checkingConflict, setCheckingConflict] = useState(false);
-  const [conflictingAppointments, setConflictingAppointments] = useState<any[]>([]);
+  const [conflictingAppointments, setConflictingAppointments] = useState<AppointmentConflict[]>([]);
 
-  const [schedules, setSchedules] = useState<any[]>([]);
-  const [offices, setOffices] = useState<any[]>([]);
+  const [schedules, setSchedules] = useState<Schedule[]>([]);
+  const [offices, setOffices] = useState<Office[]>([]);
   const [doctorSpecialty, setDoctorSpecialty] = useState<string>('Medicina Interna');
 
   // Obtener fecha, hora y paciente de los parámetros URL
@@ -39,7 +90,7 @@ function NuevaCitaContent() {
   const pacienteParam = searchParams.get("paciente");
 
   const form = useForm<AppointmentFormValues>({
-    resolver: zodResolver(appointmentSchema) as any,
+    resolver: zodResolver(appointmentSchema),
     defaultValues: {
       paciente_id: pacienteParam || "",
       fecha: dateParam ? format(new Date(dateParam), "yyyy-MM-dd") : format(new Date(), "yyyy-MM-dd"),
@@ -113,11 +164,7 @@ function NuevaCitaContent() {
     }
   }, [motivo]);
 
-  useEffect(() => {
-    loadData();
-  }, []);
-
-  const loadData = async () => {
+  const loadData = useCallback(async () => {
     try {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return;
@@ -143,14 +190,17 @@ function NuevaCitaContent() {
         .eq("status", "offline");
 
       const allPatients = [
-        ...(registeredPatients?.map((rp: any) => ({
-          id: rp.patient.id,
-          nombre_completo: rp.patient.nombre_completo,
-          email: rp.patient.email,
-          cedula: null,
-          type: "registered",
-        })) || []),
-        ...(offlinePatients?.map((op: any) => ({
+        ...(registeredPatients?.map((rp: RegisteredPatientResult) => {
+          const p = Array.isArray(rp.patient) ? rp.patient[0] : rp.patient;
+          return {
+            id: p?.id,
+            nombre_completo: p?.nombre_completo,
+            email: p?.email,
+            cedula: null,
+            type: "registered",
+          };
+        }) || []),
+        ...(offlinePatients?.map((op: { id: string; nombre_completo: string; cedula: string | null }) => ({
           id: op.id,
           nombre_completo: op.nombre_completo,
           email: null,
@@ -159,7 +209,7 @@ function NuevaCitaContent() {
         })) || []),
       ];
 
-      setPatients(allPatients);
+      setPatients(allPatients as Patient[]);
 
       // Cargar horarios
       const { data: schedulesData } = await supabase
@@ -184,22 +234,25 @@ function NuevaCitaContent() {
 
       const specialty =
         profileData?.sacs_especialidad ||
-        (profileData?.specialties as any)?.name ||
+        (profileData?.specialties as { name?: string } | null)?.name ||
         'Medicina Interna';
       setDoctorSpecialty(specialty);
 
-    } catch (err) {
+    } catch (err: unknown) {
       console.error("Error loading data:", err);
     } finally {
       setLoadingPatients(false);
     }
-  };
+  }, []);
+
+  useEffect(() => {
+    loadData();
+  }, [loadData]);
 
   // Verificar conflictos de horario
-  const checkTimeConflicts = async (fecha: string, hora: string, duracion: number) => {
+  const checkTimeConflicts = useCallback(async (fecha: string, hora: string, duracion: number) => {
     if (!fecha || !hora) return;
 
-    setCheckingConflict(true);
     try {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return;
@@ -250,7 +303,7 @@ function NuevaCitaContent() {
 
       if (allConflicts.length > 0) {
         const conflictList = allConflicts.map(apt => {
-          const getVal = (obj: any) => Array.isArray(obj) ? obj[0]?.nombre_completo : obj?.nombre_completo;
+          const getVal = (obj: unknown) => Array.isArray(obj) ? (obj[0] as { nombre_completo?: string })?.nombre_completo : (obj as { nombre_completo?: string })?.nombre_completo;
           const patientName = getVal(apt.paciente) || getVal(apt.offline_patient) || 'Paciente';
           const time = format(new Date(apt.fecha_hora), 'HH:mm');
           return `${time} - ${patientName}`;
@@ -263,16 +316,16 @@ function NuevaCitaContent() {
       } else {
         setError(null);
       }
-    } catch (err) {
+    } catch (err: unknown) {
       console.error('Error checking conflicts:', err);
     } finally {
-      setCheckingConflict(false);
+      // Done
     }
-  };
+  }, []);
 
   // Verificar conflictos cuando cambian fecha, hora o duración
   useEffect(() => {
-    const subscription = watch((value, { name }) => {
+    const subscription = watch((value) => {
       const duracion = value.duracion_minutos;
       if (fecha && hora && duracion) {
         const timeoutId = setTimeout(() => {
@@ -282,9 +335,9 @@ function NuevaCitaContent() {
       }
     });
     return () => subscription.unsubscribe();
-  }, [fecha, hora]);
+  }, [fecha, hora, watch, checkTimeConflicts]);
 
-  const onSubmit = async (data: AppointmentFormValues) => {
+  const onSubmit: SubmitHandler<AppointmentFormValues> = useCallback(async (data) => {
     setLoading(true);
     setError(null);
 
@@ -298,7 +351,6 @@ function NuevaCitaContent() {
       let finalPacienteId = data.paciente_id;
       let isOffline = false;
 
-      // Handle NEW patient creation
       // Handle NEW patient creation
       if (data.paciente_id === "NEW" && data.new_patient_data) {
         try {
@@ -339,22 +391,23 @@ function NuevaCitaContent() {
             }
           } else {
             // Creado exitosamente
-            finalPacienteId = newPatient.id;
+            finalPacienteId = (newPatient as { id: string } | null)?.id || data.paciente_id;
             isOffline = true;
           }
-        } catch (createErr: any) {
+        } catch (createErr: unknown) {
           console.error("Error creating offline patient:", createErr);
-          setError("Error al registrar el nuevo paciente: " + (createErr.message || "Error desconocido"));
+          setError("Error al registrar el nuevo paciente: " + (createErr instanceof Error ? createErr.message : "Error desconocido"));
           setLoading(false);
           return;
         }
       } else {
-        const selectedPatient = patients.find(p => p.id === data.paciente_id);
+        const selectedPatient = (patients as { id: string, type?: string }[]).find(p => p.id === data.paciente_id);
         isOffline = selectedPatient?.type === "offline";
       }
 
-      // Validar que la hora no sea pasada (aunque zod ya lo hace)
-      if (!isTimeValid()) {
+      // Validar que la hora no sea pasada
+      const selectedDateTime = new Date(`${data.fecha}T${data.hora}:00`);
+      if (selectedDateTime < new Date()) {
         setError("La fecha y hora seleccionadas ya pasaron. Por favor, elige una hora futura.");
         setLoading(false);
         return;
@@ -371,7 +424,7 @@ function NuevaCitaContent() {
         .neq('status', 'cancelada');
 
       // Verificar solapamiento
-      const hasConflict = finalConflictCheck?.some(apt => {
+      const hasConflict = finalConflictCheck?.some((apt: { fecha_hora: string; duracion_minutos: number }) => {
         const aptStart = new Date(apt.fecha_hora);
         const aptEnd = new Date(aptStart.getTime() + apt.duracion_minutos * 60000);
         return (
@@ -387,9 +440,6 @@ function NuevaCitaContent() {
         return;
       }
 
-      // Validar conflictos (usando finalPacienteId si es necesario, pero el conflicto es por horario)
-      // ... (existing conflict check logic logic remains mostly same but we use finalPacienteId logic below)
-
       // Combinar fecha y hora
       const fechaHora = new Date(`${data.fecha}T${data.hora}:00`);
 
@@ -402,14 +452,14 @@ function NuevaCitaContent() {
         primera_vez: "#F59E0B",
       };
 
-      // Generar URL de videollamada si es telemedicina (solo para pacientes registrados)
+      // Generar URL de videollamada if telemedicine
       const appointmentId = crypto.randomUUID();
       const meetingUrl = data.tipo_cita === "telemedicina" && !isOffline
         ? `https://meet.jit.si/cita-${appointmentId.substring(0, 8)}`
         : null;
 
       // Preparar datos de la cita
-      const appointmentData: any = {
+      const appointmentData: Record<string, unknown> = {
         id: appointmentId,
         medico_id: user.id,
         fecha_hora: fechaHora.toISOString(),
@@ -421,12 +471,10 @@ function NuevaCitaContent() {
         color: colors[data.tipo_cita] || colors.presencial,
         price: data.precio ? parseFloat(data.precio) : null,
         meeting_url: meetingUrl,
-        location_id: searchParams.get("officeId") || null,
         metodo_pago: data.metodo_pago,
         enviar_recordatorio: data.enviar_recordatorio,
       };
 
-      // Asignar el ID correcto según el tipo de paciente
       if (isOffline) {
         appointmentData.offline_patient_id = finalPacienteId;
         appointmentData.paciente_id = null;
@@ -435,84 +483,29 @@ function NuevaCitaContent() {
         appointmentData.offline_patient_id = null;
       }
 
-      console.log("📝 Intentando crear cita con datos:", appointmentData);
-      console.log("📍 location_id enviado:", appointmentData.location_id);
+      const result = await supabase
+        .from("appointments")
+        .insert(appointmentData)
+        .select()
+        .single();
 
-      // Lógica robusta de inserción con reintento si falta la columna o hay error de FK
-      let result;
-      try {
-        result = await supabase
-          .from("appointments")
-          .insert(appointmentData)
-          .select()
-          .single();
+      if (result.error) throw result.error;
 
-        if (result.error) throw result.error;
-      } catch (firstError: any) {
-        // PGRST204: Column not found
-        // 42703: Undefined column (Postgres)
-        // 23503: Foreign key violation (Postgres)
-        const isSchemaError = firstError?.code === "PGRST204" || firstError?.code === "42703";
-        const isFKError = firstError?.code === "23503";
-
-        if (isSchemaError || isFKError) {
-          console.warn(`⚠️ Error de base de datos detectado (${firstError?.code}). Reintentando sin ubicación...`);
-          if (isFKError) console.error("❌ Error de FK original:", firstError.message);
-
-          // Creamos una copia sin location_id
-          const { location_id, ...fallbackData } = appointmentData;
-
-          result = await supabase
-            .from("appointments")
-            .insert(fallbackData)
-            .select()
-            .single();
-
-          if (result.error) throw result.error;
-        } else {
-          throw firstError;
-        }
-      }
-
-      const createdAppointment = result.data;
-      console.log("✅ Cita creada exitosamente:", createdAppointment);
-
-      // Log de actividad
       await supabase.from("user_activity_log").insert({
         user_id: user.id,
         activity_type: "appointment_created",
-        description: `Cita creada para ${fechaHora.toLocaleString()} ${searchParams.get("officeId") ? `en consultorio` : ""
-          }`,
+        description: `Cita creada para ${fechaHora.toLocaleString()}`,
         status: "success",
       });
 
-      // Track consultation reason usage for smart suggestions
-      if (data.motivo) {
-        try {
-          await fetch('/api/suggestions/consultation-reasons', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ reason: data.motivo }),
-          });
-        } catch (trackError) {
-          console.warn('Could not track reason usage:', trackError);
-        }
-      }
-
       router.push("/dashboard/medico/citas");
-    } catch (err: any) {
-      console.error("💥 Error creating appointment (FULL):", JSON.stringify(err, null, 2));
-      console.error("💥 Error creating appointment (raw):", err);
-
-      let errorMessage = "Error al crear la cita";
-      if (err?.message) errorMessage = err.message;
-      if (err?.details) errorMessage += ` (${err.details})`;
-
-      setError(errorMessage);
+    } catch (err: unknown) {
+      console.error("Error creating appointment:", err);
+      setError(err instanceof Error ? err.message : "Error al crear la cita");
     } finally {
       setLoading(false);
     }
-  };
+  }, [patients, router]);
 
   return (
     <VerificationGuard>
@@ -546,8 +539,9 @@ function NuevaCitaContent() {
             <AlertDescription className="text-yellow-800">
               <div className="font-semibold mb-2">⚠️ Citas existentes en este horario:</div>
               <ul className="list-disc list-inside space-y-1">
-                {conflictingAppointments.map((apt) => {
-                  const patientName = apt.paciente?.nombre_completo || apt.offline_patient?.nombre_completo || 'Paciente';
+                {conflictingAppointments.map((apt: AppointmentConflict) => {
+                  const getVal = (obj: unknown) => Array.isArray(obj) ? (obj[0] as { nombre_completo?: string })?.nombre_completo : (obj as { nombre_completo?: string })?.nombre_completo;
+                  const patientName = getVal(apt.paciente) || getVal(apt.offline_patient) || 'Paciente';
                   return (
                     <li key={apt.id} className="text-sm">
                       {format(new Date(apt.fecha_hora), "HH:mm")} - {patientName} ({apt.motivo || 'Sin motivo'})
@@ -560,7 +554,7 @@ function NuevaCitaContent() {
         )}
 
         <FormProvider {...form}>
-          <form onSubmit={handleSubmit(onSubmit)}>
+          <form onSubmit={handleSubmit(onSubmit as (data: AppointmentFormValues) => Promise<void>)}>
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 relative">
               {/* Main Form */}
               <div className="lg:col-span-2 space-y-6">

@@ -1,14 +1,22 @@
 "use client";
 
 import { useState } from "react";
+import Image from "next/image";
 import { Upload, CheckCircle, AlertCircle, Loader2, Camera } from "lucide-react";
 import { Button } from "@red-salud/ui";
 import { Label } from "@red-salud/ui";
 
+interface CedulaVerificationData {
+  success: boolean;
+  cedula?: string;
+  nombre?: string;
+  error?: string;
+}
+
 interface CedulaPhotoUploadProps {
   expectedCedula?: string;
   expectedNombre?: string;
-  onVerificationComplete: (data: any) => void;
+  onVerificationComplete: (data: CedulaVerificationData) => void;
 }
 
 export function CedulaPhotoUpload({
@@ -25,7 +33,7 @@ export function CedulaPhotoUpload({
     "idle" | "success" | "error"
   >("idle");
   const [verificationMessage, setVerificationMessage] = useState("");
-  const [verificationData, setVerificationData] = useState<any>(null);
+  const [verificationData, setVerificationData] = useState<CedulaVerificationData | null>(null);
 
   const handleFrontImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -131,9 +139,11 @@ export function CedulaPhotoUpload({
           <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-blue-500 transition-colors">
             {frontPreview ? (
               <div className="space-y-4">
-                <img
+                <Image
                   src={frontPreview}
                   alt="Vista previa frontal"
+                  width={200}
+                  height={120}
                   className="max-h-48 mx-auto rounded"
                 />
                 <Button
@@ -180,9 +190,11 @@ export function CedulaPhotoUpload({
           <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-blue-500 transition-colors">
             {backPreview ? (
               <div className="space-y-4">
-                <img
+                <Image
                   src={backPreview}
                   alt="Vista previa trasera"
+                  width={200}
+                  height={120}
                   className="max-h-48 mx-auto rounded"
                 />
                 <Button

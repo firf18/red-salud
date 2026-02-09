@@ -98,9 +98,10 @@ export default function PharmacyRegisterFlow() {
                 legalRepName: '',
             });
             setSuccess(true);
-        } catch (error: any) {
+        } catch (error: unknown) {
             console.error('Error al enviar formulario:', error);
-            toast.error(error.message || 'Error al enviar la solicitud');
+            const errorMessage = error instanceof Error ? error.message : 'Error al enviar la solicitud';
+            toast.error(errorMessage);
         } finally {
             setLoading(false);
         }

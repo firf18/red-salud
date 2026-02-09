@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { createClient } from "@supabase/supabase-js";
 import {
   Building2,
@@ -9,10 +9,6 @@ import {
   Edit,
   Trash2,
   Phone,
-  Mail,
-  MapPin,
-  User,
-  Package,
   Filter,
 } from "lucide-react";
 import { Button } from "@red-salud/ui";
@@ -49,15 +45,7 @@ export default function ProveedoresPage() {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedEstado, setSelectedEstado] = useState("");
 
-  useEffect(() => {
-    loadProveedores();
-  }, []);
-
-  useEffect(() => {
-    filterProveedores();
-  }, [proveedores, searchTerm, selectedEstado]);
-
-  const loadProveedores = async () => {
+  const loadProveedores = useCallback(async () => {
     try {
       const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
       const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
@@ -75,9 +63,9 @@ export default function ProveedoresPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
-  const filterProveedores = () => {
+  const filterProveedores = useCallback(() => {
     let filtered = proveedores;
 
     if (searchTerm) {
@@ -95,7 +83,17 @@ export default function ProveedoresPage() {
     }
 
     setFilteredProveedores(filtered);
-  };
+  }, [proveedores, searchTerm, selectedEstado]);
+
+  useEffect(() => {
+    loadProveedores();
+  }, [loadProveedores]);
+
+  useEffect(() => {
+    filterProveedores();
+  }, [filterProveedores]);
+
+
 
   const getEstadoColor = (estado: string) => {
     switch (estado) {

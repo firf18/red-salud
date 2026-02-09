@@ -1,4 +1,4 @@
-import { RotateCw, ZoomIn, ZoomOut, Info } from "lucide-react";
+import { RotateCw, ZoomIn, ZoomOut } from "lucide-react";
 import { Button } from "@red-salud/ui";
 import {
     Tooltip,

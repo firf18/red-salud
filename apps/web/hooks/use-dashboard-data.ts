@@ -126,22 +126,6 @@ function getWeekRange(): { start: Date; end: Date } {
 }
 
 /**
- * Formatea hora de una fecha ISO.
- */
-function formatTime(isoDate: string): string {
-    const date = new Date(isoDate);
-    return date.toLocaleTimeString("es-VE", {
-        hour: "2-digit",
-        minute: "2-digit",
-        hour12: false,
-    });
-}
-
-// ============================================================================
-// HOOK PRINCIPAL
-// ============================================================================
-
-/**
  * Hook para obtener todos los datos del dashboard del médico.
  * Incluye suscripciones de tiempo real para notificaciones.
  * 
@@ -150,7 +134,7 @@ function formatTime(isoDate: string): string {
  */
 export function useDashboardData(doctorId: string | undefined): DashboardData {
     // Estados
-    const [appointments, setAppointments] = useState<any[]>([]); // Raw appointments
+    const [appointments, setAppointments] = useState<Appointment[]>([]); // Raw appointments
     const [todayAppointments, setTodayAppointments] = useState<TodayAppointment[]>([]);
     const [weekAppointments, setWeekAppointments] = useState<TodayAppointment[]>([]);
     const [conversations, setConversations] = useState<RecentConversation[]>([]);
@@ -263,8 +247,11 @@ export function useDashboardData(doctorId: string | undefined): DashboardData {
             if (result.success && result.data) {
                 const recent = result.data.slice(0, 5).map((conv) => {
                     // last_message puede ser un objeto Message o undefined
+                    interface LastMessage {
+                        content?: string;
+                    }
                     const lastMsgContent = typeof conv.last_message === 'object' && conv.last_message
-                        ? (conv.last_message as any).content || "Sin mensajes"
+                        ? (conv.last_message as LastMessage)?.content || "Sin mensajes"
                         : "Sin mensajes";
 
                     return {

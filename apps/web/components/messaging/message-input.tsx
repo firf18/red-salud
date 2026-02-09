@@ -3,8 +3,7 @@
 import { useState } from "react";
 import { Button } from "@red-salud/ui";
 import { Textarea } from "@red-salud/ui";
-import { Send, Paperclip, Loader2 } from "lucide-react";
-import { cn } from "@red-salud/core/utils";
+import { Send, Loader2 } from "lucide-react";
 
 interface MessageInputProps {
   onSend: (content: string) => Promise<void>;

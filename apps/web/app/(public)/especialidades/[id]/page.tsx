@@ -33,7 +33,7 @@ import { SpecialtyTreatments } from "@/components/sections/specialties/Specialty
 import { RelatedSpecialties } from "@/components/sections/specialties/RelatedSpecialties";
 import { createClient } from "@/lib/supabase/client";
 import { Metadata } from "next";
-import { cn, slugify } from "@/lib/utils";
+import { cn, slugify } from "@red-salud/core";
 import { getSpecialtyContent } from "@/components/sections/specialties/specialties-content.data";
 import { FadeIn } from "@/components/ui/motion-wrapper";
 import { getSpecialtyTheme } from "@/lib/specialty-theme";

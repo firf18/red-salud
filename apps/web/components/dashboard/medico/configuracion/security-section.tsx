@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { Button, Input, Label, Badge } from "@red-salud/ui";
 import { toast } from "sonner";
@@ -16,11 +17,7 @@ import {
   Trash2,
   AlertCircle,
   XCircle,
-  Clock,
-  QrCode,
-  Copy,
-  ArrowRight,
-  ShieldCheck
+  Clock
 } from "lucide-react";
 import { useEffect } from "react";
 import { supabase } from "@/lib/supabase/client";
@@ -35,8 +32,7 @@ import {
   DialogContent,
   DialogDescription,
   DialogHeader,
-  DialogTitle,
-  DialogFooter
+  DialogTitle
 } from "@red-salud/ui";
 
 export function SecuritySection() {
@@ -56,7 +52,7 @@ export function SecuritySection() {
   const [deleteOTP, setDeleteOTP] = useState("");
   const [verifyingStep, setVerifyingStep] = useState(false);
 
-  const [profile, setProfile] = useState<any>(null);
+  const [profile, setProfile] = useState<{ id: string; nombre_completo: string; telefono: string; cedula: string } | null>(null);
   const [cancellingDeletion, setCancellingDeletion] = useState(false);
 
   // 2FA State
@@ -89,9 +85,10 @@ export function SecuritySection() {
         toast.error(result.error);
         return;
       }
-      setSetup2FAData(result as any);
+      setSetup2FAData(result as { secret: string; qrCodeUrl: string });
       setShow2FASetup(true);
     } catch (error) {
+      console.error("Error starting 2FA setup:", error);
       toast.error("Error al iniciar configuración 2FA");
     }
   };
@@ -112,7 +109,7 @@ export function SecuritySection() {
       setShow2FASetup(false);
       setSetup2FAData(null);
       setVerificationCode("");
-    } catch (error) {
+    } catch {
       toast.error("Error al verificar código");
     } finally {
       setIsVerifying2FA(false);
@@ -130,7 +127,7 @@ export function SecuritySection() {
       }
       toast.success("2FA desactivado correctamente");
       setIs2FAEnabled(false);
-    } catch (error) {
+    } catch {
       toast.error("Error al desactivar 2FA");
     }
   };
@@ -427,7 +424,7 @@ export function SecuritySection() {
                   Abre tu aplicación de autenticación (Google Authenticator, Authy) y escanea este código.
                 </p>
                 <div className="bg-white p-4 rounded-lg border w-fit mx-auto md:mx-0">
-                  <img src={setup2FAData.qrCodeUrl} alt="QR Code" className="w-48 h-48" />
+                  <Image src={setup2FAData.qrCodeUrl} alt="QR Code" width={192} height={192} className="w-48 h-48" />
                 </div>
                 <div className="text-xs text-gray-500 font-mono bg-gray-100 p-2 rounded text-center break-all">
                   {setup2FAData.secret}

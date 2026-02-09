@@ -47,7 +47,6 @@ export function RecipePreview({
     patient,
     medications,
     diagnosis,
-    notes,
     doctorInfo: initialDoctorInfo,
     fecha = new Date(),
     officeId,
@@ -132,7 +131,7 @@ export function RecipePreview({
                         }
 
                         // Priority for Specialty: sacs_especialidad -> profile.especialidad -> relational specialty
-                        const displayedSpecialty = (profile as any).sacs_especialidad || profile.especialidad || specialtyName;
+                        const displayedSpecialty = (profile as unknown as { sacs_especialidad?: string }).sacs_especialidad || profile.especialidad || specialtyName;
 
                         // Priority: User requested 'cedula' (CI) explicitly. 
                         // Fallbacks: doctor_details.licencia_medica -> profiles.sacs_matricula

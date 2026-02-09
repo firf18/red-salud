@@ -8,7 +8,7 @@
 
 "use client";
 
-import { useState, useEffect, Suspense, useRef } from "react";
+import { useState, useEffect, Suspense, useRef, useCallback } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { motion } from "framer-motion";
 import { supabase } from "@/lib/supabase/client";
@@ -81,7 +81,7 @@ function EstadisticasInner() {
   const searchParams = useSearchParams();
   const [doctorId, setDoctorId] = useState<string | null>(null);
   const [isRefreshing, setIsRefreshing] = useState(false);
-  const [dateRange, setDateRange] = useState({
+  const [dateRange] = useState<{ start: Date; end: Date }>({
     start: new Date(new Date().setDate(new Date().getDate() - 30)),
     end: new Date()
   });
@@ -109,33 +109,27 @@ function EstadisticasInner() {
     loadDoctorId();
   }, [router]);
 
-  const handleTabChange = (tabId: TabType) => {
-    const newUrl = tabId === "resumen"
-      ? "/dashboard/medico/estadisticas"
-      : `/dashboard/medico/estadisticas?tab=${tabId}`;
-    router.push(newUrl, { scroll: false });
-  };
 
-  const handleRefresh = async () => {
+  const handleRefresh = useCallback(async () => {
     setIsRefreshing(true);
     // Simular recarga
     await new Promise(resolve => setTimeout(resolve, 500));
     setIsRefreshing(false);
-  };
+  }, []);
 
   // Note: Using a callback ref pattern or just a stable ref object
-  const activeTabRef = useRef<any>(null);
+  const activeTabRef = useRef<{ exportData: (format: "excel" | "markdown") => void } | null>(null);
 
-  const handleExport = () => {
+  const handleExport = useCallback(() => {
     if (activeTabRef.current?.exportData) {
       // Simple usage for now: Default to Excel, could add a dropdown later
       activeTabRef.current.exportData("excel");
     } else {
       alert("Exportación no disponible en esta vista");
     }
-  };
+  }, []);
 
-  const renderTabContent = () => {
+  const renderTabContent = useCallback(() => {
     if (!doctorId) return null;
 
     switch (activeTab) {
@@ -149,7 +143,7 @@ function EstadisticasInner() {
       case "brotes": return <BrotesTab doctorId={doctorId} dateRange={dateRange} />;
       default: return <ResumenTab ref={activeTabRef} doctorId={doctorId} dateRange={dateRange} />;
     }
-  };
+  }, [doctorId, activeTab, dateRange]);
 
   // Mostrar skeleton mientras carga
   if (!doctorId) {
